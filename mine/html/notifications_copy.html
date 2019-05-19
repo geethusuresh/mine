@@ -1,0 +1,80 @@
+{% load humanize %} {% load zone %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+</head>
+
+<body class="fixed" style="font-size:13px">
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} 
+    {% include "components/cust_header.html"%} 
+    {% else %} 
+    {% include "components/header.html"%} 
+    {% endif %}
+    <div class="wrapper">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %} {% include "side_bar/customer.html"%} {% else %} {% include "side_bar/sidebar.html"%} {% endif %}
+        <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Notification Center  <small></small></h1>
+                <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Notification Center</li>
+                </ol>
+            </div>
+            <div class="content">
+                <!--               <div class="box"> -->
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-sm-3">
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="timeline-centered">
+                            {% if activitys %} {% for act in activitys %}
+                            <article class="timeline-entry">
+                                <div class="timeline-entry-inner">
+                                    <time class="timeline-time"><span>{% tzone act.time %}</span> <span>{{ act.time|naturaltime}}</span></time>
+                                    <div class="timeline-icon palette-peter-river">
+                                        <i class="fa fa-comment"></i>
+                                    </div>
+                                    <div class="timeline-label">
+                                        <h2><a>{{ act.owner }}</a> <span>{{act.note}}</span> - {{act.ticket}}</h2> {% if act.remark %} with remark <pre style="  max-height: 200px;">{{ act.remark|safe }}</pre>{% endif %}
+                                    </div>
+                                </div>
+                            </article>
+                            {% endfor %}
+                            <article class="timeline-entry begin">
+                                <div class="timeline-entry-inner">
+                                    <div class="timeline-icon palette-concrete">
+                                        <i class="fa fa-ellipsis-h"></i>
+                                    </div>
+                                </div>
+                            </article>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    {% include "components/service_request.html"%}
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} 
+    {% include "components/customer_footer.html"%} 
+    {% else %}
+    {% include "components/footer.html"%} 
+    {% endif %}
+    {% include "components/sr_cust.html"%}
+    <script type="text/javascript">
+    $("#notis").addClass("active");
+    </script>
+</body>
+
+</html>

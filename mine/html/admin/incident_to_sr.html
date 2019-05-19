@@ -1,0 +1,112 @@
+  <div class="modal fade" id="convert_ticket" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/ticket/conversion/to_sr/{{ticket.id}}" method="POST">{% csrf_token %}
+        <input type="text" style="display:none" value="" id="convert_to" name="convert_to">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">{{ ticket.ticketid }} --> <i id="sr_ticket"></i></h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-8" >
+              <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-3">
+                  <dt id="priority_dt">Priority :</dt>
+                </div>
+                <div class="col-md-7" style="display:none" id="sr_priority">
+                  <select id="priority-sr" name="priority" class="form-control">
+                    <option value="">Select Priority</option>
+                    <option value="Urgent">Urgent</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Purchase">Purchase</option>
+                  </select>
+                </div>
+                <div class="col-md-7" style="display:none" id="in_priority">
+                  <select id="priority-in" name="priority" class="form-control">
+                    <option value="">Select Priority</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <br>
+              <div class="row" style="display:none" id="severity_div">
+                <div class="col-md-2"></div>
+                <div class="col-md-3">
+                  <dt id="severity_dt">Severity :</dt>
+                </div>
+                <div class="col-md-7" id="in_priority">
+                  <select id="severity-in" name="severity" class="form-control">
+                    <option value="">Select Severity</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border:0px">
+          <button type="submit" class="btn btn-success" >Convert</button>
+          <!-- <a href="" id="delete_attachment" type="submit" class="btn btn-success" >Convert</a> -->
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  
+
+  $(document).ready(function(){
+    
+    if('{{ ticket.ticketid }}'.substring(0,2) == 'SR'){
+      $("#span_type").html('Incident')
+      $("#in_priority").show()
+      $("#priority-in").attr('required','true')
+      $("#priority-sr").attr('disabled','disabled')
+      $("#severity-in").attr('disabled','disabled')
+      var new_ticketid = 'IN'+'{{ ticket.ticketid }}'.substring(2);
+      $("#sr_ticket").html(new_ticketid);
+      $("#convert_to").val('IN')
+    }
+    else{
+      $("#span_type").html('Service Request')
+      $("#sr_priority").show()
+      $("#priority-sr").attr('required','true')
+      $("#priority-in").attr('disabled','disabled')
+      $("#severity-in").attr('disabled','disabled')
+      var new_ticketid = 'SR'+'{{ ticket.ticketid }}'.substring(2);
+      $("#sr_ticket").html(new_ticketid);
+      $("#convert_to").val('SR')
+    }
+    $("#priority-in").on('change',function(){
+      customer_id = $('#customr_tic_val').val();
+      $.ajax({
+          url: "/fetch_severity_list/?customer="+customer_id+"&priority="+$("#priority-in").val(),
+        }).done(function(result) {
+          // console.log(result)
+          if(result.length > 0 && typeof result !== 'undefined'){
+            for(i in result){
+              $("#severity-in").append('<option value='+result[i][0]+'>'+result[i][1]+'</option>');  
+              console.log(result[i][1])
+            }
+            $("#severity-in").attr('disabled',false)
+            $("#severity-in").attr('required','true')
+            $("#severity_div").show();
+          }
+          else{
+            $("#severity-in").attr('disabled','disabled')
+            $("#severity-in").attr('required','false')
+            $("#severity_div").hide();
+            $("#severity-in option:gt(0)").remove();
+          }
+          
+
+        });
+    })
+  })
+</script>

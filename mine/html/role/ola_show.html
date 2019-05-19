@@ -1,0 +1,223 @@
+
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OLA Administration</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+           .checkbox label {
+  padding-left: 20px;
+  margin-bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+    </style>
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <script type="text/javascript"> 
+
+    </script>
+   
+
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="fa fa-refresh"></i>for more</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container">
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html" %} 
+                <!-- <li  ><a href="/" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-list-alt"></i><span class="text">List</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu  ">
+                    <li><a href="/persongroupadmin/list/workgroup"><span class="text">Workgroup</span></a></li>
+                    <li><a href="/persongroupadmin/list/subgroup"><span class="text">Subgroup</span></a></li>
+                    <li><a href="/list/role"><span class="text">Role</span></a></li>
+                    <li><a href="/list/privilege"><span class="text">Privilege</span></a></li>
+                  </ul>
+                </li> -->
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              <div class="panel panel-default">
+                <div class="panel-heading"><h5><i class="fa fa-lightbulb-o"></i> Tips</h5></div>
+                <div class="panel-body">
+                  <p>You can do live search to the widget at search box located at top bar. It's very useful if your dashboard is full of widget.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>OLA Definitions</h2>
+                <em>Add Details</em>
+              </div>
+
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <form  id="ola_form" name ="ola_form" method='post' action=''>
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>SLA--{{ ola_item.sla_commitment.sla.name }}</h3>
+                  <!-- <a href="" data-toggle="modal" data-target="#ola_definition" class="btn btn-success btn-xs"  style=" float:right;margin-right:10px;margin-top:5px">New</a> -->
+                    <!-- <a href="" data-toggle="modal" data-target="#remove_subgroup" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Remove</a>
+                    <a href="/persongroupadmin/home"  class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Subgroup Mapping</a>
+                    <a href="/persongroupadmin/remove"  class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Subgroup Members</a> -->
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                        {% csrf_token %}    
+                        <div class="container"> 
+                        <div class="row">
+                          {% if messages %}
+                              {% for message in messages %}
+                              <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                              {% endfor %}
+                          {% endif %}
+                        </div>
+                        <fieldset>
+                          <div class="controls clearfix" style="text-align:center"> 
+                            
+                              <input class="form-control" type="text" id="name" name="name" style="margin: 0 auto; text-align: left;width:300px"required placeholder="Name" value="{{ola_item.name}}" readonly></p>
+                            <input class="form-control" type="text" id="ola_description" name="ola_description" required placeholder="Description" style="margin: 0 auto; text-align: left;width:300px" value="{{ola_item.description}}" readonly></p>
+                            <select class="form-control" id="table" name="table" required style="margin: 0 auto; text-align: left;width:300px" readonly>
+                              <option selected>Select Table</option>
+                              <option value="ticket" selected>Ticket</ option>
+                            </select></p>
+                            <input class="form-control" type="text" id="condition" name="condition" required placeholder="condition" style="margin: 0 auto; text-align: left;width:300px" value="{{ ola_item.sla_commitment.sla.condition}}" readonly>
+                            <!-- <input class="form-control" type="text" id="title" name="title" required placeholder="Title">
+                            </p>
+                            <input class="form-control" type="text" id="department" name="department"required placeholder="Department">
+                            </p>
+                            <input class="form-control" type="text" id="location" name="location" required placeholder="Location"></p> -->
+                            
+                                </div>
+                              </table>
+                          </div>
+                        </fieldset>
+                        </div>
+                      
+                      </div>
+                    </div>
+                  </div>
+                                  <div class="widget">
+                  <div class="widget-header span8"><h3><i class="fa fa-magic"></i>Commitments</h3><!-- <span id="add_commitment" class="btn glyphicon glyphicon-plus pull-right " style="margin-left: 30px; background-color:#b7c3c2;"/> -->
+                  </div>
+                  <input type="text"  value="{{sla_commitment.id}}" name="c_id" id="c_id" style="display:none;"/>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                      
+                        {% csrf_token %}    
+                        <div class="container"> 
+                        
+                        <fieldset>
+                          <div id="commitment_div">
+                            <div  class="controls input-group" id="commitment_div_content" >
+                            
+                              <!-- <select class="form-control input-sm" id="ola_type" name="ola_type" required style=" margin-top:20px;text-align: left;width:200px">
+                                <option selected value="">Select ola Type</option>
+                                    <option value="response">Response ola</option>
+                                    <option value="resolution">Resolution ola</option>
+                              </select> -->
+                              <table>
+                              <tr>
+                              <td>
+                              {% for  ola_com in ola_item.ola_entries.all%}
+                                <div class="row">
+                                <div id="commitment_div" style="margin-top:10px;">
+                                  <div  class="controls input-group" id="commitment_div_content">
+                                    <!-- <input type="number" id="commitment_ids" name="commitment_ids"  value="{{ola_com.id}}" style="display:none;" readonly=""> -->
+                                    <select class="form-control input-sm" id="sla_type" name="sla_type" required style=" margin-top:20px;text-align: left;width:200px" readonly>
+                                      {% if ola_com.olatype == "response_ola" %}
+                                          <option value="response" selected>Response OLA</option>
+                                          <option value="resolution">Resolution OLA</option>
+                                      {% else %}
+                                          <option value="response" >Response OLA</option>
+                                          <option value="resolution" selected>Resolution OLA</option>
+                                      {% endif %}
+                                    </select>
+                                      <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description" name="description" style="margin-left: 30px; text-align: left;width:200px;height:50px;vertical-align:top;"required value="" readonly="">{{ola_com.description}}</textarea>
+                                    <input class="form-control input-sm" type="number" min="1"id="time" name="time" required value="{{ola_com.time_value}}" style="margin-left: 30px; text-align: left;width:150px;margin-top:20px;" readonly>
+                                    <select class="form-control input-sm" id="time_type" name="time_type" required style="margin-left: 30px; text-align: left;width:70px;margin-top:20px;" readonly>
+                                      {% if ola_com.time_type == "hour" %}
+                                        <option value="hour" selected>Hour</option>
+                                         <option value="minute">Minute</option>
+                                      {% elif ola_com.time_type == "minute" %}
+                                          <option value="hour">Hour</option>
+                                          <option value="minute" selected>Minute</option>
+                                      {% endif %}
+                                    </select>
+                                  </div>
+                                  </div>
+                                </div> 
+                                 {% endfor %}
+                                  </form>  
+                              </fieldset>
+                        
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+
+</html>

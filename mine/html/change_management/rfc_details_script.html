@@ -1,0 +1,817 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#blink_date_conflict").hide();
+        $("#blink_start").hide();
+        $("#blink_finish").hide();
+        if ($('#down_time_required').val()) {
+            var data = $('#down_time_required').val();
+            if (data == 'yes') {
+                $('.dw_time').show();
+            } else {
+                $('.dw_time').hide();
+            }
+        }
+        fetch_priority_list();
+    });
+</script>
+// <script type="text/javascript">
+//     $(window).load(function() {
+//         $(".page-loader-js").fadeOut("slow");
+//     });
+// </script>
+<script type="text/javascript">
+    function check_task_scheduled_dates(){
+        val_1 = new Date($('#utc_date1').val());
+        val_2 = new Date($('#utc_date2').val());
+        sched_1 = new Date($('#sched_star').text());
+        sched_2 = new Date($('#sched_fini').text());
+        var check_eligibility = false;
+        if (val_1) {
+            if (val_1 >= sched_1 && val_1 <= sched_2){
+                check_eligibility = true;
+                $("#blink_start").hide();
+                $('#task_submit').removeAttr('disabled');
+            } else {
+                $("#blink_start").show();
+                $('#task_submit').attr('disabled');
+            }
+        }
+        if ($('#utc_date2').val().length > 0){
+            if (val_2 >= sched_1 && val_2 <= sched_2){
+                check_eligibility = true;
+                $("#blink_finish").hide();
+                $('#task_submit').removeAttr('disabled');
+            } else {
+                $("#blink_finish").show();
+                $('#task_submit').attr('disabled');
+            }
+        }
+        if (val_1 && val_2) {
+            if (val_2 <= val_1 && check_eligibility == true){
+                $("#blink_date_conflict").show();
+                $('#task_submit').attr('disabled', 'true');
+            } else {
+                $("#blink_date_conflict").hide();
+                $('#task_submit').removeAttr('disabled');
+            }
+        }
+    }
+</script>
+<script type="text/javascript">
+    function check_re_scheduled_dates(){
+        val_1 = new Date($('#scheduled_start_dat').val());
+        val_2 = new Date($('#re_scheduled_fini_dat').val());
+        if (val_1 && val_2) {
+            if (val_2 <= val_1){
+                $("#re_sched_date_conflict").show();
+                $('#re_submit').attr('disabled', 'true');
+            } else {
+                $("#re_sched_date_conflict").hide();
+                $('#re_submit').removeAttr('disabled');
+            }
+        }
+    }
+</script>
+<script type="text/javascript">
+    $(function () {
+        $('#datetimepicker12').datetimepicker({
+            'sideBySide': true,
+        })
+        .on('change.dp', function (e) {
+            $('#utc_date1').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+        })
+        .change(function (){
+            $('#utc_date1').val(moment($('#schedu_start_dat_val').val()).utc().format('MM/DD/YYYY hh:mm a'));
+            check_task_scheduled_dates();
+        })
+    });
+    $(function () {
+        $('#datetimepicker2').datetimepicker({
+            'sideBySide': true,
+        })
+        .on('change.dp', function (e) {
+            $('#utc_date2').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+        })
+        .change(function(){
+            $('#utc_date2').val(moment($('#schedu_finish_dat_val').val()).utc().format('MM/DD/YYYY hh:mm a'));
+            check_task_scheduled_dates();
+        })
+    });
+    $(function () {
+        $('#re_dt_picker1').datetimepicker()
+        .on('change.dp', function (e) {
+            $('#scheduled_start_dat').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+        })
+        .change(function(){
+            $('#scheduled_start_dat').val(moment($('#re_sched_start').val()).utc().format('MM/DD/YYYY hh:mm a'));
+            check_re_scheduled_dates();
+        })
+    });
+    $(function () {
+        $('#re_dt_picker3').datetimepicker()
+        .on('change.dp', function (e) {
+            $('#re_scheduled_fini_dat').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+        })
+        .change(function(){
+            $('#re_scheduled_fini_dat').val(moment($('#re_sched_finish').val()).utc().format('MM/DD/YYYY hh:mm a'));
+            check_re_scheduled_dates();
+        })
+    });
+</script>
+<script>
+    $("#ass_group").on('change',function(){
+        $("#ass_subgroup option:gt(0)").remove().end();
+        $("#ass_owner option:gt(0)").remove().end();
+        if($("#ass_group :selected").text()!='--Select--'){
+            $.ajax({
+                url:"/ticket/incident/create",
+                type:"POST",
+                dataType:"json",
+                data:{
+                  workgroupid : this.value,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success : function(data) {
+                    data = JSON.parse(data);
+                    for (var i in data){
+                        $("#ass_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                    }
+                },
+                error : function(xhr,errmsg,err) {
+                  console.log(err);
+                }
+            });
+        }
+    });
+</script>
+<script>
+    $("#task_doma").on('change', function(){
+        $("#task_sub_domain option:gt(0)").remove().end();
+        $("#task_owner option:gt(0)").remove().end();
+        if($("#task_doma :selected").text()!='--Select--'){
+          $.ajax({
+            url:"/ticket/incident/create",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupid : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              data = JSON.parse(data);
+                for (var i in data){
+                    $("#task_sub_domain").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                }
+            },
+            error : function(xhr,errmsg,err) {
+              console.log(err);
+            }
+          });
+          return false;
+        }
+    });
+</script>
+<script>
+    $('#task_sub_domain').on('change', function(){
+        $("#task_owner option:gt(0)").remove().end();
+        var subgroup_id = $('#task_sub_domain').val();
+        if($("#task_sub_domain").text()!='--Select--'){
+            $.ajax({
+              url :"/subgroup/members/",
+              type:"POST",
+              dataype:"json",
+              data:{"subgroup_id": subgroup_id,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+              success:function(data){
+                  $("#task_owner option:gt(0)").remove();
+                  member_list = data;
+                for (var i in member_list){
+                  $("#task_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                } 
+               },
+               error: function(xhr,errmsg,err){
+                console.log(xhr);
+               }       
+            });
+        }
+    });
+</script>
+<script>
+    $('#ass_subgroup').on('change', function(){
+        $("#ass_owner option:gt(0)").remove().end();
+        var subgroup_id = $('#ass_subgroup').val();
+        if($("#ass_subgroup").text()!='--Select--'){
+            $.ajax({
+              url :"/subgroup/members/",
+              type:"POST",
+              dataype:"json",
+              data:{"subgroup_id": subgroup_id,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+              success:function(data){
+                    member_list = data;
+                    for (var i in member_list){
+                        $("#ass_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                    } 
+               },
+               error: function(xhr,errmsg,err){
+                console.log(xhr);
+               }       
+            });
+        }
+    });
+</script>
+<script>
+    $('#task_cate').on('change', function(){
+        $('#task_sub_cat option:gt(0)').remove().end();
+        if ($('#task_cate').text() != '--Select--'){
+            $.ajax({
+                url :"/category/enduser",
+                type:"POST",
+                dataype:"json",
+                data:{catty: $('#task_cate').val() ,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){            
+                    cat_list = JSON.parse(data);
+                    for (var i in cat_list){
+                        $("#task_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                    } 
+                },
+                error: function(xhr,errmsg,err){
+                }       
+            });
+        }
+    })
+</script>
+<script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+    }); 
+</script>
+<script>
+    function format ( d ) {
+        var owner_id = d[8];
+        var assess_id = d[1];
+        var approved_stat = d[9];
+        if (approved_stat == "Not yet approved") {
+            console.log($('#user_email_data').val(), owner_id);
+            var user_email_id = $('#user_email_data').val();
+            if (owner_id == user_email_id){
+                class_name = ''
+            } else {
+                class_name = 'style="display: none"';
+            }
+            var url = '/rfc/assessment/'+assess_id+"/";
+            return '<form method="post" action="'+url+'" >'+
+                '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">'+
+                '<div class="col-sm-12">'+
+                    '<div class="col-sm-6">'+
+                        '<label><strong>Approval Status</strong></label>'+
+                        '<select name="approval_stat" class="form-control" required>'+
+                            '<option value="">--Select--</option>'+
+                            '<option value="approved">Completed</option>'+
+                            '<option value="rejected">Pending</option>'+
+                        '</select> <br/>'+
+                        '<label><strong>Effort (in minutes)</strong></label>'+
+                        '<input type="number" name="effort" class="form-control" required min="0"/>'+
+                    '</div>'+
+                    '<div class="col-sm-6">'+
+                        '<label><strong>Cost</strong></label>'+
+                        '<input type="number" class="form-control" name="cost" required min="0"/><br/>'+
+                        '<label><strong>Impact</strong></label>'+
+                        '<select name="impact" class="form-control" required>'+
+                            '<option value="">--Select--</option>'+
+                            '<option value="Low">Low</option>'+
+                            '<option value="Medium">Medium</option>'+
+                            '<option value="High">High</option>'+
+                        '</select><br/><br/>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="col-sm-12">'+
+                    '<label><strong>Implementaion Notes:</strong></label>'+
+                    '<textarea class="form-control" name="implementation_notes" required>'+
+                    '</textarea><br/>'+
+                    '<div class="col-sm-6">'+
+                        '<button class="btn btn-success" '+ class_name+' type="submit">Submit</button>'+
+                    '</div>'+
+                '</div>'+
+            '</form>';
+        } else {
+            var imple_notes = d[10];
+            var cost_dat = d[11];
+            var effrt = d[12];
+            var impact = d[13];
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                '<tr>'+
+                    '<td>Implementation Notes:</td>'+
+                    '<td>'+imple_notes+'</td>'+
+                '</tr>'+
+                '<tr>'+
+                    '<td>Cost:</td>'+
+                    '<td>'+cost_dat+'</td>'+
+                '</tr>'+
+                '<tr>'+
+                    '<td>Effort( in min ):</td>'+
+                    '<td>'+effrt+'</td>'+
+                '</tr>'+
+                '<tr>'+
+                    '<td>Impact:</td>'+
+                    '<td>'+impact+'</td>'+
+                '</tr>'+ 
+            '</table>';
+        }
+    }
+</script>
+<style type="text/css">
+    td.details-control {
+        background: url('/static/img/details_open.png') no-repeat center center;
+        cursor: pointer;
+    }
+    tr.shown td.details-control {
+        background: url('/static/img/details_close.png') no-repeat center center;
+    }
+    .badge-as-circle {
+        border-radius: 1em;
+    }
+</style>
+<script>
+    $(document).ready(function(){
+        $("#re_sched_date_conflict").hide();
+        var tab1 = $('#assessment_tab').DataTable();
+        $('#assessment_tab tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = tab1.row( tr );
+            if ( row.child.isShown() ) {
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                row.child( format(row.data()) ).show();
+                tr.addClass('shown');
+            }
+        });
+    });
+</script>
+<script>
+    function format_sub_tasks(dat){
+        if (dat.length > 0){
+            var html_dat = ''
+            $.each(dat, function (index, item) {
+                var tr = '<tr>';
+                var td_dat = ''
+                for (i in item){
+                    td_dat = td_dat+'<td>'+item[i]+'</td>';
+                }
+                html_dat = html_dat + tr + td_dat+'</tr>';
+            });
+            return '<table class="table table-stripped hist_sub_tsks_tab" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                        '<thead>'+
+                            '<tr>'+
+                                '<th> Note</th>'+
+                                '<th> Time</th>'+
+                                '<th> Owner</th>'+
+                            '</tr>'+
+                        '</thead>'+
+                        '<tbody>'+
+                            html_dat+
+                        '</tbody>'+
+                '</table>';
+        } else {
+            return ''
+        }
+    }
+</script>
+<script>
+    $(document).ready(function(){
+        var tab1 = $('#request_hist_tab').DataTable({"bSort": false});
+        $('#request_hist_tab tbody').on('click', 'td.details-control', function () {
+            var tr = $(this).closest('tr');
+            var row = tab1.row( tr );
+            hist_index = row.index();
+            var histories_dat = {{dumbed_his|safe}}
+            var clicked_hist = histories_dat[hist_index];
+            clicked_sub_tasks = clicked_hist.sub_tasks;
+            if ( row.child.isShown() ) {
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                row.child( format_sub_tasks(clicked_sub_tasks) ).show();
+                tr.addClass('shown');
+                tr.addClass('remove-border-bottom');
+                $('.hist_sub_tsks_tab').DataTable();
+            }
+            $('#request_hist_tab').DataTable();
+        });
+    });
+
+</script>
+<style>
+    .remove-border-bottom {
+        border-bottom: none;
+    }
+</style>
+<script>
+    $('#sched_task_table').DataTable();
+    $('#sch_app').DataTable();
+    $('#auth_app').DataTable();
+    $('#task_review_tab').DataTable();
+    $('#related_tickets_tab').DataTable();
+</script>
+<script>
+    $("#app_dom").on('change', function(){
+        $("#app_subdom option:gt(0)").remove().end();
+        // $("#app_own option:gt(0)").remove().end();
+        if($("#app_dom :selected").text()!='--Select--'){
+          $.ajax({
+            url:"/ticket/incident/create",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupid : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              data = JSON.parse(data);
+                for (var i in data){
+                    $("#app_subdom").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                }
+            },
+            error : function(xhr,errmsg,err) {
+              console.log(err);
+            }
+          });
+          return false;
+        }
+    });
+</script>
+<script>
+    $('#auth_app tbody').on('click', 'td', function(){
+        var a_tag = $(this).find('a').html();
+        console.log(a_tag);
+        if (a_tag == 'Comments'){
+            sch_id = $(this).prev().prev().prev().prev().prev().prev().prev().prev().html();
+            // document.location.href = '/rfc/view_schedule/'+sch_id+"/";
+            $('#sched_appr_form').attr('action', '/rfc/schedule_approver_comments/'+sch_id+'/');
+        }
+    });
+</script>
+<!-- Removed this functionality no schedule approvers -->
+<script>
+    $('#app_subdom').on('change', function(){
+        $("#app_own option:gt(0)").remove().end();
+        var subgroup_id = $('#app_subdom').val();
+        if($("#app_subdom").text()!='--Select--'){
+            $.ajax({
+              url :"/subgroup/members/",
+              type:"POST",
+              dataype:"json",
+              data:{"subgroup_id": subgroup_id,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+              success:function(data){
+                    member_list = data;
+                for (var i in member_list){
+                  $("#app_own").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                } 
+               },
+               error: function(xhr,errmsg,err){
+                console.log(xhr);
+               }       
+            });
+        }
+    });
+</script>
+<script>
+    $(document).ready(function(){
+        $('.rfc_data').hide()
+        var status = "{{rfc.status}}";
+        if (status == 'ACC_CAT') {
+            $('#accept_and_categorize').addClass("active in");
+        } else if (status == 'ASSESS') {
+            $('#assessment_phase').addClass("active in");
+        } else if (status == 'SCHED') {
+            $('#scheduling_phase').addClass("active in");
+        } else if (status == 'AUTH') {
+            $('#authorizing_phase').addClass("active in");
+        } else if (status == 'CAB') {
+            $('#approval_cab_phase').addClass("active in");
+        } else if (status == 'IMPL' || status == 'COMP' || status == 'INPROG') {
+            $('#implementation_phase').addClass("active in");
+        } else if (status == 'REVIEW' || status == 'CLOSED') {
+            $('#review_phase').addClass("active in");
+        } else {
+            $('#basic_details').addClass("active in");
+        }
+        $('.btn-arrows').last().hide();
+    });
+</script>
+<script type="text/javascript">
+    $('#edit_change').on('click', function(){
+        $('.radio_class').attr('disabled', false);
+        $('.rfc_data').show();
+        $('#edit_change').hide();
+        $('.hide_data').hide();
+    })
+</script>
+<script>
+    $('#rfc_req').addClass('active');
+</script>
+<script src="/static/lightslider/lightslider.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#light_slider").lightSlider({
+            slideMove: 1,
+            item: 1,
+            loop: true,
+            slideMargin: 0,
+        });
+    });
+</script>
+<script>
+    $("#c_cust").on('change',function(){
+        $("#c_cat option:gt(0)").remove().end();
+        $("#c_group option:gt(0)").remove().end();
+        $('#c_sub_cat option:gt(0)').remove().end();
+        $('#c_subgroup option:gt(0)').remove().end();
+        $("#c_owner option:gt(0)").remove().end();
+        $('#ci_data option:gt(0)').remove().end();
+        $('#asset_data option:gt(0)').remove().end();
+        $("#add_asset option:gt(0)").remove().end();
+        $("#add_ci option:gt(0)").remove().end();
+        if($("#c_cust :selected").text()!='-Select-'){
+            $.ajax({
+                url:"/ticket/incident/customer",
+                type:"POST",
+                dataType:"json",
+                  data:{
+                    // groupid : this.value,
+                    groupid : $('#c_cust').val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                  },
+                  success : function(data) {
+                    data = JSON.parse(data['group_list']);
+                    for (var i in data){
+                      $("#c_group").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}))
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                }
+            });
+            $.ajax({
+                url :"/category/enduser",
+                type:"POST",
+                data:{custid: $('#c_cust').val(),
+                      csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){            
+                   cat_list = JSON.parse(data);
+                  for (var i in cat_list){
+                    
+                    $("#c_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+                  } 
+                 },
+                 error: function(xhr,errmsg,err){
+                  console.log(xhr);
+                 }       
+            });
+            $.ajax({
+                url: "/rfc/ci_list/",
+                type:"POST",
+                data:{
+                    customer_id:$('#c_cust').val(),
+                    csrfmiddlewaretoken:'{{csrf_token}}',
+                    type_val: 'ci',
+                },
+                success:function(data){
+                    ci_list = JSON.parse(data);
+                    for (var i in ci_list){
+                        $("#ci_data").append($('<option>', {value:ci_list[i].pk, text:ci_list[i].name}));
+                        $("#add_ci").append($('<option>', {value:ci_list[i].pk, text:ci_list[i].name}));
+                    }
+                },
+                error: function(xhr, errmsg, err){
+                    console.log("error");
+                }
+            });
+            $.ajax({
+                url: "/rfc/ci_list/",
+                type:"POST",
+                data:{
+                    customer_id:$('#c_cust').val(),
+                    csrfmiddlewaretoken:'{{csrf_token}}',
+                    type_val: 'asset',
+                },
+                success:function(data){
+                    list_data = JSON.parse(data);
+                    for (var i in list_data){
+                        $("#asset_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                        $("#add_asset").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                    }
+                },
+                error: function(xhr, errmsg, err){
+                    console.log("error");
+                }
+            });
+        }
+    });
+</script>
+<script>
+    $("#c_group").on('change',function(){
+        $("#c_subgroup option:gt(0)").remove().end();
+        $("#c_owner option:gt(0)").remove().end();
+        if($("#c_group :selected").text()!='-Select Group-'){
+          $.ajax({
+            url:"/ticket/incident/create",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupid : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              data = JSON.parse(data);
+                for (var i in data){
+                    $("#c_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                }
+            },
+            error : function(xhr,errmsg,err) {
+              console.log(err);
+            }
+          });
+          return false;
+        }
+    });
+</script>
+<script>
+    $('#c_cat').on('change', function(){
+        var catid = $('#c_cat').val();
+        $("#c_sub_cat option:gt(0)").remove().end();
+        if (catid){
+            $.ajax({
+                url :"/category/enduser",
+                type:"POST",
+                data:{catty: catid,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){
+                    cat_list = JSON.parse(data);
+                    for (var i in cat_list){
+                        $("#c_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                    } 
+                },
+                error: function(xhr,errmsg,err){
+                    console.log(xhr);
+                }       
+            });
+        }
+    });
+</script>
+<script>
+    $('#c_subgroup').on('change', function(){
+        $("#c_owner option:gt(0)").remove().end();
+        var subgroup_id = $('#c_subgroup').val();
+        if($("#c_subgroup").text()!='-Select Owner-'){
+            $.ajax({
+              url :"/subgroup/members/",
+              type:"POST",
+              data:{"subgroup_id": subgroup_id,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+              success:function(data){
+                  $("#c_owner option:gt(0)").remove();
+                  member_list = data;
+                for (var i in member_list){
+                  $("#c_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                } 
+               },
+               error: function(xhr,errmsg,err){
+                console.log(xhr);
+               }       
+            });
+        }
+    });
+</script>
+<script type="text/javascript">
+    function exit_edit() {
+        $('.radio_class').attr('disabled', true);
+        $('.rfc_data').hide();
+        $('.hide_data').show();
+        $('#edit_change').show();
+    }
+</script>
+<script type="text/javascript">
+    function get_list_data(type_name) {
+        if (type_name == 'ci') {
+            $('#ci_data').attr('disabled', false);
+            $('#asset_data').attr('disabled', true);
+            $('#ci_data').attr('required', true);
+            $('#asset_data').attr('required', false);
+        } else if (type_name == 'asset') {
+            $('#asset_data').attr('disabled', false);
+            $('#ci_data').attr('disabled', true);
+            $('#ci_data').attr('required', false);
+            $('#asset_data').attr('required', true);
+        }
+        $('#ci_data option:gt(0)').remove().end();
+        $('#asset_data option:gt(0)').remove().end();
+        if ($('#c_cust').val() && (type_name == 'ci' || type_name == 'asset')) {
+            $.ajax({
+                url: "/rfc/ci_list/",
+                type:"POST",
+                data:{
+                    customer_id:$('#c_cust').val(),
+                    csrfmiddlewaretoken:'{{csrf_token}}',
+                    type_val: type_name,
+                },
+                success:function(data){
+                    list_data = JSON.parse(data);
+                    for (var i in list_data){
+                        if ( type_name == "ci")
+                            $("#ci_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                        else if (type_name == "asset")
+                            $("#asset_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                    }
+                },
+                error: function(xhr, errmsg, err){
+                    console.log("error");
+                }
+            });
+        }
+    }
+</script>
+<script type="text/javascript">
+    $('#change_request_main').addClass("active");
+    $('#main_change_dash').addClass("active");
+    $('#change_sub_nav').css("display", "block");
+    $('#rfc_dashboard').addClass("active");
+    $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+</script>
+<script type="text/javascript">
+    function submit_ok() {
+        var delete_type = $('#confirm_type').val();
+        var delete_id = $('#delete_id').val();
+        if (delete_type == 'change_attachment') {
+            document.location.href = "/rfc/delete_attachment/"+delete_id+"/";
+        } else if (delete_type == 'change_task') {
+            document.location.href = "/rfc/delete_task/"+delete_id+"/";
+        }
+    }
+</script>
+<script type="text/javascript">
+    function remove_change_attachment(attach_id) {
+        $('#delete_id').val(attach_id);
+        $('#confirm_msg').html('<strong> Are you sure want to delete this attachment? </strong>');
+        $('#confirm_type').val('change_attachment')
+        $('#confirm_box').modal('toggle');
+    }
+</script>
+<script type="text/javascript">
+    $('#down_time_required').on('change', function(){
+        if (this.value && this.value == 'yes' ) {
+            $('.dw_time').show();
+        } else {
+            $('.dw_time').hide();
+        }
+    });
+    function delete_task(task_id) {
+        $('#delete_id').val(task_id);
+        $('#confirm_msg').html('<strong> Are you sure want to delete this task? </strong>');
+        $('#confirm_type').val('change_task');
+        $('#confirm_box').modal('toggle');
+    }
+</script>
+<script type="text/javascript">
+    function fetch_priority_list() {
+        var impact = $('#impact').val();
+        // if(impact_val) {
+        //     var impact = impact_val
+        // } else {
+        //     var impact = '{{ rfc.}}'
+        // }
+        var urgency = $('#urgency').val();
+        if (impact && urgency) {
+            $("#change_priority:gt(0)").remove().end();
+            $.ajax({
+                url: "/rfc/create/?impact="+impact+'&urgency='+urgency,
+                dataType: "json",
+                success: function( data, textStatus, jqXHR) {
+                    var items = data;
+                    for (var i in items){
+                    $("#change_priority").append($('<option>', {value:items[i].field_value, text:items[i].display_value}));
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                     console.log( textStatus);
+                }
+            });
+        }
+    }
+    $('#urgency').on('change', function(){
+        if (this.value) {
+            fetch_priority_list();
+        }
+    });
+    $('#impact').on('change', function(){
+        if (this.value) {
+            fetch_priority_list();
+        }
+    });
+</script>

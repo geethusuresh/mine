@@ -1,0 +1,449 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}    
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>
+        <script src="/static/js/DataTables-1.10.4/media/js/jquery.dataTables.js" type="text/javascript"> </script>
+            <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        
+    
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+    {% else %}
+      {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Reports | <small>Servicedesk Engineers Performance Report</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Reports</li>
+                </ol>
+            </div>
+            {% if report == True %}
+            <div class="content">
+              <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                    {{report_heading}} <br />
+                    Total Tickets Routed: {{count}}
+                    
+                </div>
+              </div>
+                  <div class="page-loader-js"></div>
+                  {% endif %}
+            <div class="content">
+            <form  id="frm_reports" name ="frm_reports" method='post' action='/sdengineers_report/' onsubmit="return submit_report()" target="_blank">
+                {% csrf_token %}
+
+              <div class="row" style="background:none repeat scroll 0 0 #ffffff;">
+              <div class="box">
+              <div class="col-sm-12">
+                <div style="margin-bottom:20px;">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-danger " style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                    {% endfor %}
+                {% endif %}
+                </div>
+              </div>
+            {% if report == False %}
+                <!--Start row-->
+              <div class="col-sm-12" id="ticket_attr_filter"> 
+                  <div style="margin-bottom:20px;">                     
+                  <fieldset>
+                    <div class="controls">
+                      {% if "Customer_Dashboard" not in request.session.logged_user_priv %}
+                      <div class="col-sm-3" id="engineer_div">
+                        <label style = "font-weight: bold" for ="engineer_name">Engineer Name</label>
+                        <select name="engineer_name" id="engineer_name" class="form-control" multiple style="width:204px;height: 161px;">
+                        {% for eng in engineers %}
+                            <option value="{{eng.id}}">{{eng}}</option>
+                            {% endfor %}
+                        </select><br />
+                      </div>
+                      {% endif %}
+                      <br>
+                    </div>
+                  </fieldset>
+                  </div>
+              </div>
+                  <!--End row -->
+                  <div class="col-sm-12" id="date_duration_area"> 
+                    <div style="margin-bottom:20px;">
+                        <div class="controls">
+                            <div class="col-sm-2">
+                                <label style = "font-weight:bold;" for="ticket_action">Report Duration</label>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <!--Start row-->
+                  <div class="col-sm-12" id="date_attr_filter"> 
+                    <div style="margin-bottom:20px;">                     
+                      <fieldset>
+                        <div class="controls">                         
+                          <div class="col-sm-2">
+                              <select name="ticket_action" id="ticket_action" class="form-control" style="font-size:10px;width:100px;">
+                                <option value="created">Ticket Created</option>                       
+                              </select>
+                          </div>
+                          <div class="col-sm-2">
+                            <select name="duration" id="duration" class="form-control" style="font-size:10px;width:85px;" onchange="duration_change(this.value)">
+                              <option value="on">On</option>
+                              <option value="between">Between</option>
+                              <option value="after">After</option>
+                              <option value="before">Before</option>
+                             <!--  <option class="performance_repo" value="weekly">Weekly</option> -->
+                              <!-- <option class="performance_repo" value="monthly">Monthly</option> -->
+                            </select>
+                          </div>
+                          <div class="col-sm-2" id="start_date_div">
+                            <input type="text" name="start_date" id="start_date" class="form-control" />
+                          </div>                          
+                          <div class="col-sm-2" id="end_date_div" style="display:none;">
+                            <input type="text" name="end_date" id="end_date" class="form-control" />
+                          </div>
+                      </div>
+                      </fieldset>
+                    </div>
+                  </div>
+                  <!--End row -->
+
+                  <!--Start row -->
+                  <div class="col-sm-12"> 
+                    <div style="margin-bottom:20px;">                     
+                      <fieldset>
+                        <div class="controls">
+                          <input type="submit" value="Fetch Report" class="btn btn-success" style="float:right;min-width:20%;margin-right: 69px;">
+                          <label style = "font-weight: bold;color:red;display:none;margin-left:27px;
+                            margin-top: 7px;" id="error_section"></label>
+                        </div>
+                      </fieldset>
+                      </div>
+                  </div>
+                  <!--End row -->
+                  </div>
+                  </div> 
+                </form>
+                               
+                <!--end box -->
+            </div>
+          </div>
+        </div>
+        
+    
+    <script type="text/javascript">
+    //$.noConflict()
+    $(function() {
+      $( "#start_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+      $( "#end_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+      /*$("#start_date").change(function(){
+          $("#end_date").datepicker('option', 'minDate', $('#start_date').val());
+      });
+      $("#end_date").change(function(){
+          $("#start_date").datepicker('option', 'maxDate', $('#end_date').val());
+      });*/
+    });
+   
+    function duration_change(obj_val){
+      if (obj_val == 'weekly' || obj_val == 'monthly') {
+          $('#start_date_div').hide();
+          $('#start_date').val('');
+          $('#end_date_div').hide();
+          $('#start_date').val('')
+      } else {
+          $('#end_date').val('');
+          $('#start_date').val('');
+          $('#start_date_div').show();
+          $('#end_date_div').show()
+      }
+      if(obj_val == "between"){
+          $('#end_date').val('');
+          $('#start_date').val('');
+          $('#end_date_div').show();
+      }
+      else{
+         $('#end_date').val('');
+          $('#start_date').val('');
+          $('#end_date_div').hide();
+      }
+
+    }
+
+    function submit_report(){      
+      var report_type = "sdengineer_report"//$('#report_type').val();
+      if (report_type == "sdengineer_report")
+        {
+          if ($("#engineer_name").val() == null){
+              $('#error_section').html("Please select atleast one engineer for the report generation");
+              $('#error_section').show(100);
+              return false;
+            }
+          if ($('#duration').val() != 'weekly' && $('#duration').val() != 'monthly') {
+              if($('#start_date').val() == ""){         
+                  $('#error_section').html("Please select date field for the report generation");
+                  $('#error_section').show(100);
+                  return false;          
+              }
+          }
+
+          if($('#duration').val() == "between"){
+              if($('#end_date').val() == ""){
+                $('#error_section').html("Please select end date, as you have selected between date range");
+                $('#error_section').show(100);
+                return false;
+              }
+              else{
+                $('#error_section').hide();
+                //return true;
+              }
+          }
+          if($('#duration').val() == "on"){
+            if($("#start_date").val() == ""){
+              $('#error_section').html("Please select date field for the report generation");
+              $('#error_section').show(100)
+              return false
+            }else{
+              $('#error_section').hide()
+              //return true
+            }
+          }
+          
+          }
+          else{
+              $('#error_section').hide(100);
+              return true;
+          }
+      }
+  </script>
+
+  {% else  %}
+<!--            <div class="row">-->
+
+
+            <div class="col-sm-12">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Ticket Details</h4>
+                        {%  if ticketlist %}
+                        <form action="/tickets/openticket/" method="post"> {% csrf_token %}
+                            <input type="submit" value="Export To CSV" class="btn btn-success" name="export_to_excel" id="export_to_excel" style="float:right; position:relative;top:-44px">
+                                    <input type="hidden" name="export" value="true" />
+                                    <input type="hidden" name="ticketids" value="{{ticketids}}">
+                                    <input type="hidden" name="report_heading" value="{{report_heading}}">
+                                    {% comment %}
+                                    <input type="hidden" name="start_date" value="{{start_date}}">
+                                    <input type="hidden" name="end_date" value="{{end_date}}">
+                                    {% endcomment %}
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div class="panel-body">
+                        <div id="sdengineerchart">
+                          
+                            <script type="text/javascript">
+                            $(function(){
+                                $('#sdengineerchart').highcharts({
+
+                                      chart:{
+                                          zoomType: 'xy',
+                                      },
+                                      title: {
+                                            text: 'Servicedesk Engineers Performance Report',
+                                            x: -20 //center
+                                        },
+                                        // subtitle: {
+                                        //     text: 'Source: WorldClimate.com',
+                                        //     x: -20
+                                        // },
+
+                                        xAxis: {
+                                            categories: [{% for status_details in status_wise_report %}
+                                                                        {% for key, value in status_details.items %}
+                                                                                
+                                                                                       {% for k,v in  value.items %} "{{ k }}", {% endfor %},
+                                                                               
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    ],
+                                            min: 0,
+
+
+                                          labels: {
+                                              rotation: -45
+                                            },
+                                            marker: {
+                                                enabled: true,
+                                                radius : 4,
+                                            },
+
+                                        },
+                                        scrollbar : {
+                                            enabled : true,
+                                        },
+
+                                        yAxis: {
+                                            title: {
+                                                text: 'No. of Tickets '
+                                            },
+                                            //scrollbar: {
+                                              //enabled : true,
+                                             // showfull:false,
+                                            //},
+                                            plotLines: [{
+                                                value: 0,
+                                                //width: 1,
+                                                //color: '#808080'
+                                            }]
+                                        },
+                                        tooltip: {
+                                            valueSuffix: ' tickets'
+                                        },
+                                        legend: {
+                                            layout: 'vertical',
+                                            align: 'right',
+                                            verticalAlign: 'middle',
+                                            borderWidth: 0
+                                        },
+                                        plotOptions: {
+                                                series: {
+                                                    marker: {
+                                                        enabled: true,
+                                                        radius: 4,
+                                                    }
+                                                }
+                                            },
+                                            navigation: {
+                                                buttonOptions: {
+                                                    enabled: false,
+                                                }
+                                              },
+
+                                        series: [
+                                          {% for status_details in status_wise_report %}
+                                                                        {% for key, value in status_details.items %}
+                                                                                {
+                                                                                      name: "{{ key | real }}",
+                                                                                      {% if value.items %}
+                                                                                      data:[ {% for k,v in  value.items %} {{ v }}, {% endfor %}],
+                                                                                      {% else %}
+                                                                                      data : {{value}} ,
+                                                                                      {% endif %}
+                                                                                },
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                        ],
+                                        
+                                          scrollbar: {
+                                                enabled: true,
+                                                barBackgroundColor: 'gray',
+                                                barBorderRadius: 7,
+                                                barBorderWidth: 0,
+                                                buttonBackgroundColor: 'gray',
+                                                buttonBorderWidth: 0,
+                                                buttonArrowColor: 'yellow',
+                                                buttonBorderRadius: 7,
+                                                rifleColor: 'yellow',
+                                                trackBackgroundColor: 'white',
+                                                trackBorderWidth: 1,
+                                                trackBorderColor: 'silver',
+                                                trackBorderRadius: 7
+                                            },
+
+                                            });
+                                       });
+
+                                      
+                            </script>
+                        </div>
+                        <table class="table table-bordered" id="sdeng_report_table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket No</th>
+                                    <th>Engineer</th>
+                                    <th>Total Time Taken</th>
+                                    <th>Routed Workgroup</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in ticketlist %}
+                                  {% if ticket.get_routed_engineer %}
+                                    <tr>
+                                        <td>
+                                                <a href="/ticket/{{ticket.id}}" target="_blank" class="btn btn-sm btn-success" data-toggle="tooltip" data-placement="bottom" title="">{{ticket.ticketid}}</a>
+                                        </td>
+                                        <td>{{ ticket.get_routed_engineer.user.get_full_name }}</td>
+                                        {% comment %}
+                                        <td><span style="display:none;">{{ticket.created_date.year}} {% if ticket.created_date.month >= 10 %}{{ticket.created_date.month}}{% else %}0{{ticket.created_date.month}}{%endif%}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                        {% endcomment %}
+                                        <td> {% sdtimetaken ticket %} </td>
+                                        <td>{{ ticket.group }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        </div>
+        
+                <script type="text/javascript">
+         (function($) {
+            $(document).ready(function(){
+                $('#sdeng_report_table').dataTable({
+                    //aaSorting: [[2, 'desc']],
+                        "bPaginate": true,
+                        "bFilter": false,
+                        "responsive":false,
+                        "scrollX": true,
+                        "processing":true,
+                        "serverSide": false,
+                        "pageLength":10,
+                        "searching": true,
+                        "bSort": true,
+                        "oLanguage": {
+                            "sProcessing": "Loading Data...Please Wait"
+                        },
+                });
+            });
+            })(jQuery);
+        </script>
+        <style type="text/css">
+            .highcharts-credits {display:  none !important}
+
+        </style>
+    
+  {% endif %}
+  {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+  {% include "components/footer.html"%}
+  <!-- <script src="/static/js/highcharts/highcharts.js"></script> -->
+        <!-- <script src="/static/js/highcharts/highcharts-more.js"></script> -->
+        <!-- <script src="/static/js/highcharts/exporting.js"></script> -->
+        <script src="/static/js/highcharts/highstock.js"></script>
+
+        <!-- <script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->
+  </body>
+</html>

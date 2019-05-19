@@ -1,0 +1,26 @@
+<html>
+	<head>
+	</head>
+	<body>
+		Hi {{ user.first_name }} {{ user.last_name }},<br/><br/>
+
+			You have been successfully registered at OneConsole. Please login at <a href="https://oneconsole.marlabs.com">OneConsole</a> with your registered id {{ user.email }}. Please find the details below. 
+			<br/> <br/>
+			<strong>Details</strong><br/>
+			<strong> =========</strong><br/>
+			Login ID : {{ user.email }}<br/>
+			Password : < YOUR WINDOWS/EMAIL PASSWORD ><br/>
+			First Name : {{ user.first_name }}<br/>
+			Last Name : {{ user.last_name }}<br/>
+			Manager : {{ profile.supervisor.email }}<br/>
+			<br/> <br/>
+			Please contact Marlabs helpdesk at below address incase you have any issue in login at OneConsole portal.
+			<br/> <br/>
+			Regards,<br/>
+			Marlabs IT Support<br/>
+			VOIP: 732-694-1000 X4357<br/>
+			E-mail: helpdesk@marlabs.com<br/>
+
+			Note: This is an auto generated e-mail. Please do not reply to this mail. <br/>
+	</body>
+</html>

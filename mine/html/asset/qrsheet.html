@@ -1,0 +1,214 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Asset Management  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Item Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div id="spr_0" class="panel panel-default plain profile-widget">
+                                <div class="panel-heading">
+                                  <p class="panel-title">We are allmost done, Please download and paste QR Code on asset</p>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-3 col-md-6 col-sm-12">
+                                        <br>
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive" id="profile_ad" src="/media/{{stock.qrcode}}" alt="qr">
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="col-lg-9 col-md-6 col-sm-12">
+                                        <div class="profile-name" style="margin-top: 15px;font-size: 22px;margin-bottom: 10px;">
+                                            {{stock.model_name}}
+                                          </div>
+
+                                             <div class="media" style="color: #767676;">
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Serial Number :</label>
+                                     {{purchase.stock.serial_no}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Model Name: </label>
+                                    {{ stock.model_name }}
+                                </li>
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Manufacturer :</label>
+                                     {{stock.manufacturer}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Vendor : </label>
+                                    {{ stock.vendor }}
+                                </li>
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Purchased On :</label>
+                                     {{stock.purchase_date}}
+                                </li>
+                            </ul>
+                            
+                        </div>
+                    </div>
+
+
+                                       
+                                        <div class="profile-quote">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                                  <div class="row" style="margin-right:10px; margin-left:10px">
+                                    <a class="btn btn-success" href="/media/{{stock.qrcode}}" download>Download QR Code</a>
+                                    <div class="pull-right">
+                                      <a href="" data-toggle="modal" data-target="#assigning" class="btn btn-info btn-lg">Assign</a>
+                                      <!--   {% if purchase %}
+                                        <a href="/asset/stock/{{purchase.id}}/{{profile.id}}" class="btn btn-info btn-lg" style="">Assign to {{purchase.task.ticket.affectedperson}}</a>
+                                        {% else %}
+                                      <a href="/asset/stock/" class="btn btn-info btn-lg" style="">All Done! Go back</a>
+                                        {% endif %} -->
+                                    </div>
+                                    
+                                  </div>
+                                  
+                                </div>
+                            </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+  <div class="modal fade" id="assigning" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Assign asset</h4>
+        </div>
+        <!-- <form action="/asset/stock/delivery/{{purchase.id}}" method="POST">{% csrf_token %} -->
+        <div class="modal-body">
+
+          {% if purchase.task %}
+          <div class="row">
+            <div class="col-sm-12">
+              <p>This Stock was created assosiated with a Task - {{purchase.task.taskid}} for ticket - {{purchase.task.ticket.ticketid}}. Do you want to allot this asset directly to the person?</p>
+            <a href="/asset/stock/{{purchase.id}}/{{profile.id}}" class="btn btn-info pull-right" style="">Assign to {{purchase.task.ticket.affectedperson}}</a>
+            </div>
+          </div>
+          <div class="row">
+            <p class="panel-title text-center">or</p>
+          </div>
+          {% endif %}
+          <form method="POST" action="/asset/allocate/user/">{% csrf_token %}
+          <div class="row">
+            <div class="col-sm-8">
+              <p>Assign asset- {{purchase.stock.stockid}} another Person</p>
+              <select class="form-control" name="user" required>
+                <option value="" selected disabled>-select a user-</option>
+                {% for user in users %}
+                <option value="{{user.id}}">{{user.user.username}}</option>
+                {% endfor %}
+              </select>
+              <input type="text" class="hidden" name="purchase" value="{{purchase.id}}">
+            </div>
+            <div class="col-sm-4">
+              <button class="btn btn-success" style="float:right;margin-top:15%" type="submit">Assign Asset</button>
+            </div>
+          </div>
+          </form>
+          
+        </div>
+        <div class="modal-footer" style="border:0px">
+          <a href="/asset/takeback/{{purchase.id}}" class="btn btn-info">Take asset-{{purchase.stock.stockid}} to stock</a>
+          
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+      {% include "asset/addtostock.html" %}
+
+      
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+
+
+
+    </body>
+</html>

@@ -1,0 +1,327 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+   {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+        <div class="wrapper">
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            {% if dependency == 'normal' %}
+            <div class="alert alert-success fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              <strong>Node Not Dependent ,</strong> You Can remove or edit without any impact
+            </div>
+            {% else %}
+            <div class="alert alert-info fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              <strong>Node Got dependency ,</strong> Removal affects other systems.
+            </div>
+            {% endif %}
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Node Informations | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Node Info</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              
+
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-header">
+                      <p class="panel-title">Host Map</p>
+                    </div>
+
+
+
+                    <div class="panel-body text-center">
+                      {% if relation_list|length > 0%}
+                          <canvas id="springydemo" width="940" height="480" />
+                      {% else %}
+                          <p class="text-thin" > No Data Found</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="row">
+                <div class="col-sm-7">
+                  <div class="panel">
+                <div class="panel-heading">                  
+                  <h3 class="panel-title">List Of Applications</h3>
+                </div>
+                <div id="alerter"></div>
+                <div class="panel-body">
+                  
+                  <div class="pad-btm form-inline">
+                    <div class="row">
+                      <div class="col-sm-6 table-toolbar-left">
+                        
+                      </div>
+                      <div class="col-sm-6 table-toolbar-right">
+                       <!--  <a href="" data-toggle="modal" data-target="#app_add"  class="btn btn-purple btn-labeled fa fa-plus">Add</a>
+                        <a href="" data-toggle="modal" data-target="#app_relate"  class="btn btn-green btn-labeled fa fa-plus">Relate</a> -->
+                        <div class="btn-group btn-group">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                      {% if relations|length > 0 %}
+                          <table class="table table-striped table-hover">
+                            <thead>
+                              <tr>
+                                <th>Object 1</th>
+                                <th>Type of relation</th>
+                                <th>Object 2</th>
+                                <th class="text-center">Application</th>
+                                <th class="text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for app in relations %}
+                              <tr>
+                                <td><a href="#" class="btn-link">{{app.obj1}}</a></td>
+                                <td>{{ app.relation }}</td>
+                                <td>{{app.obj2}}</td>
+                                <td class="text-center">
+                                {% if app.app %}
+                                  <a href="/dashboard/index/application/{{app.app.id}}"></a>
+                                  <span class="label label-table label-success">{{app.app.app_name}}</span>
+                                {% else %}
+                                  <p class="text-warning">Not Mapped</p>
+                                {% endif %}
+                                </td>
+                                </td>
+                                <td class="text-right">
+                                  <!-- <a class="btn btn-xs btn-default add-tooltip" data-toggle="tooltip" href="#" data-original-title="Edit" data-container="body"><i class="fa fa-pencil"></i></a> -->
+                                  <button class="btn btn-danger" id="deleteid" value="{{app.id}}" onclick="deletepop({{app.id}})"><i class="fa fa-times">{{app.obj1}}-{{app.obj2}}</i></button>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                      {% else %}
+                          <span class="text-thin text-center"> No Data Found</span>
+                      {% endif %}
+                  </div>
+                </div>
+              </div>
+
+
+                </div>
+                <div class="col-sm-5">
+                 <!--  <div class="panel">
+                <div class="panel-heading">
+                  <div class="panel-control">
+                    <button data-dismiss="panel" class="btn btn-default">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
+                  <h3 class="panel-title"></h3>
+                </div>
+                <div class="panel-body">
+
+                </div>
+              </div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+<div class="modal fade" id="app_add" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Create New Incident</h4>
+      </div>
+      <form action="/dashboard/index/application/add/{{host.id}}" method="post" enctype="multipart/form-data" id="incident_form">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>App name</label>
+              <input type="text" name="appname" class="form-control content skel-cell-important" required>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border:0px">
+        <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add Application</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/plain_chart/springy.js"></script>
+    <script src="/static/plain_chart/springyui.js"></script>
+    <script>
+     $("#table_id").DataTable();
+
+    $("#asset").addClass("active");
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+
+    function deletepop(x){
+      $('#alerter').empty();
+      $('#alerter').append('<div class="alert alert-primary media fade in">Are You Sure Want to Delete Relation<a href="/application/relation/delete/'+ x + '"' + 'class="btn btn-danger pull-right btn-sm">Yes</a><a href="" class="btn btn-success pull-right btn-sm" data-dismiss="alert">No</a></div>').fadeIn(1000);
+    }
+
+
+    </script>
+
+
+
+    <script>
+var graph = new Springy.Graph();
+
+
+{% for app in relation_list %}
+var {{app.global_name}} = graph.newNode  ({
+  label: "{{app.names}}",color:'{{app.color}}',
+  // image:{src:"/media/customer/logo/Marlabslogo_vector1_copy_1.png",width: 80,height:20, text: '{{app.names}}' },
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.global_name}}, {{app.obj2.global_name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+
+jQuery(function(){
+  var springy = window.springy = jQuery('#springydemo').springy({
+    graph: graph,
+    nodeSelected: function(node){
+      console.log('Node selected: ' + JSON.stringify(node.data));
+    }
+  });
+});
+</script>
+    </body>
+</html>

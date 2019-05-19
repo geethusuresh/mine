@@ -1,0 +1,900 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+        @media screen and (max-width: 640px) {
+        table {
+          overflow-x: auto;
+          display: block;
+        }
+      }
+      
+          .padding-md {
+          padding: 2px!important;
+          }
+          .timeline-centered .timeline-entry {
+         
+          width: 78%;
+          }
+          .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+          position: absolute;
+          left: -152px;
+          text-align: right;
+          /* padding: 0 10px; */
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+          }
+          .timeline-centered:before {
+          background: #A5A2A2;
+          left: 22%;
+          }
+          .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+          border-color: rgba(140, 126, 126, 0) #8C8787 transparent transparent;
+          }
+          .timeline{
+              background-color: transparent;
+          }
+          .timeline-time {
+              background-color: transparent;
+          }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+
+          {% include "side_bar/customer.html"%}
+
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1  class="text-thin">Tickets Details  <small>{{ticket.ticketid}}</small></h1>
+                    <ol class="breadcrumb">
+                      <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Tickets</li>
+                        
+                    </ol>
+                </div>
+
+                <div class="content">
+                {% include 'components/msg_div.html' %}
+
+                  
+
+<!-- here it starts -->
+
+
+
+              <div class="row">
+              {% if ticket.status == "CANCELLED" or ticket.status == "CLOSED" %}
+                <div class="col-md-12">
+              {% else %}
+                <div class="col-md-8">
+              {% endif %}
+                    <div class="box">
+                        <div class="box-body">
+                             
+
+<!-- tabbed -->
+
+                    <ul class="nav nav-tabs" role="tablist">
+                      <li class="active"><a href="#basic1" role="tab" data-toggle="tab"> Details</a></li>
+                      <li><a href="#att1" role="tab" data-toggle="tab"> Worklog</a></li>
+                      {% if attachments %}
+                      <li><a href="#attachments" role="tab" data-toggle="tab"> Attachments</a></li>
+                      {% endif %}
+                     {% if time_spend %}
+                      <li><a href="#timer" role="tab" data-toggle="tab">Time Spend</a></li>
+                      {% endif %}
+
+                      {% if monitoring_relation %}
+                        <li><a href="#monitoring" role="tab" data-toggle="tab">Monitoring</a></li>
+                      {% endif %}
+
+                      {% if security_relation %}
+                      <li><a href="#security" role="tab" data-toggle="tab">Host Overview</a></li>
+                      {% endif %}
+
+                      {% if destinationip %}
+                      <li><a href="#securitymon" role="tab" data-toggle="tab" onclick="security_monitoring();">Security Events</a></li>
+                      {% endif %}
+
+                      
+                    </ul>
+                    <br>
+                    <div class="tab-content">
+
+<!-- tabbed plane 1 -->
+                      <div class="tab-pane active" id="basic1">
+                            <div class="box box-body">
+                              <p><strong>Ticket Completion Status</strong></p>
+                            <div class="progress progress-striped active progress-sm">
+                              <div class="progress-bar progress-bar-{% if ticket.status == "NEW" %}success{% endif %}{% if ticket.status == "WAITAPPR" %}warning{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}info{% endif %}{% if ticket.status == "RESOLVED" %}info{% endif %}{% if ticket.status == "CLOSED" %}success{% endif %}{% if ticket.status == "CANCELLED" %}danger{% endif %}{% if ticket.status == "REJECTED" %}danger{% endif %}" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"  data-toggle="tooltip" data-original-title="{% if ticket.status == "NEW" %}5{% endif %}{% if ticket.status == "WAITAPPR" %}2{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}35{% endif %}{% if ticket.status == "RESOLVED" %}90{% endif %}{% if ticket.status == "CLOSED" %}100{% endif %}{% if ticket.status == "CANCELLED" %}100{% endif %}{% if ticket.status == "REJECTED" %}100{% endif %}%-{{ticket.status|real:ticket.customer.id}}" style="width:{% if ticket.status == "NEW" %}5{% endif %}{% if ticket.status == "WAITAPPR" %}2{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}35{% endif %}{% if ticket.status == "RESOLVED" %}90{% endif %}{% if ticket.status == "CLOSED" %}100{% endif %}{% if ticket.status == "CANCELLED" %}100{% endif %}{% if ticket.status == "REJECTED" %}100{% endif %}%">
+                              </div>
+                            </div>
+                            </div>
+                            
+                            <!-- <hr> -->
+
+                            <div class="row">
+                              <div class="col-md-8">
+                                <label><strong>Summary:</strong> </label>
+                                {{ ticket.summary }}<br>                        
+                              </div>
+                              <div class="col-md-4" style="border-left:1px solid black" >
+
+                                <h4>{{ ticket.ticketid }}</h4>
+                                <label class="label label-success" style="font-size:14px" >{{ticket.status | real:ticket.customer.id}}</label>
+                                                      
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-12"><br>
+                              <label><strong>Description:</strong>  </label>
+                                <!-- <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ ticket.description }}" rows="8" cols="20" readonly></textarea> -->
+                                <pre>{{ticket.description|safe}}</pre>
+
+                              </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                              <div class="col-md-6"> 
+
+                                <div class="box-body padding-md">
+                                    <dl class="dl-horizontal">
+                                        <dt>Impacted User :</dt>
+                                          <dd>{{ ticket.affectedperson }}</dd>
+                                          <dt>Phone No :</dt>
+                                          <dd> {% if ticket.affectedphone %}{{ ticket.affectedphone }}{%else%} None {% endif %}</dd>
+                                          <dt>User Email :</dt>
+                                          <dd>{{ ticket.affectedemail }}</dd>
+                                          <dt>Submitted by :</dt>
+                                          <dd>{{ ticket.reportedby }}</dd>
+                                        
+                                    </dl>
+                                </div>
+
+
+                                <hr>
+                              </div>
+
+                              <div class="col-sm-6">
+
+                               <div class="box-body padding-md">
+                                <dl class="dl-horizontal">
+                                    <dt>Category :</dt>
+                                    <dd>{{ ticket.category }}</dd>
+                                    <dt>Domain :</dt>
+                                    <dd> {{ticket.subgroup}}</dd>
+                                    <dt>Source :</dt>
+                                    <dd>{{ ticket.source }}</dd>
+                                    {% if ticket.source == "Niksun" or ticket.source == "Redcanary" or ticket.source == "LEM" or ticket.source == "Varonis" or ticket.source == "Zixcorp" or ticket.source == "Isensor" %}
+                                        <dt>Tool URL:</dt>
+
+                                            {% if tool_url %}
+                                             <dd><a href="{{ tool_url }}" target="_blank">{{ tool_url|truncatechars:20 }} </a></dd>
+                                            {% else %}
+                                                <dd>None</dd>
+                                            {% endif %}
+                                        <dt>IP Address:</dt>
+                                        {% if security_ip%}
+                                            <dd>{{ security_ip }} </dd>
+                                        {% else %}
+                                            <dd>None</dd>
+                                        {% endif %}
+                                        <dt>Hostname:</dt>
+                                        {% if security_host%}
+                                            <dd>{{ security_host }} </dd>
+                                        {% else %}
+                                            <dd>None</dd>
+                                        {% endif %}
+
+                                    {% endif %}
+                                    {% if ticket.ticket_location %}
+
+                                    <dt>Ticket Location:</dt>
+                                    <dd>{{ticket.ticket_location}}</dd>
+                                    {% endif %}
+                                    <dt>Assigned to :</dt>
+                                    <dd>{{ ticket.owner }}</dd>
+                                    
+                                </dl>
+                                </div>
+                                <hr>
+                              </div>
+                            </div>
+
+
+
+                            <div class="row">                
+                              <div class="col-md-6">
+                                <div class="box-body padding-md">
+                                  <dl class="dl-horizontal">
+                                    <dt>Expected Resolution</dt>
+                                    <!-- <dt>Date:</dt> -->
+                                      <dd>{% tzone ticket.targetfinish %}</dd>
+                                      
+                                  </dl>
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <div class="box-body padding-md">
+
+                                  <dl class="dl-horizontal">
+                                      <dt>Created Date :</dt>
+                                        <dd>{% tzone ticket.creationdate %}</dd>
+                                        <dt>Last Updated:</dt>
+                                        <dd>{% tzone ticket.changedate %}</dd>
+                                    
+                                  </dl>
+                                </div>
+
+                              </div>
+                             
+                            </div>
+                            <hr>
+                            <div>
+                               {% if resolved %}
+                              {% for resolve in resolved %}
+                              <div class="box-body padding-md">
+                                  <dl class="dl-horizontal">
+                                    <dt>Symptom :</dt>
+                                    <dd>{{ resolve.symptom }}</dd>
+                                    <dt>Cause :</dt>
+                                    <dd> {{ ticket.actualstart}}</dd>
+                                   <!--  <dt>Target Finish :</dt>
+                                    <dd>{{ resolve.resolution }}</dd> -->
+                                    <dt>Resolution :</dt>
+                                    <dd>{{ resolve.resolution }}</dd>
+                                      
+                                  </dl>
+                                </div>
+                              {% endfor %}
+                              {% endif %}
+                            </div>
+                    </div>
+                        <!-- tabbed plane 2 -->
+
+
+
+                      <!--Starting Monitoring Tab pane -->
+                      <div class="tab-pane" id="monitoring">
+                       <div class="row">                               
+                          <div class="col-sm-12">
+                            <canvas id="springydemo" width="600" height="600" />
+                          </div>
+                       </div>
+                      </div>                    
+                      <!--End monitoring tab pane -->
+
+                       <!--Starting Security Tab pane -->
+                      <div class="tab-pane" id="security">
+                       <div class="row">                               
+                          <div class="col-sm-12">
+                            <canvas id="springydemo_security" width="600" height="600" />
+                          </div>
+                       </div>
+                      </div>                    
+                      <!--End monitoring tab pane -->
+
+                      <!--Starting Security Tab pane -->
+                      <div class="tab-pane" id="securitymon">
+                       <div class="row">
+                          <div class="col-sm-12" id="loader_security" style=" display:none;text-align:center;">
+                              <img src="/static/img/loader.gif" />
+                          </div>
+
+                          <div class="col-sm-12" id="error_box" style=" display:none;text-align:center;">
+                             <div class="alert alert-danger">Error occured while displaying the graph</div>
+                          </div>
+
+                          <div class="col-sm-12">
+                            <div class="col-sm-1">
+                            </div>
+                            <div class="col-sm-10" id="attack_graph_sec">
+                              <canvas id="charter" width="500" height="500" />
+                              </canvas>
+                            </div>
+                            <div class="col-sm-1">
+                            </div>
+                          </div>
+                        </div>
+                      </div>                    
+                      <!--End monitoring tab pane -->
+
+
+
+                      <div class="tab-pane" id="att1">
+                                                 <div class="timeline">
+          
+                    <div class="timeline-header">
+                      <div class="timeline-header-title bg-info">Now</div>
+                    </div>
+
+
+                    {% for act in activity %}
+                      {% if act.activity %}
+
+                    {% if act.activity == "CANCELLED" or act.activity == "CLOSED" or act.activity == "REJECTED" %}
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-danger"><i class="fa fa-building fa-lg"></i>
+                        </div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <h4 class="mar-no pad-btm"><a href="#" class="text-danger">{{ act.owner.user.email }} {{act.note}}</a></h4>
+                        {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                      {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+
+                    {% endif %}
+                    {% if act.activity == "QUEUED" %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-warning"><i class="fa fa-comment fa-lg"></i></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <p class="mar-no pad-btm"><a href="#" class="btn-link text-semibold">{{act.owner.user.email }}</a> {{act.note}}.
+                        </p>
+                      {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                      {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+
+                    {% endif %}
+
+                 
+
+
+
+
+                    {% if act.activity == "VENDAWAIT" or act.activity == "CUSTAWAIT" %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-info"><i class="fa fa-comment fa-lg"></i></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <p class="mar-no pad-btm"><a href="#" class="btn-link text-semibold">{{ act.owner.user.email }}</a> {{act.note}}.
+                        </p>
+                      {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                      {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+
+                    {% endif %}
+
+                    {% if act.activity == "RESOLVED" %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                        </div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        
+                        <a href="#" class="btn-link text-semibold">{{ act.owner.user.email }}</a> {{act.note}}
+                        {% if act.remark %}
+                        <blockquote class="bq-sm bq-open ">{{act.remark}}</blockquote>
+                      {% endif %}
+                       {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+
+
+                    {% if act.activity == "INPROG" %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-mint"><i class="fa fa-thumbs-up fa-lg"></i></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        
+                        <a href="#" class="btn-link text-semibold">{{ act.owner.user.email }}</a> {{act.note}}
+                        {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                       {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+
+
+
+                    {% if act.activity == "NEW" or act.activity == "WAITAPPR"  %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <p>{{ act.owner.user.email }} {{act.note}}</p>
+                        {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                       {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+
+                {% if act.activity == "Update" %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-info"><i class="fa fa-comment fa-lg"></i></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <p>{{ act.owner.user.email }} {{act.note}}</p>
+                        {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                       {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip" style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+                    {% endif %}
+
+                  
+                   {% else %}
+
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">{% tzone act.time %}</div>
+                      </div>
+                      <div class="timeline-label">
+                        <p class="mar-no pad-btm"><a href="#" class="btn-link text-semibold">{{act.owner.user.email }}</a> {{act.note}}.
+                        </p>
+                      {% if act.remark %}
+                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                      {% endif %}
+                      {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"  style="float:right; color:black !important;"></a>
+                              {% endif %}
+                      </div>
+                    </div>
+
+                    {% endif %}
+                    {% endfor %}
+                  </div>
+
+
+                    </div>
+
+
+<!-- tabbed plane 3 -->
+
+
+
+<!-- tabbed plane 4 -->
+
+
+                      <div class="tab-pane" id="attachments">
+                        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                          <thead>
+                            <tr role="row">
+                            <th >Uploaded by</th>
+                            <th> File name</th>
+                            <th >Time</th>
+                            <th >Actions</th>
+                            </tr>
+                          </thead>         
+                          <tbody >
+                          {% for act in attachments %}
+                            <tr class="odd">
+                            <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                            <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                            <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                            <td>
+                              <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}" download="{{attachments.docfile}}">
+                                <i class="fa fa-download "></i>                                            
+                              </a>
+                              <a class="btn btn-danger btn-sm" href="#" id="modal_confirmation" onclick="modal_confirmation_open({{act.id}});">
+                                <i class="fa fa-trash-o "></i> 
+                              </a>
+                            </td>
+                          {% endfor %}         
+                          </tbody>
+                        </table>
+                      </div>
+
+<!-- end of tabb -->
+
+                      <div class="tab-pane" id="timer">
+                        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                          <thead>
+                            <tr role="row">
+                            <th>Ticket</th>
+                            <th >Time Spend in Hours</th>
+                            </tr>
+                          </thead>         
+                          <tbody >
+                          {% for act in time_spend %}
+                            <tr class="odd">
+                            <td class="grey"><a  style="color:#555">{{act.ticket}}</a></td>
+                            <td class="grey"><a  style="color:#555">{{act.time|hour_cal}}</a></td>
+                          {% endfor %}         
+                          </tbody>
+                        </table>
+                      </div>
+
+
+
+                            <!-- Tool Url Edit Modal -->
+                            <div id="edit_toolurl" class="modal fade" role="dialog">
+                              <div class="modal-dialog">
+
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Edit Tool URL</h4>
+                                  </div>
+                                  <div class="modal-body">
+                                    <form action="/customer/tickets/detail/{{ticket.id}}" method="POST" enctype="multipart/form-data" onsubmit="return validate_url();">{% csrf_token %}
+                                    <input type="text" id="tool_url" name="tool_url" style="width:100%;margin-top:5px;" placeholder="Enter your tool url (http://www.example.com)">
+                                    <button class="btn btn-success" style="width:25%;margin-top:5px;" type="submit">Update</button>
+                                    </form>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                             <!-- Tool Url Edit Modal  ends-->
+
+                    </div>
+                  </div>
+                </div><!-- /.box -->
+                </div><!-- /.col -->
+
+                {% if ticket.status == "CANCELLED" or ticket.status == "CLOSED" %}
+                {% else %}
+                    <div class="col-md-4">
+                        <div class="box">
+                            <div class="box-title">
+                                <h3>Add WorkLog</h3>
+                                <div class="pull-right box-toolbar">
+                                    <a href="#" class="btn btn-link btn-xs"  data-toggle="modal" data-target="#myModal">
+                                    <!-- <i class="fa fa-plus"></i> -->
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="box-body">
+                              <form action="/customer/tickets/detail/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                              <select class="hidden" style="margin-bottom:5px" name = "status">
+                                
+                                <option value="{{ticket.status}}">{{ticket.status}}</option>
+                                
+                              </select>
+
+                              
+                              <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>
+                              <br>
+                            <input id="image " type="file" name="image" class="screenshot_image_upload_update"> <br>
+
+                            <span class="error_message_for_upload_update" style="color:red;"></span>
+                            <!-- Important show file upload error -->
+
+                            <button class="btn btn-success" style="width:100%;margin-top:5px;" type="submit">Update</button> 
+                            </form>
+
+                        
+                            </div>
+                            
+                          </div><!-- /.box -->
+                        </div>
+                    </div><!-- /.row -->
+                    {% endif %}
+                  </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div><!-- /.wrapper -->
+
+
+
+
+
+        <div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/cancel/{{ticket.id}}" method="POST">
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+        <div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Compose email</h4>
+              </div>
+              <div class="modal-body">
+              <button class="btn btn-sm btn-warning"> <font size="3"> Select persons to send mail </font></button><br>
+                <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Affected person
+                <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}">Reported person
+                <input type="checkbox" name="email_fill" value="{{ticket.owner.user.email}}">Owner
+                <input type="checkbox" name="email_fill" value="{{ticket.supervisor.email}}">Reporting Manager<br><br>
+                <form action="/ticket/email/{{ticket.id}}" method="POST">
+                  {% csrf_token %}
+                  
+                  <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                  <input type="button" id="append_to" class="btn-primary btn btn-sm pull-right" style="margin-top:-33px;" value="Add selected persons email"> <br>
+                  <input type="email" multiple id="cc_list" style="width:70%;" name="cc_list" class="form-control" placeholder="Cc" >
+                  <input type="button" id="append_cc" class="btn-primary btn btn-sm pull-right" style="margin-top:-33px;" value="Add selected persons email"> <br><br>
+                  <input type="text" id="subject" name="subject" class="form-control" placeholder="Subject" required><br>
+                  <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control" placeholder="Body " rows="10" cols="20" required></textarea><br>
+
+
+                  <button class="btn btn-success" style="float:right;width:30%" type="submit">Send Email</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+{% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles %}
+    {% include "components/dashboard_footer.html"%}
+{% endif %}
+{% include "components/customer_footer.html"%}
+{% include "components/confirmation_box.html" %}
+
+{% if ticket.customer.chat_messenger == True %}
+    {% include "components/converse.html" %}
+{% endif %}
+
+<script type="text/javascript" src="/static/plain_chart/springy.js"></script>
+<script type="text/javascript" src="/static/plain_chart/springyui.js"></script>
+<script src="/static/chartjs/Chart.js"></script>
+<script type="text/javascript">
+    function modal_confirmation_open(attachment_id){
+        $('#delete_id').val(attachment_id);
+        $('#confirm_msg').html('<strong> Are you sure want to delete this attachment?  </strong>');
+        $('#confirm_type').val('ticket_attachment');
+        $('#confirm_box').modal('toggle');
+    }
+    function submit_ok() {
+        var delete_type = $('#confirm_type').val();
+        var delete_id = $('#delete_id').val();
+        if (delete_type == 'ticket_attachment') {
+            document.location.href = "/attachment/delete/"+delete_id;
+        }
+        $('#confirm_box').modal('hide');
+    }
+</script>
+{% if monitoring_relation %}
+<script type="text/javascript">
+  var graph = new Springy.Graph();
+
+  {% for app in monitoring_relation %}
+  var {{app.global_name}} = graph.newNode  ({
+    label: '{{app.names}}', color:'{{app.color}}'        
+  });
+  {% endfor %}
+
+  {% for app in monitoring_ci_relation %}
+  graph.newEdge({{app.obj1.global_name}}, {{app.obj2.global_name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+  {% endfor %}
+
+  $(document).ready(function(){
+    var springy = window.springy = $('#springydemo').springy({
+      graph: graph,
+      nodeSelected: function(node){
+        console.log('Node selected: ' + JSON.stringify(node.data));
+      }
+    });
+  });
+</script>
+{% endif %}
+
+{% if security_relation %}
+<script type="text/javascript">
+  var graph_security = new Springy.Graph();
+
+  {% for app in security_relation %}
+  var {{app.global_name}} = graph_security.newNode  ({
+    label: '{{app.names}}'        
+  });
+  {% endfor %}
+
+  {% for app in security_ci_relation %}
+  graph_security.newEdge({{app.obj1.global_name}}, {{app.obj2.global_name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+  {% endfor %}
+
+  $(document).ready(function(){
+    var springy_security = window.springy = $('#springydemo_security').springy({
+      graph: graph_security,
+      nodeSelected: function(node){
+        console.log('Node selected: ' + JSON.stringify(node.data));
+      }
+    });
+  });
+</script>
+{% endif %}
+
+<script type="text/javascript">
+  var attacks = "";
+  function security_monitoring(){
+    if(attacks==""){
+        $('#loader_security').show();
+        $('#attack_graph_sec').hide();
+        $('#error_box').hide();        
+        $.ajax({
+            url:"/security/ticketdash",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',                    
+              dest_ip:'{{destinationip}}',
+              ticket_id:'{{ticket.id}}'
+            },
+            success: function(data){
+              attacks = data.attack_graph;              
+              app_times = [];
+              app_count = [];
+              $.each(attacks,function(i,obj){                  
+                  app_times.push(obj.times);
+                  app_count.push(obj.count);
+              });
+              var data = {
+                labels:app_times,
+                datasets: [
+                    {
+                        label: "Attacks",
+                        fillColor: "#9cc96b",
+                        strokeColor: "#27ae60",
+                        highlightFill: "rgba(220,220,220,0.75)",
+                        highlightStroke: "rgba(220,220,220,1)",
+                        data:app_count 
+                    },
+                ]
+            };
+            $('#error_box').hide();
+            $('#loader_security').hide();
+            $('#attack_graph_sec').show(); 
+            var ctx = document.getElementById("charter").getContext("2d");
+            var myLineChart = new Chart(ctx).Bar(data, {showXLabels: 5 , responsive: true});
+            },
+            error: function(data){
+              $('#loader_security').hide(); 
+              $('#error_box').show();                     
+            }
+        });
+    }       
+  }
+</script>
+
+<script>
+     $("#service").addClass("active")
+     $("#subm").css({'display' : 'block'})
+      {% if ticket.affectedperson == profile %}
+        $("#mytic").addClass("active");
+      {% else %}
+        $("#alltic").addClass("active");
+      {% endif %}
+</script>
+
+
+
+<!--IMPORTANT >>> validating file type and size(size allowed only less than 1mb)-->
+<script>
+    (function ($, $win) {
+      'use strict';
+
+      $( document ).ready(function() {
+
+        $('.screenshot_image_upload_update').bind('change', function() {
+          //this.files[0].size gets the size of your file.
+          var ext = $('.screenshot_image_upload_update').val().split('.').pop().toLowerCase();
+          //get upload file type
+          var notAllowedFiles = ["exe", "rar", "dll"];
+          var validFileStatus = 0;
+          if(this.files[0].size>10000000){
+
+            $(".error_message_for_upload_update").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+            $('.screenshot_image_upload_update').val("")
+            validFileStatus = 1;
+          }
+
+          if(notAllowedFiles.indexOf(ext)!=-1){
+            $(".error_message_for_upload_update").html('Upload error try again, exe,rar,dll file types are not allowed')
+            $('.screenshot_image_upload_update').val("")
+            validFileStatus = 1;
+          }
+          if(validFileStatus!=1){
+              $(".error_message_for_upload_update").empty()
+          }
+        });
+
+      });
+
+    }(jQuery, jQuery(window)));
+
+</script>
+
+<script type="text/javascript">
+    function validate_url() {
+        var tool_url = document.getElementById("tool_url").value;
+        var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+        if (pattern.test(tool_url)) {
+            return true;
+        }
+        else{
+            alert("Url is not in the required format(eg: http://www.example.com)");
+            return false;
+        }
+
+    }
+</script>
+
+
+
+
+</body>
+</html>
+

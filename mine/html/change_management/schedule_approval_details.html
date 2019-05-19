@@ -1,0 +1,88 @@
+{% extends "change_management/change_base.html" %}
+{% block title_content %} Schedule Details {% endblock title_content %}
+{% block page_head %} Change Management <small>| Schedule Details </small>{% endblock page_head %}
+{% load zone %}
+
+{% block bread_crumb %} <li class="active"> Schedule Details </li>{% endblock bread_crumb %}
+
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <h5 class="panel-title">Schedule Approval Details - {{schedule.schedule_id}}</h5>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="col-sm-4">
+                        <dl class="dl-horizontal">
+                            <dt>Change Id : </dt>
+                            <dd>{{schedule.change_req.change_id}}</dd><br/>
+                            <dt>Type of Approval : </dt>
+                            <dd>{{schedule.approval_level}}</dd>
+                            <br/>
+                            <dt>Domain : </dt>
+                            <dd>{{schedule.group.workgroup}}</dd><br/>
+                        </dl>
+                    </div>
+                    <div class="col-sm-4">
+                        <dl class="dl-horizontal">
+                            <dt>Created Date : </dt>
+                            <dd>{% tzone schedule.created_date %}</dd><br/>
+                            <dt>Approval Sent Time : </dt>
+                            <dd>{% tzone schedule.sent_time %}</dd><br/>
+                            <dt>Subdomain : </dt>
+                            <dd>{{schedule.subgroup.subgroupname}}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-sm-4">
+                        {% if schedule.status != None %}
+                            <dl class="dl-horizontal">
+                                <dt> Status : </dt>
+                                <dd>{{schedule.status}}</dd><br/>
+                                <dt>Approver : </dt>
+                                <dd>{{schedule.approver.user.email}}</dd><br/>
+                                <dt>Approved Date : </dt>
+                                <dd>{% tzone schedule.approved_date %}</dd>
+                            </dl>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Scheduler Comments : </strong></label>
+                    <p>{{schedule.scheduler_comments|safe}}</p>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                {% if schedule.subgroup.id in subgroup_list and schedule.status == None %}
+                    <div class="col-sm-8">
+                        <form method="post" action="/rfc/schedule_approver_comments/{{schedule.id}}/" id="sched_appr_form">{% csrf_token %}
+                            <label><strong>Status</strong></label>
+                            <select name="status" class="form-control" required>
+                                <option value="">--Select--</option>
+                                <option value="Approve">Approve</option>
+                                <option value="Reject">Reject</option>
+                            </select><br/>
+                            <label><strong>Comments</strong></label>
+                            <textarea name="comments" class="form-control" required></textarea><br/>
+                            <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+
+{% block footer_content %}
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        // $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

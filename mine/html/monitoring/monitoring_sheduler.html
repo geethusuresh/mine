@@ -1,0 +1,213 @@
+{% load humanize %}
+{% load zone %}
+{% load tpcalc %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+     <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>    -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->
+
+    <script type="text/javascript">
+      function box_items_details(app_ids){
+        $('#top_box_appid').val(app_ids);
+        $('#frm_top_box').submit();
+      }
+
+    </script>
+
+    <script type="text/javascript">
+    function item_details(item_id){
+        $('#trigger_item_details').val(item_id);
+        $('#frm_item_details').submit();
+    }
+
+    function check_host_change(){
+        $('#host_selection').val('host_selected');
+        $('#hostgroup_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function check_hostgroup_change(){
+        $('#hostgroup_selection').val('hostgroup_selected');
+        $('#host_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function timeintervel_duration(duration){
+        $('#timeinterval').val(duration);
+        $('#frm_timeinterval').submit();
+    }
+
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html" %}
+      <div class="rightside">
+          <div class="page-head" style="margin-top:10px">
+              <h1 class="text-thin">Monitoring Reports | <small>Scheduled Details</small></h1>
+              <ol class="breadcrumb">
+                 <li>You are here:</li>
+                  <li><a href="/">Home</a></li>
+                  <li><a href="#">Monitoring Reports</a></li>
+                  <li class="active">Scheduled Details</li>
+              </ol>
+          </div>
+          {% if messages %}
+              <ul>
+                  {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                      <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                    {% endif %}
+                  {% endfor %}
+              </ul>
+          {% endif %}
+          <div class="content">
+              <div class="panel">
+                  <div class="panel-heading">
+                      <h3 class="panel-title text-thin text-center">Scheduled Details</h3>
+                  </div>
+                  <div class="panel-body">
+                      <!-- <h3 class="text-thin text-center">My Tickets</h3> -->
+                      <table class="table table-striped table-hover" id="zabbix_table_id" width="100%">
+                          <thead>
+                              <tr role="row">
+                                  <th></th>
+                                  <th>Monitored Groups</th>
+                                  <th>Monitored Hosts</th>
+                                  <th>Parameters</th>
+                                  <th>Schedule Method</th>
+                                  <th></th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for item in zmc_objects %}
+                                  <tr class="odd">
+                                      <td>
+                                      <a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit" href="/advanced_monitoring/monitoring_configuration/{{item.id}}">
+                                      <i class="fa fa-edit "></i>
+                                      </a>
+                                      </td>
+                                      <td>                                     
+                                      {% for hostgroup in item.hostgroup.all %}
+                                        {% if  forloop.last %}
+                                        {{ hostgroup.hostgroup }}
+                                        {% else %}
+                                        {{ hostgroup.hostgroup }},
+                                        {% endif %}
+                                      {% endfor %}</td>
+                                      <td> 
+                                      {% for host in item.host.all %}
+                                        {% if  forloop.last %}
+                                        {{ host.hostid|hostname }}
+                                        {% else %}
+                                        {{ host.hostid|hostname }},
+                                        {% endif %}
+                                      {% endfor %}</td>
+                                      <td>
+                                      {% if not item.choices.all %}
+                                        None
+                                      {% else %}
+                                      {% for choice in item.choices.all %}
+                                        {% if  forloop.last %}
+                                        {{ choice.description }}
+                                        {% else %}
+                                        {{ choice.description }},
+                                        {% endif %}
+                                      {% endfor %}
+                                      {% endif %}
+                                      </td>
+                                      <td>{{ item.type }}</td>
+                                      <td>
+                                      <a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="Delete" href="/advanced_monitoring/delete_zabbix_configuration/{{item.id}}">
+                                       <i class="fa fa-trash-o"></i>
+                                      </a>
+                                      </td>                                    
+                                  </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+              </div> 
+          </div>
+      </div>
+
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+     {% include "ticket/advanced_search_popup.html" %}
+    <script>            
+      $("#mon_sheduler").addClass("active");
+      $("#mon_sheduler_sub").css({'display' : 'block'});
+      $("#scheduler").addClass("active");       
+    </script>   
+     <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+    <link href="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
+    <script src="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/src/js/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript">
+     function monitor_add_to_dashboard(item_id,report_type){ 
+      $.ajax({
+          type: "POST",
+          url: "/addreport_to_dashboard/",
+          data: { report_type: report_type, item_id: item_id, csrfmiddlewaretoken: '{{ csrf_token }}'}
+          })
+          .done(function( msg ) {             
+              $('#success_alert').html(msg);
+              $('#success_alert').show(1000);
+          })
+          .fail(function() {              
+              $('#failed_alert').html("Oh! Failed to move this report to your dashboard");
+              $('#failed_alert').hide(1000);
+          });                   
+    }
+    </script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#zabbix_table_id').DataTable({
+            aaSorting:[[1,'desc']],
+            // "columnDefs": [
+            //     { "width": "20%", "targets": 4 }
+            // ],
+            "scrollX": true
+        });
+    });
+</script>
+    {% include "components/dashboard_footer.html" %}  
+    {% include "components/service_request.html" %}  
+    </body>
+</html>

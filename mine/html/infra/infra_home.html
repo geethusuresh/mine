@@ -1,0 +1,313 @@
+{% load humanize %}
+{% load zone %}
+{% load pagination %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/asset_css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+        <link href="/static/map/training.css" rel="stylesheet"/>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <script src="/static/map/d3-archi.js"></script>
+        <style>
+            .list-info li label {
+                width: 100px;
+            }
+            .clb{
+              display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+            }
+            svg:not(:root) {
+              overflow: visible;
+            }
+            svg {
+               border-radius: 0px; 
+            }
+        </style>
+        <style>
+            .media-left{
+                float: left;
+            }
+
+            ul{
+                list-style: none outside none;
+                padding-left: 0;
+                margin: 0;
+            }
+            .content-slider li{
+                text-align: center;
+                color: #FFF;
+            }
+            .content-slider h3 {
+                margin: 0;
+                padding: 70px 0;
+            }
+        </style>
+        <style>
+            .select-label {
+                position: absolute;
+            }
+            .select-wrapper {
+                position: relative;
+                margin-top: 15px; 
+            }
+            .select-wrapper input.select-dropdown {
+                position: relative;
+                cursor: pointer;
+                color: #444;
+                background-color: transparent;
+                border: none;
+                border-bottom: 1px solid #9e9e9e;
+                outline: none;
+                height: 3rem;
+                line-height: 3rem;
+                width: 100%;
+                font-size: 1rem;
+                margin: 0 0 15px 0;
+                padding: 0;
+                display: block;
+            }
+            .select-wrapper .mdi-navigation-arrow-drop-down {
+                position: absolute;
+                right: 0;
+                top: 0;
+                font-size: 23px;
+            }
+            select {
+                display: none;
+            }
+            select.browser-default {
+                display: block;
+            }
+            select:disabled {
+                color: rgba(0, 0, 0, 0.3);
+            }
+            .select-wrapper input.select-dropdown:disabled {
+                color: rgba(0, 0, 0, 0.3);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+            }
+
+            .select-wrapper i {
+                color: rgba(0, 0, 0, 0.3);
+            }
+
+            .select-dropdown li.disabled {
+                color: rgba(0, 0, 0, 0.3);
+            }
+            .select-dropdown li.disabled:hover {
+                background-color: transparent;
+            }
+            select {
+                display: inline;
+            }
+        </style>
+        <style type="text/css">
+            table.dataTable.no-footer {
+                border-bottom-color: #ddd;
+            }
+            table.dataTable thead th,
+            table.dataTable thead td {
+                border-bottom-color: #ddd;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/asset_header.html"%}
+        {% endif %}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/asset_sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Infrastructure |<small> Data Centers</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Data Centers</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title text-center">Infrastructure Map</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-12" style="text-align:right;">
+                                            <!--  <button onclick="expandAll()">Expand All</button>
+                                            <button onclick="collapseAll()">Collapse All</button>    -->
+                                            <div id="expand" style="cursor:pointer;" onclick="tree_expansion()"><img src="/static/img/toggle-expand.png"/>&nbsp;[Expand All]</div>
+                                            <input type="hidden" name="expand_op" id="expand_op" value="expand" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12"> <span id='tree'></span> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="panel plan text-center" style="color:#515151">
+                                <a class="btn btn-success pull-right" data-target="#add_host" data-toggle="modal" title="Add Data Center" data-placement="bottom"> + </a>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <h4 class="text-thin">Data Centers</h4>
+                                        <!-- <l class="fa fa-server fa-3x"></l> -->
+                                    </div>
+                                    <!-- <hr> -->
+                                    <div class="demo">
+                                        <div class="item">
+                                            {% comment %}
+                                                <ul id="content-slider" class="content-slider">
+                                                    {% for ci in dcs %}
+                                                        <li class="col-xs-2">
+                                                        <a href="/management/infra/{{ci.id}}" style="color:#515151">
+                                                        <h4 class="text-thin">{{ci.dc_name}}</h4>
+                                                        <p class="text-sm mar-no">{{ci.location}}</p>
+                                                        </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endcomment %}
+                                            <table class="table table-striped table-bordered dataTable dtr-inline no-footer">
+                                                <thead>
+                                                    <tr role="row">
+                                                        <th>Name</th>
+                                                        <th>Location</th>
+                                                        <th>Hosts(#)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for ci in dcs %}
+                                                        <tr>
+                                                            <td><a href="/management/infra/{{ci.id}}">{{ci.dc_name}}</a></td>
+                                                            <td>{{ci.location}}</td>
+                                                            <td>{{ci.hosts_set.all|length }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            <div class="col-sm-12 pull-right pad-all">
+                                                <div class="dataTables_paginate paging_simple_numbers pull-right">
+                                                    {% pagination dcs 1 1 1 1 %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>  
+                                </div>
+                            </div>
+                            <!-- <div class="panel plan">
+                                <div class="panel-heading">
+                                    <p class="h2 panel-title text-center ">Add Data Center</p>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="POST" action="/datacenter/add/">{% csrf_token %}
+                                        <div class="row col-sm-12">
+                                            <label class="pull-left">Data Center Name:</label>
+                                            <input type="text" name="dcname" class="form-control" required>
+                                        </div>
+                                        <div class="row col-sm-12" style="margin-bottom:5%;margin-top:4%">
+                                            <label  class="pull-left">Data Center Location:</label>
+                                            <input type="text" name="dcloc" class="form-control" required>
+                                        </div>
+                                        <br><br>
+                                        <button class="btn btn-success btn-labeled fa fa-paper-plane" type="submit">Add Data Center</button>
+                                    </form>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                        </div>
+                        <div class="col-sm-4">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="add_host" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title text-center" id="myModalLabel">Add Data Center</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="panel plan">
+                           <div class="panel-body">
+                                <form method="POST" action="/datacenter/add/">{% csrf_token %}
+                                    <div class="row col-sm-12">
+                                        <label class="pull-left">Data Center Name:</label>
+                                        <input type="text" name="dcname" class="form-control" required>
+                                    </div>
+                                    <div class="row col-sm-12" style="margin-bottom:5%;margin-top:4%">
+                                        <label  class="pull-left">Data Center Location:</label>
+                                        <input type="text" name="dcloc" class="form-control" required>
+                                    </div>
+                                    <br><br>
+                                    <button class="btn btn-success btn-labeled fa fa-paper-plane" type="submit">Add Data Center</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "asset/addtostock.html" %}
+        {% include "components/msg_div.html" %}
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/customer_footer.html"%}
+        {% else %}
+            {% include "components/footer.html"%}
+        {% endif %}
+        <script>
+            var treeData = {{finale|safe}};
+        </script>
+        <script src='/static/map/training.js'></script>
+        <script src="/static/lightslider/lightslider.js"></script>
+        <script>
+            // $(document).ready(function() {
+            //     $("#content-slider").lightSlider({
+            //         loop:false,
+            //         keyPress:true,
+            //         item: 2,
+            //     });
+            // });
+            $("#infra").addClass("active");
+            $("#infraopen").css('display','block');
+            $("#dcview").addClass("active");
+            function tree_expansion(){
+                var expand = $('#expand_op').val();
+                if(expand=="expand"){
+                    expandAll();
+                    $('#expand').html('<img src="/static/img/toggle.png"/>&nbsp;[Collapse All]');
+                    $('#expand_op').val('collapse');
+                }
+                else if(expand=="collapse"){
+                    collapseAll();
+                    $('#expand_op').val('expand');
+                    $('#expand').html('<img src="/static/img/toggle-expand.png"/>&nbsp;[Expand All]');
+                }
+            }
+        </script>
+    </body>
+</html>
+
+
+

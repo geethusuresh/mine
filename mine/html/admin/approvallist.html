@@ -1,0 +1,151 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oneconsole | Adminpanel</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 ">
+            <h4 style="color:#FFF">OneConsole</h4>
+          </div>  
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- <div id="tour-searchbox" class="input-group searchbox">
+                  <input type="search" class="form-control" placeholder="enter keyword here...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                  </span>
+                </div> -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+
+                  <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+                  <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+             <ul class="main-menu">
+              <div class="sidebar-content">
+              <img src="/static/img/logo.png">
+              </div>
+              {% include "side_bar/sidebar.html"%}
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                  
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Approval Session</h2>
+                <em>Ticket List</em>
+              </div>
+
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Recent Tickets</h3>
+                  <div class="btn-group widget-header-toolbar">
+                          <span class="label label-High">High</span>
+                          <span class="label label-Medium">Medium</span>
+                          <span class="label label-Low">Low</span>
+                          
+                        </div>
+
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                <thead>
+                  <tr role="row">
+                  <th>ID</th>
+                  <th >Ticket</th>
+                  
+                  <th>Customer</th>
+                  <th>Source</th>
+                  <th>Status</th>
+                  <th>Owner</th>
+                  <th>Group</th>
+                  <th>Target start</th>
+                  <th >Time</th>
+                  <th> Priority </th></tr>
+                </thead>
+            {% for ticket in approvers %}
+                <tbody>
+                  <tr class="odd  ">
+                  <td class="grey">{{ticket.ticket.cls}}000{{ticket.id}}</td>
+                    <td class="grey"><a href="/ticket/approval/{{ticket.id}}" style="color:#555">{{ticket.ticket}}</a></td>
+                    <td class="grey">{{ticket.ticket.customer}}</td>
+                    <td class="grey">{{ticket.ticket.source}}</td>
+                    <td class="grey">{{ticket.ticket.status|real:ticket.ticket.customer.id}}</td>
+                    <td class="grey">{{ticket.ticket.owner}}</td>
+                    <td class="grey">{{ticket.ticket.group}}</td>
+                    <td class="grey">{{ticket.ticket.targetstart|naturaltime}}</td>
+                    <td class="grey">{{ticket.ticket.reportdate|naturaltime}}</td>
+                    <td class="grey" style="width:15px"><span class="label label-{{ticket.ticket.reportedpriority}}">o</span></td>
+                </tbody>
+            {% endfor %}
+              </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+
+</html>

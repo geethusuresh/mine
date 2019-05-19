@@ -1,0 +1,270 @@
+@charset "utf-8";
+/* CSS Document */
+
+.oneConsoleLogo{
+  margin-top:8px !important;	
+}
+.material-icons{
+	color:#0071b9 !important;	
+}
+.topMenu ul{
+  padding:0;
+  margin:0;
+}
+.topMenu ul li{
+  border-right:solid 1px #e9e9e9;
+  color:#333 !important;	
+}
+.topMenu ul li a{
+  color:#9b9b9b !important;	
+  text-transform:uppercase;
+}
+.topMenu ul li:last-child{
+  color:#FFFFFF !important;	
+  text-transform:uppercase;
+  background:#2182c4;
+}
+.topMenu ul li:last-child a{
+  color:#FFFFFF !important;	
+}
+.coreFeature{
+  margin-top:60px;	
+  padding-bottom:60px;
+  clear:both;
+}
+.coreFeature ul{
+  padding:0;
+  margin:0;	
+}
+.coreFeature ul li{
+  border-right:solid 1px #e9e9e9;
+  min-height:76px; 
+  float:left;
+  width:14%;
+  text-align:center;
+}
+.coreFeature ul li:last-child{
+  border-right:none;
+}
+.coreFeature ul li p{
+  text-align:center;
+  color:#242424;
+}
+.nextGenFeature{
+	padding-top:40px;
+}
+.Highlights{
+	padding-top:40px;
+}
+.Highlights h3{
+	text-align:center;
+	padding-bottom:25px;
+}
+.Highlights ul{
+	margin:0;
+	padding:0;
+	line-height:normal;
+	list-style:none;
+}
+.Highlights ul li{
+	float:left;
+	color:#403e3e;
+	padding:12px 0px 12px 50px;
+	background:url(../images/highlights.jpg) left center no-repeat; 
+}
+.powerfull{
+	background:url(../images/powerfull.jpg) no-repeat center;
+	height:700px;
+}
+.powerfull h3{
+	padding-top:45px;
+	color:#FFF;
+}
+.powerfull h3 a{
+	padding-top:45px;
+	color:#FFF;
+}
+.powerfull p{
+	padding-top:25px;
+	color:#FFF;
+}
+.ExtendOneconsole{
+	padding-top:35px;
+	text-align:center;
+	
+}
+.ExtendOneconsole h4{
+	text-transform:uppercase;
+	text-decoration:underline;
+}
+.ExtendOneconsole p{
+	color:#242424;
+	font-size:19px;
+}
+/*.requestForaDemo{
+	color:#FFFFFF;
+	font-size:24px;
+	text-transform:uppercase;
+	background:#2182c4;
+	padding:15px 14px 15px 14px !important;
+	margin-bottom:30px;
+}*/
+
+.requestForaDemo {
+    color: #FFFFFF;
+    font-size: 24px;
+    text-transform: uppercase;
+    background: #2182c4;
+    padding: 15px 35px 15px 35px !important;
+    margin: 35px 0px 50px 0px;
+    border-radius: 35px;
+}
+.footerbottom{
+	font-size:14px;
+	color:#666;
+	text-align:center;
+	padding-top:50px;
+	padding-bottom:50px;
+}
+.SocialMedia{
+	position:absolute;
+	z-index:999;
+	color:#fff;
+	width:380px;
+	height:50px;
+	margin-left:37%;
+	margin-top:38%;
+}
+.SocialMedia ul{
+	line-height:normal;
+	list-style:none;
+}
+.SocialMedia ul li{
+	float:left;
+	background: rgba(255, 255, 255, .2);
+	margin-right:3px;
+	border-radius:4px;
+	width:50px;
+	height:50px;
+	text-align:center;
+	padding-top:10px;
+}
+
+.SocialMedia1{
+	z-index:999;
+	color:#fff;
+	width:380px;
+	height:50px;
+	margin-left:37%;
+	margin-bottom:120px;
+}
+.SocialMedia1 ul{
+	line-height:normal;
+	list-style:none;
+}
+.SocialMedia1 ul li{
+	float:left;
+	background: rgba(204, 204, 204, .6);
+	margin-right:3px;
+	border-radius:4px;
+	width:50px;
+	height:50px;
+	text-align:center;
+	padding-top:10px;
+}
+
+#star {
+  text-align: center;
+  font-size: 100px;
+  line-height: 500px;
+  color: #ddd;
+}
+
+@media only screen and (max-device-width: 480px) {
+nav .brand-logo{
+	left:56%;
+}
+.CoreFeaturesTxt{
+   margin-top:15px;
+}
+.coreFeature{
+  margin-top:60px;	
+  padding-bottom:60px;
+  clear:both;
+}
+.coreFeature ul{
+  padding:0;
+  margin:0;	
+}
+.coreFeature ul li{
+  border-right:solid 1px #e9e9e9;
+  min-height:76px; 
+  display:block;
+  width:50%;
+  text-align:center;
+}
+.coreFeature ul li:last-child{
+   border-right:solid 1px #e9e9e9;
+}
+.coreFeature ul li p{
+  text-align:center;
+  color:#242424;
+}
+.SocialMedia{
+	position:absolute;
+	z-index:999;
+	color:#fff;
+	width:380px;
+	height:50px;
+	margin-left:3%;
+	margin-top:42%;
+}
+.SocialMedia ul{
+	line-height:normal;
+	list-style:none;
+}
+.SocialMedia ul li{
+	float:left;
+	background: rgba(205, 205, 205, .6);
+	margin-right:3px;
+	border-radius:4px;
+	width:40px;
+	height:45px;
+	text-align:center;
+	padding-top:10px;
+}
+	
+	
+	
+	
+.SocialMedia1{
+	z-index:999;
+	color:#fff;
+	height:50px;
+	margin-bottom:30px;
+	margin-left: 3%;
+	width:auto;
+}
+.SocialMedia1 ul{
+	line-height:normal;
+	list-style:none;
+}
+.SocialMedia1 ul li{
+	float:left;
+	background: rgba(204, 204, 204, .6);
+	margin-right:3px;
+	border-radius:4px;
+	width:40px;
+	height:45px;
+	text-align:center;
+	padding-top:10px;
+}
+.requestForaDemo{
+	color:#FFFFFF;
+	font-size:24px;
+	text-transform:uppercase;
+	background:#2182c4;
+	padding:6px 2px 6px 2px !important;
+	margin-left:8%;
+}
+}

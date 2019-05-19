@@ -1,0 +1,400 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Control panel<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Control panel</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <p class="panel-title">Activated Modules</p>
+                   </div>
+                   <div class="panel-body">
+                     {% for mod in modules %}
+                     <div class="col-sm-2">
+                       <div class="">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin {{mod.module.icon}}"></span>
+                          <p>{{mod.module}}</p>
+                          <!-- <p>0/1 used</p> -->
+                        </div>
+                      </div>
+                    </div>
+                     {% endfor %}
+                   </div>
+                 </div>
+               </div>
+                
+              </div>    
+              <div class="row">
+                  <div class="col-sm-12">
+                      <div class="panel">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">Administration</h3>
+                          </div>
+                      </div>
+                          <!-- <div class="panel-body"> -->
+                              <div class="col-sm-9">
+                                <div class="tab-base tab-stacked-left">
+                                  <!--Nav tabs-->
+                                  <ul class="nav nav-tabs">
+                                    <li class="{% if not domain_create_section %} active {% endif %}">
+                                      <a data-toggle="tab" href="#tags">Roles</a>
+                                    </li>
+                                    <li>
+                                      <a data-toggle="tab" href="#manus">Users</a>
+                                    </li>
+                                    <li {% if domain_create_section %} class="active" {% endif %}>
+                                      <a data-toggle="tab"  href="#vendors">Domains</a>
+                                    </li>
+                                  </ul>
+                                  <!--Tabs Content-->
+                                  <div class="tab-content">
+                                    <div id="tags" class="tab-pane fade {% if not domain_create_section %} active in {% endif %}">
+                                      <!-- <h4 class="text-thin">Roles</h4> -->
+                                      <h4 class="panel-title">Roles</h4>
+                                      <div class="col-sm-8">
+                                        <ul class="list-group">
+                                          {% for role in roles %}
+                                          <a href="/controlpanel/role/{{role.id}}">
+                                            <li class="list-group-item">{{role.rolename}}</li>
+                                          </a>
+                                          {% endfor %}
+                                      </ul>
+                                      </div>
+                                      <div class="col-sm-4">
+                                        <a class="btn btn-purple btn-rounded btn-labeled fa fa-bookmark-o" data-toggle="modal" data-target="#tagus">Add New Role</a>
+                                      </div>
+                                    </div>
+                                    <div id="manus" class="tab-pane fade">
+                                      <!-- <h4 class="text-medium text-center col-sm-6">Users</h4> -->
+                                      <h4 class="panel-title">Users</h4>
+                                      <div class="col-sm-8">
+                                        <ul class="list-group">
+                                          {% for user in users %}
+                                            <a href="/admin_settings/users/{{ user.id }}/">
+                                              <li class="list-group-item">{{user.user.username}}</li>
+                                            </a>
+                                          {% endfor %}
+                                      </ul>
+                                      </div>
+                                      <div class="col-sm-4">
+                                        <a class="btn btn-purple btn-rounded btn-labeled fa fa-user" data-toggle="modal" data-target="#manufact">Add Users</a>
+                                      </div>
+                                    </div>
+                                    <div id="vendors" class="tab-pane fade {% if domain_create_section %} active in {% endif %}">
+                                      <!-- <h4 class="text-thin">Domains</h4> -->
+                                      <h4 class="panel-title">Domains</h4>
+                                      <div class="col-sm-8">
+                                        <ul class="list-group">
+                                          {% for domain in cusdomain %}
+                                            <li class="list-group-item"><a href="/customer/domain/{{domain.id}}/details/">{{domain.domain}}</a></li>
+                                          {% endfor %}
+                                      </ul>
+                                      </div>
+                                      <div class="col-sm-4">
+                                        <a class="btn btn-purple btn-rounded btn-labeled fa fa-bars" data-toggle="modal" data-target="#vendoru">Add Domain</a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-sm-3">
+                                <a href="/">
+                                  <div class="panel plain">
+                                    <div class="panel-body text-center">
+                                      <p class="text-uppercase mar-btm text-md">{{profile.customer}}</p>
+                                      <i class="fa fa-puzzle-piece fa-5x"></i>
+                                      <hr>
+                                      <!-- <p class="h2 text-thin">Customize </p> -->
+                                      <small><span class="text-semibold"></span></small>
+                                    </div>
+                                  </div>
+                                </a>
+                              </div>
+                          <!-- </div> -->
+                      <!-- </div> -->
+                  </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  {% if message.tags == 'error' %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-danger" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="tagus" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New Role</h4>
+        </div>
+        <form action="/controlpanel/role/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Role Name</label>
+          <input type="text" name="role" requried class="form-control" required maxlength="20" id="role_name" onkeyup="check_duplicate_entry()" autocomplete="off">
+          <p class="alert-danger" id="role_duplicate_error" style="display:none; padding:6px; margin-top:10px;"></p>
+          <label style="margin-top:5px">Allow access to modules:</label>
+          <div class="pad-ver">
+          {% for module in modules %}
+          <div class="col-sm-4 form-block">
+            <!-- <label class="form-checkbox form-normal form-primary">{{module.module}}</label> -->
+            <label class="form-normal form-primary"><input name="access" value="{{module.module.id}}" type="checkbox"> &nbsp;{{module.module}}</label>
+          </div>
+          
+          {% endfor %}
+        </div>
+        </div>
+
+        
+        <div class="modal-footer" style="border:0px">
+        <button id="role_button" class="btn btn-success" style="float:right" type="submit">Add New Role</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="manufact" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New User</h4>
+        </div>
+        {% if cusdomain %}
+        <form action="/customer/user/new/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>First Name</label>
+              <input type="text" name="firstname" required class="form-control">
+            </div>
+            <div class="col-sm-6">
+              <label>Last Name</label>
+              <input type="text" name="lastname" required class="form-control">
+            </div>
+          </div>
+          <div class="row">
+            
+              <div class="col-sm-6">
+              <label>Email Address</label>
+              <input type="text" name="email" class="form-control" required></div>
+              <br>
+              <div class="col-sm-1 h3" style="margin-top:0px">@</div>
+              <div class="col-sm-5">
+                <select class="selectpicker" name="domain" required>
+                  {% for domain in cusdomain %}
+                  <option value="{{domain.id}}">{{domain.domain}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Password</label>
+              <input type="password" name="password1" id="password-1" required class="form-control" onkeyup="checker()">
+            </div>
+            <div class="col-sm-6">
+              <label>Confirm Password</label>
+              <input type="password" name="password2" id="password-2" required class="form-control" onkeyup="checker()">
+              <small id="passu" style='color:red'>Password didnt match</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" id="buttondis" style="float:right" type="submit">Save</button>
+        
+        
+        </div>
+        </form>
+        {% else %}
+        <div class="model-body">
+          <p class="text-center text-thin h4">To add user you need to add domain <p>
+          <p class="text-center text-thin h4 link" ><a href="" data-toggle="modal" style="color:blue" data-target="#vendoru">Set your Domain</a></p>
+          <br>
+        </div>      
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="vendoru" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add Domain</h4>
+        </div>
+        <form action="/customer/domain/add/{{profile.customer.id}}" method="POST" id="add_domain" >{% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <div class="col-sm-3">
+              <label  style="margin-top:7px">Domain Name: </label>
+            </div>
+            <div class="col-sm-9">
+              <input type="text" name="domain" placeholder="oneconsole.com" required class="form-control" id="domain_val">
+              <small class="help-block">Please enter your domain name (exclude www)</small>
+              <p style="color:red" id="domain_error">Please enter a valid domain.</p>
+            </div>
+          </div>
+          
+          <!-- <br> -->
+          <!-- <div class="col-sm-3 h3 text-thin" style="margin-top:0px">www.</div> -->
+          <div class="col-sm-9"></div>
+          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Add</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+      {% include "asset/addtostock.html" %}
+
+    {% include "components/customer_footer.html"%}
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+    $("#table_id").DataTable();
+    $("#cps").addClass("active");
+    </script>
+     <script>
+      $("#passu").hide()
+        function checker(){
+             if($('#password-2').val() != $("#password-1").val()){
+
+                $("#passu").show()
+                $("#buttondis").prop('disabled', true)
+
+             }else{
+                $("#passu").hide()
+                $("#buttondis").prop('disabled', false)
+             }
+        }
+
+    </script>
+    <script type="text/javascript">
+        $('#add_domain').submit( function(event){
+            var re = new RegExp(/^((?:(?:(?:\w[\.\-\+]?)*)\w)+)((?:(?:(?:\w[\.\-\+]?){0,62})\w)+)\.(\w{2,6})$/);
+            var domain = $('#domain_val').val();
+            if (domain.match(re)) {
+              return;
+            } else {
+              event.preventDefault();
+              $('#domain_error').show();
+            }
+        });
+        $(document).ready(function(){
+          $('#domain_error').hide();
+        })
+    </script>
+    <script type="text/javascript">
+        function check_duplicate_entry() {
+            var role_name = $('#role_name').val();
+            if (role_name.length > 0){
+                $.ajax({
+                    url: "/controlpanel/role/add/"+'?role_name='+role_name,
+                    dataType: "json",
+                    success: function( data) {
+                        $('#role_duplicate_error').hide();
+                        $('#role_button').prop("disabled", false);
+                        if (data.result == "yes"){
+                            $('#role_duplicate_error').show();
+                            $('#role_button').prop("disabled", true);
+                            $('#role_duplicate_error').text("Role name already taken");
+                        }
+                    },
+                    error: function(data){
+                         console.log(data);
+                    }
+                });
+            }
+        }
+    </script>
+    </body>
+</html>

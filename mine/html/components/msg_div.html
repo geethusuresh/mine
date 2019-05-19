@@ -1,0 +1,36 @@
+{% if messages %}
+    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+        {% for message in messages %}
+            <div class="alert-wrap in animated jellyIn">
+                <div class="alert alert-{% if message.tags == 'success'%}success{% elif message.tags == 'error' %}danger{% endif %}" role="alert">
+                    <button class="close" type="button">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                    <div class="media">
+                        <div class="media-body">
+                            <h4 class="alert-title"></h4>
+                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+<div style="display:none" id="alert_block" onclick="remove_div()">
+    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+        <!-- <div class="alert-wrap in animated jellyIn">
+            <div class="alert alert-success" role="alert" id="alert_class">
+                <button class="close" type="button">
+                    <i class="fa fa-times-circle"></i>
+                </button>
+                <div class="media">
+                    <div class="media-body">
+                        <h4 class="alert-title"></h4>
+                        <p class="alert-message"><strong id="alert_msg"></strong></p>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>

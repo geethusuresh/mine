@@ -1,0 +1,1167 @@
+{% load humanize %}
+{% load zone %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+        <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+    </style>
+    <script type="text/javascript" src="/static/customer/Chart.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.css" rel="stylesheet">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+    <input type="hidden" name="profile" id="profile" value="{{profile}}">
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Profile | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Profile</li>
+                </ol>
+            </div>
+            {% include "components/msg_div.html" %}
+            <div class="content">
+<!--               <div class="row">
+                <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-body">
+                    <div class="row">
+                      <div class="col-sm-2">
+                      
+                        <img src="/static/img/profile_pic/{{profile}}.jpg" id="profile_ad" style="width:160px" alt="user-avatar" class="profile-avatar">
+
+                        <img src="/static/img/photo.jpg" id="profile_av" style="width:160px" alt="user-avatar" class="profile-avatar">
+                     
+                            <h3>{{profile.user.first_name}} {{profile.user.last_name}}</h3>
+                            <small> {{profile.title}}</small>
+                      
+                        
+                      </div>
+                      <div class="col-sm-10">
+                          <ul class="nav nav-tabs" role="tablist">
+                              <li class="active"><a href="#info" role="tab" data-toggle="tab">Basic info </a></li>
+                              {% if groups %}
+                              <li><a href="#info1" role="tab" data-toggle="tab">Group Details</a></li>
+                              {% endif %}
+                              <li><a href="#info2" role="tab" data-toggle="tab">Settings</a></li>
+                              {% if workhour %}
+                              <li><a href="#info3" role="tab" data-toggle="tab">Efforts</a></li>
+                              {% endif %}
+                              <li><a href="#assets" role="tab" data-toggle="tab">Asset Details</a></li>
+                          </ul>
+                          <div class="tab-content">
+                            <div class="tab-pane active" id="info">
+                              <div class="box-body padding-md">
+                                <dl class="dl-horizontal">
+                                  <dt>First Name :</dt>
+                                  <dd>{{ profile.user.first_name }}</dd>
+                                  <dt>Last Name :</dt>
+                                  <dd>{{profile.user.last_name}}</dd>
+                                  <dt>Email Address :</dt>
+                                  <dd>{{profile.user.email}}</dd>
+                                  <dt>Phone Number :</dt>
+                                  <dd>{{profile.phonenumber_set.all.0.primary}}</dd>
+                                  <dt>Supervisor / Request Approver :</dt>
+                                  <dd>{{profile.supervisor}}</dd>
+                                  <dt>Department :</dt>
+                                  <dd>{{ profile.department }}</dd>
+                                  <dt>Location :</dt>
+                                  <dd>{{profile.location}}</dd>
+                                  <dt>Country :</dt>
+                                  <dd>{{profile.country}}</dd>
+                                </dl>
+                              </div>
+                            </div>
+
+                            <div class="tab-pane " id="info1">
+                                {% if groups %}
+                                <div class="row">
+                                  <div class="col-sm-6">
+                                    <h4>Groups : </h4>
+                                    <div class="bootstrap-tagsinput">
+                                      {% for group in groups %}
+                                      <span class="label label-primary">{{ group.workgroup.workgroup }}<span data-role="remove"></span></span>
+                                      {% endfor %}
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-6">
+                                    <h4>Subgroups : </h4>
+                                    <div class="bootstrap-tagsinput">
+                                      {% for group in groups %}
+                                      <span class="label label-primary">{{ group.subgroup.subgroupname }}<span data-role="remove"></span></span>
+                                      {% endfor %}
+                                    </div>
+                                  </div>
+                                </div>
+                                {% else %}
+                                <p>No Group or Subgroup</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="tab-pane" id="info3">
+                              <table class="table">
+                                <thead>
+                                  <tr role="row">
+                                  <th >Ticket</th>
+                                  <th> efforts(in minutes)</th>
+                                  </tr>
+                                </thead>
+                                
+                                <tbody >
+                                {% for act in workhour %}
+                                  <tr class="odd">
+                                  <td class="grey"><a  style="color:#555">{{act.ticket.ticketid}}</a></td>
+                                  <td class="grey"><a  style="color:#555">{{act.time}}</a></td>
+                                  </tr>
+                                {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            <div class="tab-pane" id="assets">
+                              {% if hard or soft %}
+                              <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a href="#hard" role="tab" data-toggle="tab">Hardware</a></li>
+                                <li><a href="#soft" role="tab" data-toggle="tab">Software</a></li>          
+                              </ul>
+                              <br>
+                              <div class="tab-content">
+                                <div class="tab-pane active" id="hard">
+                                  <dl class="dl-horizontal">
+                                      {%for apis in hard%}
+                                      <dt>Hardware Name :</dt>
+                                      <dd>{{ apis.name }}</dd>
+                                      <dt>Serialnumber :</dt>
+                                      <dd>{{apis.serialnumber}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                                <div class="tab-pane " id="soft">
+                                  <dl class="dl-horizontal">
+                                      {%for apis in soft%}
+                                      <dt>Software Name :</dt>
+                                      <dd>{{ apis.name }}</dd>
+                                      <dt>Plarform :</dt>
+                                      <dd>{{apis.platformname}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                              </div>
+                              {% else %}
+                              <div class="row col-sm-12 container">
+                                <br>
+                                <p>Nothing Found on Database</p>
+                              </div>
+                              
+                              {% endif %}
+                            </div>
+
+                            <div class="tab-pane" id="info2">
+                              <form action="/profile/" method="post">{% csrf_token %}
+                                <div class="row">
+                                  <br>
+                                  <div class="col-sm-12">
+                                    <label>Change Your timezone:{{profile.timezone}}</label>
+                                      <select class="form-control" name="tz">
+                                      {% if profile.timezone %}
+                                      <option value="{{profile.timezone}}">{{profile.timezone}}</option>
+                                      {% endif %}
+                                      {% for tz in timezone %}
+
+                                      <option>{{tz}}</option>
+                                      {% endfor %}
+                                    </select>
+                                      <br>
+                                    <label><p>Create Your Signature:</p></label>
+                                    <textarea class="form-control" name="sign" col="10" rows="10" placeholder="Create your Signature">{% if profile.signature %}{{profile.signature}}{% endif %}</textarea>
+                                  </div>
+                                  <div class="col-sm-">
+                                  </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                  <div class="col-sm-9">
+                                    
+                                  </div>
+                                  <div class="col-sm-3">
+                                    <button id="delay" type="submit" style="width:100%" class="btn btn-success btn-huge">Save Changes</button>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </div> -->
+
+
+
+
+
+              <div class="col-sm-4">
+                <div id="spr_0" class="panel panel-default plain profile-widget">
+                                <div class="panel-body">
+                                    <div class="col-lg-4 col-md-4 col-sm-12">
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive" id="profile_ad" style="border-radius: 50%;" src="/static/img/profile_pic/{{profile}}.jpg" alt="">
+                                            <img class="img-responsive" id="profile_av" style="border-radius: 50%;" src="/static/img/photo.jpg" alt="">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-8 col-sm-12">
+                                        <div class="profile-name" style="margin-top: 15px;font-size: 22px;margin-bottom: 10px;">
+                                            {{profile.user.first_name}} {{profile.user.last_name}} 
+                                            <span class="label label-success">{{ profile.customer }}</span>
+                                        </div>
+                                        <div class="profile-quote">
+                                        </div>
+                                        <div class="profile-stats-info">
+                                            <h4>{{profile.title}}</h4>
+                                        </div>
+                                        <li  style="list-style: outside none none" style="padding: 8px 15px;"><i class="btn btn-info btn-circle fa fa-phone "></i> {{profile.phonenumber_set.all.0.primary}}</li>
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                      <div class="media" style="color: #767676;margin-left:10% ">
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">First name</label>
+                                    {{profile.user.first_name}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Email</label>
+                                    {{profile.user.email}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-home"></span>
+                                    <label class="clb">Work Location</label>
+                                    {{ profile.location|default:"None" }}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-flag"></span>
+                                    <label class="clb">Nationality</label>
+                                    {{profile.country|default:"None"}}
+                                </li>
+                            </ul>
+                            
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="col-sm-8">
+                            <div class="box">
+                              <div class="box-body">
+                                <ul class="nav nav-tabs" role="tablist">
+                                  <li class="active"><a href="#infow" role="tab" data-toggle="tab">Your Ticket Statistics </a></li>
+                                  <li><a href="#info" role="tab" data-toggle="tab">Basic info </a></li>
+                                {% if groups %}
+                                <li><a href="#info1" role="tab" data-toggle="tab">Group Details</a></li>
+                                {% endif %}
+                                <li><a href="#info2" role="tab" data-toggle="tab">Settings</a></li>
+                                {% if workhour %}
+                                <li><a href="#info3" role="tab" data-toggle="tab">Efforts</a></li>
+                                {% endif %}
+                                {% if asset_flag != 1 %}
+                                <li><a href="#assets" role="tab" data-toggle="tab" onclick="runMyFunction();" id="asst">Asset Details</a></li>
+                                {% endif %}
+                                {% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                  <li><a href="#emails" role="tab" data-toggle="tab">Email Signature</a></li>
+                                {% endif %}
+                                <li><a href="#delegate" role="tab" data-toggle="tab">Delegate Settings</a></li>
+                              </ul>
+                              <div class="tab-content" style="margin-left:7%;margin-top:2%">
+                                <div class="tab-pane active" id="infow">
+                      <div class="media" style="color: #767676;">
+                                <div class="row">
+                                  <div class="col-sm-8">
+                                    <canvas id="profilechart" width="300" height="300"></canvas>
+                                  </div>
+                                  <div class="col-sm-4">
+                                    <label style="width:60%"><span class='btn btn-danger'></span> New</label>: {{news}}<br>
+                                    <label style="width:60%"><span class='btn btn-warning'></span> Queued</label>: {{queued}}<br>
+                                    <label style="width:60%"><span class='btn btn-success'></span> InProgress</label>: {{progress}}  <br>
+                                    <label style="width:60%"><span class='btn btn-primary'></span> Resolved</label>: {{resolved}}<br>
+                                    <label style="width:60%"><span class='btn btn-info'></span> Awaiting</label>: {{await}}<br>
+                                  </div>
+                                </div>
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+
+                                
+
+                                
+                            
+                        </div>
+                    </div>
+                                </div>
+                            <div class="tab-pane" id="info">
+                              <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;color: #767676;">
+                              <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Location Site</label>
+                                    {{profile.locationsite|default:"None"}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="glyphicon glyphicon-briefcase"></span>
+                                    <label class="clb">Department</label>
+                                    {{profile.department|default:"None"}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-user"></span>
+                                    <label class="clb">Supervisor</label>
+                                    {{profile.supervisor.first_name|default:"None"}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-columns"></span>
+                                    <label class="clb">JobCode</label>
+                                    {{profile.jobcode|default:"None"}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="glyphicon glyphicon-log-out"></span>
+                                    <label class="clb">Last Login</label>
+                                    {% tzone profile.user.last_login %}
+                                </li>
+                            </ul>
+                            </div>
+
+                                  
+                            <div class="tab-pane " id="info1">
+                                {% if groups %}
+                                <div class="row">
+                                  <div class="col-sm-6">
+                                    <h4>Groups : </h4>
+                                    <div class="bootstrap-tagsinput">
+                                      {% for group in groups %}
+                                      <span class="label label-primary">{{ group.workgroup.workgroup }}<span data-role="remove"></span></span>
+                                      {% endfor %}
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-6">
+                                    <h4>Subgroups : </h4>
+                                    <div class="bootstrap-tagsinput">
+                                      {% for group in groups %}
+                                      <span class="label label-primary">{{ group.subgroup.subgroupname }}<span data-role="remove"></span></span>
+                                      {% endfor %}
+                                    </div>
+                                  </div>
+                                </div>
+                                {% else %}
+                                <p>No Group or Subgroup</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="tab-pane" id="emails">
+                              
+                              <a href="/profile/signature/" class="btn btn-info pull-right">Generate Signature</a>
+                              <br>
+                            {% if email_signature %}
+
+                              <div class="row" style="margin-top:8%;margin-bottom:5%">
+                                <!-- <div class="col-sm-1"></div> -->
+                                <div class="col-sm-12">
+                                <table style="width:100%">
+                                {% if email_signature.address %}
+                                  <tr>
+                                    <td rowspan="6" style="width:180px"><a href="http://marlabs.com/"><image src="/static/social/marlabs_full.jpg" style="width:180px !important" ></a> </td>
+                                    <td colspan="4"><strong>{{email_signature.first_name}} |</strong> {{email_signature.title}}</td>
+                                  </tr>
+                                    {% else %}
+                                    <td rowspan="5" style="width:180px" ><a href="http://marlabs.com/" ><image src="/static/social/marlabs_full.jpg" style="width:180px !important"></a></td>
+                                    <td colspan="4"><strong>{{email_signature.first_name}} |</strong> {{email_signature.title}}</td>
+
+                                   {% endif %}
+                                    
+                                  <tr>
+                                    <td colspan="4">{{email_signature.office_name.name}}</td>
+                                  </tr>
+                                  {% if email_signature.address %}
+                                   <tr>
+                                    <td colspan="4">{{email_signature.address}}</td>
+                                  </tr>
+                                  {% endif %}
+                                  <tr>
+                                    <td colspan="4">{{email_signature.contact_number}}</td>
+                                  </tr>
+                                   <tr>
+                                    <td colspan="4">{{email_signature.email}}</td>
+                                  </tr>
+                                  <tr>
+                                    
+                                    <td  colspan="4"><a href="https://www.facebook.com/marlabsinc"><img src="/static/social/Facebook.png"> </a>
+                                      <a href="https://twitter.com/Marlabs"><img src="/static/social/Twitter.png"> </a>
+                                      <a href="https://www.linkedin.com/company/marlabs-inc"><img src="/static/social/Linkedin.png"> </a>
+                                      <a href="https://plus.google.com/+MarlabsIncorporated/posts"><img src="/static/social/Google-plus.png"> </a>
+                                      <a href="https://www.youtube.com/user/Marlabsinc"><img src="/static/social/Youtube.png"> </a>
+                                    </td>                          </tr>
+                                </table>
+                              
+                                </div>
+
+                              </div>
+                              {% else %}
+                              You have no saved signature, click on generate signature and make one.
+                              {% endif %}
+
+
+
+
+
+                            </div>
+
+
+                              <div class="tab-pane" id="info3">
+                              <table class="table">
+                                <thead>
+                                  <tr role="row">
+                                  <th >Ticket</th>
+                                  <th> efforts(in minutes)</th>
+                                  </tr>
+                                </thead>
+                                
+                                <tbody >
+                                {% for act in workhour %}
+                                  <tr class="odd">
+                                  <td class="grey"><a  style="color:#555">{{act.ticket.ticketid}}</a></td>
+                                  <td class="grey"><a  style="color:#555">{{act.time_taken}}</a></td>
+                                  </tr>
+                                {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {% if asset_flag != 1 %}
+                            <div class="tab-pane" id="assets">
+                            <!-- <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a href="#hard" role="tab" data-toggle="tab" id="comp">Computer</a></li>
+                                <li><a href="#soft" role="tab" data-toggle="tab">Monitor</a></li> 
+                                <li><a href="#swr" role="tab" data-toggle="tab">Softwares</a></li> 
+                                <li><a href="#phn" role="tab" data-toggle="tab">Phones</a></li>   
+                                <li><a href="#printer" role="tab" data-toggle="tab">Printer</a></li>   
+                                <li><a href="#network" role="tab" data-toggle="tab">Network</a></li>   
+                                <li><a href="#device" role="tab" data-toggle="tab">Device</a></li>   
+                              </ul>
+                             -->
+                             <dl class="dl-horizontal" id="comp-details" >
+                                  </dl>
+                            </div>
+                            {% endif %}
+                            <div class="tab-content">
+                                <!-- div class="tab-pane active" id="hard">
+                                  
+                                </div> -->
+                              <div class="tab-pane " id="soft">
+                                  <dl class="dl-horizontal" id="monitor-details">
+                                  </dl>
+                              </div>
+                              <div class="tab-pane " id="swr">
+                                  <dl class="dl-horizontal" id="sw-details">
+                                  </dl>
+                              </div>
+                              <div class="tab-pane " id="phn">
+                                  <dl class="dl-horizontal" id="phn-details">
+                                  </dl>
+                              </div>
+                              <div class="tab-pane " id="printer">
+                                  <dl class="dl-horizontal" id="printer-details">                                      
+                                  </dl>
+                              </div>
+                              <div class="tab-pane " id="network">
+                                  <dl class="dl-horizontal" id="network-details">
+                                  </dl>
+                              </div>
+                              <div class="tab-pane " id="device">
+                                  <dl class="dl-horizontal" id="device-details">
+                                  </dl>
+                              </div>
+                            </div>
+                            
+                            <!-- <div class="tab-pane" id="assets">
+                            {% if assets or monitor or phones or sw %}
+                              
+                              <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a href="#hard" role="tab" data-toggle="tab">Computer</a></li>
+                                <li><a href="#soft" role="tab" data-toggle="tab">Monitor</a></li> 
+                                <li><a href="#software" role="tab" data-toggle="tab">Softwares</a></li> 
+                                <li><a href="#phone" role="tab" data-toggle="tab">Phones</a></li>        
+                              </ul>
+                              <br>
+                              <div class="tab-content">
+                                <div class="tab-pane active" id="hard">
+                                  <dl class="dl-horizontal">
+                                    {%for asset in assets%}
+                                      <dt>Computer Name :</dt>
+                                      <dd>{{ asset.computer_name }}</dd>
+                                      <dt>Serial Number :</dt>
+                                      <dd>{{asset.serialnum}}</dd>
+                                      <dt>Status :</dt>
+                                      <dd>{{asset.status}}</dd>
+                                      <dt>Manufacturer :</dt>
+                                      <dd>{{asset.manufacture}}</dd>
+                                      <dt>Location :</dt>
+                                      <dd>{{asset.location_name}}</dd>
+                                      <dt>Model :</dt>
+                                      <dd>{{asset.comp_model}}</dd>
+                                      <dt>Operating System :</dt>
+                                      <dd>{{asset.os}}</dd>
+                                      <dt>Updated Date :</dt>
+                                      <dd>{{asset.updated_date}}</dd>
+                                      <hr>
+                                    {%endfor%}
+                                      
+                                    </dl>
+                                </div>
+                                <div class="tab-pane " id="soft">
+                                  <dl class="dl-horizontal">
+                                      {%for mon in monitor%}
+                                      <dt>Monitor Name :</dt>
+                                      <dd>{{ mon.monitor }}</dd>
+                                      <dt>Location :</dt>
+                                      <dd>{{mon.location}}</dd>
+                                      <dt>Serial Number :</dt>
+                                      <dd>{{mon.serialnum}}</dd>
+                                      <dt>Monitor Type :</dt>
+                                      <dd>{{mon.type}}</dd>
+                                      <dt>Monitor Model :</dt>
+                                      <dd>{{mon.monitor_model}}</dd>
+                                      <dt>Status :</dt>
+                                      <dd>{{mon.status}}</dd>
+                                      <dt>Manufacturer :</dt>
+                                      <dd>{{mon.manufacture}}</dd>
+                                      <dt>Updated Date :</dt>
+                                      <dd>{{mon.updated_date}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                                <div class="tab-pane " id="software">
+                                  <dl class="dl-horizontal">
+                                      {%for sw in sw%}
+                                      <dt>Software Name :</dt>
+                                      <dd>{{ sw.soft }}</dd>
+                                      <dt>Publisher :</dt>
+                                      <dd>{{sw.publisher}}</dd>
+                                      <dt>Software Version :</dt>
+                                      <dd>{{sw.version}}</dd>
+                                      <dt>Operating System :</dt>
+                                      <dd>{{sw.os}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                                <div class="tab-pane " id="software">
+                                  <dl class="dl-horizontal">
+                                      {%for sw in sw%}
+                                      <dt>Software Name :</dt>
+                                      <dd>{{ sw.soft }}</dd>
+                                      <dt>Publisher :</dt>
+                                      <dd>{{sw.publisher}}</dd>
+                                      <dt>Software Version :</dt>
+                                      <dd>{{sw.version}}</dd>
+                                      <dt>Operating System :</dt>
+                                      <dd>{{sw.os}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                                <div class="tab-pane " id="phone">
+                                  <dl class="dl-horizontal">
+                                      {%for ph in phones%}
+                                      <dt>Phone Name :</dt>
+                                      <dd>{{ ph.phone }}</dd>
+                                      <dt>Serial Number :</dt>
+                                      <dd>{{ph.serialnum}}</dd>
+                                      <dt>Location :</dt>
+                                      <dd>{{ph.location}}</dd>
+                                      <dt>Status :</dt>
+                                      <dd>{{ph.status}}</dd>
+                                      <dt>Phone Type :</dt>
+                                      <dd>{{ph.phone_type}}</dd>
+                                      <dt>Manufacturer :</dt>
+                                      <dd>{{ph.manufacture}}</dd>
+                                      <dt>Phone Model :</dt>
+                                      <dd>{{ph.phone_models}}</dd>
+                                      <dt>Updated Date :</dt>
+                                      <dd>{{ph.updated_date}}</dd>
+                                      <hr>
+                                      {%endfor%}
+                                    </dl>
+                                </div>
+                              </div>
+                              {% else %}
+                              <div >
+                                <br>
+                                <p>Nothing Found on Database</p>
+                              </div>
+                              
+                              {% endif %}
+                            </div> -->
+
+                            <div class="tab-pane" id="info2">
+                              <form action="/profile/" method="post">{% csrf_token %}
+                                <div class="row">
+                                  <br>
+                                  <div class="col-sm-12">
+
+                                        <input type="text" name="first_name" class="hidden" value="{{profile.user.first_name}}">
+                                        <input type="text" name="last_name" class="hidden" value="{{profile.user.last_name}}">
+                                        <input type="text" name="location" class="hidden" value="{{profile.location}}">
+
+
+                                    <label>Change Your timezone:{{profile.timezone}}</label>
+                                      <select class="form-control" name="tz">
+                                      {% if profile.timezone %}
+                                      <option value="{{profile.timezone}}">{{profile.timezone}}</option>
+                                      {% endif %}
+                                      {% for tz in timezone %}
+
+                                      <option>{{tz}}</option>
+                                      {% endfor %}
+                                    </select>
+                                      <br>
+
+                                    <label><p>Create Your Signature:</p></label>
+                                    <textarea class="form-control" name="sign" col="10" rows="10" placeholder="Create your Signature" id="profile_signature">{% if profile.signature %}{{profile.signature}}{% endif %}</textarea>
+                                  </div>
+                                  <div class="col-sm-">
+                                  </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                  <div class="col-sm-9">
+                                    <label>Email Notification : </label>
+                                    <select class="form-control" style="width:100%" name="noti">
+                                      {% if profile.notify == True %}
+                                      <option value="True">Yes</option>
+                                      <option value="False">No</option>
+                                      {% else %}
+                                      <option value="False">No</option>
+                                      <option value="True">Yes</option>
+                                      {% endif %}
+                                    </select>
+                                    <br>
+                                  </div>
+                                  <div class="col-sm-3">
+                                  
+                                  </div>
+
+                                </div>
+                                <div class="row">
+                                  <div class="col-sm-9"></div>
+                                  <div class="col-sm-3">
+                                    <button id="delay" type="submit" style="width:100%;" class="btn btn-success btn-huge">Save Changes</button>
+                                  </div>
+                                </div>
+                              </form>
+                              <div class="row pad-all">
+                                  <hr/>
+                              </div>
+                              <div class="row pad-all">
+                                  <h4 class="text-thin text-center">Mobile Notification Settings</h4>
+                                  <div class="text-center">
+                                      <p>Customize mobile notification settings for getting mobile notifications on your mobile.</p>
+                                      <br>
+                                      {% if profile.mobile_notify %}
+                                          <a href="{% url 'change_mobile_notification' %}?status=disable" class="btn btn-danger pull-right">Disable Mobile Notification </a>
+                                      {% else %}
+                                          <a href="{% url 'change_mobile_notification' %}?status=enable" class="btn btn-success pull-right">Enable Mobile Notification </a>
+                                      {% endif %}
+                                  </div>
+                              </div>
+                              <div class="row pad-all">
+                                  <h4 class="text-thin text-center">View Email Ticket as HTML</h4>
+                                  <div class="text-center">
+                                      <p>View Ticket created from email as HTML page.</p>
+                                      <br>
+                                      {% if profile.is_html_version %}
+                                          <a href="{% url 'view_emailticket_as_html' %}?status=disable" class="btn btn-danger pull-right">Disable </a>
+                                      {% else %}
+                                          <a href="{% url 'view_emailticket_as_html' %}?status=enable" class="btn btn-success pull-right">Enable </a>
+                                      {% endif %}
+                                  </div>
+                              </div>
+                              <hr>
+                              <div class="row pad-all">
+                                <form method="POST" action="/profile/notification/preference/save/"> {% csrf_token %}
+                                    <div class="col-sm-3">
+                                        <label>Select Notifications Type</label>
+                                    </div> 
+                                    <div class="col-sm-9">  
+                                        {% for each in roledon %}
+                                        <span class="col-sm-6">
+                                             <input type="checkbox" value="{{each.id}}" {% if each.is = "on" %}checked {% endif %} name="preference"> {{each.not}}
+                                        </span>
+                                       
+                                        {% endfor %}
+                                    </div>  
+                                    <div class="row">
+                                     <div class="col-sm-9"></div>
+                                    <div class="col-sm-3">
+                                    <button class="btn btn-success btn-huge" type="submit" style="width:100%">Save Changes</button></div></div>
+                                </form>
+                                <div></div>
+                            </div>
+                            </div>
+
+                            <div class="tab-pane" id="delegate">
+                                  <div class="row">
+                                      <div class="col-sm-8">
+                                          <form method="post" action="/user/delegate/choose/" id="form_id">{% csrf_token %}
+                                              <div class="col-sm-12">
+                                                  <input type="hidden" id="customer_id" value="{{ profile.customer.id }}">
+                                                  <label>Delegation User</label>
+                                                  <input type="text" name="new_delegate" id="new_delegate_email" class="form-control" required><br/>
+                                                  <label>Start Date</label>
+                                                  <input type="text" name="start_date" id="start_date1" class="form-control" required readonly>
+                                                  <label>End Date</label>
+                                                  <input type="text" name="end_date" id="end_date1" class="form-control" required readonly><br/>
+                                                  <label>Reason</label>
+                                                  <textarea class="form-control" name="reason" required></textarea><br/>
+                                              </div>
+                                              <div class="col-sm-12">
+                                                  <input type="submit" value="Assign" class="btn btn-success">
+                                              </div>
+                                              <div class="col-sm-12">
+                                                  <div class="alert alert-danger col-sm-12" role="alert" style="display:none; margin-top:10px;" id="alert_id">
+                                                      <span id="span_id"></span>
+                                                  </div>
+                                              </div>
+                                          </form>
+                                      </div>
+                                      <div class="col-sm-4">
+                                          <a href="/delegate_history/{{ profile.id }}/" class="btn btn-warning">View Delegate History</a>
+                                      </div>
+                                  </div>
+                            </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+
+            </div>
+          </div>
+        </div>
+        
+
+        <div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false"tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body">
+                    <img src="{% static 'img/loadinghr.gif'%}" id="img" style=""/ >
+                </div>
+                <div class="modal-footer">
+                    <h4 class="pull-left">Fetching asset details from GLPI server. This may take a while...</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    <script src="/static/wysihtml5/lib/js/wysihtml5-0.3.0.js"></script>
+    <script src="/static/wysihtml5/bootstrap-wysihtml5.js"></script>
+
+    <script type="text/javascript">
+ $(document).ready(function () {
+
+     // Attach Button click event listener 
+    // $("#asst").click(function(){
+
+    //      // show Modal
+    //     $('#myModal').modal('show'); 
+    // });
+   
+});
+ $(document).ready(function () {
+
+     // Attach Button click event listener 
+    $("#mon").click(function(){
+
+         // show Modal
+        $('#myModal').modal('show'); 
+    });
+   
+});
+
+ </script>
+    
+    <script type="text/javascript">
+            function runMyFunction() {
+
+              $('#comp-details').children().remove()
+              $("#monitor-details").children().remove();
+              $("#sw-details").children().remove();
+              $("#phn-details").children().remove();
+              $("#printer-details").children().remove();
+              $("#network-details").children().remove();
+              $("#device-details").children().remove();
+
+              $.ajax({
+                url:"/asset/computer/deatils/",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#comp-details");
+                    if(data_list.length>0){
+
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name :'+'</dt><dd>'+ data.model_name +'</dd>'+
+                                      // '<dt>'+'Model :'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Location :'+'</dt><dd>'+data.location+'</dd>' +
+                                      '<dt>'+'Domain :'+'</dt><dd>'+data.department+'</dd>' +
+                                      // '<dt>'+'Operating System :'+'</dt><dd>'+data.os+'</dd>'+
+                                      '<dt>'+'Status :'+'</dt><dd>'+data.status+'</dd>'+
+                                      '<dt>'+'warranty Start Date :'+'</dt><dd>'+data.purchasedate+'</dd>'+
+                                      '<dt>'+'warranty End Date :'+'</dt><dd>'+data.warrantyexpiry+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serial_no+'</dd>'+
+                                      '<dt>'+'Asset Tag :'+'</dt><dd>'+data.tag__item_type+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+            /*
+              $.ajax({
+                //url:"#/asset/software/deatils/",
+                url:"#",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#sw-details");
+                    if(data_list.length>0){                                        
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Location :'+'</dt><dd>'+data.location+'</dd>' +
+                                      '<dt>'+'Publisher:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Version:'+'</dt><dd>'+data.version+'</dd>'+
+                                      '<dt>'+'Location :'+'</dt><dd>'+data.category+'</dd>' +
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+
+              $.ajax({
+                //url:"#/asset/monitor/deatils/",
+                url:"#",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#monitor-details");
+                    if(data_list.length>0){
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Status:'+'</dt><dd>'+data.status+'</dd>'+
+                                      '<dt>'+'Location:'+'</dt><dd>'+data.location+'</dd>' +
+                                      '<dt>'+'Type:'+'</dt><dd>'+data.type+'</dd>'+
+                                      '<dt>'+'Manufacturer:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Model:'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serialnumber+'</dd>'+
+                                      '<dt>'+'Asset Tag :'+'</dt><dd>'+data.asset_tag+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                        
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+
+            $.ajax({
+                //url:"/asset/phone/deatils/",
+                url:"#",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#phn-details");
+                    if(data_list.length>0){
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Status:'+'</dt><dd>'+data.status+'</dd>'+
+                                      '<dt>'+'Location:'+'</dt><dd>'+data.location+'</dd>'+
+                                      '<dt>'+'Model:'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Type:'+'</dt><dd>'+data.type+'</dd>' +
+                                      '<dt>'+'Brand:'+'</dt><dd>'+data.brand+'</dd>'+
+                                      '<dt>'+'Manufacture:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serialnumber+'</dd>'+
+                                      '<dt>'+'Asset Tag :'+'</dt><dd>'+data.asset_tag+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+              
+              $.ajax({
+                //url:"/asset/printer/deatils/",
+                url: "#",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#printer-details");
+                    if(data_list.length>0){
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Status:'+'</dt><dd>'+data.status+'</dd>'+
+                                      '<dt>'+'Location:'+'</dt><dd>'+data.location+'</dd>'+
+                                      '<dt>'+'Domain:'+'</dt><dd>'+data.domain+'</dd>'+
+                                      '<dt>'+'Model:'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Type:'+'</dt><dd>'+data.type+'</dd>' +
+                                      '<dt>'+'Manufacture:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serialnumber+'</dd>'+
+                                      '<dt>'+'Asset Tag :'+'</dt><dd>'+data.asset_tag+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+              
+              $.ajax({
+                //url:"/asset/network/deatils/",
+                url:"#",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#network-details");
+                    if(data_list.length>0){
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Status:'+'</dt><dd>'+data.status+'</dd>'+
+                                      '<dt>'+'Location:'+'</dt><dd>'+data.location+'</dd>'+
+                                      '<dt>'+'Domain:'+'</dt><dd>'+data.domain+'</dd>'+
+                                      '<dt>'+'Model:'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Type:'+'</dt><dd>'+data.type+'</dd>' +
+                                      '<dt>'+'Manufacture:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serialnumber+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+
+              $.ajax({
+                url:"#",
+                //url:"/asset/device/deatils/",
+                type:"GET",
+                dataType:"json",
+                  success : function(data_list) {
+                    var table = $("#device-details");
+                    if(data_list.length>0){
+                      $.each(data_list, function(index, data){
+                        table.append('<dt>'+'Name:'+'</dt><dd>'+data.name+'</dd>'+
+                                      '<dt>'+'Location:'+'</dt><dd>'+data.location+'</dd>'+
+                                      '<dt>'+'Model:'+'</dt><dd>'+data.model+'</dd>'+
+                                      '<dt>'+'Brand:'+'</dt><dd>'+data.brand+'</dd>'+
+                                      '<dt>'+'Manufacture:'+'</dt><dd>'+data.manufacture+'</dd>'+
+                                      '<dt>'+'Serial Number :'+'</dt><dd>'+data.serialnumber+'</dd>'+
+                                      '<dt>'+'Asset Tag :'+'</dt><dd>'+data.asset_tag+'</dd>'+
+                                      '<dt style="height: 10px !important;"></dt><dd></dd>');
+                      });
+                    }
+                    else{
+                      table.append('<dt> No details found </dt><dd></dd>');
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });*/
+            }
+    </script>
+
+    
+    
+    <script>
+    $("#profile_ad").hide()
+    $("#profile_av").hide()
+    $.ajax({
+    type: 'HEAD',
+    url: '/static/img/profile_pic/{{profile}}.jpg',
+    success: function() {
+      $("#profile_ad").show()
+    },  
+    error: function() {
+      $("#profile_av").show()
+    }
+});
+    $("#profile").addClass("active")
+    </script>
+        <script>
+    var ctx = document.getElementById("profilechart").getContext("2d");
+          var data = [
+        {
+            value: {{news}},
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "New"
+        },
+        {
+            value: {{resolved}},
+            color: "#1d364f",
+            highlight: "#1d3640",
+            label: "Resolved"
+        },
+        {
+            value: {{queued}},
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Queued"
+        },
+        {
+            value: {{progress}},
+            color: "#27ae60",
+            highlight: "#5cb85c",
+            label: "In Progress"
+        },
+        {
+            value: {{await}},
+            color: "#3498db",
+            highlight: "#5bc0de",
+            label: "Awaiting"
+        }
+    ]
+    var myDoughnutChart = new Chart(ctx).Doughnut(data, {
+    animateScale: true
+});
+    </script>
+    <script type="text/javascript">
+    $('#profile_signature').wysihtml5({
+        "color": true,
+        "link": false,
+        "image": false,
+        "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"]
+      });
+
+    </script>
+      <script type="text/javascript">
+            $('#new_delegate_email').autocomplete({
+                width: 300,
+                max: 10,
+                delay: 100,
+                minLength: 1,
+                autoFocus: true,
+                cacheLength: 1,
+                scroll: true,
+                highlight: false,
+                source: function(request, response) {
+                    var customer_id = $('#customer_id').val();
+                    var name = $('#new_delegate_email').val();
+                    $.ajax({
+                        url: "/admin_settings/users/search/?customer_id="+customer_id+'&name='+name,
+                        dataType: "json",
+                        data: request,
+                        success: function( data, textStatus, jqXHR) {
+                            var items = data;
+                            response(items);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                             console.log( textStatus);
+                        }
+                    });
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $('#start_date1').datepicker({ minDate: 0 });
+            $('#end_date1').datepicker({ minDate: 0 });
+        </script>
+        <script type="text/javascript">
+            $( "#form_id" ).submit(function( event ) {
+                var re = /\S+@\S+\.\S+/;
+                // re.test(email);
+                var email_id = $('#new_delegate_email').val();
+                var start = $('#start_date1').val()
+                var end = $('#end_date1').val()
+                val_1 = new Date(start);
+                val_2 = new Date(end);
+                var diff = val_2 - val_1;
+                if (re.test(email_id)) {
+                    if (start &&  end) {
+                        if (diff < 0) {
+                            $('#alert_id').show();
+                            $( "#span_id" ).text( "Please choose valid start and end date !" ).show();
+                            event.preventDefault();
+                        } else {
+                            return;
+                        }
+                    } else {
+                        $('#alert_id').show();
+                        $( "#span_id" ).text( "Please choose start and end date !" ).show();
+                        event.preventDefault();
+                    }
+                } else {
+                    $('#alert_id').show();
+                    $( "#span_id" ).text( "Please choose a valid delegation user !" ).show();
+                    event.preventDefault();
+                }
+            });
+        </script>
+        
+    </body>
+</html>
+

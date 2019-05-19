@@ -1,0 +1,359 @@
+{% load humanize %} {% load zone %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+    <style>
+    ul {
+        list-style: none outside none;
+        padding-left: 0;
+        margin: 0;
+    }
+    
+    .demo .item {
+        /*margin-bottom: 60px;*/
+    }
+    
+    .content-slider li {
+        /*background-color: #ed3020;*/
+        text-align: center;
+        color: #FFF;
+    }
+    
+    .content-slider h3 {
+        margin: 0;
+        padding: 70px 0;
+    }
+    
+    .demo {
+        /*width: 800px;*/
+    }
+    
+    .btn:not(.disabled):not(:disabled):active,
+    .btn:not(.disabled):not(:disabled).active {
+        box-shadow: transparent;
+    }
+    
+    .btn:not(.disabled):not(:disabled):active,
+    .btn:not(.disabled):not(:disabled).active {
+        box-shadow: transparent;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+</head>
+
+<body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+ 
+{% if alert_message %}
+{% for alert in alert_message %}
+    {% if profile.customer in alert.viewable_custs.all %}
+        <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small>| Enduser Dashboard</small></h1>
+                <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+            <div class="content">
+                {% if messages %}
+                <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                    {% for message in messages %}
+                    <div class="alert-wrap in animated jellyIn">
+                        <div class="alert alert-success" role="alert">
+                            <button class="close" type="button">
+                                <i class="fa fa-times-circle"></i>
+                            </button>
+                            <div class="media">
+                                <div class="media-body">
+                                    <h4 class="alert-title"></h4>
+                                    <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-sm-7">
+                        <div class="panel">
+                            <div class="panel-header">
+                                {% if roles|length > 2 %}
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <!-- <div class="col-sm-2"></div> -->
+                                        <div class="col-sm-5">
+                                            <h3 class="panel-title" style="text-align:center"> Dashboards : </h3>
+                                        </div>
+                                        <div class="col-sm-4 panel-title" style="margin-top:1.5%">
+                                            <form method="POST" action="/dashboard/">
+                                                <select name="role_name" style="" class="form-control" onchange="change_dashboard()" id="role_name">
+                                                    {% for role in roles %} {% if first_role == role %}
+                                                    <option selected="selected" value="{{role}}">{{role}}</option>
+                                                    {% else %}
+                                                    <option value="{{role}}">{{role}}</option>
+                                                    {% endif %} {% endfor %}
+                                                </select>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr style="margin-top:2px;margin-bottom:0px"> {% endif %}
+                                <div class="panel">
+                                    <div class="panel-header">
+                                        <h3 class="panel-title" style="text-align:center">Tickets <l class="fa fa-ticket"></l></h3>
+                                    </div>
+                                    <div class="panel-body table-responsive no-padding" style="margin-top:2%">
+                                        <table class="table table-striped text-center" id="table_id" class="display">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center"></th>
+                                                    <th class="text-center">Ticket Id</th>
+                                                    <th class="text-center">Ticket Summary</th>
+                                                    <!-- <th>Reported Date</th> -->
+                                                    <!-- <th>Priority</th> -->
+                                                    <!-- <th class="text-center">Expected Resolution</th> -->
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Last Changed</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for ticket in tickets %}
+                                                <tr>
+                                                    <td>
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/{{ticket.id}}">
+                                                            <i class="fa fa-edit "></i>
+                                                        </a>
+                                                    </td>
+                                                    <td class="grey">{{ticket.ticketid}}</td>
+                                                    <td class="grey">{{ticket.summary}}</td>
+                                                    <!-- <td class="grey"><span style="display:none;">{{ticket.creationdate.year}}{% if ticket.creationdate.month >= 10 %}{{ticket.creationdate.month}}{% else %}0{{ticket.creationdate.month}}{%endif%}{% if ticket.creationdate.day >= 10 %}{{ticket.creationdate.day}}{% else %}0{{ticket.creationdate.day}}{%endif%}{{ticket.creationdate.time | time}}</span>{% tzone ticket.creationdate %}</td> -->
+                                                    <!-- <td class="grey" >{{ticket.internalpriority}}</td> -->
+                                                    <td class="grey">{{ticket.status | real}}</td>
+                                                    <!-- <td class="grey">
+                                                        {% if ticket.status == 'CLOSED' %}
+                                                        <label class="label label-warning"> Closed</label>
+                                                        {% elif ticket.status == 'RESOLVED' %}
+                                                        <label class="label label-success"> Resolved</label>
+                                                        {% else %}
+                                                        <span style="display:none;">{{ticket.targetfinish.year}}{% if ticket.targetfinish.month >= 10 %}{{ticket.targetfinish.month}}{% else %}0{{ticket.targetfinish.month}}{%endif%}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span> {% tzone ticket.targetfinish %} {% endif %}
+                                                    </td> -->
+                                                    <td class="grey">
+                                                        <span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span> {% tzone ticket.changedate %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <!-- <div class="panel">
+                            <div class="panel-heading">
+                                <div class="panel-control">
+                                </div>
+                                <h3 class="panel-title">Todo List</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form method="POST" action="/todo/add/">{% csrf_token %}
+                                    <div class="input-group mar-btm">
+                                        <input type="text" placeholder="remember everything" name="todo" class="form-control" required>
+                                        <input type="hidden" value="{{is_directed}}" name="is_directed">
+                                        <span class="input-group-btn">
+                        <button class="btn btn-purple fa fa-plus" type="submit"></button>
+                      </span>
+                                    </div>
+                                </form>
+                                <ul class="list-group">
+                                    {% for todo in todos %}
+                                    <li class="list-group-item">
+                                       
+                                        <a href="#" class="badge badge-success" onclick="get_confirmation({{todo.id}}, 'completed', '{{is_directed}}')">
+                                            <l class='fa fa-check' style=''></l>
+                                        </a>
+                                        
+                                        <a href="#" class="badge badge-danger" onclick="get_confirmation({{todo.id}}, 'removed', '{{is_directed}}')">
+                                            <l class='fa fa-remove' style=''></l>
+                                        </a>
+                                        {{todo.todo}}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div> -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <div class="panel-control">
+                                    <button class="btn btn-default" data-target="#demo-panel-collapse" data-toggle="collapse"><i class="fa fa-chevron-down"></i></button>
+                                </div>
+                                <h3 class="panel-title">FAQ Search</h3>
+                            </div>
+                            <div id="demo-panel-collapse" class="collapse in" >
+                                <div class="panel-body">
+                                    <form id="form_faq_search" method="GET" action="" onsubmit="return create_faq_search_url();">
+                                        <div class="col-sm-9">
+                                            <div class="input-field col s6">
+                                                <input id="search_keyword" type="text" name="search_keyword" class="form-control" maxlength="50" required placeholder="keyword">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <button type="submit" class="btn btn-success">
+                                                <l class="fa fa-search"></l> Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading text-center">
+                                <h3 class="panel-title text-center">Service Catalogs <l class="fa fa-paper-plane"></l></h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="demo">
+                                    <div class="item">
+                                        <ul id="content-slider" class="content-slider" style="height:50px">
+                                            {% for ci in catalogs %}
+                                                {% if ci.privilege.func_admin.func_name in request.session.logged_user_priv%}
+                                                    <div id="demo-weather-widget-md" class="panel panel-{% cycle "mint" "info " "primary" "pink" %} panel-colorful text-center">
+                                                        <a href="/ticket/template/{{ci.id}}" style="color:white">
+                                                            <div class="panel-body">
+                                                                <div class="row pad-top">
+                                                                    <div class="col-xs-1"></div>
+                                                                    <div class="col-xs-2">
+                                                                        <l class="fa fa-ticket fa-4x"></l>
+                                                                    </div>
+                                                                    <div class="col-xs-9" style="float:left">
+                                                                        <p class="h3 text-thin">{{ci.summary}}</p>
+                                                                        <br>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    {% include "components/confirmation_box.html" %}
+    <script src="/static/lightslider/lightslider.js"></script>
+    <script type="text/javascript">
+        function create_faq_search_url(){
+            keyword = $('#search_keyword').val();
+            $('#form_faq_search').attr('action', '/faq/view?search='+keyword);
+            return true;
+        }
+    </script>
+    <script>
+    $(document).ready(function() {
+        //  $("#content-slider").lightSlider({
+        //     loop:true,
+        //     auto:true,
+        //     keyPress:true,
+        //     adaptiveHeight:true,
+        //     item:1,
+        //     speed:500,
+
+        // });
+
+        var autoplaySlider = $('#content-slider').lightSlider({
+            auto: true,
+            loop: true,
+            item: 1,
+        });
+        $('#total').text(autoplaySlider.getTotalSlideCount());
+        $('#content-slider').parent().on('mouseenter', function() {
+            autoplaySlider.pause();
+        });
+        $('#content-slider').parent().on('mouseleave', function() {
+            autoplaySlider.play();
+        });
+    });
+    </script>
+    <script>
+    $("#dash").addClass("active")
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#table_id').DataTable({
+            aaSorting: [
+                [3, 'desc']
+            ]
+        });
+    })
+    </script>
+    <script type="text/javascript">
+    function change_dashboard() {
+        var role_name = $('#role_name').val();
+        role_name = role_name.replace(/ /g, '_');
+        document.location.href = "/dashboard/?name=" + role_name;
+    }
+    </script>
+    <script>
+    function animate_alert_msg() {
+        $('#alert_msg').css({
+            right: '0%'
+        });
+        $('#alert_msg').animate({
+            right: '-100%'
+        }, 20000, 'linear', function() {
+            animate_alert_msg();
+        });
+    }
+    $(document).ready(function() {
+        animate_alert_msg();
+    });
+    </script>
+    <script type="text/javascript">
+        function submit_ok() {
+            var directed_dat = $('#confirm_type').val()
+            var delete_id = $('#delete_id').val();
+            document.location.href = "/todo/complete/"+delete_id+"?is_directed="+directed_dat;
+            $('#confirm_box').modal('hide');
+        }
+    </script>
+    <script type="text/javascript">
+        function get_confirmation(remove_id, type_data, directed_dat) {
+            console.log(directed_dat,type_data);
+            $('#delete_id').val(remove_id);
+            if (type_data == "removed"){
+                $('#confirm_msg').html('<strong> Are you sure you want to remove this from todo list? </strong>');
+            } else if (type_data == "completed") {
+                $('#confirm_msg').html('<strong> Are you sure? Your action will remove this from todo list? </strong>');
+            }
+            $('#confirm_type').val(directed_dat)
+            $('#confirm_box').modal('toggle');
+        }
+    </script>
+</body>
+
+</html>

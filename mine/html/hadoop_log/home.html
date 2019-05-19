@@ -1,0 +1,169 @@
+{% extends 'hadoop_log/base.html' %}
+<style type="text/css">
+  
+    .modal-backdrop{
+      z-index: 0 !important;
+    }
+
+</style>
+{% block content %}
+<div id="home">
+
+    <div class="multiselect_form">
+    <form id="filter_form" action="{% url 'hadoop:job_list' %}" method='post'>
+        {% csrf_token %}
+        <div class="MultiSelect"> 
+        {% for choice in form.mapreduce %}
+            <span class="radio">{{ choice.tag }}</span>
+            <label>{{ choice.choice_label }}</label>
+        {% endfor %}
+        </div>
+        <input id="check_btn" type='submit' value='Go'>
+    </form>
+    </div>
+    <h2>Map-Reduce Jobs</h2>
+        {% if mapreduce_fields %}
+    		<table>
+    		<tr>
+                <th>Log Upload Date</th>
+                {% if mapreduce_fields %}
+                    <th>JOB ID</th>
+                {% endif %}
+
+                {% for mapreduce in mapreduce_fields %}
+                {% if mapreduce == 'FSC' %}
+        			<th>FILE: Number of bytes read</th>
+        			<th>FILE: Number of bytes read</th>
+        			<th>FILE: Number of bytes written</th>
+        			<th>FILE: Number of read operations</th>
+        			<th>FILE: Number of large read operations</th>
+        			<th>FILE: Number of write operations</th>
+        			<th>HDFS: Number of bytes read</th>
+        			<th>HDFS: Number of bytes written</th>
+        			<th>HDFS: Number of read operations</th>
+        			<th>HDFS: Number of large read operations</th>
+        			<th>HDFS: Number of write operations</th>
+                {% elif mapreduce == 'JC' %}
+                    <th>Launched map tasks</th>
+                    <th>Launched reduce tasks</th>
+                    <th>Data-local map tasks</th>
+                    <th>Total time spent by all maps in occupied slots (ms)</th>
+                    <th>Total time spent by all reduces in occupied slots (ms)</th>
+                    <th>Total time spent by all map tasks (ms)</th>
+                    <th>Total time spent by all reduce tasks (ms)</th>
+                    <th>Total vcore-seconds taken by all map tasks</th>
+                    <th>Total vcore-seconds taken by all reduce tasks</th>
+                    <th>Total megabyte-seconds taken by all map tasks</th>
+                    <th>Total megabyte-seconds taken by all reduce tasks</th>
+                {% elif mapreduce == 'MRF' %}
+                    <th>Map input records</th>
+                    <th>Map output records</th>
+                    <th>Map output bytes</th>
+                    <th>Map output materialized bytes</th>
+                    <th>Input split bytes</th>
+                    <th>Combine input records</th>
+                    <th>Combine output records</th>
+                    <th>Reduce input groups</th>
+                    <th>Reduce shuffle bytes</th>
+                    <th>Reduce input records</th>
+                    <th>Reduce output records</th>
+                    <th>Spilled Records</th>
+                    <th>Shuffled Maps</th>
+                    <th>Failed Shuffles</th>
+                    <th>Merged Map outputs</th>
+                    <th>GC time elapsed (ms)</th>
+                    <th>CPU time spent (ms)</th>
+                    <th>Physical memory (bytes) snapshot</th>
+                    <th>Virtual memory (bytes) snapshot</th>
+                    <th>Total committed heap usage (bytes)</th>
+                {% elif mapreduce == 'SE' %}
+                    <th>BAD_ID</th>
+                    <th>CONNECTION</th>
+                    <th>IO_ERROR</th>
+                    <th>WRONG_LENGTH</th>
+                    <th>WRONG_MAP</th>
+                    <th>WRONG_REDUCE</th>
+                {% elif mapreduce == 'FIFC' %}
+                     <th>Bytes Read</th>
+                {% elif mapreduce == 'FOFC' %}
+                     <th>Bytes Written</th>
+                {% endif %}
+                {% endfor %}
+    		</tr>
+            {% for job in jobs %}
+            		<tr>
+                    <td>{{ job.get_log_date }}</td>
+                    {% if mapreduce_fields %}
+                        <td>{{ job.job_id }}</td>
+                    {% endif %}
+                {% for mapreduce in mapreduce_fields %}
+                    {% if mapreduce == 'FSC' %}
+                        <td>{{ job.file_number_of_bytes_read }}</td>
+                        <td>{{ job.file_number_of_bytes_written }}</td>
+                        <td>{{ job.file_number_of_read_operations }}</td>
+                        <td>{{ job.file_number_of_large_read_operations }}</td>
+                        <td>{{ job.file_number_of_write_operations }}</td>
+                        <td>{{ job.hdfs_number_of_bytes_read }}</td>
+                        <td>{{ job.hdfs_number_of_bytes_written}}</td>
+                        <td>{{ job.hdfs_number_of_read_operations }}</td>
+                        <td>{{ job.hdfs_number_of_large_read_operations }}</td>
+                        <td>{{ job.hdfs_number_of_write_operations }}</td>
+                    {% elif mapreduce == 'JC' %}
+                        <td>{{ job.launched_map_tasks }}</td>
+                        <td>{{ job.launched_reduce_tasks }}</td>
+                        <td>{{ job.data_local_map_tasks }}</td>
+                        <td>{{ job.total_time_spent_by_all_maps }}</td>
+                        <td>{{ job.total_time_spent_by_all_reduces }}</td>
+                        <td>{{ job.total_time_spent_by_all_map_tasks }}</td>
+                        <td>{{ job.total_time_spent_by_all_reduce_tasks }}</td>
+                        <td>{{ job.total_vcore_seconds_taken_by_all_map_tasks }}</td>
+                        <td>{{ job.total_vcore_seconds_taken_by_all_reduce_tasks }}</td>
+                        <td>{{ job.total_megabyte_seconds_taken_by_all_map_tasks }}</td>
+                        <td>{{ job.total_megabyte_seconds_taken_by_all_reduce_tasks }}</td>
+                    {% elif mapreduce == 'MRF' %}
+                        <td>{{ job.map_input_records }}</td>
+                        <td>{{ job.map_output_records }}</td>
+                        <td>{{ job.map_output_bytes }}</td>
+                        <td>{{ job.map_output_materialized_bytes }}</td>
+                        <td>{{ job.input_split_bytes }}</td>
+                        <td>{{ job.combine_input_records }}</td>
+                        <td>{{ job.combine_output_records }}</td>
+                        <td>{{ job.reduce_input_groups }}</td>
+                        <td>{{ job.reduce_shuffle_bytes }}</td>
+                        <td>{{ job.reduce_input_records }}</td>
+                        <td>{{ job.reduce_output_records }}</td>
+                        <td>{{ job.spilled_records }}</td>
+                        <td>{{ job.shuffled_maps }}</td>
+                        <td>{{ job.failed_shuffles }}</td>
+                        <td>{{ job.merged_map_outputs }}</td>
+                        <td>{{ job.gc_time_elapsed }}</td>
+                        <td>{{ job.cpu_time_spent }}</td>
+                        <td>{{ job.physical_memory_bytes_snapshot }}</td>
+                        <td>{{ job.virtual_memory_bytes_snapshot }}</td>
+                        <td>{{ job.total_committed_heap_usage_bytes }}</td>
+                    {% elif mapreduce == 'SE' %}
+                        <td>{{ job.bad_id }}</td>
+                        <td>{{ job.connection }}</td>
+                        <td>{{ job.io_error }}</td>
+                        <td>{{ job.wrong_length }}</td>
+                        <td>{{ job.wrong_map }}</td>
+                        <td>{{ job.wrong_reduce }}</td>
+                    {% elif mapreduce == 'FIFC' %}
+                        <td>{{ job.bytes_read }}</td>
+                    {% elif mapreduce == 'FOFC' %}
+                        <td>{{ job.bytes_written }}</td>
+                    {% endif %}
+                {% endfor %}
+    				</tr>
+            {% endfor %}
+    		</table>
+        {% endif %}
+<form action="{% url 'hadoop:log_file_upload' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="field {% if form.log_file.errors %} error{% endif %}">
+    <input id="id_log_file" name="log_file" type="file" />
+    </div>
+    <input class="upload_btn" type="submit" value="Upload File" />
+</form>
+</div>
+{% endblock %}

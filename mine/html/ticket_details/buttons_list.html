@@ -1,0 +1,335 @@
+{% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv %}
+    <div class="col-sm-12">
+        <a href="/create/prints/{{ticket.id}}" target="_blank" class="btn btn-primary pull-right btn-sm"><i class="fa fa-download"></i> Generate PDF</a>
+    </div>
+{% endif %}
+{% if jira_check %}
+    {% if jira_tkt_details %}
+        <br/><br/>
+        <div class="custom-box palette-peter-river">
+            <h4 style="text-align:center;">Jira Issue Details</h4>
+            <p style="text-align:center;">                                 
+                <a href="{{jira_tkt_details.0.jira_link}}" target="_blank" class="jissue_anch">
+                    #{{jira_tkt_details.0.issue_key}}
+                </a>
+            </p>                                
+        </div>
+    {% else %}
+        <div style="margin-bottom:10px;">
+            <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#jira_issue"><i class=""></i><span class="text" >Create or link an issue in Jira</span></a>
+        </div>
+    {% endif %}
+{% endif %}
+{% if "Resolver_Dashboard" in request.session.logged_user_priv and is_subgroup_member %}
+    {% if ticket.status == "RESOLVED" or ticket.status == "CLOSED" %}
+        <div class="custom-box palette-peter-river">
+            <h4>Ticket Resolved by</h4>
+            <p>{{ticket.resolver}}</p>
+            <i class="fa fa-info"></i>
+        </div>
+    {% elif ticket.status == "CANCELLED" %}
+        <div class="custom-box palette-alizarin">
+            <h4>Ticket Canceled</h4>
+            <p></p>
+        </div>
+    {% else %}
+        {% if ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+            <div class="custom-box palette-wisteria">
+                <h4>Currently</h4>
+                <p>On Hold</p>
+                <i class="fa fa-clock-o"></i>
+            </div>
+        {% else %}
+            {% if finish == "done" %}
+                <div class="custom-box palette-alizarin">
+                    <h4>Time up</h4>
+                    <p>Sla Breached</p>
+                    <i class="fa fa-info"></i>
+                </div>
+            {% elif finish == 'none' %}
+                <div class="custom-box palette-nephritis">
+                    <h4>No SLA</h4>
+                    <p>Free to work</p>
+                    <i class="fa fa-magic"></i>
+                </div>
+            {% else %}
+                <div class="custom-box palette-peter-river">
+                    <h4  id="clock"></h4>
+                    <p>Time Left!</p>
+                    <i class="fa fa-clock-o"></i>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% if ticket.ended_at %}
+        <div class="col-lg-12" >
+            <p><label class="label label-danger" >Ticket already Canceled/Closed</label></p>
+        </div>
+    {% endif %}
+{% endif %}
+
+<br/>
+{% if is_subgroup_member and "Resolver_Dashboard" in request.session.logged_user_priv %}
+    <!-- check status -->
+    {% if ticket.status == 'QUEUED' or ticket.status == 'INPROG' or ticket.status == 'CUSTAWAIT' or ticket.status == 'VENDAWAIT' %}
+        <div class="row">
+            <div class="col-md-12">
+                <a data-toggle="modal" class="btn btn-info" data-target="#ownership" style="width:100%; margin-top:10px;{% if ticket.owner == profile %}display:none{% endif %}" >Take Ownership {% if ticket.owner and ticket.owner != profile %}from <br/>{{ticket.owner}} {% endif %}</a>
+                <a data-toggle="modal"  class="btn btn-info" data-target="#assign_subgroup" style="width:100%; margin-top:10px;">Assign to Subgroup Member</a>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+{% if "IT Manager" not in request.session.roles and "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+    {% if ticket.status == "NEW" and "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+        <form action="/ticket/assign/{{ticket.id}}" method="POST" >
+            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+            <input type="hidden" name="ticket_cust" id="ticket_cust" value="{{ticket.customer.customerid}}"/>
+            <div class="box-body pad-top">
+                <dl class="dl-horizontal">
+                    {% if ticket.cls == "REQ" %}
+                        <dt>Customer:</dt>
+                        <dd>
+                            <select style="padding:2px;width:100%;margin-top:5px" name = "ticket_customer" requried id="ticket_customer" class="form-control">
+                                <option value="">-Select Customer-</option>
+                                {% for customer in customers %}
+                                    <option value="{{customer.id}}" {% if ticket.customer == customer %} selected {% endif %}> {{customer.customername}}</option>
+                                {% endfor %}
+                            </select>
+                        </dd>
+                        <dt class="impacted_ailin_cls" style="display:none">Airline : </dt>
+                        <dd class="impacted_ailin_cls" style="display:none">
+                            <select class="form-control" style="padding:2px;width:100%;margin-top:5px" name="impacted_airline" id="impacted_airline_stat">
+                                <option value="">--Select--</option>
+                            </select>
+                        </dd>
+                        <dt>Class : </dt>
+                        <dd>
+                            <select  style="padding:2px;width:100%;margin-top:5px" name = "cls" required id="ticket_typee" class="form-control">
+                                <option value="" >-Select Class-</option>
+                                <option value="SR" >Service Request</option>
+                                <option value="IN" >Incident</option>
+                                {% if "CustomerSDResolverAdminAccess" not in request.session.logged_user_priv %}
+                                    <option value="PB" >Problem</option>
+                                {% endif %}
+                                {% if "CustomerSDResolverAdminAccess" not in request.session.logged_user_priv %}
+                                    <option value="CH" >Change</option>
+                                {% endif %}
+                            </select>
+                        </dd>
+                        <dt class="approval_required">Approval Required</dt>
+                        <dd class="approval_required">
+                            <input type="checkbox" name="approval_required" onchange="checking_approval()" id="is_approval_req" value="true"/> 
+                        </dd>
+                    {% else %}
+                        <input class="hidden" value="{{ticket.cls}}" id="ticketclass">
+                    {% endif %}
+                    <dt class="sr_approval_required">Domain :</dt>
+                    <dd class="sr_approval_required" >
+                        <select  style="padding:2px;width:100%;margin-top:5px" id = "workgroup" name="group" requried class="form-control">
+                            <option value="" >-Select Group-</option>
+                            {% for group in groups %}
+                                <option value="{{group.id}}" {% if ticket.group.id == group.id %} selected="true" {% endif %} > {{group.workgroup}}</option>
+                            {% endfor %}
+                        </select>
+                    </dd>
+                    <dt class="sr_approval_required">Sub Domain :</dt>
+                    <dd class="sr_approval_required">
+                        <select  style="padding:2px;width:100%;margin-top:5px" name = "subgroup" id="subgroup" requried class="form-control" value="{{ ticket.subgroup.id }}">
+                            <option value="">--Select Subgroup--</option>
+                            {% if ticket.subgroup %}
+                                <option value="{{ticket.subgroup.id }}" selected="true">Subgroup - {{ticket.subgroup}}</option>
+                            {% endif %}
+                        </select>
+                    </dd>
+                    <dt class="sr_approval_required">Priority :</dt>
+                    <dd class="sr_approval_required">
+                        <select  style="padding:2px;width:100%;margin-top:5px" id = "internal_priority" name="internal" requried class="form-control">
+                            <option value="">-Select-</option>
+                            {% if ticket.cls == 'SR'%}
+                                <option value="Urgent" {% if ticket.internalpriority == "Urgent" %} selected {% endif %}>Urgent</option>
+                                <option value="Normal" {% if ticket.internalpriority == "Normal" %} selected {% endif %}>Normal</option>
+                                <option value="Purchase" {% if ticket.internalpriority == "Purchase" %} selected {% endif %}>Purchase</option>
+                            {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                <option value="Critical" {% if ticket.internalpriority == "Critical" %} selected {% endif %}>Critical</option>
+                                <option value="High" {% if ticket.internalpriority == "High" %} selected {% endif %}>High</option>
+                                <option value="Medium" {% if ticket.internalpriority == "Medium" %} selected {% endif %}>Medium</option>
+                                <option value="Low" {% if ticket.internalpriority == "Low" %} selected {% endif %}>Low</option>
+                            {% elif ticket.cls == 'CH' %}
+                                <option value="Change" {% if ticket.internalpriority == "Change" %} selected {% endif %}>Change</option>
+                            {% endif %}
+                        </select>
+                    </dd>
+                    <dt id="severity_dt">Severity :</dt>
+                    <dd>
+                        <select  style="padding:2px;width:100%;margin-top:5px" id="severity" name="impact" class="form-control">
+                            {% if ticket.impact %}
+                                <option value="{{ticket.impact}}" selected="true">{{ticket.impact}}</option>
+                            {% endif %}
+                        </select>
+                    </dd>
+                    <dt class="sr_approval_required">Category :</dt>
+                    <dd class="sr_approval_required">
+                        <select style="padding:2px;width:100%;margin-top:5px" id="cat_name" name="category_id" required onchange="load_subcategory_list()" class="form-control">
+                            <option value="">-Select Category-</option>
+                            {% for category in category_list %}
+                                <option value="{{category.id}}" {% if ticket.category.id == category.id %} selected="true" {% endif %}>{{category.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </dd>
+                    <dt class="sr_approval_required">Subcategory :</dt>
+                    <dd class="sr_approval_required">
+                        <select style="padding:2px;width:100%;margin-top:5px" id="sub_cat_name" name="sub_cat_id" {% if ticket.customer.category_change == False %}required{% endif %} class="form-control" value="{{ ticket.subcategory.id }}">
+                            <option value="">-Select Subcategory-</option>
+                            {% if ticket.subcategory %}
+                                <option value="{{ticket.subcategory.id}}" selected="true">{{ticket.subcategory.name}}</option>
+                            {% endif %}
+                        </select>
+                    </dd>
+                    <dt class="sr_approval_required">Priority Flag</dt>
+                    <dd class="sr_approval_required">
+                        <select name="priority_flag" class="form-control" style="padding:2px;width:100%;margin-top:5px">
+                            <option value="">-Select Flag-</option>
+                            <option value="true">Flag</option>
+                            <option value="false">Un-Flag</option>
+                        </select>
+                    </dd>
+                </dl>
+            </div>
+            <textarea style="margn-top:5px" type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Add remark" rows="4" cols="10" ></textarea>
+            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+            {% if ticket.approve == "FALSE" %}
+            {% else %}
+                <button class="btn btn-success btn-md" style="margin-top:5px;width:50%" type="submit">Assign</button>
+            {% endif %}  
+        </form>
+    {% elif  ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+        {% if zendesk_customer and ticket.source == "zendesk" %}
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-dark" id="zendesk_solved" style="margin-top:3px;width:100%" href=""><i class="zendesk_fa-spinner fa fa-spinner fa-spin" style="display: none" aria-hidden="true"></i><span class="text" >Change Zendesk Ticket #{{ zendesk.zendesk_id }} Status</span></a>
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-md-12">
+                <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#email" onclick="email_cc_capturing({{ticket.id}})"><i class="" ></i><span class="text" > Send Email </span></a>
+                <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reassign"><i class="" ></i><span class="text" > Reassign </span></a>
+                <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#resolve" onclick="fetch_resolution_codes();"><i class="" ></i><span class="text" > Resolve </span></a>
+                {% if ticket.cls == "IN" and "Resolver_Dashboard" in request.session.logged_user_priv %}
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#kb_modal"><i class="" ></i><span class="text" > Search KB </span></a>
+                {% endif %}
+                {% if ticket.priority_flag != True and "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                    <a class="btn btn-danger" style="margin-top:3px;width:100%" href="/ticket_flag/{{ticket.id}}/?flag_set=True" ><i class="" ></i><span class="text" > Set Flag </span></a>
+                {% elif ticket.priority_flag == True and "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                    <a class="btn btn-danger" style="margin-top:3px;width:100%" href="/ticket_flag/{{ticket.id}}/?flag_unset=True"><i class="" ></i><span class="text" > Unset Flag </span></a>
+                {% endif %}
+                <a class="btn btn-warning" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#priority" onclick="change_priority()"><i class="" ></i><span class="text" > Change Priority </span></a>
+                {% if ticket.customer.category_change %}
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#change_category" onclick="ticket_category_change('{{ ticket.customer.id}}', '{{ ticket.category.id}}', '{{ ticket.subcategory.id}}')"><span class="text" > Change Category </span></a>
+                {% endif %}
+                {% if ticket.impacted_airline and "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                    <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#change_ia"><i class="" ></i><span class="text" > Change Carrier </span></a>
+                {% endif %}
+                {% if ticket.isglobal %}
+                    <a href="/ticket/isglobal/{{ticket.id}}"  style="margin-top:3px;width:100%" class="btn btn-info">Remove global</a>
+                {% else %}
+                    <a href="/ticket/isglobal/{{ticket.id}}" style="margin-top:3px;width:100%" class="btn btn-info">Make global</a>
+                {% endif %}
+                <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#sla" deactivate><span class="text" > Stop SLA</span></a>
+                {% if ticket.deactivatelist_set.all|length > 0 %}
+                    <a class="btn btn-danger" style="margin-top:3px;width:100%" href="/deactivate/users?ticket_created=True&ticket={{ticket.id}}" ><span class="text" > Deactivate </span></a>
+                {% endif %}
+            </div>
+        </div>
+    {% elif ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+        <div class="row">
+            <div class="col-md-12">
+                <a class="btn btn-success" style="margin-top:3px;width:100%"  href="" data-toggle="modal" data-target="#inprog" ><i class="" ></i><span class="text" > Start SLA</span></a>
+            </div>
+        </div>
+    {% comment %}
+        {% elif ticket.status == "RESOLVED" %}
+            <div class="row">
+                {% if ticket.cls != "PB" and ticket.is_task != True %}
+                    <div class="col-md-12">
+                        <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#close"><i class="" ></i><span class="text" > Close Ticket </span></a>
+                    </div>
+                {% endif %}
+                <div class="col-md-12">
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reopen"><i class="" ></i><span class="text" > Reopen Ticket </span></a>
+                </div>
+            </div>
+    {% endcomment %}
+    {% endif %}
+    <hr>
+    <div class="row">
+        {% if ticket.ended_at %} 
+            {% if ticket.status == "CLOSED" and ticket.customer.reopen_closed_tickets %}
+                <div class="col-md-12">
+                    <a class="btn btn-info"  href="" style="margin-top:3px; width:100%;" data-toggle="modal" data-target="#reopen_closed_ticket"><i class="" ></i><span class="text" > Reopen Closed Ticket </span></a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="col-md-12">
+                {% if ticket.status != 'NEW' and ticket.status != 'RESOLVED' and ticket.customer.ticket_conversion and ticket.status != 'CANCELLED' and ticket.status != 'CLOSED' %}
+                    <a  class="btn btn-warning" style="margin-bottom:3px;width:100%" href="" data-toggle="modal" data-target="#convert_ticket" >Convert to {% if ticket.ticketid|slice:"2" == 'SR'%}Incident{% else %}Service Request{% endif %}</a>
+                {% endif %}
+                {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                    <a class="btn btn-warning"  href="" data-toggle="modal" style="width:100%" data-target="#cancel"><span class="text" > Cancel Ticket </span></a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+{% if ticket.status == "RESOLVED" %}
+    {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and is_subgroup_member %}
+        <div class="row">
+            {% if ticket.cls != "PB" and ticket.is_task != True %}
+                <div class="col-md-12">
+                    <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#close"><i class="" ></i><span class="text" > Close Ticket </span></a>
+                </div>
+            {% endif %}
+            <div class="col-md-12">
+                <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reopen"><i class="" ></i><span class="text" > Reopen Ticket </span></a>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+<div class="row">
+    <div class="col-md-12">
+        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+            {% if is_favourite == True %}
+                <a href="/mark/favourite_ticket/{{ticket.id}}/?is_not_favourite=true" style="margin-top:3px;width:100%" class="btn btn-danger">Remove from Favourite Tickets</a>
+            {% else %}
+                <a href="/mark/favourite_ticket/{{ticket.id}}/?is_favouirte=true" style="margin-top:3px;width:100%" class="btn btn-danger">Add to Favourite Tickets</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+<!-- ticket.owner and ticket.owner != profile and  -->
+{% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile%}
+    <div class="row">
+        <div class="col-md-12">
+            {% if ticket.customer.add_customer_ticket %}
+                <a href="#" data-toggle="modal" data-target="#add_customer_ticket" style="margin-top:3px;width:100%" class="btn btn-success">Add Customer Ticket</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% if ticket.status == "CLOSED" and ticket.customer.add_attachment %}
+    {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile%}
+        <div class="row">
+            <div class="col-md-12">
+                <a href="#" data-toggle="modal" data-target="#add_attachment" style="margin-top:3px;width:100%" class="btn btn-success">Add Attachment</a>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+{% if ticket.ticketattachments_set.all|length > 0 %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'generate_zip' ticket.id %}" data-toggle="tool-tip" data-placement="bottom" style="margin-top:3px;width:100%" class="btn btn-info">Download Attachments</a>
+        </div>
+    </div>
+{% endif %}

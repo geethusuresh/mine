@@ -1,0 +1,201 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Reports</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+   
+    <script src="/static/backwardtimer/jquery-backward-timer.min.js" type="text/javascript"></script>
+
+
+    <style type="text/css">
+    .page-head {
+      background: none repeat scroll 0 0 transparent;
+      box-shadow: none;     
+      padding: 20px 0 15px;
+      position: relative;
+    }
+    .breadcrumb {
+      background: none repeat scroll 0 0 #fff;
+      border: 1px solid #ededed;
+      border-radius: 5px;
+      float: right;
+      font-size: 12px;
+      padding: 7px 10px;
+      position: absolute;
+      right: 0;
+      top: 20px;
+      margin-bottom: 10px;
+      list-style: none outside none;      
+    }
+    .page-head > h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+        <div class="content">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="page-head" style="margin-top:10px">
+                <h1>Realtime Monitoring Dashboard<small></small></h1>
+                <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Realtime Dashboard</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12" style="text-align:right;">
+              <div id="timer_div">
+                 <span style="font-size:34px;color:#5cb85c;">Refresh in </span>  <span id="exec_timer" style="font-size:34px;color:#337ab7;"></span>
+              </div>
+              <div id="updating_div" style="font-size:34px;color:#5cb85c;display:none;">
+                  Updating.....
+              </div>
+            </div>
+             <div class="col-sm-12" id="message_box" style="display:none;">
+                <div class="alert alert-danger" role="alert">Error occured while updating the monitoring content</div>
+             </div>
+          </div>
+        
+          <!-- Start row -->
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="panel">
+                  <div class="panel-heading">                    
+                    <h3 class="panel-title">Latest Monitored Issues</h3>
+                  </div>                
+                <div class="panel-body">                  
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered" id="report_table">
+                      <thead>
+                        <tr>
+                          <th>Customer</th>
+                          <th>Host</th>
+                          <th>Issue</th>                                  
+                          <th>Age</th>
+                          <th>Severity</th>
+                          <th>Ticket Number</th>
+                          <th>Ticket Status</th>                                 
+                        </tr>
+                      </thead>  
+                      <tbody id="issue_details">
+                      {% for customer_issues in customer_system_status %}
+                        <tr>
+                          <td>{{customer_issues.customer}}</td>
+                          <td>{{customer_issues.host}}</td>
+                          <td style="background-color:{{customer_issues.color}};">{{customer_issues.trigger_name}}</td>
+                          <td>{{customer_issues.lastmonitor_age}}</td>
+                          <td>{{customer_issues.severity}}</td>
+                          {% if customer_issues.ticket_number != ""  %}
+                            <td><a target="_blank" href="/ticket/{{customer_issues.ticketid}}" style="color:#337ab7;">{{customer_issues.ticket_number}}</a></td>
+                          {% else %}
+                            <td>Not yet created</td>
+                          {% endif %}
+                          <td>{{customer_issues.ticketstatus}}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>                         
+                    </table>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <!--End row -->
+
+        </div>
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      {% include "components/dashboard_footer.html" %}
+      {% include "reports/reports_js.html" %}     
+
+      <script type="text/javascript">
+      $('#exec_timer').backward_timer({
+        seconds: 60,
+        format: 's%s',
+        on_exhausted: function(timer) {
+            $('#timer_div').hide();
+            $('#message_box').hide();
+            $('#updating_div').show();
+            $.ajax({
+                url:"/advanced_monitoring/realtimeissues",
+                type: "POST", 
+                dataType:"json",
+                data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(data){
+                   var customer_issues = data.customer_system_status;
+                   var issue_details = '';
+                   $.each(customer_issues,function(i,obj){
+                        issue_details+= '<tr>';
+                        issue_details+= '<td>' + obj.customer + '</td>';
+                        issue_details+= '<td>' + obj.host + '</td>';
+                        issue_details+= '<td style="background-color:'+obj.color+';">' + obj.trigger_name + '</td>';
+                        issue_details+= '<td>' + obj.lastmonitor_age + '</td>';
+                        issue_details+= '<td>' + obj.severity + '</td>';
+                        if(obj.ticket_number != ""){                          
+                          issue_details+= '<td><a target="_blank" href="/ticket/'+obj.ticketid+'" style="color:#337ab7;">'+obj.ticket_number+'</a></td>';
+                        }
+                        else{
+                          issue_details+= '<td>Not yet created</td>';
+                        }
+                        issue_details+= '<td>'+obj.ticketstatus+'</td>';
+                        issue_details+= '</tr>';
+                   }); 
+
+                   if(issue_details != ''){
+                      $('#issue_details').html(issue_details); 
+                      $('#exec_timer').backward_timer('reset');
+                      $('#exec_timer').backward_timer('start');                         
+                      $('#updating_div').hide('slow');
+                      $('#timer_div').show('slow');
+                   }                                        
+                },
+                error: function(data){
+                    $('#message_box').show();
+                    $('#updating_div').hide();
+                    $('#exec_timer').backward_timer('reset');
+                    $('#exec_timer').backward_timer('start');
+                },
+          });
+        } 
+      });
+      $('#exec_timer').backward_timer('start');
+      </script>
+
+      <script type="text/javascript">
+        setInterval(function() {
+            window.location.reload();
+          }, 1800000); 
+      </script>
+    </body>
+</html>

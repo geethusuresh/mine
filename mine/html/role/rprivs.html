@@ -1,0 +1,136 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      /*margin-right: 60px;*/
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Role-{{role_item.rolename}}  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+                {% if messages %}
+                  <ul >
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                      {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <div class="row">
+                  <div class="col-sm-10">
+                    
+                  </div>
+                  <div class="col-sm-2">
+                    <a href="/list/role" style="width:100%" class="btn btn-info">Go Back</a>
+                  </div>
+                </div>
+                <br>
+              <div class="row">
+                <div class="col-md-6">
+                <div class="box">
+                  <div class="box-title">
+                    <h3>Existing Privileges</h3>
+                  </div>
+                  <div class="box-body no-padding">
+                    <table class="table table-hover " id="rpriv_table">
+                      <thead>
+                      <tr>
+                          <th>No</th>
+                          <th>privilege</th>
+                          <th>Description</th>
+                          <th></th>
+                      </tr> 
+                      </thead>
+                      <tbody>
+                      {% for priv in privileges %}
+                      <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ priv.privname }}</td>
+                        <td>{{ priv.description }}</td>
+                        <td><a href="/list/rprivs/{{role_item.id}}/{{priv.id}}" class="btn btn-sm btn-danger"><i class="glyphicon glyphicon-trash"></i></a></td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                    </table>
+                    <div class="row">
+                      
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <div class="col-md-6">
+                <div class="box">
+                  <div class="box-title">
+                    <h3>Assign New</h3>
+                    <!-- <a href="/list/roles" class="btn btn-success btn-sm pull-right">Done</a> -->
+                  </div>
+                  <div class="box-body no-padding">
+                    <table class="table table-hover " id="rpriv_table2">
+                      <thead>
+                      <tr>
+                          <th>No</th>
+                          <th>privilege</th>
+                          <th>Description</th>
+                          <th></th>
+                      </tr> 
+                      </thead>
+                      <tbody>
+                      {% for priv in remaining_privileges %}
+                      <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ priv.privname }}</td>
+                        <td>{{ priv.description }}</td>
+                        <td><a href="/assign/privilege/{{role_item.id}}/{{priv.id}}" class="btn btn-success btn-sm"> <i class="glyphicon glyphicon-plus"></i> </span></td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                    </table>
+                    <div class="row">
+                      
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </div>             
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+    $("#rpriv_table").dataTable();
+    $("#rpriv_table2").dataTable();
+    </script>
+</html>
+

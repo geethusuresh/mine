@@ -1,0 +1,149 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Email Template Admin</title>   
+   <script type="text/javascript" src="/static/js/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>     
+    <script type="text/javascript" src="/static/js/king-common.min.js"></script>
+    <script type="text/javascript" src="/static/js/common.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/jquery-ui.css">
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">    
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">              
+              <ul class="main-menu">
+                <div class="sidebar-content">
+                <img src="/static/img/logo.png">
+              </div>            
+                {% include "side_bar/sidebar.html" %} 
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                  <li><i class="fa fa-home"></i><a href="/dashboard/">Home</a></li>
+                  <li><a href="#">Templates</a></li> <li class="active">Wizard</li>
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Configure Email Templates</h2>
+                <em>Add Details</em>
+              </div>
+              {% if message %}
+                <div class="alert alert-success" role="alert">
+                {{message}}
+                Please <a href="/view_email_template/"><b>click here</b></a> to see the template details
+                </div>
+              {% endif %}
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic">Email Templates Details</i></h3></div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">                     
+                        <div class="container">                        
+                        <fieldset>
+                          <div class="controls" style="width:400px;margin-left:20%">
+                          <form class="form-horizontal" method="POST" role="form" action="/view_email_template/">{% csrf_token %} 
+                            <div class="form-group">
+                               <label for="customer">Customer</label>                  
+                                 <select class="form-control" required id="customer" name="customer">
+                                    <option value="">Select any customer</option>
+                                    {% for customer_item in customer_details %}
+                                    {% if customer_item.id == selected_customer_id %}
+                                    <option value="{{customer_item.id}}" selected="selected">{{customer_item.customername}}</option>
+                                    {% else %}
+                                     <option value="{{customer_item.id}}">{{customer_item.customername}}</option>
+                                     {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-success" style="margin-top:10px;">Search</button>    
+                            </div>
+                            </form>
+                          </div>
+                        </fieldset>
+                        </div>                     
+                      </div>
+                    </div>
+                    <!--Start Search results content area-->                                        
+                       {% if selected_customer_id > 0 %}
+                       {% if templates_flag > 0 %}
+                       <h4>{{customer_name}} Email Templates Details</h4> 
+                        <div class="list-group">
+                          {% for template_item in template_details %}                     
+                          <a href="/email_template_admin_op/{{template_item.id}}" class="list-group-item" style="font-weight:bold;margin-top:10px;" title="Please click here to edit the template">
+                          {{template_item.templatename}}</a>
+                         {% endfor %}
+                        </div>
+                        {% else %}                       
+                        <div class="alert alert-info" role="alert">
+                           No email templates found under {{customer_name}}. Please <a href="/email_template_admin/"><b>click here</b></a> to add the template details 
+                        </div>
+                        {% endif %}
+
+                        {% else %}
+                         <div class="alert alert-info" role="alert">
+                           Please select any customer to view the templates
+                        </div>
+                        {% endif %}             
+                    <!--End Search results area -->
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+</html>

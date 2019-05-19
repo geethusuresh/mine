@@ -1,0 +1,134 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="customer_ticket_list">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+
+          {% include "side_bar/customer.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1  class="text-thin">Service Desk | <small>{{ type }}</small></h1>
+                    <ol class="breadcrumb">
+                      <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">{{type}}</li>
+                    </ol>
+                </div>
+
+                <div class="content">
+                  <div class="row">
+                    <div class="col-sm-12">
+                    <div class="panel">
+                      <div class="panel-heading text-center">
+                          <h3 class="panel-title">Tickets</h3>
+                      </div>
+                      <div class="panel-body no-padding">
+                        <table class="table table-striped" id="table_id" class="">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Ticket Id</th>
+                              <th>Ticket Summary</th>
+                              <th>Reported Date</th>
+                              <th>Priority</th>
+                              <th >Status</th>
+                              <th>Expected Resolution</th>
+                              
+                              <!-- <th>View/Edit</th> -->
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for ticket in tickets %}
+                          <tr>
+                            <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/customer/tickets/detail/{{ticket.id}}">
+                              <i class="fa fa-edit "></i>                   
+                            </a></td>
+                            <td class="grey"><a href="/customer/tickets/detail/{{ticket.id}}" style="color:#555">{{ticket.ticketid}}</a></td>
+                            <td class="grey">{{ticket.summary}}</td>
+                            <td class="grey"><a href="/customer/tickets/detail/{{ticket.id}}" style="color:#555"><span style="display:none;">{{ticket.reportdate.year}}{% if ticket.reportdate.month >= 10 %}{{ticket.reportdate.month}}{% else %}0{{ticket.reportdate.month}}{%endif%}{% if ticket.reportdate.day >= 10 %}{{ticket.reportdate.day}}{% else %}0{{ticket.reportdate.day}}{%endif%}{{ticket.reportdate.time | time}}</span>
+                        {% tzone ticket.reportdate %}</a></td>
+                            <td class="grey" >{{ticket.internalpriority}}</td>
+                            <td class="grey">{{ticket.status | real:ticket.customer.id}}</td>
+                            <td class="grey">
+                            {% if ticket.status == 'CLOSED' %}
+                              Closed
+                            {% elif ticket.status == 'RESOLVED' %}
+                              Resolved
+                            {% else %}
+                               <span style="display:none;">{{ticket.targetfinish.year}}{% if ticket.targetfinish.month >= 10 %}{{ticket.targetfinish.month}}{% else %}0{{ticket.targetfinish.month}}{%endif%}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                              {% tzone ticket.targetfinish %}
+                            {% endif %}
+                          </td>
+                            
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>            
+                      </div>
+                    </div>
+                  </div>
+
+</div>
+
+
+
+                </div>
+            </div>
+        </div><!-- /.wrapper -->
+
+{% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles %}
+  {% include "components/dashboard_footer.html"%}
+  {% include "components/customer_footer.html"%}
+{% else %}
+  {% include "components/footer.html"%}
+  {% include "components/sr_cust.html"%}
+{% endif %}
+
+
+<script>
+     $("#service").addClass("active")
+     $("#subm").css('display','block');
+      {% if type == "My Tickets" %}
+        $("#mytic").addClass("active");
+      {% else %}
+        $("#alltic").addClass("active");
+      {% endif %}
+
+
+      // $("#infra").addClass("active");
+      // $("#infraopen").css('display','block');
+      //     $("#dcview").addClass("active");
+     </script>
+     <script type="text/javascript">
+     $(document).ready(function(){
+        $('#table_id').DataTable().destroy();
+        $('#table_id').DataTable({
+            aaSorting: [[3, 'desc']],
+        });
+     });
+     </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

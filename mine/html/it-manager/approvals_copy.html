@@ -1,0 +1,331 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style type="text/css">
+            table.fixed { table-layout:fixed; word-break:break-all;}
+            table.fixed td { overflow: hidden; }
+            .bs{
+            background-color: transparent;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px" id="it-manger-approval">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                {% if alert_message %}
+                    {% for alert in alert_message %}
+                        {% if profile.customer in alert.viewable_custs.all %}
+                        <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Approval Dashboard <small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Approval Dashboard</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    
+                    <div class="panel">
+                        <a href="?approved=True" class="btn btn-info pull-right" data-toggle="tooltip" data-placement="bottom" title="View Approved Tickets" style="margin-bottom:10px;" target="_blank"> View Approved Tickets</a><br/>
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center">Approval Dashboard</h3>
+                            <div class="panel-control">
+                                <ul class="nav nav-tabs" >
+                                    <li class="active"><a href="#pending"  data-toggle="tab">Pending Tickets</a></li>
+                                    <!-- <li ><a href="#approved"  data-toggle="tab">Approved Tickets</a></li> -->
+                                    <li ><a href="#declined" data-toggle="tab">Rejected Tickets</a></li>
+                                    <li ><a href="#closed" data-toggle="tab">Closed / Cancelled Tickets</a></li>
+                                </ul>
+                            </div>
+                            <!-- <h3 class="panel-title">Dashboard</h3> -->
+                        </div>
+                        <div class="panel-body">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active in" id="pending">
+                                    <div class="col-sm-12">
+                                        <h4 class="text-thin text-center">Ticket Pending For Approval</h4><br/><br/>
+                                        <table class="table table-striped borderless fixed" id="table_id" style="margin-top:10px">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Ticket Id</th>
+                                                    <th>Ticket Summary</th>
+                                                    <th>Reported Date</th>
+                                                    <th>Priority</th>
+                                                    <th>Reporting Manager Approval</th>
+                                                    <th>Functional Head Approval</th>
+                                                    <th>Status</th>
+                                                    <th>Reported Person</th>
+                                                    <th>Customer</th>
+                                                    <th>Ticket Belongs To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for details in pending_tickets %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if details.it_response == "Enduser" and details.modifiedperson == details.affectedperson %}
+                                                                <a data-toggle="tooltip" data-placement="bottom" title="Enduser Replied" class="btn btn-info btn-sm" href="/ticket/app/{{details.id}}">
+                                                                    <i class="fa fa-info "></i>
+                                                                </a>
+                                                            {% elif details.it_response == "IT" %}
+                                                                <a data-toggle="tooltip" data-placement="bottom" title="Additional Information" class="btn btn-warning btn-sm" href="/ticket/app/{{details.id}}">
+                                                                    <i class="fa fa-info "></i>
+                                                                </a>
+                                                            {% elif details.it_response == "FH" %}
+                                                                <a data-toggle="tooltip" data-placement="bottom" title="Functionalhead Approval" class="btn btn-danger btn-sm" href="/ticket/app/{{details.id}}">
+                                                                    <i class="fa fa-info "></i>
+                                                                </a>
+                                                            {% else %}
+                                                                <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/app/{{details.id}}">
+                                                                    <i class="fa fa-edit "></i>
+                                                                </a>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ details.ticketid }}</td>
+                                                        <td>{{ details.summary }}</td>
+                                                        <td><span style="display:none;">{{details.reportdate.year}}{% if details.reportdate.month >= 10 %}{{details.reportdate.month}}{% else %}0{{details.reportdate.month}}{%endif%}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%} {{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td> 
+                                                        <td>{{ details.internalpriority }}</td>
+                                                        <td>
+                                                            {% for approval in details.approval_set.all %}
+                                                                {% if approval.approvaltype == 'MANAGER' %}
+                                                                    {% if approval.approve == True %}
+                                                                        Yes
+                                                                    {% else %}
+                                                                        No
+                                                                    {% endif %}
+                                                                {% elif approval.approvaltype == 'EmailApproval' and approval.approver.user == details.affectedperson.supervisor %}
+                                                                    {% if approval.approve == True %}
+                                                                        Yes
+                                                                    {% else %}
+                                                                        No
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>{{details.id|fun_head_approval_status}}</td>
+                                                        <td>{{ details.status | real:details.customer.id}}</td>
+                                                        <td>{{ details.reportedby.user.username }}</td>
+                                                        <td>{{ details.customer.customername }}</td>
+                                                        <td>{{ details.ticketattribute_set.all.0.additional_category|tic_categorize}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="declined">
+                                    <div class="col-sm-12 pad-all">
+                                        <div class="col-sm-5">
+                                            <input type="text" id="reject_start_date" name="reject_start_date" placeholder="Start date" value="{{rejected_start}}" class="form-control">
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <input type="text" id="reject_end_date" name="reject_end_date" placeholder="End date" value="{{rejected_end}}" class="form-control">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <a href="#" onclick="get_date_filter_data('reject')" class="btn btn-success" type="submit">Fetch Tickets</a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-sm-12">
+                                        <h4 class="text-thin text-center">Rejected Tickets</h4>
+                                        <table class="table table-striped borderless fixed" id="table_2">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Ticket Id</th>
+                                                    <th>Ticket Summary</th>
+                                                    <th>Reported Date</th>
+                                                    <th>Priority</th>
+                                                    <th>Reporting Manager Approval</th>
+                                                    <th>Status</th>
+                                                    <th>Reported Person</th>
+                                                    <th>Customer</th>
+                                                    <th>Ticket Belongs To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for details in declined_tickets %}
+                                                    <tr>
+                                                        <td>
+                                                            <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/app/{{details.id}}">
+                                                            <i class="fa fa-edit "></i>
+                                                            </a>
+                                                        </td>
+                                                        <td>{{details.ticketid }}</td>
+                                                        <td>{{ details.summary }}</td>
+                                                        <td><span style="display:none;">{{details.reportdate.year}}{{details.reportdate.month}}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%}{{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                                                        <td>{{ details.internalpriority }}</td>
+                                                        <td>
+                                                            {% for approval in details.approval_set.all %}
+                                                                {% if approval.approvaltype == 'MANAGER' %}
+                                                                    {% if approval.approve %}
+                                                                      Yes
+                                                                    {% else %}
+                                                                      No
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>{{ details.status | real:details.customer,.id}}</td>
+                                                        <td>{{ details.reportedby }}</td>
+                                                        <td>{{ details.customer.customername}}</td>
+                                                        <td>{{ details.ticketattribute_set.all.0.additional_category|tic_categorize}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="closed">
+                                    <div class="col-sm-12 pad-all">
+                                        <div class="col-sm-5">
+                                            <input type="text" id="clos_start_date" name="clos_start_date" placeholder="Start date" value="{{clos_start}}" class="form-control">
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <input type="text" id="clos_end_date" name="clos_end_date" placeholder="End date" value="{{clos_end}}" class="form-control">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <a href="#" onclick="get_date_filter_data('clos')" class="btn btn-success" type="submit">Fetch Tickets</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12"></div>
+                                    <div class="col-sm-12">
+                                        <h4 class="text-thin text-center" >Canceled/Closed Tickets</h4>
+                                        <table class="table table-striped" id="table_3">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Ticket Id</th>
+                                                    <th>Ticket Summary</th>
+                                                    <th>Reported Date</th>
+                                                    <th>Priority</th>
+                                                    <th>Reporting Manager Approval</th>
+                                                    <th>Status</th>
+                                                    <th>Reported Person</th>
+                                                    <th>Customer</th>
+                                                    <th>Ticket Belongs To</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for details in closed_tickets %}
+                                                    <tr>
+                                                        <td><a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/app/{{details.id}}">
+                                                            <i class="fa fa-edit "></i>
+                                                            </a>
+                                                        </td>
+                                                        <td>{{details.ticketid }}</td>
+                                                        <td>{{ details.summary }}</td>
+                                                        <td><span style="display:none;">{{details.reportdate.year}}{{details.reportdate.month}}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%}{{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                                                        <td>{{ details.internalpriority }}</td>
+                                                        <td>
+                                                            {% for approval in details.approval_set.all %}
+                                                                {% if approval.approvaltype == 'MANAGER' %}
+                                                                    {% if approval.approve %}
+                                                                        Yes
+                                                                    {% else %}
+                                                                        No
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td>{{ details.status | real:details.customer.id}}</td>
+                                                        <td>{{ details.reportedby }}</td>
+                                                        <td>{{ details.customer.customername}}</td>
+                                                        <td>{{ details.ticketattribute_set.all.0.additional_category|tic_categorize}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script>
+            $("#adash").addClass("active")
+            $(function() {
+                $( "#reject_start_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+                $( "#reject_end_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+                $( "#clos_start_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+                $( "#clos_end_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#table_id').DataTable({
+                  aaSorting:[[3,'desc']]
+                });
+                $('#table_1').DataTable({
+                  aaSorting:[[3,'desc']]
+                });
+                $('#table_2').DataTable({
+                  aaSorting:[[3,'desc']]
+                });
+                $('#table_3').DataTable({
+                  aaSorting:[[3,'desc']]
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function change_dashboard(){
+                var role_name = $('#role_name').val();
+                role_name = role_name.replace(/ /g, '_');
+                document.location.href = "/dashboard/?name="+role_name;
+            }
+        </script>
+        <script>
+            function animate_alert_msg() {
+                $('#alert_msg').css({right:'0%'});
+                $('#alert_msg').animate({right: '-100%'}, 20000, 'linear', function(){animate_alert_msg();});
+            }
+            $(document).ready(function(){
+                animate_alert_msg();
+            });
+        </script>
+        <script type="text/javascript">
+            function get_date_filter_data(filter_type){
+                var reject_start_date = $('#reject_start_date').val();
+                var reject_end_date = $('#reject_end_date').val();
+                var clos_start_date = $('#clos_start_date').val();
+                var clos_end_date = $('#clos_end_date').val();
+                if (reject_start_date.length == 0)
+                    reject_start_date = "None"
+                if (reject_end_date.length == 0)
+                    reject_end_date = "None"
+                if (clos_start_date.length == 0)
+                    clos_start_date = "None"
+                if (clos_end_date.length == 0)
+                    clos_end_date = "None"
+                if (reject_start_date != "None" && reject_end_date != "None")
+                    url = "/?type=reject&reject_start="+reject_start_date+"&reject_end="+reject_end_date;
+                else if (clos_start_date != "None" && clos_end_date != "None")
+                    url = "/?type=close&close_start="+clos_start_date+"&close_end="+clos_end_date;
+                else
+                    var url = '/'
+                if (url.length > 0 && clos_start_date != "None" && clos_end_date != "None"){
+                    url = url + "&close_start="+clos_start_date+"&close_end="+clos_end_date;
+                }
+                document.location.href = url;
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,393 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    @page {
+        size: letter landscape;        
+        margin: 0cm;               
+    }
+
+    @font-face {
+        font-family: "Lato";
+        src: url("{{static_dir}}fonts/lato-reg-webfont.ttf");
+    }
+
+    div { font-family: Lato; }
+    table { font-family: Lato; }
+
+    .report_heading{
+    	text-align:center;
+    	font-size:24px;
+    	margin:20px 0px 0px 0px;
+    }
+
+    .summary{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bold;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:18px;
+    }
+
+    .summary_tbl_contents{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:18px;
+    	background-color:#e7eefa;
+    	border:1px solid #FFF;
+    }
+
+    .ticket_details_head{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bolder;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:14px;
+    	border:1px solid #FFF;
+    	color:#154a9b;
+    }
+
+    .ticket_details_cnt{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:14px;
+    	background-color:#93d5fc;
+    	border:1px solid #FFF;
+    }    
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">    
+  </head>
+  <body class="fixed" style="font-size:13px">
+  	<div class="content">
+        <div>
+            <div style="text-align:right;padding-top:10px;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <br />
+        <div>
+            <div style="text-align:center;color:#595959;font-size:35px;">
+                Marlabs OneConsole
+            </div>
+
+            {% if customer_logo %}            
+            <div style="text-align:center;">
+                <img src="{{media_root}}/{{customer_logo}}" style="text-align:center;height:90px;" /> 
+            </div>            
+            {% endif %}
+
+            <div style="text-align:center;color:#000000;font-size:24px;">
+                <h1>{{customer.customername}} </h1>
+            </div>
+            <div style="text-align:center;color:#002060;font-size:24px;">
+                Weekly Utilization Report - {{current_month}}
+            </div>
+            <div style="text-align:center;color:#00b0f0;font-size:20px;font-weight:bold;font-style: italic;">
+                (Week {{week_startdate}} to Week {{week_ennddate}})
+            </div>
+        </div>         
+              
+    	<div style="{% if customer_logo %}padding-top:145px;{% else %}padding-top:235px;{% endif %}">
+    		<div>
+                <span>
+                    <img src="{{static_dir}}img/background-layer.jpeg" style="width:1050px; height:250px;" />
+                </span>
+    		</div>    		
+    	</div>
+
+        <pdf:nextpage />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        <br />
+        <br />
+
+    	<div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                Ticket Summary and Support Hours                
+            </div>
+        </div>
+    	
+    	<div style="text-align:center;">           
+    	   <table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;text-align:center;" width="100%">
+    			<tr>
+    				<th colspan="2" class="summary">
+    					Summary
+    				</th>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Customer Tickets - {{current_month_year}}
+    				</td>
+    				<td class="summary_tbl_contents">
+    					Week {{week_startdate}} to {{week_ennddate}}
+    				</td>
+    			</tr>
+
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Total No. of tickets handled
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{tickets_handled}}
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					No. of tickets Closed
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{tickets_closed_count}}
+    				</td>
+    			</tr>
+                <tr>
+                    <td class="summary_tbl_contents">
+                        No. of tickets Resolved
+                    </td>
+                    <td class="summary_tbl_contents">
+                        {{tickets_resolved_count}}
+                    </td>
+                </tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					No. of tickets Open
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{tickets_open_count}}
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Total hours used for this week
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{hours_used_week|hour_cal}}
+    				</td>
+    			</tr>
+    			<tr>
+    				<th colspan="2" class="summary">
+    					Support Hours
+    				</th>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Total hours available
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{total_hours|hour_cal}}
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Hours used for the month
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{hours_used_month|hour_cal}}
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="summary_tbl_contents">
+    					Hours remaining for the month
+    				</td>
+    				<td class="summary_tbl_contents">
+    					{{hours_remaining|hour_cal}}
+    				</td>
+    			</tr>
+          </table>                  
+    	</div>
+        <br />
+        <br />       
+        
+        <div style="padding-top:218px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+
+        <pdf:nextpage />
+
+    	<br />    	
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>        
+        <br />
+
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                Support Hours Dashboard                
+            </div>
+        </div>
+
+        <div>
+            <img src="{{media_root}}/phantom_shots/{{customer_pkid}}.jpeg" style="text-align:center;width:1050px; height:550px;" /> 
+        </div>
+        
+        <div style="padding-top:115px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+
+        <pdf:nextpage />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        
+    	<br />
+    	<br />
+
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                Ticket Summary               
+            </div>
+        </div>    
+
+    	<div>
+    		<table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+    			<tr>    				
+    				<th class="ticket_details_head">
+    					<strong>Ticket No</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Ticket Summary</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Assigned Engineer</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Created Date</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Closed Date</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Hours Spend</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Current status</strong>
+    				</th>
+    			</tr>
+
+    			{% for tickets in tickets_closed_details %}
+    			<tr>    				
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__ticketid}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__summary}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__owner__user__first_name}} {{tickets.ticket__owner__user__last_name}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__creationdate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__closedate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.total|hour_cal}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__status | real}} 
+    				</td>
+    			</tr>
+    			{% endfor %}
+
+    			{% for tickets in tickets_resolved_details %}
+    			<tr>    				
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__ticketid}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__summary}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__owner__user__first_name}} {{tickets.ticket__owner__user__last_name}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__creationdate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__closedate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.total|hour_cal}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticket__status|real}} 
+    				</td>
+    			</tr>
+    			{% endfor %}
+
+    			{% for tickets in tickets_open_details %}
+    			<tr>    				
+    				<td class="ticket_details_cnt">
+    					{{tickets.ticketid}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.summary}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.user_details.user.first_name}} {{tickets.user_details.user.last_name}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.creationdate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.closedate|tzonest}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.hours_spend|hour_cal}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{tickets.status|real}} 
+    				</td>
+    			</tr>
+    			{% endfor %}    			
+    		</table>
+    	</div>
+
+        <pdf:nextpage />
+
+        <br />
+        <br />      
+
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>
+         <br />
+        <br />
+
+        <div>
+            <div style="text-align:center;">
+            <img src="{{static_dir}}img/thankyou.jpg" style="text-align:right;width:800px;height:500px;" />
+            </div>
+        </div>
+
+        <div style="padding-top:170px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+    </div>
+  </body>
+  </html>
+

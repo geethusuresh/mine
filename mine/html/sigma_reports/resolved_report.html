@@ -1,0 +1,389 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Resolved Report  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="/reports/">Reports</li>
+                    <li class="active">Resolved Reports</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                    {{report_heading}} <br />                    
+                </div>
+              </div>
+
+              <!--start row -->
+              <div class="row">
+                <div class="col-sm-12">                                             
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <i class="fa fa-fw"></i>                            
+                          </div>
+                          <div class="panel-body">
+                          <form name="frm_ageing" id="frm_ageing" action="/resolved_report/" method="POST"> {% csrf_token %}
+                            <div class="col-sm-8">                             
+                              <select class="form-control" name="strategic_workgroup" id="strategic_workgroup" required>
+                                <option value="">Select Strategic Business Groups</option>
+                                {% for strategic_group_item in strategic_groups  %}
+                                {% for key,value in strategic_group_item.items %}
+                                {% if group_details == value %}                                  
+                                  <option value="{{value}}" selected="selected">{{key}}</option>
+                                {% else %}
+                                  <option value="{{value}}">{{key}}</option>
+                                {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="col-sm-4">
+                            <input type="submit" value="Fetch Report" class="btn btn-success" style="float:left;min-width:20%;">
+                            <a class="btn btn-success" title="Reset Report" href="/resolved_report/" style="float:left;min-width:20%;margin-left:20px;">Reset</a>
+                            <input type="hidden" name="strategic_grp_name" id="strategic_grp_name" />
+                            </div>                            
+                          </form>
+                          </div>
+                      </div>
+                </div>
+              </div>
+              <!--End row -->
+
+
+                <!-- Start row-->
+                <div class="row">
+                  <!--Thrid widget -->     
+                    <div class="col-sm-12">                                             
+                      <div class="panel">
+                          <div class="panel-heading">
+                          <h5 style="font-size:17px" class="panel-tiltle">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>
+                            <center>{{report_box_heading}}</center></h5>
+                          </div>
+                          <!-- /.panel-heading -->
+                          <div class="panel-body">
+                              <div id="backlog_ageing_report"></div>
+                              {% if caption == 1 %}
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#backlog_ageing_report').highcharts({
+                                        chart: {
+                                            type: 'column',
+                                            marginTop: 50                                      
+                                        },
+                                        title: {
+                                            text: ''
+                                        },                                
+                                        xAxis: {
+                                            categories: [
+                                                {% for groups in strategic_business_overview %}
+                                                  '{{groups.strategic_group}}',
+                                                {% endfor %}                              
+                                            ],                                            
+                                        },
+                                        yAxis: {
+                                            min: 0,                                            
+                                            title: {
+                                                text: 'No. of resolved tickets'
+                                            },
+                                            labels: {
+                                              formatter: function() {
+                                                return this.value;
+                                              }
+                                            }
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2,
+                                                dataLabels: {
+                                                  enabled: true,
+                                                  align: 'middle',
+                                                  y: -1,
+                                                  rotation: -90,
+                                                  style: {
+                                                    fontWeight: 'bold'
+                                                  }
+                                                }
+                                            },
+                                            series: {
+                                            pointPadding: 0.2,
+                                            cursor: 'pointer',
+                                              point: {
+                                                  events: {
+                                                      click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        // str_name = str_name.replace(" ","_");
+                                                        str_name = str_name.replace(/ /g,"_");
+                                                        console.log(str_name)
+                                                        console.log(this.y)
+                                                        
+                                                        var str_category = this.category;
+                                                        str_category = str_category.replace(/ /g,"_");
+                                                        console.log(str_category)
+
+                                                        
+                                                      window.open("/jira/report/jira_resolved_individual_excel/"+str_name+"/"+str_category+"");
+                                                      }
+                                                  }
+                                              }
+                                            }
+
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#3C5F87',
+                                              name: 'Last Month',
+                                              data: [{% for groups in strategic_business_overview %}
+                                              {{groups.lastmonth_count}},
+                                              {% endfor %}
+                                              ]
+                                          }, {
+                                              type: 'column',
+                                              color:'#924947',
+                                              name: 'Last Week',
+                                            data: [{% for groups in strategic_business_overview  %}
+                                                  {{groups.lastweek_count}},
+                                                {% endfor %}
+                                              ]
+                                          }, {
+                                              type: 'column',
+                                              color:'#6C823F',
+                                              name: 'Current Week',
+                                            data: [{% for groups in strategic_business_overview  %}
+                                                  {{groups.currentweek_count}},
+                                                {% endfor %}
+                                              ]
+                                        }],
+                                        exporting: { enabled: false }
+                                    });
+                                });
+                              </script>
+                              {% endif %}
+                              {% if caption == 0 %}
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#backlog_ageing_report').highcharts({
+                                        chart: {
+                                            type: 'column',
+                                            marginTop: 50  
+                                        },
+                                        title: {
+                                            text: ''
+                                        },                                
+                                        xAxis: {
+                                            categories: [
+                                                {% for groups in strategic_business_overview %}
+                                                  '{{groups.strategic_group}}',
+                                                {% endfor %}                              
+                                            ],                                            
+                                        },
+                                        yAxis: {
+                                            min: 0,                                            
+                                            title: {
+                                                text: 'No. of resolved tickets'
+                                            },
+                                            labels: {
+                                              formatter: function() {
+                                                return this.value;
+                                              }
+                                            }
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2,
+                                                dataLabels: {
+                                                  enabled: true,
+                                                  align: 'middle',
+                                                  y: -1,
+                                                  rotation: -90,
+                                                  style: {
+                                                    fontWeight: 'bold'
+                                                  }
+
+                                                }
+                                            },
+                                            series: {
+                                            pointPadding: 0.2,
+                                            cursor: 'pointer',
+                                              point: {
+                                                  events: {
+                                                      click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        // str_name = str_name.replace(" ","_");
+                                                        str_name = str_name.replace(/ /g,"_");
+                                                        console.log(str_name)
+                                                        console.log(this.y)
+                                                        
+                                                        var str_category = this.category;
+                                                        str_category = str_category.replace(/ /g,"_");
+                                                        console.log(str_category)
+
+                                                        
+                                                      window.open("/jira/report/jira_resolved_subgroup_excel/"+str_name+"/"+str_category+"");
+                                                      }
+                                                  }
+                                              }
+                                            }
+
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#3C5F87',
+                                              name: 'Last Month',
+                                              data: [{% for groups in strategic_business_overview %}
+                                              {{groups.lastmonth_count}},
+                                              {% endfor %}
+                                              ]
+                                          }, {
+                                              type: 'column',
+                                              color:'#924947',
+                                              name: 'Last Week',
+                                            data: [{% for groups in last_week_closed_count  %}
+                                                  {{groups.lastweek_count}},
+                                                {% endfor %}
+                                              ]
+                                          }, {
+                                              type: 'column',
+                                              color:'#6C823F',
+                                              name: 'Current Week',
+                                            data: [{% for groups in strategic_business_overview  %}
+                                                  {{groups.currentweek_count}},
+                                                {% endfor %}
+                                              ]
+                                        }],
+                                        exporting: { enabled: false }
+                                    });
+                                });
+                              </script>
+                              {% endif %}
+
+                              {% if caption == 1 %}
+                              <!--Summary-->
+                              <div class="col-sm-12" style="margin-top:20px;">
+                                <div class="col-sm-6" style=" solid #ff0000;font-size: 10px;color:#446b9c;">
+                                  <div>
+                                      CURRENT WEEK - TOTAL NUMBER OF RESOLVED ISSUES FOR THE CURRENT WEEK 
+                                  </div>
+                                  <div>
+                                      LAST WEEK - TOTAL NUMBER OF RESOLVED ISSUES FOR THE LAST WEEK
+                                  </div>
+                                  <div>
+                                      LAST MONTH - TOTAL NUMBER OF RESOLVED ISSUES TILL THE END OF LAST MONTH
+                                  </div>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                                <div class="col-sm-5" style=" solid #ff0000;font-size: 11px;color:#446b9c;">
+                                  <div>
+                                      Resolved Report:- Resolution has been taken, and it is awaiting verification by reporter. From here issues are either reopened, or are closed
+                                  </div>
+                                </div>
+                              </div>
+                              <!--End Summary-->  
+                              {% endif %}
+                              {% if caption == 0 %}
+                              <!--Summary-->
+                              <div class="col-sm-12" style="margin-top:20px;">
+                                <div class="col-sm-6" style=" solid #ff0000;font-size: 10px;color:#446b9c;">
+                                  <div>
+                                      CURRENT WEEK - TOTAL NUMBER OF RESOLVED ISSUES FOR THE CURRENT WEEK 
+                                  </div>
+                                  <div>
+                                      LAST WEEK - TOTAL NUMBER OF RESOLVED ISSUES FOR THE LAST WEEK
+                                  </div>
+                                  <div>
+                                      LAST MONTH - TOTAL NUMBER OF RESOLVED ISSUES TILL THE END OF LAST MONTH
+                                  </div>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                                <div class="col-sm-5" style=" solid #ff0000;font-size: 11px;color:#446b9c;">
+                                  <div>
+                                      Resolved Report:- Resolution has been taken, and it is awaiting verification by reporter. From here issues are either reopened, or are closed
+                                  </div>
+                                </div>
+                              </div>
+                              <!--End Summary-->  
+                              {% endif %}
+                                                                
+                        </div>
+                      </div>
+                    </div>
+                  <!--End second widget -->
+                </div>
+                <!--End row -->                          
+
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>        
+      {% include "components/dashboard_footer.html" %}
+      {% include "components/service_request.html" %}
+      {% include "reports/reports_js.html" %}
+    </body>
+</html>

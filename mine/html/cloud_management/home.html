@@ -1,0 +1,183 @@
+{% extends 'cloud_management/base_old.html'%} {% load staticfiles %}
+
+
+{% block basecontent %}{% load staticfiles %}
+ {% block content %}
+{% endblock %}
+
+<style type="text/css">
+  
+    .modal-backdrop{
+      z-index: 0 !important;
+    }
+
+</style>
+
+<div id="largeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add New Cloud</h4>
+            </div>
+            <div class="modal-body">
+               <div class="col-xs-12">
+            <div class="box box-solid" style="padding:6px">
+                <div class="box-body">
+                    <div class="row">
+                   <div class="col-md-3 col-sm-3">
+                            <ul class="nav nav-pills nav-stacked" id="myTab">
+                                <li class="header">Private Cloud</li>
+                                <li class="active">
+                                    <a href="#openstack" data-toggle="tab" role="tab">
+                                        <img src="/static/cloud-static-files/img/openstack.png" class="img-circle" width="18"> 
+                                        <span style="color:black">Openstack</span>
+                                    </a>
+                                </li>
+          <!--                                      </ul>
+                           <ul class="nav nav-pills nav-stacked"> -->
+                                <li class="header">Public Cloud</li>
+                                <li>
+                                    <a href="#aws_account" data-toggle="tab" role="tab">
+                                        <img src="/static/cloud-static-files/img/aws-ec2_server.jpg" class="img-circle" width="15">
+                                        <span style="color:black"> Amazon Web Services</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#azure_account" data-toggle="tab" role="tab">
+                                        <img src="https://satonaoki.files.wordpress.com/2014/02/windows-azure.png?w=614" class="img-circle" width="15">
+                                        <span style="color:black"> MS Azure</span>
+                                    </a>
+                                </li>
+                            </ul>
+                </div>
+                 <div class="col-md-9 col-sm-9">
+                 <span id = "account_error"></span>
+                  <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="openstack">
+                              <span id = "openstack_error"></span>
+                              <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'openstack_credential'%}">
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Account Name :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="name" class="form-control" id ="name" placeholder="Add Name for Your Account">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Keystone URL :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="keystone" class="form-control" id ="keystone" placeholder="Add Openstack Url">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Username :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="username" class="form-control" id ="username" placeholder="Add Openstack Username">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Password :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="password" class="form-control" id ="password" placeholder="Add Openstack Password">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Tenant Name :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="tenant" class="form-control" id ="tenant" placeholder="Add Openstack Project">
+                                      </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button class="btn btn-primary" type="submit" id="form-submit">Submit</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                   </div>
+                              </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="aws_account">
+                              <span id = "aws_error"></span>
+                              <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'aws_registration'%}">{% csrf_token%}
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Account Name :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="name" class="form-control" id ="name" placeholder="Add Name for Your Account">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Access Key ID:</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="access_key_id" class="form-control" id ="username" placeholder="Add AWS access key id">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Secret Access Key:</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="secret_access_key" class="form-control" id ="password" placeholder="Add AWS Secret access key">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Region:</label>
+                                      <div class="col-sm-6">
+                                          <select name="region" class="form-control">
+                                            <option value="EC2_US_EAST">US East (Northern Virginia)</option>
+                                            <option value="EC2_US_WEST_OREGON">US West (Oregon)</option>
+                                            <option value="EC2_US_WEST">US West (Northern California)</option>
+                                            <option value="EC2_EU">EU (Ireland)</option>
+                                            <option value="EC2_AP_SOUTHEAST"> Asia Pacific (Singapore) </option>
+                                            <option value="EC2_AP_SOUTHEAST2">Asia Pacific (Sydney) </option>
+                                            <option value="EC2_AP_NORTHEAST">Asia Pacific (Tokyo) </option>
+                                            <option value="EC2_SA_EAST"> South America (Sao Paulo)</option>
+                                          </select>
+                                      </div>
+                                  </div>
+                                   <div class="modal-footer">
+                                    <button class="btn btn-primary" type="submit" id="form-submit">Submit</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                   </div>
+                              </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="azure_account">
+                              <span id = "azure_error"></span>
+                              <form method="post" class="form-horizontal style-form" id="azure-form" action="{%url 'add_azure_account'%}" enctype="multipart/form-data">{% csrf_token%}
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Account Name :</label>
+                                      <div class="col-sm-6">
+                                          <input type="text" required name="name" class="form-control" id ="name" placeholder="Add Name for Your Account">
+                                      </div>
+                                  </div>
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-sm-4 control-label">Public Settings File :</label>
+                                      <div class="col-sm-6">
+                                          <input type="file" required name="key_file" class="form-control" id ="key_file" placeholder="Add certificate file">
+                                      </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button class="btn btn-primary" type="submit" id="form-submit">Add</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                   </div>
+                              </form>
+                    </div>
+                  </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+            </div>
+
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script> -->
+ <script>
+      $('#myTab a:first').tab('show')
+     $( ".create-cloud" ).click(function() {
+          $("#largeModal").modal('show');
+      });
+  </script>
+{% endblock%}

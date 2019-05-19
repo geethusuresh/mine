@@ -1,0 +1,56 @@
+{% extends "change_management/change_base.html" %}
+{% load zone %}
+{% block title_content %} Change Report {% endblock title_content %}
+{% block page_head %} Change Management <small>| Reports </small>{% endblock page_head %}
+
+{% block bread_crumb %} <li class="active"> Reports </li>{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">Change Requests</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Vew/Edit</th>
+                                <th>ChangeID</th>
+                                <th>Domain</th>
+                                <th>Subdomain</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for change in change_requests %}
+                                <tr>
+                                    <td><a href="/rfc/details/{{change.id}}/" class="btn btn-success"><i class="fa fa-edit"></i></a></td>
+                                    <td>{{change.change_id}}</td>
+                                    <td>{{change.group.workgroup}}</td>
+                                    <td>{{change.subgroup.subgroupname}}</td>
+                                    <td>{{change.status}}</td>
+                                    <td>{{change.priority}}</td>
+                                    <td>{% tzone change.created_date %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+    <script src="/static/customer/moment.min.js"></script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#change_report').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

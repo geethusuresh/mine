@@ -1,0 +1,180 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li class="active">Users</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Users</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-12" style="margin-bottom:5px;">
+                                        <div class="newtoolbar">
+                                            <div class="table-toolbar-left">
+                                                <!-- <a href="/admin_settings/customers/all/" class="btn btn-info btn-labeled fa fa-times" style="margin-right:5px;">View All Customers</a> -->
+                                                <!-- <a href="#" class="btn btn-warning btn-labeled fa fa-times" data-target="#create_role" data-toggle="modal" style="margin-right:5px;">Create Role</a> -->
+                                                <!-- <a href="#" data-toggle="modal" data-target="#create_group" class="btn btn-danger btn-labeled fa fa-times" style="margin-right:5px;">Create Group</a>
+                                                <a href="/admin_settings/copy_templates/" class="btn btn-success btn-labeled fa fa-times" style="margin-right:5px;">Copy All Templates</a>
+                                                <a href="/admin_settings/assign_support_team/{{customer.id}}/" class="btn btn-pink btn-labeled fa fa-times" style="margin-right:5px;">Support Team</a> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href="#a_users">
+                                                    <i class="fa fa-lg"></i> Active Users
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href="#d_users">
+                                                    <i class="fa fa-lg"></i>
+                                                    Inactive Users
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div class="tab-pane fade in active" id="a_users">
+                                                <table class="table table-stripped" id="active_users">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="display:none;">ID</th>
+                                                            <th>Email</th>
+                                                            <th>Firstname</th>
+                                                            <th>Customer</th>
+                                                            <th>Edit</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="tab-pane" id="d_users">
+                                                <table class="table table-stripped" id="deactive_users_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="display:none;">ID</th>
+                                                            <th>Email</th>
+                                                            <th>Firstname</th>
+                                                            <th>Customer</th>
+                                                            <th>Edit</th>
+                                                        </tr>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#active_users').dataTable({
+               "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/users/all/?active=true",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "": "id", sClass:"hidden"},
+                    { "": "email" },
+                    { "": "first_name"},
+                    { "": "customer"},
+                    { "": "", "bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 4,
+                    "data": null,
+                    "defaultContent": "<button class='btn btn-success'> <i class='fa fa-edit'> </i> </button> "
+                }] 
+            });
+            $('#deactive_users_table').dataTable({
+               "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/users/all/?deactive=true",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "": "id", sClass:"hidden"},
+                    { "": "email" },
+                    { "": "first_name"},
+                    { "": "customer"},
+                    { "": "", "bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 4,
+                    "data": null,
+                    "defaultContent": "<button class='btn btn-success'> <i class='fa fa-edit'> </i> </button> "
+                }] 
+            });
+        </script>
+        <script type="text/javascript">
+            $('#active_users').on('click', 'tr', function(e) {
+                var row = $(this).find('td:eq(0)').text();
+                if (row) {
+                    document.location.href = "/admin_settings/users/"+row+"/";
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            $('#deactive_users_table').on('click', 'td', function(e) {
+                var th = $(this).closest('table').find('th').eq(this.cellIndex);
+                if (th.html() == 'Edit') {
+                    var row = $(this).prev().prev().prev().prev().html();
+                    console.log(row);
+                    document.location.href = "/admin_settings/users/"+row+"/";
+                }
+            });
+        </script>
+    </body>
+</html>

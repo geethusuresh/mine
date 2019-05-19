@@ -1,0 +1,401 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+     <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>    -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highstock.js"></script>    
+    <script src="/static/js/highcharts/exporting.js"></script>   
+    <!--End High Charts -->
+
+    <script type="text/javascript">
+    function item_details(item_id){
+        $('#trigger_item_details').val(item_id);
+        $('#frm_item_details').submit();
+    }
+
+    function check_host_change(){
+        $('#host_selection').val('host_selected');
+        $('#hostgroup_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function check_hostgroup_change(){
+        $('#hostgroup_selection').val('hostgroup_selected');
+        $('#host_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function timeintervel_duration(duration){
+        $('#timeinterval').val(duration);
+        $('#frm_timeinterval').submit();
+    }
+
+    function multi_customer_perm(){
+        $('#frm_multi_customer').submit();
+    }
+    
+    </script>
+   
+    <style type="text/css">        
+      .panel-title{font-size:15px;}
+    </style> 
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css"> 
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/monitoring_header.html"%}
+    {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+    {% else %}
+      {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+         {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Monitoring Service | <small>Network Monitoring Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>                   
+                    <li class="active">Network Monitoring Details</li>
+                </ol>
+            </div>
+            <div class="content">              
+
+                <!-- /.row -->
+                <div class="row">
+                    <form name="frm_host_item" id="frm_host_item" action="/advanced_monitoring/network_monitoring/" method="POST">{% csrf_token %}
+                    <!-- <div class="row"> -->
+                      <div class="col-lg-12" style="margin-bottom:18px;"> 
+                         <div class="col-lg-4">
+                            <div class="panel" style="margin-top:16px;">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">
+                                    <i class="fa fa-exchange fa-fw"></i> Network Monitored Groups
+                                  </h3>
+                                </div>
+                                <div class="panel-body">                           
+                                    <select class="form-control" name="hostgroup" id="hostgroup" onchange="check_hostgroup_change();">
+                                        <option value="" style="font-weight:bold;">
+                                         Please select any groups</option>      
+                                          {% for hostitem in hostgrp_details %}
+                                          {% if hostitem.hostgroup_id == selected_hostgroup %}           
+                                          <option value="{{hostitem.hostgroup_id}}" selected="selected">
+                                          {{hostitem.hostgroup}}
+                                          </option>
+                                          {% else %}            
+                                          <option value="{{hostitem.hostgroup_id}}">{{hostitem.hostgroup}}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                    </select>                           
+                                </div>
+                            </div>                 
+                         </div>
+
+                         <div class="col-lg-4" {% if hostdetails %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                            <div class="panel" style="margin-top:16px;">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">
+                                    <i class="fa fa-exchange fa-fw"></i> Network Monitored Hosts
+                                  </h3>
+                                </div>
+                                <div class="panel-body">                                                   
+                                    <select class="form-control" name="host" id="host">
+                                        <option value="" style="font-weight:bold;">
+                                         Please select any hosts</option>      
+                                          {% for hostitem in hostdetails %}
+                                          {% if hostitem.hostid == selected_host %}           
+                                          <option value="{{hostitem.hostid}}" selected="selected">
+                                          {{hostitem.hostname}}
+                                          </option>
+                                          {% else %}            
+                                          <option value="{{hostitem.hostid}}">{{hostitem.hostname}}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                    </select>                           
+                                </div>
+                            </div>
+                            <button id="btn_chart_details" name="btn_chart_details" type="submit" style="float:right" class="btn waves-effect waves-light btn-info ">
+                             Fetch Data</button>                  
+                         </div>
+                       </div>
+                    <!-- </div> -->
+                    <input type="hidden" name="hostgroup_selection" id="hostgroup_selection" value="" />
+                </form>
+              </div>        
+              <!-- /.row -->
+        
+              <!--Response Graph block -->
+               <div class="row">
+                 <div class="col-lg-12">     
+                   <div class="panel">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> {% if selected_hostname %} {{selected_hostname}} - {% endif %} ICMP Response Time (ms)                            
+                        </h3>                          
+                      </div>
+                      <!-- /.panel-heading -->
+                      <div class="panel-body">
+                      {% if response_details %}
+                         <div id="resp_chart" style="width: 100%; height: 400px;"></div>
+                      {% else %}
+                       <div class="alert alert-danger" role="alert">
+                          {% if hostdetails %}
+                            No monitored data found. Please select any host and fetch monitored details
+                          {% else %}
+                            No monitored data found. Please select any hostgroup and fetch monitored details
+                          {% endif %}
+                        </div>
+                      {% endif %}                        
+                      </div>
+                      <!-- /.panel-body -->
+                  </div>
+                </div>
+              </div>
+              <!--Graph block -->
+
+              <!--packet loss Graph block -->
+               <div class="row">
+                 <div class="col-lg-12">     
+                   <div class="panel">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> {% if selected_hostname %} {{selected_hostname}} - {% endif %} ICMP Loss (%)                            
+                        </h3>                          
+                      </div>
+                      <!-- /.panel-heading -->
+                      <div class="panel-body">
+                      {% if packetloss %}
+                         <div id="packet_chart" style="width: 100%; height: 400px;"></div>
+                      {% else %}
+                       <div class="alert alert-danger" role="alert">
+                          {% if hostdetails %}
+                            No monitored data found. Please select any host and fetch monitored details
+                          {% else %}
+                            No monitored data found. Please select any hostgroup and fetch monitored details
+                          {% endif %}
+                        </div>
+                      {% endif %}                        
+                      </div>
+                      <!-- /.panel-body -->
+                  </div>
+                </div>
+              </div>
+              <!--Graph block -->
+                    
+            </div>
+          </div>
+        </div>
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+      {% include "ticket/advanced_search_popup.html" %}
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      <script type="text/javascript">
+          $("#monitoring_nav").addClass("active");
+          $("#monitoring_sub").css('display','block');
+          $("#network_detail").addClass("active");
+      </script>
+      {% if response_details %}
+      <script type="text/javascript">
+        var response_data = [{% for item in response_details %} [{{item.0}}000,{{item.1}}], {% endfor %}];          
+        // create the chart
+        $('#resp_chart').highcharts('StockChart', {
+            title: {
+                text: 'ICMP Response Time (ms)'
+            },
+
+            subtitle: {
+                text: ''
+            },
+
+            xAxis: {
+                gapGridLineWidth: 0
+            },           
+
+            yAxis: {              
+              title: {
+                  text: 'ICMP Response Time (ms)'
+              }
+            },
+
+            exporting: {
+                enabled: false
+            },
+
+            tooltip: {
+                formatter: function () {                  
+                  var s = '<b>' + Highcharts.dateFormat('%A, %b %e, %H:%M:%S', this.x) + '</b>';
+                  $.each(this.points, function () {
+                      s += '<br/>Response Time = ' + this.y + ' ms';
+                  });
+                  return s;
+                }
+            },
+
+            rangeSelector : {
+                buttons : [{
+                    type : 'hour',
+                    count : 1,
+                    text : '1h'
+                }, {
+                    type : 'day',
+                    count : 1,
+                    text : '1D'
+                }, {
+                    type : 'day',
+                    count : 2,
+                    text : '2D'
+                }],
+                selected : 1,
+                inputEnabled : false
+            },
+
+            series : [{
+                name : 'Response Time',
+                type: 'area',
+                data : response_data,
+                gapSize: 5,
+                tooltip: {
+                    valueDecimals: 2
+                },
+                fillColor : {
+                    linearGradient : {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops : [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                threshold: null
+            }]
+        });
+        </script>
+      {% endif %}
+
+      {% if packetloss %}
+      <script type="text/javascript">
+        var packetloss_data = [{% for item in packetloss %} [{{item.0}}000,{{item.1}}], {% endfor %}];          
+        // create the chart
+        $('#packet_chart').highcharts('StockChart', {
+            title: {
+                text: 'ICMP Loss (%)'
+            },
+
+            subtitle: {
+                text: ''
+            },
+
+            xAxis: {
+                gapGridLineWidth: 0
+            },
+
+            yAxis: {
+              min: 0,
+              max:100,
+              title: {
+                  text: 'ICMP Loss (%)'
+              }
+            },
+
+            exporting: {
+                enabled: false
+            },
+
+            tooltip: {
+                formatter: function () {                  
+                  var s = '<b>' + Highcharts.dateFormat('%A, %b %e, %H:%M:%S', this.x) + '</b>';
+                  $.each(this.points, function () {
+                      s += '<br/>ICMP Loss = ' + this.y + ' %';
+                  });
+                  return s;
+                }
+            },
+
+            rangeSelector : {
+                buttons : [{
+                    type : 'hour',
+                    count : 1,
+                    text : '1h'
+                }, {
+                    type : 'day',
+                    count : 1,
+                    text : '1D'
+                }, {
+                    type : 'day',
+                    count : 2,
+                    text : '2D'
+                }],
+                selected : 1,
+                inputEnabled : false
+            },
+
+            series : [{
+                name : 'ICMP Loss',
+                type: 'area',
+                data : packetloss_data,
+                gapSize: 5,
+                tooltip: {
+                    valueDecimals: 2
+                },
+                fillColor : {
+                    linearGradient : {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops : [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                threshold: null
+            }]
+        });
+        </script>
+      {% endif %}
+
+      {% include "components/dashboard_footer.html" %} 
+      {% include "components/service_request.html" %} 
+    </body>
+</html>

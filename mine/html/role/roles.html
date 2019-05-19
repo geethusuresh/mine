@@ -1,0 +1,278 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: -49px;
+      margin-right: 25px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="col-sm-10">
+                <div class="box">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab"> 
+                      <li class="{% if not priv_div  %} active {% endif %}"><a data-toggle="tab" href="#roles">Roles</a></li>
+                      <li class="{% if priv_div  %} active {% endif %}"><a data-toggle="tab" href="#privileges">Privileges</a></li>
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+                      <div id="roles" class="tab-pane fade in {% if not priv_div  %} active {% endif %}">
+                          <table class="table table-hover " id="role_table">
+                            <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Role</th>
+                                <th>Description</th>
+                                <th>Customer</th>
+                                <th>No of Privileges</th>
+                            </tr> 
+                            </thead>
+                            <tbody>
+                              {% for role in role_list %}
+                              <tr>
+                                <td><a href="/role/edit/{{role.id}}" style="color:inherit;">{{ forloop.counter}}</a></td>
+                                <td><a href="/role/edit/{{role.id}}" style="color:inherit;">{{ role.rolename }}</a></td>
+                                <td>{{ role.description}}</td>
+                                <td>{{ role.customer }}</td>
+                                {% for x,y in rp_list %}
+                                  {% if x == role.id %}
+                                    <td><a href="/list/rprivs/{{role.id}}"><label class="btn label-info" style="width:40px;"><i  style=" font-size: 10pt;">{{y}}</i></label></a></td>
+                                  {% endif %}
+                                {% endfor %}
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                      </div>
+                      <div id="privileges" class="tab-pane fade in {% if priv_div  %} active {% endif %}">
+                          <table class="table table-hover" id="privilege_table">
+                            <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Privilege</th>
+                                <th>Description</th>
+                                <th>Roles</th>
+                            </tr> 
+                            </thead>
+                            <tbody>
+                            {% for priv in privileges %}
+                            <tr>
+                              <td><a href="/privilege/edit/{{priv.id}}" style="color:inherit;">{{ forloop.counter}}</a></td>
+                              <td><a href="/privilege/edit/{{priv.id}}" style="color:inherit;">{{ priv.privname }}</a></td>
+                              <td>{{ priv.description}}</td>
+                              {% for x,y in pr_list %}
+                                {% if x == priv.id %}
+                                  <td><a href="/list/proles/{{priv.id}}"><label class="btn label-info" style="width:40px;"><i  style=" font-size: 10pt;">{{y}}</i></label></a></td>
+                                {% endif %}
+                              {% endfor %}
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                          </table>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2" style="margin-top:0px">
+                <div >
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_role"><i  ></i><span class="text" > Add New Role </span></a>
+                  <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_privilege"><i  ></i><span class="text" > Add New Privilege </span></a>
+                </div>
+              <div >
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <div class="modal fade" id="assign_privilege" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" id="priv_assign_close" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Assign New Privilege</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-hover" id="priv1_table">
+              <thead>
+                <th>No</th>
+                <th>Privilege Name</th>
+                <th>Description</th>
+                <th>Assign</th>
+              </thead>
+              <tbody>
+                
+              </tbody>
+
+            </table>
+          </div>
+          <div class="modal-footer" style="border:0px">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="add_role" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Add New </h4>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="/role/add">
+            {% csrf_token %}
+              <fieldset>
+              <div class="controls" style="text-align: center;">      
+                <input class="form-control centered" type="text" id="rolename2" name="rolename2" placeholder="Role Name" required></p>
+                <input class="form-control centered"  type="text" id="description2" name="description2" placeholder="Description" required></p>
+                <select class="form-control" id="customer2" name="customer2" required style="width:300px;display: block;margin: 0 auto;"  >
+                  <option value="">Select Customer</option>
+                  {% for customer in customers %}
+                    <option value="{{customer.id}}">{{ customer.customername }}</option>
+                  {% endfor %}
+                </select></p>
+                 <button type="submit" class="btn btn-success">Add Role</button>
+              </div>
+              </fieldset>
+            </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="modal fade" id="add_privilege" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Add New </h4>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="/privilege/add">
+              {% csrf_token %}
+              <fieldset>
+                <div class="controls" style="text-align: center;">
+                  <input class="form-control" type="text" id="privname2" name="privname2" placeholder="Privilege Name" required><br />                                  
+                  <input class="form-control" type="text" id="privdisc" name="privdisc" placeholder="Description" required><br />
+
+                  <select class="form-control" id="func_name" name="func_name" required>
+                    <option value="">Select any functionality</option>
+                    {% for item_functions in functionalities %}
+                     <option value="{{item_functions.id}}">{{item_functions.func_name}}</option>
+                    {% endfor %}
+                  </select> <br />
+
+                   <button type="submit" class="btn btn-success">Add Privilege</button>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="modal-footer" style="border:0px">
+          </div>
+        </div>
+      </div>
+    </body>
+    <script type="text/javascript">
+    function addPrivileges(privid){
+          alert(privid);
+        }
+    
+      $('#priv1_table').on('click', '#datatable_tabletools tbody td a' , function (e) {
+          e.preventDefault();alert();
+          // show modal dialog
+          // Code
+      });
+  
+    function addPrivilege(roleid){
+          $.ajax({
+            url:"/list/remaining/privileges",
+            type:"POST",
+            dataType:"json",
+            async:true,
+            data:{
+              roleid : roleid,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              data = JSON.parse(data);
+              console.log(data);
+              for(var i=0;i<data.length;i++){
+                
+                $("#priv1_table").dataTable().fnAddData([(i+1),data[i].fields.privname,data[i].fields.description,'<span id="qa_one_t" onclick="alert();" class="btn btn-success btn-sm"> <i class="glyphicon glyphicon-plus"></i> </span>']);
+              }
+
+             $("#priv1_table").dataTable({
+              "fnInitComplete": function(oSettings, json) {
+      $("#qa_one_t").on('click',function(){
+          alert('click fire on img !');
+      });
+    }
+
+             }).fnDraw(); 
+              
+              $("#assign_privilege").modal('show');
+                
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      $(document).ready(function(){
+        $("#role_table").dataTable();
+        $("#privilege_table").dataTable();
+        $("#priv_assign_close").click(function(){
+          var oSettings = $('#priv1_table').dataTable().fnSettings();
+          var iTotalRecords = oSettings.fnRecordsTotal();
+          for (i=0;i<=iTotalRecords;i++) {
+             $('#priv1_table').dataTable().fnDeleteRow(0,null,true);
+          }
+        });
+      });
+    </script>
+</html>
+

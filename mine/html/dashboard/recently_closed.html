@@ -1,0 +1,112 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | My Closed Tickets</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Tickets | <small>My Closed Tickets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">My Closed Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="panel">
+                  <div class="panel-heading">
+                      <h3 class="panel-title text-center">My Closed Tickets</h3>
+                  </div>
+                  <div class="panel-body">
+                        <table  class="table table-hover table-striped" id="table_id">
+                         <thead>
+                              <th></th>
+                              <th>Ticket Id</th>
+                              <th>Ticket Summary</th>
+                              <th>Reported Date</th>
+                              <th>Priority</th>
+                              <th>Status</th>
+                              <th>Domain</th>
+                              <th>Subdomain</th>
+                              {% if is_egate_included %}
+                                  <th>Carrier</th>
+                              {% endif %}
+                              <th>Ticket Age</th>
+                              <th>Affected Person</th>
+                              <th>Customer</th>
+                              <th>Updated On</th>
+                              <th>Work Hours( in minutes) </th>
+                            </thead>
+                            <tbody>
+                            {% for details in tickets %}
+                            <tr>
+                              <td><a class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit"  href="/ticket/stat/{{details.id}}">
+                                  <i class="fa fa-eye "> </i>
+                                  </a></td>
+                              <td>{% if details.affectedperson.id in vips %}
+                                  <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                              {% endif %}{{details.ticketid }}</td>
+                              <td>{{ details.summary }}</td>
+                              <td><span style="display:none;">{{details.reportdate.year}}{% if details.reportdate.month >= 10 %}{{details.reportdate.month}}{% else %}0{{details.reportdate.month}}{%endif%}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%} {{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                              <td> {% if details.customer_priority %} {{ details.customer_priority.priority }} {% else %}{{details.internalpriority}} {% endif %} </td>
+                              <td> {{ details.status | real:details.customer.id}} </td>
+                              <td> {{ details.group.workgroup }} </td>
+                              <td> {{ details.subgroup.subgroupname }}</td>
+                              {% if is_egate_included %}
+                                  <td>{{ details.impacted_airline.name }}</td>
+                              {% endif %}
+                              <td>{{ details.id|ticket_age}}</td>
+                              <td>{{ details.affectedperson.user.email}}</td>
+                              <td> {{ details.customer }} </td>
+                              <td><span style="display:none;">{{details.closedate.year}}{% if details.closedate.month >= 10 %}{{details.closedate.month}}{% else %}0{{details.closedate.month}}{%endif%}{% if details.closedate.day >= 10 %}{{details.closedate.day}}{% else %}0{{details.closedate.day}}{%endif%}{{details.closedate.time | time}}</span>{% tzone details.closedate %}</td>
+                              <td>{{ details.id | work_hour}}</td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                      </table>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+     <script type="text/javascript">
+
+        $("#service").addClass("active");
+        $("#subc").css({'display' : 'block'});
+        $("#recent_close").addClass("active");
+        $(document).ready(function() {
+          $('#table_id').DataTable({
+            aaSorting:[[3,'desc']],
+            "scrollX": true,
+            columnDefs : [
+                { "width": "20%", "targets": 1 },
+            ],
+          });
+        });
+      </script>
+    </body>
+</html>
+
+
+
+
+
+

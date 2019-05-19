@@ -1,0 +1,77 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/asset_css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/asset_header.html"%}
+        <div class="wrapper">
+            {% if "finance_approval" in request.session.logged_user_priv %}
+              {% include "side_bar/sidebar.html"%}
+            {% else %}
+              {% include "side_bar/asset_sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Asset Management<small> | Cost Center</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Cost Center</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h2 class="panel-title text-thin text-center">Cost Centers</h2>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-stripped" id="cost_centers">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Name</th>
+                                            <th>Customer</th>
+                                            <th>Manager</th>
+                                            <th>Total cost</th>
+                                            <th>Currency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cost_center in costcenters %}
+                                            <tr>
+                                                <td></td>
+                                                <td>{{cost_center.id}}</td>
+                                                <td>{{cost_center.name}}</td>
+                                                <td>{{cost_center.customer.customername}}</td>
+                                                <td>{{cost_center.total_cost}}</td>
+                                                <td>{{ cost_center.currency.currency}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "asset/addtostock.html" %}
+        {% include "components/footer.html" %}
+        {% include "components/msg_div.html" %}
+        <script type="text/javascript">
+            $('#cost_centers').dataTable();
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            });
+        </script>
+    </body>
+</html>

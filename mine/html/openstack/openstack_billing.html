@@ -1,0 +1,216 @@
+{% extends 'cloud_management/home.html'%}
+
+{% block section_header %}
+      <script type="text/javascript">
+          var cloud_account_id = {{ cloud_account_id }}
+      </script>
+      <h1>Billing Details
+          <small>Billing summary of current account</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><a href="{% url 'dashboard' %}">Home</a></li>
+          <li><a href="{% url 'openstack_accounts_view' %}">Openstack accounts</a></li>
+          <li><a href="/cloud_management/openstack/{{cloud_account_id}}/dashboard">Dashboard</a></li>
+          <li>Billing</li>
+      </ol>
+{% endblock %}
+
+{% block content%}
+
+<div ng-controller='BillingController'>
+    <section class="content">
+      <div class="row">
+      <div class="col-md-12">
+        <div class="col-md-10">
+          <div class="panel panel-mint">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-xs-1">
+                </div>
+                <div class="col-xs-3">
+                  <label class="form-control" >Select Date Range: </label>
+                </div>
+                <div class="col-xs-5">
+                  <input type="text" id="date_range" class="form-control">
+                </div>
+                <div class="col-xs-3">
+                  <button id="billing-filter" class="btn btn-success" ng-click='get_billing_details()' >Submit</button>
+                </div>
+              </div>
+            </div><!-- /.box-body -->
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-10">
+            <div class="panel panel-mint">
+              <div class="panel-heading">
+                <div class="panel-control">
+                  <div class="btn-group">
+                      <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#usage_details" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+                  </div>
+                </div>
+                <h3 class="panel-title">Usage Details</h3>
+              </div>
+              <div class="panel-body" id="usage_details">
+                <div class="row">
+                  <div class="col-xs-1">
+                  </div>
+                  <div class="col-xs-9">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Resource</th>
+                        <th>Usage</th>
+                        <th>Rate</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr >
+                        <td>Disk Usage</td>
+                        <td> {[{project_usage.tenant_usage.total_local_gb_usage}]} </td>
+                        <td>$10/gb</td>
+                        <td>{[{project_usage.tenant_usage.total_local_gb_usage}]}</td>
+                      </tr>
+                      <tr >
+                        <td>Memory Usage</td>
+                        <td> {[{project_usage.tenant_usage.total_memory_mb_usage}]} </td>
+                        <td>$10/mb</td>
+                        <td>{[{project_usage.tenant_usage.total_memory_mb_usage}]}</td>
+                      </tr>
+                      <tr >
+                        <td>CPU Usage</td>
+                        <td> {[{project_usage.tenant_usage.total_vcpus_usage}]} </td>
+                        <td>$10/hr</td>
+                        <td>{[{project_usage.tenant_usage.total_vcpus_usage}]}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+              </div><!-- /.box-body -->
+            </div>
+             <button class="btn btn-block btn-info" id="instance-details">Instance Details</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div id="billing-instance-popup" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Instance Details</h4>
+          </div>
+            <div class="modal-body">
+
+            <div class="row">
+                <div class="col-md-6 pull-left">
+                    <label>Select Date Range: </label>
+                    <input type="text" id="instance_date_range">
+                    <button id="billing-filter" class="btn btn-success btn-flat margin" ng-click='get_instance_billing_details()'>Submit</button>
+                </div>
+            </div>
+
+              <div class="mailbox row">
+                <div class="col-xs-12">
+                  <div class="box box-solid">
+                    <div class="box-header">
+                      <h4 class="text-aqua" style="padding-left:146px">
+                      <i class="fa fa-usd"></i>
+                      Instance Details</h4>
+                    </div>
+                    <div class="box-body">
+                      <div class="row">
+                      <div class="col-lg-2 ">
+                      </div>
+                        <div class="col-lg-9 main-chart ">
+                          <table class="table table-bordered">
+                            <thead>
+                              <tr>
+                                <th>Instance Name</th>
+                                <th>Memory MB Hours</th>
+                                <th>UPTime</th>
+                                <th>VCPUS</th>
+                                <th>Instance State</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr ng-repeat="each_server in server_usages">
+                                <td>{[{each_server.name}]}</td>
+                                <td>{[{each_server.memory_mb}]}</td>
+                                <td>{[{each_server.uptime}]}</td>
+                                <td>{[{each_server.vcpus}]}</td>
+                                <td>{[{each_server.state}]}</td>
+
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+  $( document ).ready(function() {
+    $('#date_range').daterangepicker(
+      {
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+           'This Week': [moment().startOf('week'), moment().endOf('week')],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        },
+        startDate: moment().subtract('days', 29),
+        endDate: moment()
+      },
+        function(start, end) {
+            $('#id_pub_date span').html(start.format('MMMM D, YYYY') + '-' + end.format('MMMM D, YYYY'));
+        }
+    );
+
+
+
+      $('#instance_date_range').daterangepicker(
+      {
+        ranges: {
+           'Today': [moment(), moment()],
+           'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+           'This Week': [moment().startOf('week'), moment().endOf('week')],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        },
+        startDate: moment().subtract('days', 29),
+        endDate: moment()
+      },
+        function(start, end) {
+            $('#id_pub_date span').html(start.format('MMMM D, YYYY') + '-' + end.format('MMMM D, YYYY'));
+        }
+    );
+
+
+    $( "#instance-details").click(function(){
+      $("#billing-instance-popup" ).modal('show');
+    });
+
+  });
+</script>
+{% endblock %}

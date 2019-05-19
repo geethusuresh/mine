@@ -1,0 +1,80 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Delegation History</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Delegation History</h3>
+                                </div>
+                                <div class="panel-body">
+                                    {% if person.userdelegationhistory_set.all|length > 0 %}
+                                        <table class="table table-stripped dataTable" >
+                                            <thead>
+                                                <tr>
+                                                    <th>Created Date</th>
+                                                    <th>Details</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for hist in person.userdelegationhistory_set.all %}
+                                                    <tr>
+                                                        <td>{% tzone hist.created_date %}</td>
+                                                        <td>{{ hist.reason }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <p>No data found</p>
+                                    {% endif %}
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    </body>
+</html>

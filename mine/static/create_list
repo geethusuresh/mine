@@ -1,0 +1,13 @@
+exlist = ['MARLABS','democustomer', 'CDM','ARLINGTON', 'Apple Inc', 'ADCOUNCIL', 'SANDS CAPITAL']
+clist = Customer.objects.all().exclude(customername__in=exlist)
+source = ['Work', 'Email', 'Walk-in']
+location = ['USA', 'Bangalore', 'Mysore', 'Kochi', 'Other']
+
+for i in clist:
+    for j in source:
+        print CustTicketSource.objects.get_or_create(customer = i , name=j)
+
+
+for ni in clist:
+    for nj in location:
+        print TicketLocation.objects.get_or_create(customer = ni, name=nj)

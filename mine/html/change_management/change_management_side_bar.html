@@ -1,0 +1,56 @@
+<div class="leftside">
+    <div class="sidebar">
+        <div class="" style="padding:10px;background-color:white">
+            <div>
+                <img style="width:100%" src="/media/{{profile.customer.logo}}" alt="" />
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sub-nav" id="change_request_main">
+                <a href="#" id="main_change_dash">
+                    <i class="fa fa-dashboard"></i>
+                    <span>Change Request</span>
+                    <i class="fa fa-angle-right pull-right"></i>
+                </a>
+                <ul class="sub-menu" id="change_sub_nav">
+                    <li id="rfc_dashboard">
+                        <a href="/rfc/change_dashboard/">
+                            <!-- <i class="glyphicon glyphicon-tasks"></i> -->
+                            Dashboard
+                        </a>
+                    </li>
+                    <li id="create_rfc_req">
+                        <a href="/rfc/create/" > Create Change Request</a>
+                    </li>
+                    <li id="change_report">
+                        <a href="/rfc/reports/">
+                            <!-- <i class="glyphicon glyphicon-import"></i>  -->
+                            Reports
+                        </a>
+                    </li>
+                    <li id="task">
+                        <a href="/tasks/list/">
+                            <!-- <i class="glyphicon glyphicon-import"></i>  -->
+                            Tasks
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!-- <li id="create_field_value">
+                <a href="/rfc/field_value/create/" ><i class="fa fa-plus"></i> Field Values</a>
+            </li> -->
+            <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+        </ul>
+        <div class="sidebar-widget online-users">
+            <div class="body online-list">              
+                <div class="footer">
+                    <span class="btn btn-info" style="width:100%">
+                        <l class="fa fa-envelope-o" style="font-size:12px">
+                            {{profile.customer.help_text}}
+                        </l>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

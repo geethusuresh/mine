@@ -1,0 +1,92 @@
+{% extends 'oneconsole_help/base.html' %}
+{% load humanize %}
+{% block body %}
+    <div class="wrapper">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/customer.html"%}
+        {% else %}
+            {% include "side_bar/sidebar.html"%}
+        {% endif %}
+
+    <div class="rightside">
+    <div class="page-head" style="margin-top:10px">
+        <h1 class="text-thin">Help | <small>Help Center</small></h1>
+        <ol class="breadcrumb">
+           <li>You are here:</li>
+            <li><a href="/">Home</a></li>
+            <li><a href="{% url 'help:user_help_list' %}">Help</a></li>
+        </ol>
+    </div>
+    {% include "components/msg_div.html" %}
+{% endblock %}
+{% block content %}
+<div id="home">
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Help Center</h3>
+                                <div id="demo-panel-collapse" class="collapse in" >
+                                    <div class="panel-body text-center">
+                                     <div class="col-sm-12" style="margin-left: 40px;">
+                                        <form action="{% url 'help:user_help_list' %}" method="get">
+                                            <div class="col-sm-9">
+                                                <div class="input-field col s6">
+                                                    <input id="summ" type="text" name="keyword" value="{{ keyword }}" class="form-control" maxlength="50"  placeholder="keyword">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <button type="submit" class="btn btn-success">
+                                                    <l class="fa fa-search"></l> Search</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                    <div class="panel">
+                        <div class="panel-body">
+                            <div class="col-md-12">
+                                <div class="list-group">
+                                    {% if helps %}
+                                    {% for help in helps %}
+                                        <a href="{% url 'help:user_help_detail' help.id %}" class="list-group-item list-item-lg">{{ help.name }}</a>
+                                    {% endfor %}
+                                    {% else %}
+                                        <a href="#" class="list-group-item list-item-lg">No Results Found</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="pagination pad-top">
+            <span class="step-links">
+                <ul class="pager">
+                    <li>                
+                        {% if helps.has_previous %}
+                            <a href="?page={{ helps.previous_page_number }}"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        {% endif %}
+                    </li>
+
+                    <span class="current">
+                        Page {{ helps.number }} of {{ helps.paginator.num_pages }}.
+                    </span>
+
+                    <li>
+                        {% if helps.has_next %}
+                            <a href="?page={{ helps.next_page_number }}">Next<i class="fa fa-long-arrow-right"></i></a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </span>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Admin Dashboard</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-10">
+                            <div class="panel">
+                                <div class="panel-heading panel-pink panel-colorful">
+                                    <h2 class="panel-title text-center">Settings Log</h2>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table table-stripped" id="settings_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Person</th>
+                                                <th>Time</th>
+                                                <th>Model</th>
+                                                <th>Field</th>
+                                                <th>Old Value</th>
+                                                <th>New Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript">
+            $('#settings_table').dataTable( {
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/log/all/",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "": "fields.user" },
+                    { "": "fields.time" },
+                    { "": "fields.model" },
+                    { "": "fields.field" },
+                    { "": "fields.old" },
+                    { "": "fields.new" }
+                ],
+            });
+        </script>
+        <script type="text/javascript">
+            $('#settings_table').on('click', 'tr', function(e){
+                var row = $(this).find('td:eq(0)').text();
+            })
+        </script>
+    </body>
+</html>

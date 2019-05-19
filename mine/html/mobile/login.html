@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <title>My App</title>  
+  
+  <link rel="stylesheet" href="/static/mobile_ui/css/onsenui.css">  
+
+  <link rel="stylesheet" href="/static/mobile_ui/css/onsen-css-components.css">  
+  
+  <link rel="stylesheet" href="/static/mobile_ui/styles/app.css"/>
+
+  <script src="/static/mobile_ui/js/angular/angular.js"></script>    
+  <script src="/static/mobile_ui/js/onsenui.js"></script>    
+  <!-- <script src="js/app.js"></script>  -->
+<link rel="stylesheet" href="/static/mobile_ui/css/custom.css">  
+  <script>
+    angular.module('app', ['onsen']);
+
+    angular.module('app').controller('AppController', function($scope) {
+    });
+  </script>
+
+  <style>
+   
+  </style>
+</head>
+
+<body ng-controller="AppController">    
+
+    <ons-page>
+      <ons-toolbar>
+        <div class="center">Log In To OneConsole</div>
+        <!-- <div class="right"><ons-toolbar-button>Close</ons-toolbar-button></div> -->
+      </ons-toolbar>
+<form  method="POST" enctype="multipart/form-data" action="/mobile/app/login/auth/">{% csrf_token %}
+      <div class="login-form">
+        <input type="email" class="text-input--underbar" placeholder="Email"  name="username" value="" requried>
+        <input type="password" class="text-input--underbar" placeholder="Password" name="password" value="" requried>
+        <br><br>
+        <button  type="submit" style="background: None;width:100%;border-style:None">
+        <ons-button modifier="large"  class="login-button">Log In</ons-button></button>
+        <br><br>
+        <ons-button modifier="quiet" class="forgot-password">Forgot password?</ons-button>
+      </div>
+</form>
+    </ons-page>
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    <script>
+$(document).ready(function(){$("body").hide().fadeIn(500);});
+    </script>
+</body>
+</html>

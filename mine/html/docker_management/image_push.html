@@ -1,0 +1,67 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+<h1 class="text-thin">Push Image |
+  <small>{{image_id|truncatechars:15}} to repository</small>
+</h1>
+
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_image' server_id %}">Images</a></li>
+  <li><a href="{% url 'image_detail' server_id %}?image_id={{image_id}}">{{image_id|truncatechars:10}}</a></li>
+  <li class="active">Push</li>
+</ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-primary panel-bordered-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Push to Docker Hub</h3>
+          </div><!-- /.box-header -->
+          <form role="form" method="POST" action="{% url 'push_image' server_id image_id %}">
+          {% csrf_token %}
+            <div class="panel-body">
+                <div class="form-group">
+                  <label>Repository Type</label>
+                  <select name="repo_type" id="repo_type" class="form-control">
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>User ID</label>
+                  <input type="text" class="form-control" name="user_id" id="user_id" placeholder="Docker hub id">
+                </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <input type="password" class="form-control" name="password" id="password" placeholder="Docker hub password">
+                </div>
+                <div class="form-group">
+                  <label class="main">Email</label>
+                  <input type="text" class="form-control" name="email" id="email" placeholder="eg: yourname@server.com">
+                </div>
+                <div class="form-group">
+                  <label>Repository Name</label>
+                  <input type="text" class="form-control" name="repo_name" id="repo_name" placeholder="eg: my_repo">
+                </div>
+                <div class="form-group">
+                  <label>Tag</label>
+                  <input type="text" class="form-control" name="tag" id="tag" placeholder="eg: v1">
+                </div>
+                <div class="row">
+                  <button type="submit" class="btn btn-primary btn-block">Push Image</button>
+                </div>
+            </div>
+          </form>
+        </div>
+    </div>
+  </div>
+
+{% endblock %}

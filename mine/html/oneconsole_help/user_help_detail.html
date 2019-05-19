@@ -1,0 +1,48 @@
+{% extends 'oneconsole_help/base.html' %}
+
+{% block body %}
+    <div class="wrapper">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/customer.html"%}
+        {% else %}
+            {% include "side_bar/sidebar.html"%}
+        {% endif %}
+
+    <div class="rightside">
+    <div class="page-head" style="margin-top:10px">
+        <h1 class="text-thin">Help | <small>Help Center</small></h1>
+        <ol class="breadcrumb">
+           <li>You are here:</li>
+            <li><a href="/">Home</a></li>
+            <li><a href="{% url 'help:user_help_list' %}">Help</a></li>
+        </ol>
+    </div>
+    {% include "components/msg_div.html" %}
+{% endblock %}
+
+{% block content %}
+<div id="home">
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ help.name }}</h3>
+                    </div>
+
+                        <div class="panel-body" id="panel_helpcontent">
+                            <p>{{ help.body|safe }}</p>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#panel_helpcontent").find('img').each(function(index, obj){
+            $(obj).addClass("img-responsive");
+        });
+    });
+</script>
+{% endblock %}

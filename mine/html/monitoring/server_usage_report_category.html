@@ -1,0 +1,237 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    @page {
+        size: letter landscape;        
+        margin: 0cm;               
+    }
+
+    @font-face {
+        font-family: "Lato";
+        src: url("{{static_dir}}fonts/lato-reg-webfont.ttf");
+    }
+
+    div { font-family: Lato; }
+    table { font-family: Lato; }
+
+    .report_heading{
+    	text-align:center;
+    	font-size:24px;
+    	margin:20px 0px 0px 0px;
+    }
+
+    .summary{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bold;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:18px;
+    }
+
+    .summary_tbl_contents{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:18px;
+    	background-color:#e7eefa;
+    	border:1px solid #FFF;
+    }
+
+    .ticket_details_head{
+    	text-align:center;
+    	background-color:#00b0f0;
+    	font-weight:bolder;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:16px;
+    	border:1px solid #000000;
+    	color:#000000;
+    }
+
+    .ticket_details_cnt{
+    	text-align:left;
+    	padding:2px 0px 2px 5px;
+    	font-size:14px;
+    	background-color:#FFF;
+    	border:1px solid #000000;
+        color:#000000;
+    }
+
+    .ticket_details_subhead{
+        text-align:center;
+        background-color:#002060;
+        font-weight:bolder;
+        padding:5px 0px 5px 5px;
+        vertical-align:middle;
+        font-size:16px;
+        border:1px solid #000000;
+        color:#FFF;
+        font-style:italic;
+    }
+
+    .ticket_details_minorhead{
+        text-align:left;
+        background-color:#558ed5;
+        font-weight:bolder;
+        padding:5px 0px 5px 5px;
+        vertical-align:middle;
+        font-size:16px;
+        border:1px solid #000000;
+        color:#050731;
+        font-style:italic;
+    }      
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">    
+  </head>
+  <body class="fixed" style="font-size:13px">
+  	<div class="content">
+        <div>
+            <div style="text-align:right;padding-top:10px;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <br />
+        <div>
+            <div style="text-align:center;color:#595959;font-size:35px;">
+                OneConsole
+            </div>
+
+            {% if customer_logo %}            
+            <div style="text-align:center;">
+                <img src="{{media_root}}/{{customer_logo}}" style="text-align:center;height:90px;" /> 
+            </div>            
+            {% endif %}
+
+            <div style="text-align:center;color:#000000;font-size:24px;">
+                <h1>{{customer.customername}} </h1>
+            </div>
+            <div style="text-align:center;color:#002060;font-size:24px;">
+               {{category_name}} Servers Performance Report - {{last24hr_format}}
+            </div>            
+        </div>         
+              
+    	<div style="{% if customer_logo %}padding-top:175px;{% else %}padding-top:235px;{% endif %}">
+    		<div>
+                <span>
+                    <img src="{{static_dir}}img/background-layer.jpeg" style="width:1050px; height:250px;" />
+                </span>
+    		</div>    		
+    	</div>
+
+        <pdf:nextpage />
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>
+        <br />        
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                Hosts Uptime Summary                
+            </div>
+        </div>
+         <br /> 
+         <div>
+            {% for host_uptime in host_category_uptimereport  %}
+            <table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+                <tr>
+                    <th class="ticket_details_head" colspan="8">{{host_uptime.category}}</th>
+                </tr>
+                <tr>
+                    <td class="ticket_details_minorhead">Server Name</td>
+                    {% for uptime_date in host_uptime.uptime_report_date %}
+                    <td class="ticket_details_minorhead">{{uptime_date}}</td>
+                    {% endfor %}                    
+                </tr>
+                {% for uptime_info in host_uptime.hostuptime_report %}
+                    <tr>
+                        <td class="ticket_details_cnt">{{uptime_info.hostname}}</td>
+                        {% for uptimings in uptime_info.hostuptime  %}
+                        <td class="ticket_details_cnt">{{uptimings.uptime_perc}}%</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            <br />
+            <br />
+            {% endfor %}
+        </div>
+        <pdf:nextpage />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        <br />
+
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                Hosts Usage Details on {{last24hr_format}}                
+            </div>
+        </div>
+
+        <br />
+
+    	<div>
+            {% for hostusage_details in host_usage_report %}
+    		<table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+    			<tr>
+                    <th class="ticket_details_head">Source: {{hostusage_details.hostname}}</th>
+                    <th class="ticket_details_head" colspan="2">Environment: {{hostusage_details.environment}}</th>
+                    <th class="ticket_details_head">Role: {{hostusage_details.role}}</th>
+                </tr>
+                <tr>
+                    <td class="ticket_details_minorhead">Name</td>
+                    <td class="ticket_details_minorhead">Min</td>
+                    <td class="ticket_details_minorhead">Max</td>
+                    <td class="ticket_details_minorhead">Avg.</td>                    
+                </tr>
+                {% for item_info in hostusage_details.item_details %}
+                    <tr>
+                        <td class="ticket_details_cnt">{{item_info.name}}</td>
+                        <td class="ticket_details_cnt">{{item_info.min_val}}</td>
+                        <td class="ticket_details_cnt">{{item_info.max_val}}</td>
+                        <td class="ticket_details_cnt">{{item_info.avg_val}}</td>                       
+                    </tr>
+                {% endfor %}
+    		</table>
+            <br />
+            <br />
+            {% endfor %}
+    	</div>
+
+        <pdf:nextpage />
+
+        <br />
+        <br />      
+
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>
+         <br />
+        <br />
+
+        <div>
+            <div style="text-align:center;">
+            <img src="{{static_dir}}img/thankyou.jpg" style="text-align:right;width:800px;height:500px;" />
+            </div>
+        </div>
+
+        <div style="padding-top:170px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+    </div>
+  </body>
+  </html>
+

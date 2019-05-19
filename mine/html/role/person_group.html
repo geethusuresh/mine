@@ -1,0 +1,330 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Person Group</title>
+        <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html" %} 
+                <!-- <li  ><a href="/" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-list-alt"></i><span class="text">List</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu  ">
+                    <li  ><a href="/persongroupadmin/list/workgroup"><span class="text">Workgroup</span></a></li>
+                    <li><a href="/persongroupadmin/list/subgroup"><span class="text">Subgroup</span></a></li>
+                    <li  ><a href="/list/role"><span class="text">Role</span></a></li>
+                    <li  ><a href="/list/privilege"><span class="text">Privilege</span></a></li>
+                  </ul>
+
+                </li>
+              <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+
+                </li> -->
+
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            
+            
+            <!-- main -->
+            <div class="content">
+
+              <div class="main-header">
+                <h2>Subgroup Mapping</h2>
+                
+              </div>
+{% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="main-content">
+                <div class="row">
+                  <div class="col-sm-10">
+                    <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Add Subgroup Mapping</h3>
+                    <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-success btn-xs"  style=" float:right;margin-right:10px;margin-top:5px">Add New </a>
+                    <a href="" data-toggle="modal" data-target="#register" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Register New </a> -->
+                  </div>
+                  <div class="widget-content">
+                          <div class="wizard-wrapper">
+                            <div id="" class="wizard">
+                            <form method="post" action="">
+                              <fieldset>
+                                <div class="controls" style="width:400px;margin-left:20%;text-align:center;">          
+                                  <select class="form-control" id="customer" name="customer" required>
+                                    <option value="">Select Customer</option>
+                                    {% for customer in customers %}
+                                      <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                    {% endfor %}
+                                  </select></p>
+                                  <select class="form-control"  id="workgroup" name="workgroup" required>
+                                    <option value="">Select Workgroup</option>
+                                  </select></p>
+                                  <select class="form-control"  id="subgroup" name="subgroup" required>
+                                    <option value="">Select Subgroup</option>
+                                  </select></p>
+                                  <!-- <input type="button" value="add person" id="addperson">
+                                  <input type="button" value="remove person" id="removeperson"> -->
+                                  <input class="form-control" type="text" id="search_person" placeholder="search person" >
+                                  </p>
+                                  <div id="personadd_div" style="display:none">
+                                    <table class="table" id="person_table">
+                                      <tr>
+                                        <th>Select</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Location</th>
+                                      </tr>     
+                                    </table>
+                                </div>
+                                  </p>
+                                <button class="btn btn-success" type="submit">Map</button>                  
+                              </div>
+                            </fieldset>
+                          </form>
+                            </div>
+                          </div>
+                      </div>
+ 
+                    </div>
+
+
+                    <div class="widget">
+                      <div class="widget-header"><h3><i class="fa fa-magic"></i>Active Subgroup Members</h3>
+                    
+                      </div>
+                      <div class="widget-content">
+                          <table class="table borderless fixed" id="example">
+                              <thead>
+                              <tr>
+                                <th>Subgroup</th>
+                                <th>Workgroup</th>
+                                <th>Person</th>
+                              </tr> 
+                              </thead>
+                              <tbody>
+                              {% for submember in submember_list %}
+                              <tr>
+                                <td>{{ submember.subgroup }}</a></td>
+                                <td>{{ submember.workgroup }}</td>
+                                <td>{{ submember.person }}</td>
+                                <!-- <td><a href="/personadmin/update/{{person.id}}"><input type="button" value="update" class="btn btn-success btn-sm" ></a></td> -->
+                                <!-- <td><a href="/personadmin/deactivate/{{person.id}}" ><input type="button" value="delete" class="btn btn-success btn-sm"></a></td> -->
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                            </table>
+                      </div>
+ 
+                    </div>
+                  </div>
+                  <div class="col-sm-2">
+                    <div class="widget">
+                      <div class="widget-header"><h3></h3>
+                          
+                      </div>
+                      <div class="widget-content">
+                          <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-link btn-block"  >Add New Person</a><p><p>
+                          <a href="" data-toggle="modal" data-target="#register" class="btn btn-link btn-block"  >Register New Person</a> -->
+                          <ul class="main-menu">
+                              <li><a href="/persongroupadmin/add/subgroup"></i><span class="text">Add New Subgroup</span></a></li><p>
+                              <li  ><a href="/persongroupadmin/remove/subgroup" ></i><span class="text ">Remove Subgroup</span></a>
+                              </li><p>
+                              <li  ><a href="/persongroupadmin/home" ></i><span class="text ">Subgroup Mapping</span></a>
+                              </li><p>
+                              <li  ><a href="/persongroupadmin/remove" ></i><span class="text ">Subgroup Members</span></a>
+                              </li>
+                              
+                          </ul>
+                      </div>
+ 
+                    </div>
+                  </div>
+                </div>
+                  </div>
+                </div>
+             
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+      
+  </body>
+
+</html>
+
+<script type="text/javascript">
+  var list = [];
+  var p_dict = [];
+  var p_name_dict =[];
+  //when customer changes
+  $("#customer").on('change',function(){
+    //alert(this.value);
+    $("#personadd_div").hide();
+    $('#workgroup option:gt(0)').remove().end();
+    $('#subgroup option:gt(0)').remove().end();
+    if($("#customer :selected").text()!="Select Customer"){
+      $.ajax({
+        url:"/../persongroupadmin/home",
+        type:"POST",
+        dataType:"json",
+        data:{
+          customerid : $("#customer").val(),
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success : function(data) {
+          data = JSON.parse(data)
+          for (var i in data){
+            $("#workgroup").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+          }
+        },
+        error : function(xhr,errmsg,err) {
+          alert(err);
+        }
+      });
+      return false;
+    }
+  });
+  //when workgroup changes
+  $("#workgroup").on('change',function(){
+    //alert(this.value);
+    $("#personadd_div").hide();
+    $('#subgroup option:gt(0)').remove().end();
+    if($("#workgroup :selected").text()!="Select Workgroup"){
+      $.ajax({
+        url:"/persongroupadmin/home",
+        type:"POST",
+        dataType:"json",
+        data:{
+          workgroupname : this.value,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success : function(data) {
+          console.log(data);
+          data = JSON.parse(data)
+          for (var i in data){  
+            $("#subgroup").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+          }
+          
+
+        },
+        error : function(xhr,errmsg,err) {
+          alert(err);
+        }
+      });
+      return false;
+    }
+  });
+  $("#subgroup").on('change',function(){
+    i=0;
+    list = [];
+    //alert(this.value);
+    $("#personadd_div").hide();
+    if($("#subgroup :selected").text()!="Select Subgroup"){
+    $.ajax({
+      url:"/persongroupadmin/home",
+      type:"POST",
+      dataType:"json",
+      data:{
+        subgroupname : this.value,
+        customername : $("#customer").val(),
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      },
+      success : function(data) {
+        p_dict = JSON.parse(data[0]);
+        //p_dict = data[0];
+        p_name_dict = data[1];
+        console.log(p_dict);
+        $("#person_table td").parent().remove();
+      },
+      error : function(xhr,errmsg,err) {
+        alert(err);
+      }
+    });
+    return false;
+  }
+  });
+    $( "#search_person" ).keyup(function() {
+    $("#personadd_div").show();
+    for(var i=0;i<p_dict.length;i++){
+      if (this.value){
+        var s = p_name_dict[i];
+        console.log(s);
+        if (this.value.toLowerCase() == s.substr(0,this.value.length).toLowerCase()){
+          if(list.indexOf(s)<0){
+            console.log(list);
+             $("#person_table").last().append('<tr ><td><input type="checkbox" name="checkbox[]" value="'+p_dict[i].pk+'"/></td><td><input readonly class="form-control" type="text" name="'+p_name_dict[i]+'" value="'+p_name_dict[i]+'"/></td><td><input class="form-control" readonly type="text" name="'+p_dict[i].fields.department+'" value="'+p_dict[i].fields.department+'"/></td><td><input class="form-control"  readonly type="text" name="'+p_dict[i].fields.city+'" value="'+p_dict[i].fields.city+'"/></td></tr>');
+            list.push(s);
+          }
+        }
+      }
+    }
+  console.log( "Handler for .keypress() called." );
+});
+</script>

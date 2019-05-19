@@ -1,0 +1,25 @@
+{% load zone %}
+<table class="table table-striped" id="assess_history_tab">
+    <thead>
+        <tr>
+            <th>View/Edit</th>
+            <th>Assessment Id</th>
+            <th>Change Id</th>
+            <th>Created Date</th>
+            <th>Approved Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for history in assessment_history %}
+            <tr>
+                <td><a href="/rfc/assessment_details/{{history.id}}/" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" data-original-title="View"><i class="fa fa-edit"></i></a></td>
+                <td>{{history.assessment_id}}</td>
+                <td> <a href="/rfc/details/{{history.change_req.id}}/">{{history.change_req.change_id}}</a></td>
+                <td>{% tzone history.created_date %}</td>
+                <td>{% tzone history.finished_date %}</td>
+                <td>{% if history.is_approved == True %} <label class="label label-success">Approved</label>{% elif history.is_approved == False %} <label class="label label-danger">Rejected</label> {% endif %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

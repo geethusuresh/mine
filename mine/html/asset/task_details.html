@@ -1,0 +1,340 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/asset_css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .list-info li label {
+                width: 100px;
+            }
+            .clb{
+                display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/asset_header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/asset_sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Asset Management  <small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Item Management</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="panel-control">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#Details" aria-expanded="true">Basic Details</a>
+                                            </li>
+                                            <!-- <li class=""><a data-toggle="tab" href="#Configurations" aria-expanded="false">Relationships</a>
+                                            </li>
+                                            <li class=""><a data-toggle="tab" href="#Request" aria-expanded="false">Request</a>
+                                            </li> -->
+                                            <!-- <li class=""><a data-toggle="tab" href="#Activities" aria-expanded="false">Activities</a> -->
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <h3 class="panel-title">{{task.task_name}}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="tab-content">
+                                        <div id="Details" class="tab-pane fade active in">
+                                            <h4 class="text-thin">Basic Details</h4>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Task Title :</dt>
+                                                        <dd>{{task.task_name}}</dd>
+                                                        <br>
+                                                        <dt>Task Status :</dt>
+                                                        <dd>{{task.status}}</dd><br>
+                                                    </dl>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Affiliated Ticket :</dt>
+                                                        <dd>{{task.ticket.ticketid}}</dd><br>
+                                                    </dl>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="Configurations" class="tab-pane fade ">
+                                            {% if relations %}
+                                                <h4 class="text-thin">Relationships</h4>
+                                                <div class="timeline">
+                                                    <div class="timeline-header">
+                                                        <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                                                            <div class="timeline-header-title bg-info">Add relationship</div>
+                                                        </a>
+                                                    </div>
+                                                    {% for relation in relations %}
+                                                        <div class="timeline-entry">
+                                                            <div class="timeline-stat">
+                                                                <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                                                                </div>
+                                                                <div class="timeline-time">{{relation.installed_date}}</div>
+                                                            </div>
+                                                            <div class="timeline-label">
+                                                                <p class="text-semibold">{{relation.type_of}} {{relation.tag_name}}  {{relation.asset}}</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                  </div>
+                                            {% else %}
+                                                <a id="delay" data-toggle="modal" data-target="#addrelation" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add relationship</a>
+                                            {% endif %}
+                                        </div>
+                                        <div id="Request" class="tab-pane fade">
+                                            <h4 class="text-thin">Request Details</h4>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Request ID :</dt>
+                                                        <dd>{{stock.model_name}}</dd><br>
+                                                        <dt>Affected Person :</dt>
+                                                        <dd>Donec id elit non mi </dd><br>
+                                                        <dt>Given date :</dt>
+                                                        <dd>{{stock.tag}}</dd>
+                                                    </dl>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Assosiated Ticket ID :</dt>
+                                                        <dd>{{stock.serial_no}}</dd><br>
+                                                        <dt>Alotted By :</dt>
+                                                        <dd>{{status.available}}</dd><br>
+                                                        <dt>Take Back :</dt>
+                                                        <dd>{{stock.last_audit}}</dd>
+                                                    </dl>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="Activities" class="tab-pane fade">
+                                            <h4 class="text-thin">Asset activity</h4>
+                                            <div class="timeline">
+                                                <div class="timeline-header">
+                                                    <div class="timeline-header-title bg-info">Now</div>
+                                                </div>
+                                                {% for activity in stockhistorys %}
+                                                    <div class="timeline-entry">
+                                                        <div class="timeline-stat">
+                                                            <div class="timeline-icon"></div>
+                                                            <div class="timeline-time">{{activity.date}}</div>
+                                                        </div>
+                                                        <div class="timeline-label">
+                                                            <p>{{activity.user}} - {{activity.remark}} {{activity.tag}}</p>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    {% if task.status.status_number == "T2" %}
+                                        <h3 class="panel-title">Asset Allotted</h3>
+                                    {% else %}
+                                        {% if assets %}
+                                            <h3 class="panel-title">Available Assets in Stock</h3>
+                                        {% else %}
+                                            <h3 class="panel-title">Sorry we are Out of Stock</h3>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="panel-body">
+                                    {% if task.status.status_number == "T2" %}
+                                        <p>You already allotted asset for task {{task.taskid}}.</p>
+                                    {% else %}
+                                        {% if assets %}
+                                            {% if purchases %}
+                                                <p>You Already placed purchase request {{purchase.purchaseid}} for task {{task.taskid}}.</p>
+                                            {% else %}
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-center">Model name</th>
+                                                                <th class="text-center">Serial Number</th>
+                                                                <th class="text-center">Last Audit</th>
+                                                                <th class="text-center">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for stock in assets %}
+                                                                <tr>
+                                                                    <td><a class="btn-link" href="#">{{stock.model_name}}</a></td>
+                                                                    <td>{{stock.serial_no}}</td>
+                                                                    <td><span class="text-muted"><i class="fa fa-clock-o"></i>{{stock.last_audit}}</span></td>
+                                                                    <td><a href="/asset/task/{{task.id}}/{{stock.id}}" class="btn btn-info">
+                                                                    <l class="fa fa-edit"></l></a>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>  
+                                                <hr>
+                                                <h4 class="text-center">Or</h4>
+                                                <button class="btn btn-warning text-center"  data-toggle="modal" data-target="#placeorder"  style="float:right">create a new purchase request</button>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if purchases %}
+                                                <p>You already placed purchase request {{purchase.purchaseid}} for task {{task.taskid}}.</p>
+                                            {% else %}
+                                                <p>We dont have any {{task.tag}} in our stock, you can initiate a new purchase request and will let you know once its delivered</p>
+                                                <button class="btn btn-info"  data-toggle="modal" data-target="#placeorder"  style="float:right">create a new purchase request</button>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>    
+
+                </div>
+            </div>
+        </div>
+        {% include "components/msg_div.html" %}
+
+        <div class="modal fade" id="addrelation" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Add New Relationship</h4>
+                    </div>
+                    <form action="/asset/stock/relation/{{stock.id}}" method="POST">{% csrf_token %}
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label>Select tag</label>
+                                    <select name="type" class="form-control" id="tag">
+                                        {% for tag in tags %}
+                                            <option value="{{tag.id}}">{{tag.item_type}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label>Select asset</label>
+                                    <select name="asset2" class="form-control" id="taggroup">
+                                        <option>-select-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label>relation</label>
+                                    <input type="text" name="soft" class="form-control">
+                                </div>
+                            </div>          
+                        </div>
+                        <div class="modal-footer" style="border:0px">
+                            <button class="btn btn-success" type="submit">Add Relationship</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addassignee" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Assign Asset</h4>
+                    </div>
+                    <form action="/asset/stock/assign/{{stock.id}}" method="POST">{% csrf_token %}
+                        <div class="modal-body">
+                            <label>Select User</label>
+                            <select name="person" requried class="form-control">
+                                <option>-select-</option>
+                                {% for user in users %}
+                                    <option value="{{user.id}}">{{user}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="modal-footer" style="border:0px">
+                            <button class="btn btn-success" type="submit">Assign</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="placeorder" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Place New Order</h4>
+                    </div>
+                    <form action="/asset/stock/order/{{task.id}}" method="POST">{% csrf_token %}
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label>Prefered Model Name :</label>
+                                    <input type="text" name="label_name" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                    <label>Prefered Manufacturer :</label>
+                                    <input type="text" name="manu" class="form-control">
+                                </div>
+                            </div>
+                            <label>Requrements :</label>
+                            <textarea name="desc" class="form-control"></textarea>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label>Estimated Cost :</label>
+                                    <input type="number" name="cost" class="form-control">
+                                </div>
+                                <div class="col-sm-2">
+                                    <label>Currency</label>
+                                    <select name="costcenter" class="form-control">
+                                        <option value="{{task.cost_center.id}}">{{task.cost_center.currency}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label>Cost Center :</label>
+                                    <select name="costcenter" class="form-control">
+                                        <option value="{{task.cost_center.id}}">{{task.cost_center.name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border:0px">
+                            <button class="btn btn-success" type="submit">Create Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% include "asset/addtostock.html" %}
+        {% include "components/footer.html"%}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+    </body>
+</html>

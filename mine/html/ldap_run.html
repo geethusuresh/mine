@@ -1,0 +1,114 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ldap Details</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <script src="/static/js/common.js"></script>
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 ">
+            <h4 style="color:#FFF">Ldap Details</h4>
+          </div>
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+                <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+
+                <div style="float:right" id="tour-searchbox" class="input-group searchbox">
+                <form role="search" action="/psearch/" method="post">{% csrf_token %}
+                  <input type="search" name="search" class="form-control" placeholder="enter ticket">
+                  </form>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+            <!-- main-nav -->
+            <nav class="main-nav">              
+              <ul class="main-menu">
+              <div class="sidebar-content">
+                <img src="/static/img/logo.png">
+              </div>            
+                
+            </nav><!-- /main-nav -->
+            <!-- <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div> -->
+          
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>           
+            <!-- main -->
+            <div class="content"> 
+              <div class="main-header">
+                <h2>Ldap Details</h2>              
+              </div>                     
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="col-sm-12">    
+                
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Ldap Test Run Details</h3></div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">                     
+                        {% if status_text %}
+                          {% if style_class == "alert-danger" %}
+                          <div>Below error occured while trying to connect Ldap Server:</div>
+                          {% endif %}
+                          <div class="alert {{style_class}}" role="alert">{{ status_text }}</div>                            
+                        {% endif %}
+
+                          {% if total_records > 0 %}
+                          <div>Total records found : {{total_records}}</div> 
+                          {% endif %}   
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->                 
+              </div>
+             </div>
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+</html>

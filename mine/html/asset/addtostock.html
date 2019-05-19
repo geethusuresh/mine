@@ -1,0 +1,111 @@
+
+          <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datetimepicker.min.css">
+          <div class="modal fade" id="addstock" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h5 class="modal-title" id="myModalLabel">Add to Stock</h5>
+                </div>
+                <div class="modal-body">
+                <form action="/asset/stock/" method="POST"> 
+                  {% csrf_token %}
+                  <div class="row">
+                    <div class="col-sm-6">
+                        <label>Model Name:</label>
+                        <input type="text" name="model" class="form-control" id="model" required maxlength="50">
+                        
+                    </div>
+                    <div class="col-sm-6">
+                        <label>Serial Number:</label>
+                        <input type="text" name="serial" class="form-control" id="serial" required maxlength="50">
+                        
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row">
+                    <div class=" col-sm-6">
+                      <label>Select item</label>
+                      <select class="form-control" name="item" required>
+                        <option value="" disabled selected>Choose your option</option>
+                        {% for item in items %}
+                        <option value="{{item.id}}">{{item.item_type}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class=" col-sm-6">
+                      <label>Asset details</label>
+                      <select class="form-control" name="availability" required>
+                        <option value="" disabled selected>Choose your option</option>
+                        <option value="1">InStock</option>
+                        <option value="2">Out Of Stock</option>
+                      </select>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row">
+                    <div class=" col-sm-6">
+                      <label>Select Manufacturer</label>
+                      <select class="form-control" name="manu" required>
+                        <option value="" disabled selected>Choose your option</option>
+                        {% for manufacturer in manufacturers %}
+                        <option value="{{manufacturer.id}}">{{manufacturer.manufacturer}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class=" col-sm-6">
+                      <label>Select Vendor</label>
+                      <select class="form-control" name="vendor" required>
+                        <option value="" disabled selected>Choose your option</option>
+                        {% for vendor in vendors %}
+                        <option value="{{vendor.id}}">{{vendor.name}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <br><hr>
+                  <h5>Warranty Details</h5>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <label>Warranty Expiry</label>
+                          <input type='text'  name="w_year" class="form-control"  id='datetimepicker1'required/>
+                        <!-- <input type="number" class="form-control"> -->
+                    </div>
+                    <div class="col-sm-6">
+                    <label>Purchase on:</label>
+
+                        <input type='text' name="purchase" class="form-control" id='datetimepicker'required/>
+
+                    </div>
+                  </div>
+                  <hr>
+                  <h5>Cost Details</h5>
+                  <div class="row">
+                    <div class="col-sm-4">
+                      <label>Cost Center:</label>
+                      <select class="form-control" name="costcenter" required>
+                        <option value="">Choose your option</option>
+                          {% for cost in costcenters %}
+                        <option value="{{cost.id}}">{{cost.name}}</option>
+                          {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <label>Cost:</label>
+                      <input type="number" name="cost" class="form-control" min="0" required>
+                    </div>
+                    <div class="col-sm-4">
+                      <label>Depreciation Type:</label>
+                      <input type="text" name="depre" class="form-control" required>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer" style="border:0px">
+                <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add To Stock</button>
+                <!-- <span style="color:red">* </span> are mandatory -->
+                </div>
+                </form>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+          </div>
+       

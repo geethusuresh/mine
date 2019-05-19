@@ -1,0 +1,60 @@
+<!--Jquery Dialog -->
+  <div id="dialog-message" title="Alert">      
+  </div>
+  <!-- -->
+
+<script type="text/javascript"> 
+        function dashboard_item_delete(dashboard_item_id,div_id,ajax_loader,report_type){
+          if(confirm("Are you really want to delete this report from this dashboard?")){
+            $('#'+ajax_loader).show();
+            $.ajax({
+                type: "POST",
+                url: "/dashboard_item_delete/",
+                data: { dashboard_item_id: dashboard_item_id, report_type: report_type, csrfmiddlewaretoken: '{{ csrf_token }}'}
+                })
+                .done(function( msg ) {
+                    $('#'+ajax_loader).hide();
+                    $('#'+div_id).hide(1000);                                                  
+                })
+                .fail(function() {
+                    $('#'+ajax_loader).hide();              
+                    $( "#dialog-message" ).html("Oh! Failed to delete this report from your dashboard");
+                    $( "#dialog-message" ).dialog( "open" );                
+                });
+            }  
+        }
+
+    function report_add_to_dashboard(){
+      var report_type = $('#report_type').val();    
+      $('#ajax_loader').show();
+      $.ajax({
+          type: "POST",
+          url: "/addreport_to_dashboard/",
+          data: { report_type: report_type, csrfmiddlewaretoken: '{{ csrf_token }}'}
+          })
+          .done(function( msg ) {
+              $('#ajax_loader').hide();
+              $('#success_alert').html(msg);
+              $('#success_alert').show(100);
+          })
+          .fail(function() {
+              $('#ajax_loader').hide();
+              $('#failed_alert').html("Oh! Failed to move this report to your dashboard");
+              $('#failed_alert').hide(100);
+          });                   
+      }   
+</script>
+<script type="text/javascript">
+$(function() {        
+    $( "#dialog-message" ).dialog({
+        modal: true,
+        autoOpen: false,
+        buttons: {
+          Ok: function() {
+          $( this ).dialog( "close" );                
+          }
+        }
+      });
+});
+</script>
+

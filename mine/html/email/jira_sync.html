@@ -1,0 +1,35 @@
+{% load humanize %}
+<html>	
+	<body>
+		Dear Team,<br/><br/>
+
+		{% if op == "id-not-exist" %}
+
+			Below are the workgroup ids are missing in jira production database, <br/>
+
+		{% for wg_info in contents %}
+		
+			Workgroup Name: "{{wg_info.wg_name}}", Old Workgroup Id: "{{wg_info.wg_id}}", New Workgroup id:  "{{wg_info.new_wg_id}}" <br/>
+
+		{% endfor %}
+
+		{% endif %}
+
+		{% if op == "name-not-exist" %}
+			Below are the workgroup names are missing in jira production database, <br />
+
+			{% for wg_info in contents %}
+				{{wg_info.wg_name}}  <br/>				
+			{% endfor %}
+
+		{% endif %}
+
+		<br />
+		Thanks,<br/>
+		Oneconsole Team<br/>
+		Marlabs Inc.<br/>	
+		<br/>
+		Note : This is an auto generated report by OneConsole. Please do not reply to this email.
+		<br/>
+	</body>
+</html>

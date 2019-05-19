@@ -1,0 +1,115 @@
+<li id="dash"><a href="/"><i class="glyphicon glyphicon-dashboard"></i><span class="text">Dashboard</span></a></li>
+                 <li id="all"><a href="/ticket/all"><i class="glyphicon glyphicon-book"></i><span class="text">Tickets</span></a></li>
+                {% if approver %}
+                  
+                  <li id="approval"><a href="/ticket/approval/"><i class="glyphicon glyphicon-plus"></i><span class="text">Approval Section</span></a></li>                
+                {% endif %}
+                 <li id="noti"><a href="/notifications/"><i class="glyphicon glyphicon-plus"></i><span class="text">Notification Center</span></a></li>
+                <li id="incident"><a href="/ticket/incident/create"><i class="glyphicon glyphicon-plus"></i><span class="text">Create Service Request</span></a></li>
+                <li id="customer1"><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-user"></i><span class="text">Customers</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu ">
+                    <li id="cadd"><a href="/customer/add"><span class="text">Add Customers</span></a></li>
+                    <li id="cview"><a href="/customer/view"><span class="text">View Customers</span></a></li>
+                  </ul>
+                </li>
+                
+                <li id="tempadd"><a href="/ticket/template/add"><i class="glyphicon glyphicon-pushpin"></i><span class="text">Add Template</span></a></li>
+
+
+               <li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-user"></i><span class="text">Person Administration</span>
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu">
+                  <li  ><a href="/personadmin/listview" ><i class="glyphicon glyphicon-user"></i><span class="text ">Person</span>
+                    </a>                   
+                  </li>
+                  <li>
+                    <a href="/persongroupadmin/list/workgroup" ><i class="glyphicon glyphicon-th"></i><span class="text">Workgroup</span>
+                    </a>
+                  </li>
+                  <li><a href="/persongroupadmin/list/subgroup" ><i class="glyphicon glyphicon-th-list"></i><span class="text">Subgroup</span>
+                    
+                    </a>
+                  </li>
+                  <li  ><a href="/list/role" ><i class="glyphicon glyphicon-cog"></i><span class="text">Role</span>
+                    
+                    </a>
+                  </li>
+                  <li  ><a href="/list/privilege" ><i class="glyphicon glyphicon-plus-sign"></i><span class="text">Privilege</span>
+                    
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-plus-sign"></i><span class="text">SLA Administration</span>
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu ">
+                  <li  ><a href="/sla/definitions" ><i class="glyphicon glyphicon-plus-sign"></i><span class="text">SLA Definitions</span>
+                  </a>
+                </li>
+                <li  ><a href="/ola/definitions" ><i class="glyphicon glyphicon-plus-sign"></i><span class="text">OLA Definitions</span>
+                  </a>
+                </li>
+                </ul>
+              </li>
+
+               <li><a href="/functionality/add"><i class="glyphicon glyphicon-pushpin"></i><span class="text">Function Administration</span></a></li>              
+
+              <li id="tempadd"><a href="/kb/list"><i class="glyphicon glyphicon-book"></i><span class="text">Knowledge Base</span></a></li>
+
+              <li id="tempadd"><a href="/category/list"><i class="glyphicon glyphicon-pushpin"></i><span class="text">Category</span></a></li>
+
+               <li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-wrench"></i><span class="text">Ldap Settings</span>
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu">
+                  <li><a href="/ldap_auth_setting/"><span class="text">Add Ldap Details</span></a></li>
+                  <li><a href="/ldap_details/"><span class="text">View Ldap Details</span></a></li>                   
+                </ul>
+              </li>
+              
+              <li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-tasks"></i><span class="text">Email Templates</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu">
+                    <li><a href="/email_template_admin/"><span class="text">Configure Email Templates</span></a></li>
+                    <li><a href="/view_email_template/"><span class="text">View Templates Details</span></a></li>                  
+                  </ul>
+                </li>
+
+                <!-- <li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-envelope"></i><span class="text">Email Integration Panel</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu">
+                    <li><a href="/email_workgroup_map/"><span class="text">Email-WG Configuration</span></a></li>
+                    <li><a href="/mail_import/"><span class="text">Generate Email Ticket</span></a></li>
+                    <li><a href="/admin/django_mailbox/"><span class="text">Email Accounts Admin</span></a></li>
+                  </ul>
+                </li> -->
+                
+                 <li><a href="" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-question-sign"></i><span class="text">Faq</span>
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu ">
+                  <li><a href="/faq/add"><span class="text">Add Faq</span></a></li>
+                  <li><a href="/faq/adminview"><span class="text">View/Edit Faq</span></a></li>
+                </ul>
+              </li>
+
+
+               <li><a href="" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-question-sign"></i><span class="text">Faq Category</span>
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu ">
+                  <li><a href="/faq/category/add"><span class="text">Add Faq category</span></a></li>
+                  <li><a href="/faq/category/view"><span class="text">View/Edit Faq Category</span></a></li>
+                </ul>
+              </li>
+
+
+               <li><a href="" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-question-sign"></i><span class="text">Faq Subcategory</span>
+
+              <!--  <li><a href="/faq/view" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-question-sign"></i><span class="text">Faq Subcategory</span> -->
+
+                <i class="toggle-icon fa fa-angle-left"></i></a>
+                <ul class="sub-menu ">
+                  <li><a href="/faq/subcategory/add"><span class="text">Add subcategory</span></a></li>
+                  <li><a href="/faq/subcategory/view"><span class="text">View/Edit Subcategory </span></a></li>
+                </ul>
+              </li>

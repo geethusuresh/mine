@@ -1,0 +1,362 @@
+        <style>
+            #overall_resp_container_engineerwise .highcharts-xaxis-labels text:nth-child(2n+0){display: none!important;}
+            #overall_resp_container_engineerwise .highcharts-axis path{border:0px!important; stroke-width:0px;}
+            #overall_resp_perc_engineerwise .highcharts-xaxis-labels text:nth-child(2n+0){display: none!important;}
+            #overall_resp_perc_engineerwise .highcharts-axis path{border:0px!important; stroke-width:0px;}
+            #overall_reso_container_engineerwise .highcharts-xaxis-labels text:nth-child(2n+0){display: none!important;}
+            #overall_reso_container_engineerwise .highcharts-axis path{border:0px!important; stroke-width:0px;}
+            #overall_reso_perc_engineerwise .highcharts-xaxis-labels text:nth-child(2n+0){display: none!important;}
+            #overall_reso_perc_engineerwise .highcharts-axis path{border:0px!important; stroke-width:0px;}
+            
+            #engineer_wise_status_details .highcharts-xaxis-labels text:nth-child(2n+0){display: none!important;}
+            #engineer_wise_status_details .highcharts-axis path{border:0px!important; stroke-width:0px;}
+            
+        </style>
+        <script src="/static/js/highcharts/highcharts_grouped/grouped-categories.js"></script>
+            <div class="row">            
+                  <div class="col-sm-12">
+                      <div class="panel">
+                          <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                            Response Details - {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %} (#)
+                          </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                          <div class="panel-body">
+                              <div id="overall_resp_container_engineerwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_resp_container_engineerwise').highcharts({
+                                        chart: {
+                                            type: 'column'                                      
+                                        },
+                                        title: {
+                                            text: 'Response Time -  {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %}'
+                                        },                                
+                                        xAxis: {
+                                            
+                                            categories:[{% for x_item in workgroup_wise_resp_count %} {categories:["{{x_item.0}}"],
+                                                        name:{{x_item.1}} }, {% endfor %}],
+                                            {% comment %}
+                                                categories:[{% for x_item in workgroup_wise_resp_count %} "{{x_item.0}}", {% endfor %}],
+                                            {% endcomment %}
+                                            labels: {
+                                              rotation: -45                                         
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,                                     
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                               minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category.parent.name;
+                                                        str_name = str_name.replace(" ","_");
+                                                        window.open("/ticketpopup/?report_type={{report_type}}&graph_section=response_wise&{%if report_type == 'engineer_report'%}engineer{% elif report_type == 'workgroup_report' %}workgroup{% elif report_type == 'status_report' %}status{%elif report_type == 'priority_report'%}priority{%endif%}="+category_detail+"&sla_type=response&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in workgroup_wise_resp_count %} {{sla_item.2}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in workgroup_wise_resp_count %} {{sla_item.3}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+
+                <!--Start row -->
+
+                <div class="row">
+                  <div class="col-sm-12">
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                            Resolution Details - {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %} (#)
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                          <div class="panel-body">
+                              <div id="overall_reso_container_engineerwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_reso_container_engineerwise').highcharts({
+                                        chart: {
+                                            type: 'column'
+                                        },
+                                        title: {
+                                            text: 'Resolution Time - {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %}'
+                                        },
+                                        xAxis: {
+                                            
+                                            categories:[{% for x_item in workgroup_wise_reso_count %} {categories:["{{x_item.0}}"],
+                                                        name:{{x_item.1}} }, {% endfor %}],
+                                            {%comment %}
+                                            categories:[{% for x_item in workgroup_wise_reso_count %} "{{x_item.0}}", {% endfor %}],
+                                            {% endcomment %}
+                                            labels: {
+                                              rotation: -45
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,                                     
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category.parent.name;
+                                                        str_name = str_name.replace(" ","_");
+                                                        window.open("/ticketpopup/?report_type={{report_type}}&graph_section=resolution_wise&{%if report_type == 'engineer_report'%}engineer{% elif report_type == 'workgroup_report' %}workgroup{% elif report_type == 'status_report' %}status{%elif report_type == 'priority_report'%}priority{%endif%}="+category_detail+"&sla_type=resolution&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in workgroup_wise_reso_count %} {{sla_item.2}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in workgroup_wise_reso_count %} {{sla_item.3}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            <div class="row">
+                  <div class="col-sm-12">
+                      <div class="panel">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  <i class="fa fa-bar-chart-o fa-fw"></i>
+                                  Response Details - {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %} (%) 
+                          </div>
+                          <!-- /.panel-heading -->
+                          <div class="panel-body">
+                              <div id="overall_resp_perc_engineerwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_resp_perc_engineerwise').highcharts({
+                                        chart: {
+                                            type: 'column'
+                                        },
+                                        title: {
+                                            text: 'Response Time -' + {% if report_type == 'engineer_report' %} 'Engineer'  {% elif report_type == 'status_report' %}'Status' {% elif report_type == 'workgroup_report' %}'Workgroup'{% elif report_type == 'status_report' %}'Status' {% endif %} +' wise (%)'
+                                        },
+                                        xAxis: {
+                                            categories:[{% for x_item in workgroup_resp_perc %} {categories:["{{x_item.0}}"],
+                                                        name:{{x_item.1}} }, {% endfor %}],
+                                            {% comment %}
+                                            categories:[{% for x_item in workgroup_resp_perc %} "{{x_item.0}}", {% endfor %}],
+                                            {% endcomment %}
+                                            labels: {
+                                              rotation: -45
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y + "%";
+                                          }
+                                        },
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                               minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category.parent.name;
+                                                        str_name = str_name.replace(" ","_");
+                                                        window.open("/ticketpopup/?report_type={{report_type}}&graph_section=response_wise&{%if report_type == 'engineer_report'%}engineer{% elif report_type == 'workgroup_report' %}workgroup{% elif report_type == 'status_report' %}status{%elif report_type == 'priority_report'%}priority{%endif%}="+category_detail+"&sla_type=response&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in workgroup_resp_perc %} {{sla_item.2}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in workgroup_resp_perc %} {{sla_item.3}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+<div class="row">
+                  <div class="col-sm-12">
+                      <div class="panel">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                                  <i class="fa fa-bar-chart-o fa-fw"></i>
+                                  Resolution Details - {% if report_type == 'engineer_report' %}Engineer wise {% elif report_type == 'status_report' %}Status wise {% elif report_type == 'workgroup_report' %}Workgroup wise {% elif report_type == 'priority_report' %}Priority wise {% endif %} (%) 
+                              </h3> 
+                          </div>
+                          <!-- /.panel-heading -->
+                          <div class="panel-body">
+                              <div id="overall_reso_perc_engineerwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_reso_perc_engineerwise').highcharts({
+                                        chart: {
+                                            type: 'column'
+                                        },
+                                        title: {
+                                            text: 'Resolution Time -'+{% if report_type == 'engineer_report' %} ' Engineer'  {% elif report_type == 'status_report' %}'Status' {% elif report_type == 'workgroup_report' %}'Workgroup'{% elif report_type == 'status_report' %}'Status' {% endif %} +' wise (%)'
+                                        },
+                                        xAxis: {
+                                            
+                                            categories:[{% for x_item in workgroup_resp_perc %} {categories:["{{x_item.0}}"],
+                                                        name:{{x_item.1}} }, {% endfor %}],
+                                            {% comment %}
+                                            categories:[{% for x_item in workgroup_reso_perc %} "{{x_item.0}}", {% endfor %}],
+                                            {% endcomment %}
+                                            labels: {
+                                              rotation: -45
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y +" %";
+                                          }
+                                        },
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category.parent.name;
+                                                        str_name = str_name.replace(" ","_");
+                                                        window.open("/ticketpopup/?report_type={{report_type}}&graph_section=resolution_wise&{%if report_type == 'engineer_report'%}engineer{% elif report_type == 'workgroup_report' %}workgroup{% elif report_type == 'status_report' %}status{%elif report_type == 'priority_report'%}priority{%endif%}="+category_detail+"&sla_type=resolution&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in workgroup_reso_perc %} {{sla_item.2}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in workgroup_reso_perc %} {{sla_item.3}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>
+                        </div>
+                      </div>
+                    </div>
+                </div>

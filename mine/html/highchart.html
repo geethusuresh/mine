@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>High Charts</title>
+	<script src="/static/js/highcharts/jquery.min.js"></script>
+	<script src="/static/js/highcharts/custom.js"></script>
+	<script src="/static/js/highcharts/standalone-framework.js"></script>
+	<script src="/static/js/highcharts/exporting.js"></script>
+	<script>
+	$(function () { 
+    $('#container').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Ticket Status'
+        },
+        xAxis: {
+            categories: ['Total Task', 'Open', 'Closed']
+        },
+        yAxis: {
+            title: {
+                text: 'Status'
+            }
+        },
+        series: [{
+            name: '{{user}}',
+            data: [{{ticket}}, {{closed}}, ({{ticket}}-{{closed}})]
+        }]
+    });
+});
+	</script>
+</head>
+<body>
+	<div id="container" style="width:100%; height:300px;"></div>
+</body>
+</html>
+
+

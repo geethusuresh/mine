@@ -1,0 +1,243 @@
+{% extends 'mlbsod/home.html'%}
+{% block content %}{% load staticfiles %}
+
+
+<link href="{% static 'cloud-static-files/aws_dashboard.css' %}" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+<!-- <script src="{% static 'js/reviews.js' %}" type="text/javascript"></script>
+ -->
+
+
+ {% if not cloud_account_list and not error_message%}
+<div class="alert alert-warning alert-dismissable">
+      <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+      <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+      <p>Your have not added cloud account. Please add one.<br>
+        <a href="#" class="create-cloud" ><i class="fa fa-cloud"></i>
+            <span> Add Cloud</span>
+        </a>
+      </p>
+</div>
+{% endif %}
+
+{% for each in cloud_account_list %}
+
+<div class="content animate-panel">
+
+<div class="row panel_container">
+<div class="row">
+    <div class="col-lg-12 text-center m-t-md animated-panel zoomIn" style="-webkit-animation-delay: 0.1s;">
+        <h2>
+            Welcome to {{each.cloud_account_name}}
+        </h2>
+       <img src="/static/img/rsz_aws_logo.jpg" class="img-circle" width="60">
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-12 animated-panel zoomIn" style="-webkit-animation-delay: 0.2s;">
+        <div class="hpanel">
+            <div class="panel-heading">
+                AWS Dashboard information and statistics
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-3 text-center animated-panel zoomIn" style="-webkit-animation-delay: 0.2s;">
+                        <div class="small">
+                            <i class="fa fa-bolt"></i> Total Instances
+                        </div>
+                        <div>
+                            <h1 class="font-extra-bold m-t-xl m-b-xs">
+                                {{each.num_total_instances}}
+                            </h1>
+                            <small>Total nuber of instance in account</small>
+                        </div>
+                        <div class="small m-t-xl">
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-6 animated-panel zoomIn" style="-webkit-animation-delay: 0.3s;">
+                        <div class="text-center small">
+                            <canvas id="cpu_usage_statistics-{{each.cloud_account_id}}" width="400" height="200"></canvas><br>
+                            <i class="fa fa-laptop"></i> Last one hour cpu usage (in %) 
+                        </div>
+
+                    </div>
+                    <div class="col-md-3 text-center animated-panel zoomIn" style="-webkit-animation-delay: 0.4s;">
+                        <div class="small">
+                            <i class="fa fa-clock-o"></i> Running Instances
+                        </div>
+                        <div>
+                            <h1 class="font-extra-bold m-t-xl m-b-xs">
+                                {{each.num_running_instances}}
+                            </h1>
+                            <small>Total nuber of running instance in account</small>
+                        </div>
+                        <div class="small m-t-xl">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                    <span class="pull-right">
+                          <i class="fa fa-arrow-circle-right">
+                            <a href="{% url 'aws_node_list' each.cloud_account_id %}">
+                                Go to instance details...
+                            </a>
+                          </i>
+                    </span>
+                Last update: 21.05.2015
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.4s;">
+        <div class="hpanel">
+            <div class="panel-body text-center h-200">
+                <i class="pe-7s-graph1 fa-4x"></i>
+
+                <h1 class="m-xs">${{each.total_amount}}</h1>
+
+                <h3 class="font-extra-bold no-margins text-success">
+                    Bill Amount
+                </h3>
+                <small>Current month expense on this account.</small>
+            </div>
+            <div class="panel-footer">
+                <a href="{% url 'aws_billing' each.cloud_account_id %}">
+                    <i class="fa fa-arrow-circle-right"> Billing details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.5s;">
+        <div class="hpanel stats">
+            <div class="panel-body text-center h-200">
+
+                <h1 class="m-xs">{{each.num_volumes}}</h1>
+                <div class="stats-icon pull-right">
+                    <i class="pe-7s-share fa-4x"></i>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                Volumes
+                </h3>
+                <small>Total numer of volumes used in this account</small>
+            </div>
+            <div class="panel-footer">
+                <a href="{% url 'aws_volume_list' each.cloud_account_id %}">
+                   <i class="fa fa-arrow-circle-right"> Volume details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.7s;">
+        <div class="hpanel stats">
+
+
+            <div class="panel-body text-center h-200">
+                <h1 class="m-xs">{{each.num_key_pairs}}</h1>
+                <div class="stats-icon pull-right">
+                    <i class="pe-7s-share fa-4x"></i>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                Key Pairs
+                </h3>
+                <small>Available key pairs in this account</small>
+            </div>
+
+
+            <div class="panel-footer">
+                <a href="{% url 'aws_keypair_list' each.cloud_account_id %}">
+                    <i class="fa fa-arrow-circle-right"> Keypair details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.7s;">
+        <div class="hpanel stats">
+            <div class="panel-body text-center h-200">
+                <div class="flot-chart">
+                    <div class="flot-chart-content" id="flot-income-chart" style="padding: 0px; position: relative;"><canvas class="flot-base" width="210" height="60" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 210px; height: 60px;"></canvas><canvas class="flot-overlay" width="210" height="60" style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 210px; height: 60px;"></canvas></div>
+                </div>
+                <div class="m-t-xs">
+
+                    <div class="row">
+                        <div class="col-xs-6 animated-panel zoomIn" style="-webkit-animation-delay: 0.8s;">
+                            <small class="stat-label">Incoming</small>
+                            <h4>{{each.network_incoming_speed.avg|floatformat:"-2"}}<i class="fa fa-level-down text-success"></i></h4>
+                        </div>
+                        <div class="col-xs-6 animated-panel zoomIn" style="-webkit-animation-delay: 0.8s;">
+                            <small class="stat-label">Outgoing</small>
+                            <h4>{{each.network_outgoing_speed.avg|floatformat:"-2"}}<i class="fa fa-level-up text-success"></i></h4>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                    Networks
+                </h3>
+                <small>Average network speed in bytes/second</small>
+            </div>
+            <div class="panel-footer">
+                Last two hour network details
+            </div>
+
+                <!-- <a href="/cloud_management/{{each.account_type}}/{{each.cloud_account_id}}/dashboard" class="ca-more">more...</a> -->
+                <a href="{% url 'aws_node_list' each.cloud_account_id %}" class="ca-more">more...</a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+
+            var test  = ({{each.cpu_usage_statistics | safe}})
+            var network_outgoing_statistics_xaxis = []
+            var network_outgoing_statistics_yaxis = []
+
+
+            jQuery.each(test, function(index, value){
+                time_stamp = value['Timestamp'].split("T")[1]
+                network_outgoing_statistics_xaxis.push(time_stamp)
+                network_outgoing_statistics_yaxis.push(value['Sum'])
+            });
+
+            network_outgoing_statistics_yaxis = network_outgoing_statistics_yaxis.sort();
+            console.log( "ready!", network_outgoing_statistics_xaxis );
+            console.log( "ready!", network_outgoing_statistics_yaxis );
+
+
+            var volume_read_write_data = {
+                labels: network_outgoing_statistics_xaxis,
+                datasets: [
+                    {
+                        label: "My First dataset",
+                        fillColor: "#D4EDC8",
+                        strokeColor: "#62cb31",
+                        data: network_outgoing_statistics_yaxis
+                    }
+                ]
+            };
+
+            var ctx = $("#cpu_usage_statistics-{{each.cloud_account_id}}").get(0).getContext("2d");
+            var myLineChart = new Chart(ctx).Line(volume_read_write_data, {pointDot: false});
+
+
+});
+
+</script>
+
+{% endfor %}
+
+
+
+{% endblock %}

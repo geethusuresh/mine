@@ -1,0 +1,112 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link href="/static/select2/select2.css" rel="stylesheet" />
+    <link href="/static/select2/select2-2.css" rel="stylesheet" />
+    <style type="text/css">
+      #s2id_groupSelect, .select2-input, .select2-container, .select2-search-field, .select2-choices {
+          width: 180px;
+        }
+        .popover{
+            width:700px;
+            max-width: none;    
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+     {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+
+          {% if alert_message %}
+          {% for alert in alert_message %}
+            {% if profile.customer in alert.viewable_custs.all %}
+                <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+            {% endif %}
+          {% endfor %}
+          {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Script |<small> Status</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/management/schedule/">Management Commands</a></li>
+                    <li class="active">Script Status</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="panel">
+                      <div class="panel-heading">
+                         <p class="panel-title text-center"><strong>File - '{{ script.script }}'</strong></p>
+                       </div>
+                      <div class="panel-body table-responsive ">
+                         <table class="table table-hover " id="table_index">
+                            <thead>
+                            <tr>
+                                <th>name</th>
+                                <th>Script</th>
+                                <th>Status</th>
+                                <th>Event Recieved at</th>
+                                <th>Result</th>
+                            </tr> 
+                            </thead>
+                            <tbody>
+                              {% for script in  status_list%}
+                              <tr >
+                                <td>{{ script.script.script }}</td>
+                                <td>{{ script.command }}</td>
+                                <td class="{% if script.state == 'SUCCESS' %} text-success {% else %} text-danger {% endif %}" ><strong>{{ script.state }}</strong></td>
+                                <!-- <td>{{ script.state }}</td> -->
+                                <td>{{ script.execution_time }}&nbsp<em>{% if task.runtime %}seconds{% endif %}</em></td>
+                                <td class="{% if task.state == 'FAILURE' %} text-danger {% endif %}">{{ script.result }}</td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <script>
+      $("#table_index").dataTable({
+        'bLengthChange':false
+      })
+    </script>
+</html>

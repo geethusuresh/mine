@@ -1,0 +1,80 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Events  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="row">
+                <table class="table table-hover" id="location_table">
+                  <thead>
+                  <tr>
+                      <th>Count</th>
+                      <th>IP</th>
+                  </tr> 
+                  </thead>
+                  <tbody>
+                  {% for key,value in ip_count.items %}
+                  <tr>
+                    <td>{{ value }}</td>
+                    <td>{{ key }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    
+    </body>
+</html>
+
+<script>
+  $("#location_table").dataTable();
+</script>

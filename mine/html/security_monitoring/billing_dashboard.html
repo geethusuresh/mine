@@ -1,0 +1,197 @@
+{% load humanize %}
+{% load zone %}
+{% load set_var %}
+<!DOCTYPE html>
+<html ng-app="oneconsole"  class="no-js">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/security_monitoring/custom.css">
+
+        <style>
+       .loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px" ng-controller="BillingController">
+         {% if "Customer_Dashboard" in request.session.logged_user_priv %} {% include "components/cust_header.html"%} {% else %} {% include "components/header.html"%} {% endif %}
+        <div class="wrapper">
+             {% include "side_bar/sidebar.html"%}
+
+
+            <div class="rightside">
+                {% if alert_message %}
+                    {% for alert in alert_message %}
+                      {% if profile.customer in alert.viewable_custs.all%}
+                          <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+                      {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <div class="page-head" style="margin-top:10px">
+                    <h1  class="pull-left text-thin">Monitoring Billing Dashboard<small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                    </ol>
+                    <br/>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-purple" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content" >
+                    <div class="billing-dashboard-area">
+                    <div class="col-sm-12">
+                        <div class="col-md-4">
+                        <div class="form-group">
+                          <label>Customer</label>
+                            <select class="form-control pull-right" id="customer" name="selectedcustomer" ng-model="customer" ng-change="zabixFetch()">
+                                <option value="">-Select a Customer-</option>
+                                {% for customer in customers %}
+                                    {% if customer.customer == selectedcustomer %}
+                                        <option value="{{customer.customer}}" selected>{{customer.customer}}</option>
+                                     {% else %}
+                                        <option value="{{customer.customer}}" >{{customer.customer}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                    </div>
+
+                        <div class="col-sm-12" id="maincounts" ng-cloak>
+                            <div class="col-md-4 col-sm-12 billingdash-box-area">
+                            <div class="billingdash-box"><i class="fa fa-spinner fa-spin fa-3x" ng-show="spinner"></i>
+                            <a href="#">
+                            <div class="billingdash-box-icon-area"><img src="/static/images/host-group.png" alt="Host Group Count"/></div>
+                            <div class="billingdash-box-count-area" ng-model="host_group_count">
+
+                            <h3>[[host_group_count]]</h3><span>Host Group Counts</span>
+
+                            </div>
+                            </a>
+                            </div>
+                            </div>
+
+                            <div class="col-md-4 col-sm-12 billingdash-box-area">
+                            <div class="billingdash-box"><i class="fa fa-spinner fa-spin fa-3x" ng-show="spinner"></i>
+                             <a href="#">
+                            <div class="billingdash-box-icon-area"><img src="/static/images/monitor-host.png" alt="Monitored Host Count"/></div>
+                            <div class="billingdash-box-count-area" ng-model="host_count">
+                                <h3>[[host_count]]</h3><span>Monitored Host Counts</span></div>
+                                 </a>
+                            </div>
+                            </div>
+
+
+                            <div class="col-md-4 col-sm-12 billingdash-box-area">
+                            <div class="billingdash-box"><i class="fa fa-spinner fa-spin fa-3x" ng-show="spinner"></i>
+                            <a href="#">
+                            <div class="billingdash-box-icon-area"><img src="/static/images/monitor-item.png" alt="Monitored Item Count"/></div>
+                            <div class="billingdash-box-count-area" ng-model="item_count">
+                                <h3>[[item_count]]</h3><span>Monitored Item Counts</span></div>
+                            </a>
+                            </div>
+                            </div>
+                        </div>
+
+
+                        <div class="billingdash-more" ng-cloak>
+                            <div class="col-sm-4">
+
+                            <h4>More Details</h4>
+                            <div class="form-group">
+                              <label>Monitored Host Groups</label>
+                              <select class="form-control" id="hostgroups" ng-model="hostsGroups" ng-options="item.fields.hostgroup as item.fields.hostgroup for item in hostValues" ng-change="zabixHosts()">
+                                        <option value="" selected="selected">-Select a Host Group-</option>
+                              </select>
+                            </div>
+
+                            <div class="form-group">
+                              <label>Monitored Host </label>
+                              <select class="form-control" id="hosts" ng-model="hosts" ng-change="fetchItems()">
+                                        <option value="" selected="selected">-Select a Host-</option>
+                                        <option ng-repeat="option in hostOptions" value="[[option.hostid]]">[[option.host]]</option>
+                              </select>
+                            </div>
+
+                            </div>
+                            <div class="col-sm-6 col-sm-offset-2 text-center billingdash-more-box" ng-show="maindiv">
+
+                            <div class="billingmore-box" ng-model="more_host_count" ng-show="dv1"><i class="fa fa-spinner fa-spin fa-3x" ng-show="spinner2"></i>
+                            <h3>[[more_host_count]]</h3>
+                            <span>Host Counts</span>
+                            </div>
+                            <div class="billingmore-box" ng-model="more_item_count" ng-show="dv2"><i class="fa fa-spinner fa-spin fa-3x" ng-show="spinner2"></i>
+                            <h3>[[more_item_count]]</h3>
+                            <span>Item Counts</span>
+                            </div>
+
+                            </div>
+                        </div>
+
+
+
+
+
+
+                        <!--------------neww ends-------------->
+
+
+                </div>
+
+                </div><!-- content ending-->
+                </div> <!-- right side ending-->
+            </div>
+
+
+         {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/customer_footer.html"%}
+          {% else %}
+          {% include "components/footer.html"%}
+          {% endif %}
+         <script type="text/javascript" src="/static/angular/monitoring_controller.js"></script>
+
+<script>
+
+
+</script>
+</body>
+</html>

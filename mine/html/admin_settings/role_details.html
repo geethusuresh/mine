@@ -1,0 +1,526 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/"> Admin Dashboard </a></li>
+                        <li><a href="/admin_settings/customers/all/"> Customers </a></li>
+                        <li><a href="/admin_settings/customers/{{role.customer.id}}/"> Customer Details </a></li>
+                        <li class="active">Role Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="col-sm-12">
+                    <div class="alert alert-success media fade in col-sm-6 pull-right" id="alert_msg" style="display:none">
+                        <button class="close" type="button" onclick="$('#alert_msg').hide();">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                        <p id="id_msg_dat">You successfully deleted the SLA.</p>
+                    </div>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title pull-left"> Role Details</h3>
+                                    <a href="/admin_settings/customers/{{role.customer.id}}/" class="btn btn-info pull-right" style="margin:10px">View Customer Details</a>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="/admin_settings/roles/{{role.id}}/">{% csrf_token %}
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Name :</dt>
+                                                <dd><input type="text" name="name" value="{{ role.rolename }}" class="form-control"></dd>
+                                                <br>
+                                                <dt>Description :</dt>
+                                                <dd><textarea name="desc" class="form-control">{{ role.description}}</textarea></dd>
+                                            </dl>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Customer :</dt>
+                                                <dd>
+                                                    <input type="text" readonly value="{{ role.customer.customername }}" class="form-control">
+                                                </dd>
+                                                <br>
+                                                <dt></dt>
+                                                <dd><input type="submit" value="Save" class="btn btn-success"></dd>
+                                            </dl>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="panel panel-success">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title text-center"><i class="fa fa-gears"></i> Privileges</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="col-sm-12">
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="priv_details_tab">
+                                                    <div class="col-sm-12">
+                                                        <p class="btn btn-info" style="margin-bottom:10px">"Customer Dashboard" is required for enduser customer access.</p>
+                                                    </div>
+                                                    <ul class="nav nav-tabs">
+                                                        <li class="active">
+                                                            <a data-toggle="tab" href="#existing_privs">
+                                                                <i class="fa fa-lg"></i> Existing
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a data-toggle="tab" href="#new_privs">
+                                                                <i class="fa fa-lg"></i>
+                                                                Add
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                        <div class="tab-pane fade in active" id="existing_privs">
+                                                            <div class="col-sm-12" style="margin-top:10px">
+                                                                <div class="newtoolbar">
+                                                                    <div class="table-toolbar-left pull-right">
+                                                                        <a href="#" class="btn btn-danger" style="margin-right:5px"onclick="remove_privilege()">Remove Privilege</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <table class="table table-stripped responsive nowrap" id="role_privilege_tab">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="display:none">Id</th>
+                                                                            <th>Privilege</th>
+                                                                            <th></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane fade" id="new_privs">
+                                                            <div class="col-sm-12" style="margin-top:10px">
+                                                                <div class="newtoolbar">
+                                                                    <div class="table-toolbar-left pull-right">
+                                                                        <a href="#" class="btn btn-mint" style="margin-right:5px" onclick="add_privilege()">Assign New Privilege</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <table class="table table-stripped responsive nowrap" id="new_previlege_tab">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="display:none"></th>
+                                                                            <th>Name</th>
+                                                                            <th></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="panel panel-success">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title text-center"><i class="fa fa-users"></i> Support Members</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="col-sm-12">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active">
+                                                    <a data-toggle="tab" href="#existing_members_tab">
+                                                        <i class="fa fa-lg"></i> Existing
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a data-toggle="tab" href="#new_members_navtab">
+                                                        <i class="fa fa-lg"></i>
+                                                        Add
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade in active" id="existing_members_tab">
+                                                    <div class="col-sm-12" style="margin-top:10px">
+                                                        <div class="newtoolbar">
+                                                            <div class="table-toolbar-left pull-right">
+                                                                <a href="#" class="btn btn-danger" style="margin-right:5px"onclick="remove_members()">Remove Members</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <table class="table table-stripped" id="role_members_tab">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="display:none">Id</th>
+                                                                    <th>Member</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane fade" id="new_members_navtab">
+                                                    <div class="col-sm-12" style="margin-top:10px">
+                                                        <div class="newtoolbar">
+                                                            <div class="table-toolbar-left pull-right">
+                                                                <a href="/admin_settings/assign_support_team/{{role.customer.id}}/" class="btn btn-pink">New Support Members</a>
+                                                                <a href="#" class="btn btn-mint" style="margin-right:5px" onclick="add_members()">Save</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <table class="table table-stripped" id="new_members_tab">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="display:none">Id</th>
+                                                                    <th>Member</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/confirmation_box.html" %}
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        
+        <script type="text/javascript" src="/static/js/form-wizard.js"></script>
+
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            function initialize_datatable_privs() {
+                // Existing Privileges
+                $('#role_privilege_tab').DataTable( {
+                    "processing": true,
+                    "responsive": true,
+                    "ajax": {
+                        "processing": true,
+                        "url": "/admin_settings/previleges/{{role.id}}/",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "": "id",sClass: "hidden" },
+                        { "": "priv" },
+                        { "": "","bSortable": false, }
+                    ],
+                    "columnDefs": [ {
+                        "targets": 2,
+                        "data": "null",
+                        "defaultContent": "<input type='checkbox' name='checkbox_mem' class='form-control remove' value='member' style='height:auto'>"
+                    }],
+                    "bInfo": false,
+                });
+                // New Privileges
+                $('#new_previlege_tab').dataTable( {
+                    "processing": true,
+                    "responsive": true,
+                    "bInfo": false,
+                    "ajax": {
+                        "processing": true,
+                        "url": "/admin_settings/previleges/{{role.id}}/?add_priv=true",
+                        "dataSrc": "",
+                        "bInfo": false,
+                    },
+                    "columns": [
+                        { "": "id",sClass: "hidden" },
+                        { "": "priv" },
+                        { "": "","bSortable": false, }
+                    ],
+                    "columnDefs": [ {
+                        "targets": 2,
+                        "data": "member",
+                        "defaultContent": "<input type='checkbox' class='form-control add' style='height:auto' value='member'>"
+                    }]
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            function initialize_datatable_members(){
+                // Existing Members
+                $('#role_members_tab').dataTable( {
+                    "processing": true,
+                    "ajax": {
+                        "processing": true,
+                        "url": "/admin_settings/view/members/{{role.id}}/?type=members",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "": "id",sClass: "hidden" },
+                        { "": "member" },
+                        { "": "","bSortable": false, }
+                    ],
+                    "columnDefs": [ {
+                        "targets": 2,
+                        "data": "null",
+                        "defaultContent": "<input type='checkbox' name='checkbox_mem' class='form-control remove' value='member' style='height:auto'>"
+                    }]
+                });
+                // Non Existing Members
+                $('#new_members_tab').dataTable( {
+                    "processing": true,
+                    "ajax": {
+                        "processing": true,
+                        "url": "/admin_settings/view/members/{{role.id}}/?type=nonmembers",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "": "id",sClass: "hidden" },
+                        { "": "member" },
+                        { "": "","bSortable": false, }
+                    ],
+                    "columnDefs": [ {
+                        "targets": 2,
+                        "data": "member",
+                        "defaultContent": "<input type='checkbox' class='form-control add' style='height:auto' value='member'>"
+                    }]
+                });
+            }
+        </script>
+        <script type="text/javascript">
+        $(document).ready(function(){
+            initialize_datatable_privs();
+            initialize_datatable_members();
+        })
+        </script>
+        <script type="text/javascript">
+            function remove_privilege() {
+                $('#confirm_msg').html("<strong>Are you sure you want to remove these privileges ?</strong>");
+                $('#confirm_type').val("remove_privilege");
+                $('#confirm_box').modal('toggle');
+            }
+        </script>
+        <script type="text/javascript">
+            function add_privilege() {
+                $('#confirm_msg').html("<strong>Are you sure you want to assign privileges ?</strong>");
+                $('#confirm_type').val("add_privilege");
+                $('#confirm_box').modal('toggle');
+            }
+        </script>
+        <script type="text/javascript">
+            function add_members() {
+                $('#confirm_msg').html("<strong>Are you sure you want to save ?</strong>");
+                $('#confirm_type').val("add_members");
+                $('#confirm_box').modal('toggle');
+            }
+        </script>
+        <script type="text/javascript">
+            function remove_members() {
+                $('#confirm_msg').html("<strong>Are you sure you want to remove members?</strong>");
+                $('#confirm_type').val("remove_members");
+                $('#confirm_box').modal('toggle');
+            }
+        </script>
+        <script type="text/javascript">
+            function submit_ok() {
+                var confirm_type = $('#confirm_type').val();
+                var checked_list = []
+                if (confirm_type == "remove_privilege") {
+                    var rows = $('#role_privilege_tab').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.remove')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    if (checked_list.length > 0) {
+                        $.ajax({
+                            "method": "post",
+                            "url": "/admin_settings/remove_privilege/{{role.id}}/",
+                            "data": {
+                                "remove_data": checked_list.toString(),
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                            },
+                            success : function(data){
+                                $('#role_privilege_tab').DataTable().destroy()
+                                $('#new_previlege_tab').DataTable().destroy()
+                                if (data.message == "ok"){
+                                    $('#alert_msg').show();
+                                    if ($('#alert_msg').hasClass('alert-danger')) {
+                                        $('#alert_msg').addClass('alert-success');
+                                        $('#alert_msg').removeClass('alert-danger');
+                                    }
+                                    $( "#id_msg_dat" ).html( "<strong> Successfully removed privileges </strong>" ).show();
+                                    initialize_datatable_privs();
+                                }
+                            }
+                        });
+                    } else {
+                        $('#alert_msg').show();
+                        $('#alert_msg').removeClass('alert-success');
+                        $('#alert_msg').addClass('alert-danger');
+                        $( "#id_msg_dat" ).html( "<strong> Please choose atleast one previlege to remove </strong>" ).show();
+                    }
+                } else if (confirm_type == "add_privilege") {
+                    var rows = $('#new_previlege_tab').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.add')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    if (checked_list.length > 0) {
+                        $.ajax({
+                            "method": "post",
+                            "url": "/admin_settings/add_privilege/{{role.id}}/",
+                            "data": {
+                                "add_privs": checked_list.toString(),
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                            },
+                            success : function(data){
+                                $('#role_privilege_tab').DataTable().destroy()
+                                $('#new_previlege_tab').DataTable().destroy()
+                                if (data.message == "ok") {
+                                    $('#alert_msg').show();
+                                    if ($('#alert_msg').hasClass('alert-danger')){
+                                        $('#alert_msg').addClass('alert-success');
+                                        $('#alert_msg').removeClass('alert-danger');
+                                    }
+                                    $( "#id_msg_dat" ).html( "<strong> Successfully added privileges</strong>" ).show();
+                                    initialize_datatable_privs();
+                                }
+                            }
+                        });
+                    } else {
+                        $('#alert_msg').show();
+                        $('#alert_msg').removeClass('alert-success');
+                        $('#alert_msg').addClass('alert-danger');
+                        $( "#id_msg_dat" ).html( "<strong> Please choose atleast one previlege to add </strong>" ).show();
+                    }
+                } else if (confirm_type == 'add_members') {
+                    var rows = $('#new_members_tab').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.add')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    if (checked_list.length > 0) {
+                        $.ajax({
+                            "method": "post",
+                            "url": "/admin_settings/add_members/{{role.id}}/",
+                            "data": {
+                                "person_ids": checked_list.toString(),
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                            },
+                            success : function(data){
+                                $('#role_members_tab').DataTable().destroy()
+                                $('#new_members_tab').DataTable().destroy()
+                                if (data.message == "ok"){
+                                    $('#alert_msg').show();
+                                    if ($('#alert_msg').hasClass('alert-danger')) {
+                                        $('#alert_msg').addClass('alert-success');
+                                        $('#alert_msg').removeClass('alert-danger');
+                                    }
+                                    $( "#id_msg_dat" ).html( "<strong> Successfully added support members</strong>" ).show();
+                                    initialize_datatable_members();
+                                }
+                            }
+                        });
+                    } else {
+                        $('#alert_msg').show();
+                        $('#alert_msg').removeClass('alert-success');
+                        $('#alert_msg').addClass('alert-danger');
+                        $( "#id_msg_dat" ).html( "<strong> Please choose atleast one member to add </strong>" ).show();
+                    }
+                } else if (confirm_type == 'remove_members') {
+                    var rows = $('#role_members_tab').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.remove')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    if (checked_list.length > 0) {
+                        $.ajax({
+                            "method": "post",
+                            "url": "/admin_settings/remove_members/{{role.id}}/",
+                            "data": {
+                                "person_ids": checked_list.toString(),
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                            },
+                            success : function(data){
+                                $('#role_members_tab').DataTable().destroy()
+                                $('#new_members_tab').DataTable().destroy()
+                                $('#alert_msg').show();
+                                if ($('#alert_msg').hasClass('alert-danger')){
+                                    $('#alert_msg').addClass('alert-success');
+                                    $('#alert_msg').removeClass('alert-danger');
+                                }
+                                $( "#id_msg_dat" ).html( "<strong> Successfully removed support members</strong>" ).show();
+                                initialize_datatable_members();
+                            }
+                        });
+                    } else {
+                        $('#alert_msg').show();
+                        $('#alert_msg').removeClass('alert-success');
+                        $('#alert_msg').addClass('alert-danger');
+                        $( "#id_msg_dat" ).html( "<strong> Please choose atleast one member to remove </strong>" ).show();
+                    }
+                }
+                $('#confirm_box').modal('hide');
+            }
+        </script>
+    </body>
+</html>

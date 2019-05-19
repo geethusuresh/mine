@@ -1,0 +1,147 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+  {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/monitoring_header.html"%}
+  {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/cust_header.html"%}
+  {% else %}
+    {% include "components/header.html"%}
+  {% endif %}
+
+        <div class="wrapper">
+        {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Ticket Search | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Search</li>
+                </ol>
+            </div>
+
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-danger" style="margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="content">
+              
+
+              <div class="row">
+              <form action="/ticket/search/" method="post">{% csrf_token %}
+                <div class="col-sm-1">
+                  
+                </div>
+                <div class="col-sm-7">
+                  <input type="text" name="search" id="" class="form-control" placeholder="TicketID for search"  required maxlength="10">
+                </div>
+                <div class="col-sm-4">
+                  <button id="delay" type="submit" class="btn btn-success btn-huge" style="width:120px">Search</button>
+                </div>
+              </form>
+              </div><br>
+
+
+              <div class="box">
+                <div class="box-title">
+                  <h3>Search Result</h3>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                  <table class="table table-striped" id="table_id">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Ticket Id</th>
+                              <th>Summary</th>
+                              <th>Status</th>
+                              <th>Customer</th>
+                              <th>Source</th>
+                              <th>Affected Person</th>
+                              <th>Created Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for ticket in results %}
+                            <tr>
+                              <td>
+
+                              {% if "Admin_Dashboard" in request.session.logged_user_priv or "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                                  {% if ticket.affectedperson == profile %}
+                                      <a href="/ticket/{{ticket.id}}" class="btn btn-success"><i class="fa fa-edit"></i></a>
+                                  {% else %}
+                                      <a href="/ticket/status/edit/{{ticket.id}}" class="btn btn-success"><i class="fa fa-edit"></i></a>
+                                  {% endif %}
+                              {% elif "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                  {% if ticket.affectedperson == profile %}
+                                      <a href="/ticket/{{ticket.id}}" class="btn btn-success"><i class="fa fa-edit"></i></a>
+                                  {% elif ticket.subgroup and ticket.subgroup.id in permission_subgroups %}
+                                      <a href="/ticket/stat/{{ticket.id}}"><i class="fa fa-edit" class="btn btn-success"></i></a>
+                                  {% else %}
+                                      <a href="/ticket/search/result/{{ticket.id}}" class="btn btn-success"><i class="fa fa-edit"></i></a>
+                                  {% endif %}
+                              {% else %}
+                                  <a href="/ticket/{{ticket.id}}" class="btn btn-success"><i class="fa fa-edit"></i></a>
+                              {% endif %}
+                              </td>
+                              <td>{% if ticket.affectedperson.id in vips %}
+                                      <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                                  {% endif %}{{ ticket.ticketid }}</td>
+                              <td>{{ ticket.summary }}</td>
+                              <td>{{ ticket.status }}</td>
+                              <td> {{ticket.customer}} </td>
+                              <td> {{ticket.source}} </td>
+                              <td> {{ticket.affectedperson}} </td>
+                              <td><span style="display:none;">{{ticket.creationdate.year}}{% if ticket.creationdate.month >= 10 %}{{ticket.creationdate.month}}{% else %}0{{ticket.creationdate.month}}{%endif%}{% if ticket.creationdate.day >= 10 %}{{ticket.creationdate.day}}{% else %}0{{ticket.creationdate.day}}{%endif%}{{ticket.creationdate.time | time}}</span>
+                        {% tzone ticket.creationdate %}</td>
+
+                            </tr>
+                            {% endfor %}
+
+                          </tbody>
+                        </table>           
+            </div>
+          </div>
+        </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+    {% else %}
+      {% include "components/footer.html"%}
+    {% endif %}
+    {% include "components/service_request.html"%}
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable();
+    })
+    </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+

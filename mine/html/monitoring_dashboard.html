@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Monitoring Dashboard</title>    
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/dashboard/css/bootstrap.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="/static/dashboard/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+    <!-- Timeline CSS -->
+    <link href="/static/dashboard/css/plugins/timeline.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/dashboard/css/sb-admin-2.css" rel="stylesheet">
+    <!-- Morris Charts CSS -->
+    <link href="/static/dashboard/css/plugins/morris.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="/static/dashboard/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+     <!-- jQuery Version 1.11.0 -->
+    <script src="/static/dashboard/js/jquery-1.11.0.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/static/dashboard/js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="/static/dashboard/js/plugins/metisMenu/metisMenu.min.js"></script>
+    <!-- Morris Charts JavaScript -->
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme.js"></script>    
+    <!-- Custom Theme JavaScript -->
+    <script src="/static/dashboard/js/sb-admin-2.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript">
+    function item_details(item_id){
+        $('#trigger_item_details').val(item_id);
+        $('#frm_item_details').submit();
+    }
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/monitor_dashboard/">Monitoring Dashboard</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">                       
+                        <li class="divider"></li>
+                        <li><a href="/logout/"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">                        
+                        <li>
+                            <a  href="/"><i class="fa fa-home fa-fw"></i>
+                            &nbsp;Home</a>
+                        </li>
+                        <li>
+                        <a href="/monitor_dashboard/"><i class="fa fa-dashboard fa-fw"></i>
+                            &nbsp;Monitoring Dashboard</a>
+                        </li>
+                        <li>
+                            <a  href="/monitor_details/"><i class="fa fa-list fa-fw"></i>
+                            &nbsp;Monitoring Details</a>
+                        </li>                       
+                        <li>
+                            <a href="/logout/"><i class="fa fa-sign-out fa-fw"></i>&nbsp;Logout</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">          
+            <!-- /.row -->
+            <div class="row">
+            {% for box_items in top_box_values %}           
+                <div class="col-lg-3" style="margin-top:12px;">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-8" style="font-size:13px;">
+                                   <span style="color:#009900;font-weight:bold;">{{box_items.count_ok_items}}</span> /  <span style="color:#B82E00;font-weight:bold;">{{box_items.count_problem_items}}</span>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <div> 
+                                    {% if box_items.app_status == 1 %}                                   
+                                     <img src="/static/img/red.jpg" style="width:30px;height:28px;" />
+                                    {% elif box_items.app_status == 0 %}
+                                     <img src="/static/img/green.jpg" style="width:30px;height:30px;" />
+                                    {% endif %}                                      
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 text-left" style="font-size:13px;">
+                                   {{box_items.box_name}}
+                                </div>                                
+                            </div>                        
+                        </div>
+                        <a href="/monitor_box_details/{{box_items.applicationid}}">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>                
+                {% if forloop.counter|divisibleby:"4" %}
+                </div>
+                <!-- /.row -->
+                 <div class="row">
+                {% endif %}
+            {% endfor %}
+            </div>
+
+            <div class="row">
+            {% for bandwidth_items in speedoitemlist %}                
+                <div class="col-lg-4">                      
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>
+                           {{bandwidth_items.speedo_itemname}}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div id="container_speedo{{forloop.counter}}"></div>                 
+                             <script type="text/javascript">
+                             $('#container_speedo{{forloop.counter}}').highcharts({
+                                    chart: {
+                                        type: 'gauge',
+                                        plotBackgroundColor: null,
+                                        plotBackgroundImage: null,
+                                        plotBorderWidth: 0,
+                                        plotShadow: false,
+                                        height: 280,
+                                    },
+
+                                    title: {
+                                        text: '{{bandwidth_items.speedo_itemname}}',
+                                        style:{
+                                            fontSize:"12px"
+                                        }
+                                    },
+
+                                    pane: {
+                                        startAngle: -150,
+                                        endAngle: 150,
+                                        background: [{
+                                            backgroundColor: {
+                                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                                stops: [
+                                                    [0, '#555'],
+                                                    [1, '#333']
+                                                ]
+                                            },
+                                            borderWidth: 0,
+                                            outerRadius: '109%'
+                                        }, {
+                                            backgroundColor: {
+                                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                                stops: [
+                                                    [0, '#333'],
+                                                    [1, '#FFF']
+                                                ]
+                                            },
+                                            borderWidth: 1,
+                                            outerRadius: '107%'
+                                        }, {
+                                            // default background
+                                        }, {
+                                            backgroundColor: '#555',
+                                            borderWidth: 0,
+                                            outerRadius: '105%',
+                                            innerRadius: '103%'
+                                        }]
+                                    },
+
+                                    // the value axis
+                                    yAxis: {
+                                        min: {{bandwidth_items.speedo_lowrange.0}},
+                                        max: {{bandwidth_items.speedo_highrange.1}},
+
+                                        minorTickInterval: 'auto',
+                                        minorTickWidth: 1,
+                                        minorTickLength: 10,
+                                        minorTickPosition: 'inside',
+                                        minorTickColor: '#666',
+
+                                        tickPixelInterval: 30,
+                                        tickWidth: 2,
+                                        tickPosition: 'inside',
+                                        tickLength: 10,
+                                        tickColor: '#666',
+                                        /*labels: {
+                                            step: 2,
+                                            rotation: 'auto'
+                                        },*/
+                                        title: {
+                                            text: '{{bandwidth_items.speedo_valuesuffix}}'
+                                        },
+                                        plotBands: [{
+                                            from: {{bandwidth_items.speedo_lowrange.0}},
+                                            to: {{bandwidth_items.speedo_lowrange.1}},
+                                            color: '#55BF3B' // green
+                                        }, {
+                                            from: {{bandwidth_items.speedo_midrange.0}},
+                                            to: {{bandwidth_items.speedo_midrange.1}},
+                                            color: '#DDDF0D' // yellow
+                                        }, {
+                                            from: {{bandwidth_items.speedo_highrange.0}},
+                                            to: {{bandwidth_items.speedo_highrange.1}},
+                                            color: '#DF5353' // red
+                                        }],
+
+                                        labels: {
+                                            style: {
+                                                color: '#555'
+                                            }
+                                        }
+                                    },
+
+                                    plotOptions: {
+                                        series: {
+                                            dataLabels: {
+                                                enabled: true,
+                                                color: '#555'
+                                            }
+                                        }
+                                    },
+
+                                    series: [{
+                                        name: 'Value',
+                                        data: [{{bandwidth_items.monitored_value}}],
+                                        tooltip: {
+                                            valueSuffix: '{{bandwidth_items.speedo_valuesuffix}}'
+                                        }
+                                    }]
+
+                                });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->                                     
+                </div>
+                <!-- /.col-lg-4 -->
+                {% if forloop.counter|divisibleby:"3" %}
+                </div>
+                <!-- /.row -->
+                 <div class="row">
+                {% endif %}
+            {% endfor %}
+            </div>
+            <!-- /.row -->
+
+
+            <div class="row">
+                <div class="col-lg-12">
+                    {% if multigraph_values %}      
+                    {% for monitored_item in multigraph_values %}
+                    {% if monitored_item.x_axis_value %}     
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                            {{monitored_item.title}}                          
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                        <div id="container_multi_{{forloop.counter}}"></div>                           
+                             <script type="text/javascript">     
+                              $(function () {
+                                  $('#container_multi_{{forloop.counter}}').highcharts({
+                                      chart: {
+                                        /*type: 'line'*/
+                                        type: 'line',
+                                        height: 250
+                                      },
+                                      title: {
+                                          text: "{{monitored_item.title}}",
+                                          x: -20 //center
+                                      },                                      
+                                      xAxis: {
+                                          categories:[{% for x_item in monitored_item.x_axis_value %} "{{x_item}}", {% endfor %}],
+                                          labels: {
+                                            rotation: -90,                                  
+                                          },
+                                          type: 'datetime',
+                                          title: {
+                                              text: 'Monitored Time'
+                                          }
+                                      },
+                                      yAxis: {
+                                          title: {
+                                              text: ''
+                                          },
+                                          plotLines: [{
+                                              value: 0,
+                                              width: 1,
+                                              color: '#808080'
+                                          }]
+                                      },
+                                      tooltip: {
+                                          valueSuffix: ''
+                                      },
+                                      
+                                      series: [
+                                      {% for yaxis_items in monitored_item.y_axis_values %}
+                                      {
+                                          name:'{{yaxis_items.tooltip}}',                                  
+                                          data: [{% for y_item in yaxis_items.itemvalue %} {{y_item}}, {% endfor %}],
+                                          marker: {
+                                            enabled: false
+                                            },
+                                      },
+                                      {% endfor %}
+                                      ],
+
+                                       exporting: {
+                                        enabled: true,
+                                        chartOptions: {                
+                                      xAxis: [{categories:[{% for x_item in monitored_item.x_axis_value %} "{{x_item}}", {% endfor %}],            
+                                            labels: {
+                                                style: {
+                                                    fontSize: '6px',                            
+                                                },
+                                                rotation: -90,
+                                            }
+                                        }]
+                                    }
+                                }
+                                  });
+                              });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                     {% endif %}
+                    {% endfor %}
+                    {% else %}
+                     <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found. Please select any applications and found out the monitored items
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>                  
+                    {% endif %}   
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-8 -->                
+                <!-- /.col-lg-4 -->
+            </div>
+            <!-- /.row --> 
+        </div>
+    </div>
+    <!-- /#wrapper -->
+</body>
+
+</html>

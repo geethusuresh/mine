@@ -1,0 +1,361 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+      {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">                
+                <h1>Settings | <small>Customize Your Dashboard</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Control panel</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <p class="panel-title">Predefined Dashboards</p>                     
+                   </div>
+                   <div class="panel-body">
+                      <div class="pad-ver">
+                        <form class="form-block" action="/customize/dashboard/" method="POST" name="frm_dash" id="frm_dash" >{% csrf_token %}
+
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <div class="row">
+                            <div class="col-sm-5">
+                             <h4 class="text-thin">
+                               Helpdesk Dashboard
+                               {% if dashboard_name == "helpdesk" %}
+                                <l class="fa fa-check-circle" style="color:#27ae60"></l>
+                               {% endif %}
+                             </h4>       
+                             {% if dashboard_name != "helpdesk" %}                              
+                               <button class="btn btn-success text-center" type="button" onclick="apply_dashboard('helpdesk')">Apply Helpdesk Dashboard</button>
+                              {% endif %}                      
+                            </div>
+                            <div class="col-sm-7">
+                              <img src="/static/img/air.png" style="max-width: 80%;" class="pull-right">
+                            </div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4" style="text-align:center;">
+                              
+                            </div>
+                          </div>
+                          </div>
+                          <div class="col-sm-6" style="border-left: 1px solid #B9B9B9;">
+                            <div class="row">
+                            <div class="col-sm-5">                               
+                                <h4 class="text-thin">
+                                Advanced Dashboard {% if dashboard_name == "dynamic" %}<l class="fa fa-check-circle" style="color:#27ae60"></l>{% endif %}
+                                </h4>
+                                {% if dashboard_name != "dynamic" %}  
+                               <button class="btn btn-success" type="button" onclick="apply_dashboard('dynamic')">Apply Advanced Dashboard</button>
+                               {% endif %}
+                            </div>
+                            <div class="col-sm-7">
+                              <img src="/static/img/pro.png" style="max-width: 80%;" class="pull-right">
+                            </div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4" style="text-align:center;padding-top:6px;">
+                               
+                            </div>
+                          </div>
+                          </div>
+
+                         
+                        </div>
+
+                        <hr>
+                         <div class="row">
+                            <div class="col-sm-8">
+                              <h4 class="text-thin">
+                                  Custom Dashboard
+                                  {% if dashboard_name == "drag" %}
+                                   <l class="fa fa-check-circle" style="color:#27ae60"></l>
+                                  {% endif %} 
+                                </h4>
+                                <p>The customizable dashboard allows the user to add widgets such as top devices, interfaces, interface groups and IP groups by speed, volume, utilization and many more criteria. The widgets in the dashboard, once created, can be dragged and dropped as needed by the user. With more than 50 widgets to select from, you are certain to get the dashboard of your choice!
+                                <br>
+                                Once the dashboard is created, the user can again configure it to set the top "N" one wishes to view, the period for which the information is to be seen, the refresh time and lot more.
+                                </p>
+                            </div>
+                            <div class="col-sm-4">
+                              <a href="/customize/dashboard/select/">
+                                <div class="">
+                                  <div class="panel-body text-center">
+                                    <i class="fa fa-object-ungroup fa-5x"></i>
+                                    <!-- <hr> -->
+                                    <p class="h4 text-thin">Click to Design</p>
+                                  </div>
+                                </div>
+                                </a>
+                            </div>
+                          </div>
+                        <input type="hidden" name="dash" id="pre_dashboard" value=""/>
+
+<!-- 
+                          <div class="row">
+                            <div class="col-sm-4">
+                             <h4 class="text-thin">
+                               Helpdesk Dashboard
+                               {% if dashboard_name == "helpdesk" %}
+                                <img style="width: 26px;" src="/static/img/enabled.png">
+                               {% endif %}
+                             </h4>                             
+                            </div>
+                            <div class="col-sm-8">
+                              <img src="/static/img/air.png" style="max-width: 50%;" class="pull-right">
+                            </div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4" style="text-align:center;">
+                              {% if dashboard_name != "helpdesk" %}                              
+                               <button class="btn btn-success" type="button" onclick="apply_dashboard('helpdesk')">Apply Helpdesk Dashboard</button>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                          <hr>
+
+                          <div class="row">
+                            <div class="col-sm-4">                               
+                                <h4 class="text-thin">
+                                Advanced Dashboard
+                                {% if dashboard_name == "dynamic" %}
+                                <img style="width: 26px;" src="/static/img/enabled.png">
+                                {% endif %}
+                                </h4>
+                            </div>
+                            <div class="col-sm-8">
+                              <img src="/static/img/pro.png" style="max-width: 50%;" class="pull-right">
+                            </div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4" style="text-align:center;padding-top:6px;">
+                               {% if dashboard_name != "dynamic" %}  
+                               <button class="btn btn-success" type="button" onclick="apply_dashboard('dynamic')">Apply Advanced Dashboard</button>
+                               {% endif %}
+                            </div>
+                          </div>
+
+                          <hr> -->
+                          <!-- <div class="row">
+                            <div class="col-sm-4">                               
+                                <h4 class="text-thin">
+                                  Custom Dashboard
+                                  {% if dashboard_name == "drag" %}
+                                    <img style="width: 26px;" src="/static/img/enabled.png">
+                                  {% endif %} 
+                                </h4>
+                            </div>
+                            <div class="col-sm-4">
+                            </div>
+                            <div class="col-sm-4" style="">
+                              <a href="/customize/dashboard/select/">
+                                <div class="panel panel-primary panel-colorful">
+                                  <div class="panel-body text-center">
+                                    <i class="fa fa-object-ungroup fa-5x"></i>
+                                    <hr>
+                                    <p class="h4 text-thin">Click to Design</p>
+                                  </div>
+                                </div>
+                                </a>
+                              </div>                            
+                            </div> -->
+                          </div>
+                          <!-- <input type="hidden" name="dash" id="pre_dashboard" value=""/> -->
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- <div class="col-sm-4">
+                  <p class="h4 text-thin text-center">Or </p>
+                  <div class="col-md-8 col-lg-12" style="margin-top:20%">
+                  <a href="/customize/dashboard/select/">
+                    <div class="panel panel-primary panel-colorful">
+                      <div class="panel-body text-center">
+                        <p class=" mar-btm text-sm">Custom Dashboard</p>
+                        <i class="fa fa-object-ungroup fa-5x"></i>
+                        <hr>
+                        <p class="h2 text-thin">Click to Design</p>
+                        
+                      </div>
+                    </div>
+                    </a>
+                  </div>
+                </div> -->
+                </div>
+                
+                
+              </div>    
+
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="tagus" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form action="/asset/tag/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Tag name</label>
+          <input type="text" name="tags" requried class="form-control">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="manufact" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form action="/asset/manu/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Manufacturers Name</label>
+          <input type="text" name="manu" requried class="form-control">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="vendoru" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form action="/asset/vendor/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Vendor Name</label>
+          <input type="text" name="vendor" requried class="form-control">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+    {% include "asset/addtostock.html" %}
+    {% include "components/customer_footer.html"%}
+    <!--<script type="text/javascript" src="/static/asset/nifty.min.js"></script>-->
+    <script>    
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+    $("#table_id").DataTable();
+    $("#setti").addClass("active");
+    $("#setti_open").css('display','block');
+    $("#custome").addClass("active");
+    </script>
+
+    <script type="text/javascript">
+      function apply_dashboard(dashboard_type){          
+          $("#pre_dashboard").val(dashboard_type);          
+          $('#frm_dash').submit();
+      }
+    </script>
+
+    </body>
+</html>

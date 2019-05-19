@@ -1,0 +1,135 @@
+{% load humanize %}
+{% load zone %}
+
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+  <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
+      <link rel="stylesheet" type="text/css" href="/static/gridster/css/jquery.gridster.css">
+    <link rel="stylesheet" type="text/css" href="/static/gridster/css/styles.css">
+  <style>
+  ul { list-style-type: none; margin: 0; padding: 0; margin-bottom: 10px; }
+  li { margin: 5px; padding: 5px; width: 150px; }
+  </style>
+  <script>
+  $(function() {
+    $( "#sortable" ).sortable({
+      revert: true,
+    });
+    $('.sortable').droppable({
+
+      over: function() {  
+      save_value();
+      },
+
+      });
+    $( "ul, li" ).disableSelection();
+  });
+  </script>
+  <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+</head>
+<body>
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Profile  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Profile</li>
+                </ol>
+            </div>
+            {% if messages %}
+              <ul >
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            <div class="content">
+             
+
+             
+
+
+
+
+
+
+            </div>
+          </div>
+        </div>
+      <script type="text/javascript" src="/static/gridster/jquery.js"></script>
+    <script type="text/javascript" src="/static/gridster/jquery.gridster.js" charster="utf-8"></script>
+    <script type="text/javascript">
+      // var gridster;
+
+      // $(function() {
+      //   gridtster = $(".gridster > ul").gridster({
+      //     widget_margins: [10, 10], 
+      //     widget_base_dimensions: [140, 140],
+      //     min_cols: 6,
+      //     serialize_params: function($w, wgd) {
+      //       return {
+      //           x: wgd.col,
+      //           y: wgd.row,
+      //           width: wgd.size_x,
+      //           height: wgd.size_y,
+      //           id: $($w).attr('id'),
+      //           class: $($w).attr('class')
+      //       }
+      //   }
+      //   }).data('gridster');
+      // });
+      
+
+
+      var thenga_kola = $(".gridster ul").gridster({
+        widget_margins: [10, 10], 
+        widget_base_dimensions: [140, 140],
+        serialize_params: function($w, wgd) {
+            return {
+                x: wgd.col,
+                y: wgd.row,
+                width: wgd.size_x,
+                height: wgd.size_y,
+                id: $($w).attr('id'),
+                class: $($w).attr('class'),
+            }
+        }
+    }).data('gridster');
+
+    var json = JSON.stringify(thenga_kola.serialize());
+    console.log(json);
+    </script>
+     <script>
+     function save_value(){
+        var i = 1;
+        var x = {};
+        $('#sortable li').each(function(){
+          x[i] = $(this).attr('data-id');
+          i++;
+        });
+        console.log("x");
+      }
+     
+     </script>
+
+    </body>
+</html>
+

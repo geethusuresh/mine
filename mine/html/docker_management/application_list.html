@@ -1,0 +1,167 @@
+{% extends 'docker_management/base.html' %}
+
+{% load zone %}
+
+{% block section_header %}
+<script type="text/javascript">
+  var server_id = {{server_id}}
+</script>
+<h1 class="text-thin">
+  Applications |
+  <small>Applications inside '{{server_name}}'</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li class="active">{{server_name}}</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="col-md-10"></div>
+      <div class="col-md-2 pad-all">
+          <button type="button" class="btn btn-primary" onclick="show_add_application_modal()">Add Applications</button>
+      </div>
+    </div>
+    <div class="col-lg-9">
+      {% if application_list %}
+        {% for application in application_list %}
+          <div class="col-md-6">
+            <div class="panel panel-bordered-primary">
+              <div class="panel-heading">
+                <div class="panel-control">
+                    <a href="{% url 'list_container' server_id application.id %}">
+                      More info&nbsp;<i class="fa  fa-arrow-circle-right"></i>
+                    </a>&nbsp;&nbsp;
+                    <a onclick="show_update_application_modal({{application.id}})" style="cursor:pointer;"><i class="fa fa-edit"></i></a>
+                    &nbsp;
+                    <a style="cursor:pointer;" onclick="show_delete_application_modal({{application.id}})"><i class="fa fa-trash-o"></i></a>
+                </div>
+                <h4 class="panel-title"><strong>{{application.name}}</strong></h4>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-sm-7">
+                    <div class="panel">
+                      <div class="panel-body">
+                        <p class="text-muted">{{application.description|linebreaks}}</p>
+                        <small class="text-muted"><em>Created on {% tzone application.created_on %}</em></small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="media pad-all">
+                      <div class="media-left">
+                        <p class="text-2x mar-no text-thin text-success" data-original-title="<p>Running Containers</p>">{{application.running_container_count}}</p>
+                      </div>
+
+                      <div class="media-body">
+                        <p class="text-muted mar-no text-success">Running</p>
+                      </div>
+                    </div>
+                    <div class="media pad-all">
+                      <div class="media-left">
+                        <p class="text-2x mar-no text-thin text-danger" data-original-title="<p>Stopped Containers</p>">{{application.stopped_container_count}}</p>
+                      </div>
+                      <div class="media-body">
+                        <p class="text-muted mar-no text-danger">Stopped</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <center><h4>No Applications Found!</h4></center>
+      {% endif %}
+    </div>
+    <div class="col-lg-3">
+      <div class="panel">
+        <div class="panel-body">
+          <a href="{% url 'list_docker_compose_template' server_id %}" class="btn-block"><button class="btn btn-mint btn-block"><i class="fa fa-file-text-o"></i> Load Template</button></a>
+          <a href="{% url 'list_image' server_id %}" class="btn-block"><button class="btn btn-mint btn-block"><i class="fa fa-image "></i> Images</button></a>
+          <a href="{% url 'list_all_container' server_id %}" class="btn-block"><button class="btn btn-mint btn-block"><i class="fa fa-tasks"></i> Containers</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="add_application_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Add Application</h4>
+        </div>
+          {% include 'docker_management/application_create_form.html' %}
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="update_application_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Update Application</h4>
+        </div>
+          <div id="update_application_div">
+
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="delete_application_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Delete Application</h4>
+        </div>
+        <div class="modal-body">
+          <h4>Are you sure you want to delete?</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <a id="delete_url"><button type="submit" class="btn btn-primary">Confirm</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+
+  function show_add_application_modal(){
+    $('#add_application_modal').modal('show');
+    $('.form-control').val('');
+  }
+
+  function show_update_application_modal(id){
+    $('#update_application_modal').modal('show');
+    $('#update_application_div').empty();
+    $.ajax({
+        url: '/docker_management/server/' + server_id + '/application/' + id + '/update/',
+        type: 'get',
+        success: function(server_detail){
+          $('#update_application_div').append(server_detail);
+        },
+        error: function(xhr,errmsg,err){
+        },
+    });
+  }
+
+  function show_delete_application_modal(id){
+    $('#delete_application_modal').modal('show');
+    $('#delete_url').attr('href', '/docker_management/server/' + server_id + '/application/'+ id +'/delete/')
+  }
+</script>
+{% endblock %}

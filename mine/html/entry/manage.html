@@ -1,0 +1,316 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+    .media-left{
+      float: left;
+    }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+ 
+{% if alert_message %}
+{% for alert in alert_message %}
+<div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+{% endfor %}
+{% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h2  class="text-thin">Infrastructure Management Dashboard <small></small></h2>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+
+<div class="row">
+            <div class="col-lg-3">
+          
+                <div class="col-sm-12 col-lg-12">
+          
+                  <!--Sparkline Area Chart-->
+                  <div class="panel panel-success panel-colorful text-center">
+                    <div class="panel-body">
+          
+                      <!--Placeholder-->
+                      <div id="demo-sparkline-area">
+                      <l class="fa fa-laptop fa-5x"></l>
+                      </div>
+          
+                    </div>
+                    <a href="/asset/">
+                    <div class="bg-light pad-ver">
+                      <h4 class="mar-no text-thin">Asset Dashboard</h4>
+                    </div>
+                    </a>
+                  </div>
+
+                </div>
+
+                <div class="col-sm-12 col-lg-12">
+          
+                  <!--Sparkline Area Chart-->
+                  <div class="panel panel-danger panel-colorful text-center">
+                    <div class="panel-body">
+          
+                      <!--Placeholder-->
+                      <div id="demo-sparkline-area">
+                        <l class="fa fa-user-secret fa-5x"></l>
+                      </div>
+          
+                    </div>
+                    <a href="/dashboard/index/">
+                    <div class="bg-light pad-ver">
+                      <h4 class="mar-no text-thin">Security dashboard</h4>
+                    </div>
+                    </a>
+                  </div>
+                </div>
+
+
+
+
+                
+
+
+            </div>
+            
+            <div class="col-lg-9">
+          
+          
+
+              <div id="demo-weather-widget-lg" class="panel panel-info panel-colorful text-center">
+                <div class="panel-body">
+
+                  <div class="media">
+                    <div class="media-left">
+                      <!-- <i class="fa fa-map-marker fa-3x"></i> -->
+                    </div>
+                    <div class="media-body">
+                      <a href="/dashboard/index/application/1">
+                      <h4 class="mar-no text-left">Applications</h4>
+                      <p class="text-left">Oneconsole</p>
+                      </a>
+                    </div>
+                  </div>
+          
+
+                  <div class="row pad-top">
+                    <div class="col-xs-6">
+
+                      <!-- <canvas id="demo-weather-lg-icon-1" width="98" height="98"></canvas> -->
+                    </div>
+                    <div class="col-xs-6">
+                      <l style="float:right;font-size: 9em;" class="fa fa-connectdevelop fa-5x"></l>
+                        <p class="text-4x">27</p>
+                        <h4>Infrastructure Mapping</h4>
+
+                      
+                      
+                    </div>
+                  </div>
+                  <hr>
+          
+
+                  <ul class="list-unstyled text-center clearfix">
+                    <li class="col-xs-2">
+                      <h4>200</h4>
+                      <p class="text-sm mar-no">Network</p>
+                      <!-- <p>25 °C</p> -->
+                    </li>
+                    <li class="col-xs-2">
+                      <h4>19</h4>
+                      <p class="text-sm mar-no">HUB</p>
+                      <!-- <p>22 °C</p> -->
+                    </li>
+                    <li class="col-xs-2">
+                    
+                      <h4>20</h4>
+                      <p class="text-sm mar-no">Servers</p>
+                      <!-- <p>20 °C</p> -->
+                    </li>
+                    <li class="col-xs-2">
+                      <h4>54</h4>
+                      <p class="text-sm mar-no">Routers</p>
+                      <!-- <p>28 °C</p> -->
+                    </li>
+                    <li class="col-xs-2">
+                      <h4>89</h4>
+                      <p class="text-sm mar-no">Hosts</p>
+                      <!-- <p>22 °C</p> -->
+                    </li>
+                    <li class="col-xs-2">
+                      <h4>09</h4>
+                      <p class="text-sm mar-no">Speed</p>
+                      <!-- <p>25 °C</p> -->
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+          
+            </div>
+          </div>
+
+
+
+<div class="row">
+            <div class="col-sm-6 col-lg-4">
+          
+              <!--Registered User-->
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+              <div class="panel media pad-all">
+                <div class="media-left">
+                  <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                  <i class="fa fa-user fa-2x"></i>
+                  </span>
+                </div>
+          
+                <div class="media-body">
+                  <p class="text-2x mar-no text-thin">241</p>
+                  <p class="text-muted mar-no">Registered User</p>
+                </div>
+              </div>
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          
+            </div>
+            <div class="col-sm-6 col-lg-4">
+          
+              <!--New Order-->
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+              <div class="panel media pad-all">
+                <div class="media-left">
+                  <span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+                  <i class="fa fa-shopping-cart fa-2x"></i>
+                  </span>
+                </div>
+          
+                <div class="media-body">
+                  <p class="text-2x mar-no text-thin">543</p>
+                  <p class="text-muted mar-no">New Order</p>
+                </div>
+              </div>
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          
+            </div>
+            <div class="col-sm-6 col-lg-4">
+          
+              <!--Comments-->
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+              <div class="panel media pad-all">
+                <div class="media-left">
+                  <span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+                  <i class="fa fa-comment fa-2x"></i>
+                  </span>
+                </div>
+          
+                <div class="media-body">
+                  <p class="text-2x mar-no text-thin">34</p>
+                  <p class="text-muted mar-no">Comments</p>
+                </div>
+              </div>
+              <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          
+            </div>
+           
+          </div>
+
+            </div>
+
+
+
+          </div>
+        </div>
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+     <script src="/static/chartjs/Chart.js"></script>
+     <script>
+
+      var data = {
+          labels: [{% for app in graph %}'{{app.times}}'{% if forloop.couter != 0 %},{% endif %} {% endfor %}],
+          datasets: [
+              {
+                  label: "My First dataset",
+                  fillColor: "#5cb85c",
+                  strokeColor: "#4cae4c",
+                  highlightFill: "rgba(220,220,220,0.75)",
+                  highlightStroke: "rgba(220,220,220,1)",
+                  data: [{% for app in graph %} {{app.count}} {% if forloop.couter != 0 %},{% endif %} {% endfor %}]
+              },
+          ]
+      };
+      var ctx = document.getElementById("charter").getContext("2d");
+      var myLineChart = new Chart(ctx).Line(data, {showXLabels: 5 });
+
+     </script>
+     <script>
+      $(document).ready(function(){
+      $('#table_id').DataTable();
+    })
+     </script>
+               <script>
+
+
+          $("#sec_dash").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

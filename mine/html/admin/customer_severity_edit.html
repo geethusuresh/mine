@@ -1,0 +1,120 @@
+{% load humanize %}
+{% load zone %}
+{% load pagination %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Customer Priority</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            table.dataTable.no-footer {
+                border-bottom-color: #ddd;
+            }
+            table.dataTable thead th, table.dataTable thead td {
+                border-bottom-color: #ddd;
+            }
+            .dataTables_wrapper.no-footer .dataTables_scrollBody {
+                border-bottom-color: #ddd;
+            }
+ 
+      </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin"> SD Settings | <small>Severity Management</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Severity Management</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                {% include "components/confirmation_box.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title"> Severity Edit </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="">{% csrf_token %}
+                                        <div class="col-sm-4">
+                                            <label>Customer Priority :</label>
+                                            <select name="cust_priority" required class="form-control" >
+                                                <option value="">--Select--</option>
+                                                {% for each_priority in customer_priorities %}
+                                                    <option value="{{each_priority.id}}" {% if each_priority.id == customer_severity.customer_priority.id %} selected {% endif %} >{{each_priority.priority}} - {{each_priority.ticket_type}}</option>
+                                                {% endfor %}
+                                            </select><br/>
+                                            <label>Created Date</label>
+                                            <input type="text" name="created_date" class="form-control" readonly value="{% tzone customer_severity.created_date %}">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Severity :</label>
+                                            <input type="text" name="severity" class="form-control" required value="{{ customer_severity.severity }}"><br/>
+                                            <label>Created By</label>
+                                            <input type="text" name="created_by" class="form-control" readonly value="{{ customer_severity.created_by }}">
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Customer :</label>
+                                            <input type="text" name="customer" class="form-control" readonly value="{{ customer_severity.customer.customername }}"><br/>
+                                            <label>Priority Name</label>
+                                            <input type="text" name="priority_name" class="form-control" readonly value="{{ customer_severity.priority }}">
+                                            <div class="col-sm-12">
+                                                <br/><br/>
+                                                <div class="col-sm-6">
+                                                    <button type="submit" class="btn btn-success">Save</button>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    {% if customer_severity.is_active %}
+                                                        <a href="{% url 'severity_status' customer_severity.id %}?active_status=deactivate" class="btn btn-danger">Deactivate</a>
+                                                    {% elif customer_severity.is_active == False %}
+                                                        <a href="{% url 'severity_status' customer_severity.id %}?active_status=activate" class="btn btn-success">Activate</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            
+        </script>
+        <script>
+        </script>
+        <script type="text/javascript">
+        </script>
+    </body>
+</html>

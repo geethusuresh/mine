@@ -1,0 +1,158 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | KBList</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Knowledge Base<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Knowledge Base</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="row">
+            </div>
+            <div class="row" style="margin-top:10px">
+              <div class="col-sm-10">
+                <div class="box">
+                  <div class="box-title">
+                    <h3>KnowledgeBase</h3>
+                  </div>
+                  <div class="box-body no-padding">
+                    <table class="table table-striped" id="kb_table">
+                      <thead>
+                      <tr>
+                        <th>Symptom</th>
+                        <th>Cause</th>
+                        <th>Resolution</th>
+                        <th>Customer</th>
+                        <th>Global View</th>
+                        <th>No of Visits</th>
+                      </tr> 
+                      </thead>
+                      <tbody>
+                      {% for kb in kb_list %}
+                      <tr>
+                        <td><a href="/kb/edit/{{kb.id}}" style="color:inherit;">{{ kb.symptom }}</td></a>
+                        <td>{{ kb.cause }}</td>
+                        <td>{{ kb.resolution }}</td>
+                        <td>{{ kb.customer }}</td>
+                        {% if kb.glob == True %}
+                          <td>yes</td>
+                        {% else %}
+                          <td>No</td>
+                        {% endif %}
+                        <td>{{ kb.visits }}</td>
+                      {% endfor %}
+                    </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                 <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_category"><i  ></i><span class="text" > Add New </span></a>
+              </div>
+            </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+
+<div class="modal fade" id="add_category" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Add New </h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/kb/create">{% csrf_token %}
+          <div class="row">
+            <div class="col-sm-12">
+              <textarea id="symptom" class="form-control" name="symptom" placeholder="Symptom" rows="4" cols="35" required></textarea>
+              <br>
+              <textarea id="cause" class="form-control" name="cause" placeholder="Cause" rows="4" cols="35" required></textarea>
+              <br>
+              <textarea id="resolution" class="form-control" name="resolution" placeholder="Resolution" rows="4" cols="35"></textarea>
+              <br>
+              <div class="row">
+                <div class="col-sm-5">
+                  <select class="form-control" id="customerid" name="customerid" required style="">
+                    <option value="">Select Customer</option>
+                      {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
+                <div class="col-sm-5">
+                  <div class="row" style="padding:7px">
+                    <label>Global: </label>
+                    <input  type="radio" id="root" name="glob"  value="yes" required>Yes
+                    <input  type="radio" id="not_root" name="glob" value="no" >No<br>
+                  </div>
+                </div>
+
+                <div class="col-sm-2">
+                  <button class="btn btn-success " type="submit" >Add</button>
+                </div>
+              </div>           
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+    </body>
+    <script type="text/javascript">
+    $("#kb_table").dataTable();
+    </script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

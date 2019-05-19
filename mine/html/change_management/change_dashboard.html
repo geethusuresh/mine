@@ -1,0 +1,163 @@
+{% extends "change_management/change_base.html" %}
+{% block title_content %} Change Dashboard {% endblock title_content %}
+{% block page_head %} Change Management <small>| Dashboard </small>{% endblock page_head %}
+{% block bread_crumb %} <li class="active">Change Dashboard</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="col-sm-12">
+        <div class="col-md-4 col-sm-12 change-manag-box-area">
+            <div class="change-manag-box">
+                <div class="title-area">Assessments</div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/assessment_dashboard/?status=pending">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-hourglass-half" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val">{{change_dash.assess_wait}}</div>
+                        <div class="col-md-12">Pending</div>
+                    </a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/assessment_dashboard/?status=approved">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-thumbs-up" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val">{{change_dash.assess_approve}}</div>
+                        <div class="col-md-12">Approved</div>
+                    </a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/assessment_dashboard/?status=rejected">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-thumbs-down" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val">{{change_dash.assess_reject}}</div>
+                        <div class="col-md-12">Rejected</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12 change-manag-box-area">
+            <div class="change-manag-box">
+                <div class="title-area">Schedule Approvals</div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/schedule_approval_dashboard/?status=pending">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-hourglass-half" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val"> {{change_dash.sched_wait}}</div>
+                        <div class="col-md-12">Pending</div>
+                    </a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/schedule_approval_dashboard/?status=approved">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-thumbs-up" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val"> {{change_dash.sched_approve}}</div>
+                        <div class="col-md-12">Approved</div>
+                    </a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="/rfc/schedule_approval_dashboard/?status=rejected">
+                        <div class="col-md-12 chanage-manage-icon"><i class="fa fa-thumbs-down" aria-hidden="true"></i></div>
+                        <div class="col-md-12 chanage-manage-val"> {{change_dash.sched_reject}}</div>
+                        <div class="col-md-12">Rejected</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12 horsidebox">
+            <div class="change-manag-box-area ">
+                <div class="change-manag-box">
+                    <div class="title-area">Change Approvals</div>
+                    <div class="col-xs-6 text-center">
+                        <a href="/rfc/list/?status=ACC_CAT">
+                            <div class="col-md-6 chanage-manage-val">{{change_dash.wait}}</div>
+                            <div class="col-md-6"><i class="fa fa-hourglass-half" aria-hidden="true"></i> Pending</div>
+                        </a>
+                    </div>
+                    <div class="col-xs-6 text-center">
+                        <a href="/rfc/list/?status=REJECTED">
+                            <div class="col-md-6 chanage-manage-val">{{change_dash.rejected}}</div>
+                            <div class="col-md-6"><i class="fa fa-thumbs-down" aria-hidden="true"></i> Rejected</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="change-manag-box-area">
+                <div class="change-manag-box">
+                    <div class="title-area">CAB Approvals</div>
+                    <div class="col-xs-6 text-center">
+                        <a href="/rfc/list/?status=CAB">
+                            <div class="col-md-6 chanage-manage-val">{{change_dash.cab_wait}}</div>
+                            <div class="col-md-6"><i class="fa fa-hourglass-half" aria-hidden="true"></i> Pending</div>
+                        </a>
+                    </div>
+                    <div class="col-xs-6 text-center">
+                        <a href="/rfc/list/?status=CAB-REJECTED">
+                            <div class="col-md-6 chanage-manage-val">{{change_dash.cab_rejected}}</div>
+                            <div class="col-md-6"><i class="fa fa-thumbs-down" aria-hidden="true"></i> Rejected</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-12 change-manag-box-area">
+            <div class="change-manag-dashboard ">
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/">
+                        <div class="changedash-round">{{change_dash.all}}</div>
+                        <div>All Changes</div>
+                    </a>
+                </div>
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/?status=INPROG">
+                        <div class="changedash-round">{{change_dash.inprog}}</div>
+                        <div>Active Changes</div>
+                    </a>
+                </div>
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/?status=COMP">
+                        <div class="changedash-round">{{change_dash.completed}}</div>
+                        <div>Completed Changes</div>
+                    </a>
+                </div>
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/?status=CLOSED">
+                        <div class="changedash-round">{{change_dash.closed}}</div>
+                        <div>Closed Changes</div>
+                    </a>
+                </div>
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/?status=REJECTED">
+                        <div class="changedash-round">{{change_dash.rejected}}</div>
+                        <div>Rejected Changes</div>
+                    </a>
+                </div>
+                <div class="col-sm-2 text-center">
+                    <a href="/rfc/list/?status=CANCELLED">
+                        <div class="changedash-round">{{change_dash.cancelled}}</div>
+                        <div>Cancelled Changes</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(document).on('click', '.panel-heading a.clickable', function(e){
+                var $this = $(this);
+                if(!$this.hasClass('panel-collapsed')) {
+                    $this.parents('.panel').find('.panel-body').slideUp();
+                    $this.addClass('panel-collapsed');
+                    $this.find('i').removeClass('fa-minus').addClass('fa-plus');
+                } else {
+                    $this.parents('.panel').find('.panel-body').slideDown();
+                    $this.removeClass('panel-collapsed');
+                    $this.find('i').removeClass('fa-plus').addClass('fa-minus');
+                }
+            })                
+        });
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

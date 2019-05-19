@@ -1,0 +1,210 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Tickets | <small>Customer Waiting</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Customer Waiting Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="panel">
+                  <div class="panel-heading">
+                    <h3 class="panel-title text-center">Customer Waiting Tickets</h3>
+                  </div>
+                  <div class="panel-body">
+                      <form method="post" action="/bulk_action/">
+                            <span id="error_msg" style="display:none;" class="col-sm-12 text-danger pad-all"></span>
+                          <a href="#" class="btn btn-success" onclick="check_bulkaction_criteria()">Bulk Action</a>
+                      </form>
+                      <table  class="table table-hover table-striped" id="table_id">
+                     <thead>
+                          <th style="display:none">ID</th>
+                          <th><input type="checkbox" name="select_all" class="multi_select" />Select All</th>
+                          <th></th>
+                          <th>Ticket Id</th>
+                          <th>Ticket Summary</th>
+                          <th>Reported Date</th>
+                          <th>Priority</th>
+                          <th>Action Type</th>
+                          <th>Domain</th>
+                          <th>Subdomain</th>
+                          {% if is_egate_included %}
+                              <th>Carrier</th>
+                          {% endif %}
+                          <th>Updated On</th>
+                          <th>Ticket Age</th>
+                          <th>Work Hours (in minutes)</th>
+                        </thead>
+                        <tbody>
+                        {% for details in ownedticket %}
+                        <tr>
+                          <td style="display:none">{{ details.id }}</td>
+                          <td><input type="checkbox" class="select"></td>
+                          <td>
+                            <a class="btn btn-sm {% if details.priority_flag == True %}btn-danger{% else %}{% if details.customer_wait_status == 'enduser_reply' %}btn-primary{% elif details.customer_wait_status == 'cust_wait' %}btn-warning{% endif %}{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if details.customer_wait_status == 'enduser_reply' %} Enduser Replied {% elif details.customer_wait_status == 'cust_wait' %} Customer Wait {% endif %}" href="/ticket/stat/{{details.id}}">
+                             <i class="fa fa-search-plus "> </i>
+                            </a>
+                          </td>
+                          <td>{% if details.affectedperson.id in vips %}
+                              <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                            {% endif %}{{details.ticketid }}</td>
+                          <td> {{ details.summary|safe}}</td>
+                          <td><span style="display:none;">{{details.reportdate.year}}{% if details.reportdate.month >= 10 %}{{details.reportdate.month}}{% else %}0{{details.reportdate.month}}{%endif%}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%} {{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                          <td>{% if details.customer_priority %} {{ details.customer_priority.priority }} {% else %}{{details.internalpriority}} {% endif %}</td>
+                          <td> {{ details.status|real:details.customer.id}} </td>
+                          <td>{{details.group.workgroup}}</td>
+                          <td>{{details.subgroup.subgroupname}}</td>
+                          {% if is_egate_included %}
+                              <td>{{ details.impacted_airline.name }}</td>
+                          {% endif %}
+                          <td><span style="display:none;">{{details.changedate.year}}{{details.changedate.month}}{% if details.changedate.day >= 10 %}{{details.changedate.day}}{% else %}0{{details.changedate.day}}{%endif%}{{details.changedate.time | time}}</span> {% tzone details.changedate %} </td>
+                          <td>{{ details.id|ticket_age}}</td>
+                          <td>{{ details.id | work_hour}}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+
+                      </table>
+                  </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      <!-- modals -->
+        <div class="modal fade" id="bulk_action" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Bulk Action</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Note: This action will change the ticket status to Inprogres from Awaiting Customer Action</p>
+                        <form method="post" action="/ticket_bulk_action/">{% csrf_token %}
+                            <input type="hidden" id="checked_list_data" class="form-control" name="ticket_ids">
+                            <input type="hidden" class="form-control" name="next_status" value="INPROG">
+                            <label><strong>Remarks</strong></label>
+                            <textarea name="remarks" class="form-control"></textarea><br/>
+                            <button type="submit" class="btn btn-success" style="float:right">Update</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+    {% include "components/msg_div.html" %}
+     <script type="text/javascript">
+        $("#service").addClass("active");
+        $("#subc").css({'display' : 'block'});
+        $("#cu_wait").addClass("active");
+        $(document).ready(function() {
+          $('#table_id').DataTable({
+            aaSorting:[[5,'desc']],
+            "columnDefs": [
+                { "width": "30%", "targets": 3 },
+            ]
+          });
+        });
+      </script>
+      <script type="text/javascript">
+            $('#table_id').on('click', 'td', function(){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                var head_th = th.find("input");
+                if (head_th){
+                  var rows = $('#table_id').dataTable().fnGetNodes();
+                  var checked_list = []
+                  for(var i=0; i < rows.length; i++) {
+                      if ($(rows[i]).find('td:eq(1)').find('input.select')[0].checked) {
+                          checked_list.push($(rows[i]).find('td:eq(0)').text());
+                      }
+                  }
+                  $('#checked_list_data').val(checked_list);
+                }
+            });
+      </script>
+      <script type="text/javascript">
+            function check_bulkaction_criteria() {
+                // $('#error_block').modal('hide');
+                $('#error_msg').hide()
+                if ($('#checked_list_data').val()) {
+                    $.ajax({
+                        url:"/check_bulk_action_criteria/",
+                        type: "GET",
+                        data: {
+                            'ticket_ids': $('#checked_list_data').val()
+                        },
+                        success: function(data){
+                            if (data['response'] == "error"){
+                                $('#error_block').modal('show');
+                            } else {
+                                $('#bulk_action').modal('show');
+                            }
+                        }
+                    });
+                } else {
+                    $('#error_msg').show();
+                    $('#error_msg').text("Please choose atleast one ticket to complete the action");
+                }
+            }
+      </script>
+      <script type="text/javascript">
+            $('.multi_select').on('change', function(){
+                var rows = $('#table_id').dataTable().fnGetNodes();
+                var checked_list = [];
+                if ($(this)[0].checked) {
+                    for(var i=0; i < rows.length; i++) {
+                        $(rows[i]).find('td:eq(1)').find('input.select')[0].checked = true;
+                        checked_list.push($(rows[i]).find('td:eq(0)').text());
+                    }
+                } else {
+                    for(var i=0; i < rows.length; i++) {
+                        $(rows[i]).find('td:eq(1)').find('input.select')[0].checked = false;
+                    }
+                }
+                $('#checked_list_data').val(checked_list);
+            });
+            $('.select').on('change', function(){
+                if($(this).is(":checked") == false){
+                    $('.multi_select').prop('checked', false);
+                }
+            });
+      </script>
+      <script type="text/javascript">
+            $(".close").click(function () {
+                $("div").remove('.alert-wrap');
+            });
+      </script>
+    </body>
+</html>
+
+
+
+
+
+

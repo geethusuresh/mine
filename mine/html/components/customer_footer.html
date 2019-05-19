@@ -1,0 +1,66 @@
+<script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/custom.js" type="text/javascript"></script>
+<!-- <script src="/static/customer/js/materialize.js"></script> -->
+<script type="text/javascript" charset="utf8" src="/static/sorter/js/jquery.dataTables.js"></script>
+<script src="/static/customer/bootstrap-select.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/angular/angular.min.js"></script>
+<script type="text/javascript" src="/static/angular/angular-route.js"></script>
+<script type="text/javascript" src="/static/angular/app.js"></script>
+<script type="text/javascript" src="/static/angular/controllers.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui.js"></script>
+
+<script type="text/javascript" charset="utf8" src="/static/sorter/js/jquery.dataTables.js"></script>
+
+
+{% include "components/sr_cust.html"%}
+
+<!-- mega menu open -->
+
+<script>
+$(document).ready(function() {
+    $("#megamind").click(function() {
+        var thisobj = $(this);
+        if (thisobj.hasClass("open")) {
+            $(this).removeClass("open");
+        } else {
+            $(this).addClass("open");
+        }
+    });
+});
+</script>
+
+<!-- alert closing -->
+
+<script>
+$(".close").click(function() {
+    $("div").remove('.alert-wrap');
+
+});
+</script>
+<script>
+    $("#table_id").dataTable();
+
+</script>
+{% include "components/customer_js.html" %}
+{% include "oneconsole_help/modal_help.html" %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#modal_sidehelp').on('click', function(e){
+            e.preventDefault();
+            $.ajax({
+                url :$('#modal_sidehelp').prop('href'),
+                type:"GET",
+                dataype:"json",
+                success:function(data){
+                    // console.log(data)
+                    $('#oc_helpcontent').empty();
+                    $('#oc_helpcontent').append(data);
+                    $("#oneconsole_help").modal('show');
+                }
+            });
+        });
+    });
+</script>

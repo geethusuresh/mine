@@ -1,0 +1,66 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+  <script type="text/javascript">
+  server_id = {{server_id}}
+  </script>
+
+  <h1 class="text-thin">
+      Containers |
+     <small>List all containers for {{ server_name }}</small>
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+    <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+    <li class="active">Container List</li>
+  </ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+    <div class="row pad-all">
+      <div class="col-md-6"></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Container Details</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table toggle-circle phone breakpoint no-paging footable-loaded footable" id="demo-foo-row-toggler">
+              <thead>
+                <tr>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Container Name<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Base Image<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Created Date<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">State</th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">View Details</th>
+                </tr>
+              </thead>
+              {% if container_list %}
+                <tbody>
+                  {% for container in container_list %}
+                  <tr class="footable-even">
+                    <td class="footable-visible footable-last-column">{{container.name|slice:"1:"|truncatechars:25}}</td>
+                    <td class="footable-visible footable-last-column"><a class="text-blue">{{container.image|truncatechars:20}}</a></td>
+                    <td class="footable-visible footable-last-column">{{container.created}}</td>
+                    <td class="footable-visible footable-last-column">{% if "Up" in container.status%}{% if "Paused" in container.status%}<small class="label label-warning">{{container.status}}</small>{% else %}<small class="label label-success">{{container.status}}</small>{% endif %}{% else %}<small class="label label-danger">{% if container.status %}{{container.status}}{% else %} Stopped {% endif %}</small>{% endif %}</td>
+                    <td class="footable-visible footable-last-column"><a class="btn bg-green" href="{% url 'container_detail_from_all_container_list' server_id container.container_id %}"><i class="fa  fa-search"></i></a></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              {% endif %}
+            </table>
+          </div>
+          {% if not container_list %}
+            <h4 class="pad-all text-center">No Containers Available</h4>
+          {% endif %}
+        </div>
+      </div>
+  </div>
+
+{% endblock %}

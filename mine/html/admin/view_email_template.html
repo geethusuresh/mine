@@ -1,0 +1,105 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Customers Email Templates Details<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Email Templates Details</li>
+                </ol>
+            </div>
+            <div class="content">
+                {% if message %}
+                  <div class="row">
+                    <div class="alert alert-success" role="alert">
+                    {{message}}
+                    Please <a href="/view_email_template/"><b>click here</b></a> to see the template details
+                    </div>
+                  </div>
+                {% endif %}
+
+                <div class="box">
+                  <div class="controls" style="padding: 17px 0 21px 41px;width:90%;">
+                    <form class="form-horizontal" method="POST" role="form" action="/view_email_template/">{% csrf_token %} 
+                      <div class="form-group">                                    
+                          <select class="form-control" required id="customer" name="customer">
+                              <option value="">Select any customer</option>
+                              {% for customer_item in customer_details %}
+                              {% if customer_item.id == selected_customer_id %}
+                              <option value="{{customer_item.id}}" selected="selected">{{customer_item.customername}}</option>
+                              {% else %}
+                               <option value="{{customer_item.id}}">{{customer_item.customername}}</option>
+                               {% endif %}
+                              {% endfor %}
+                          </select>
+                          <button type="submit" class="btn btn-success" style="margin-top:10px;">Search</button>    
+                      </div>
+                      </form>
+
+                      <div>
+                        <!--Start Search results content area-->
+                         {% if selected_customer_id > 0 %}
+                         {% if templates_flag > 0 %}
+                         <h4>{{customer_name}} Email Templates Details</h4> 
+                          <div class="list-group">
+                            {% for template_item in template_details %}                     
+                            <a href="/email_template_admin_op/{{template_item.id}}" class="list-group-item" style="font-weight:bold;margin-top:10px;" title="Please click here to edit the template">
+                            {{template_item.templatename}}</a>
+                           {% endfor %}
+                          </div>
+                          {% else %}                       
+                          <div class="alert alert-info" role="alert">
+                             No email templates found under {{customer_name}}. Please <a href="/email_template_admin/"><b>click here</b></a> to add the template details 
+                          </div>
+                          {% endif %}
+
+                          {% else %}
+                           <div class="alert alert-info" role="alert">
+                             Please select any customer to view the templates
+                          </div>
+                          {% endif %}             
+                          <!--End Search results area -->
+                        </div>
+                  </div>
+                </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <script type="text/javascript">
+     $(function() {
+          $( "#dialog" ).dialog({
+          autoOpen: false,
+          show: {
+          effect: "blind",
+          duration: 1000
+          },
+          hide: {
+          effect: "explode",
+          duration: 1000
+          },
+          width:"450px"
+          });
+          $( "#dialog_btn" ).click(function() {
+            $( "#dialog" ).dialog( "open" );
+          });
+    });
+    </script>    
+    </body>
+</html>

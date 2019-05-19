@@ -1,0 +1,177 @@
+{% load zone %}
+<div class="row">
+    <div class="col-sm-8">
+        <div class="col-sm-11">
+            <label><strong>Title:</strong> </label>
+            {{ ticket.summary }}
+        </div>
+        <div class="col-sm-1">
+            {% if ticket.customer.ticket_content_editable == True and ticket.owner == profile %}
+                <a href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#edit_title" title="Edit Summary" data-placement="bottom"><i class="fa fa-edit" > </i></a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4" style="border-left:1px solid black" >
+        <h4>{{ ticket.ticketid }}</h4>
+        <label class="label label-success" style="font-size:14px" >{{ticket.status|real:ticket.customer.id}}</label>
+        {% if ticket.targetfinish %}
+            <br/>
+            <label><strong>Estimated Resolution Time</strong></label><br/>
+            {% tzone ticket.targetfinish %}
+        {% endif %}               
+    </div>
+    <div class="col-sm-12">
+        <hr/>
+    </div>
+    <div class="col-sm-12">
+        <label><strong>Description : </strong>  </label>
+        <br/>
+        <div class="col-sm-6">
+            {% if ticket.html_description %}
+                <a href="#" onclick="show_html_version({{ticket.id}}, 'ticket')" class="btn btn-info">View Html Version</a> <br/>
+            {% endif %}
+        </div>
+        <div class="col-sm-3">
+            {% if ticket.customer.ticket_content_editable and ticket.owner == profile %}
+                <button class="btn btn-success" style="float:right" id="content_edit_button"><i class="fa fa-edit"></i> Edit Content</button>
+            {% endif %}
+        </div>
+        <div class="col-sm-3">
+            {% if not profile.is_html_version or not ticket.html_description %}
+                <button class="btn btn-info" style="float:right" id="btnSelect">Select Content</button>
+            {% endif %}
+        </div>
+        <div class="col-sm-12" style="margin-top:12px">
+            <!-- <pre id="desc">{{ticket.description|safe}}</pre>
+            <textarea id="desc_text" readonly="readonly" class="form-control" style="cursor:text;height:300px"></textarea> -->
+            <div id="non_editabale_ticket_content">
+                {% if profile.is_html_version and ticket.html_description and ticket.html_description != "None" %}
+                    <iframe srcdoc="{{ticket.html_description}}" id="html_ticket_description" width="100%" height="600px" frameborder="1" scrolling="auto" onload='resizeIframe(this)'></iframe>
+                {% else %}
+                    <pre id="ticket_description" contenteditable="false">{{ ticket.description|safe }}</pre>
+                {% endif %}
+            </div>
+            {% if ticket.customer.ticket_content_editable %}
+                <div class="col-md-12" id="editable_ticket_content" style="display:none">
+                    <form action="/ticket/{{ticket.id}}/description/edit" method="POST"> {% csrf_token %}
+                        <textarea class="form-control "id="ticket_content_editor" name="ticket_description" rows="30">
+                            {% if ticket.html_description and ticket.html_description != "None"%}
+                                {{ ticket.html_description }}
+                            {% else %}
+                                {{ ticket.description }}
+                            {% endif %}
+                        </textarea>
+                        <input type="hidden" value="stat/edit" name="source_page">
+                        <div class="row pad-all">
+                            <input class="btn btn-success" class="form-control" style="float:right" type="submit" value="Submit">
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-sm-12">
+            <hr/>
+        </div>
+        <div class="col-sm-6" style="margin-top:12px">
+            <dl class="dl-horizontal">
+                <dt>Impacted User :</dt>
+                <dd>{{ ticket.affectedperson }}</dd>
+                <br>
+                <dt>Phone No :</dt>
+                <dd>{{ticket.affectedphone}}</dd><br>
+                <dt>User Email :</dt>
+                <dd>{{ ticket.affectedemail }}</dd><br/>
+                <dt>Submitted By :</dt>
+                <dd>{{ ticket.reportedby }}</dd><br/>
+                <dt>Woklocation/ Workstation :</dt>
+                <dd>{{ ticket.extrafield1}}</dd><br/>
+            </dl>
+        </div>
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Domain :</dt>
+                <dd>{{ ticket.group }}</dd>
+                <br>
+                <dt>Subdomain :</dt>
+                <dd>{{ ticket.subgroup }}</dd><br>
+                <dt>Category :</dt>
+                <dd>{{ ticket.category}}</dd><br/>
+                <dt>Subcategory :</dt>
+                <dd>{{ ticket.subcategory }}</dd><br/>
+                <dt>Source :</dt>
+                <dd>{{ ticket.source}}</dd><br/>
+            </dl>
+        </div>
+        <div class="col-sm-12">
+            <hr/>
+        </div>
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Assigned to :</dt>
+                <dd>{{ ticket.owner }}</dd>
+                <br>
+                <dt>Created Date :</dt>
+                <dd>{% tzone ticket.creationdate %}</dd><br>
+                <dt>Last Updated :</dt>
+                <dd>{% tzone ticket.changedate %}</dd><br/>
+                <dt>Target Start :</dt>
+                <dd>{% tzone ticket.targetstart %}</dd><br/>
+                <dt>Ticket Age :</dt>
+                <dd>{{ticket_age}}</dd>
+            </dl>
+        </div>
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>Actual Start :</dt>
+                <dd>{% tzone ticket.actualstart %}</dd>
+                <br>
+                <dt>Actual Finish :</dt>
+                <dd>{% tzone ticket.actualfinish %}</dd><br>
+                <dt>SLA :</dt>
+                <dd>{{ ticket.sla}}</dd><br/>
+                <dt>Target Finish :</dt>
+                <dd>{% tzone ticket.targetfinish %}</dd><br/>
+                <dt>Priority: </dt>
+                <dd>{{ ticket.internalpriority }}</dd>
+            </dl>
+        </div>
+        {% if ticket.ticketattribute_set.all|length > 0 %}
+            <div class="col-sm-12">
+                <hr/>
+            </div>
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Quantity : </dt>
+                    <dd>{{ ticket.ticketattribute_set.all.0.quantity }}</dd><br/>
+                    <dt>Type : </dt>
+                    <dd>{{ ticket.ticketattribute_set.all.0.permanent_type }}</dd>
+                </dl>
+            </div>
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Project : </dt>
+                    <dd>{{ ticket.ticketattribute_set.all.0.project }}</dd>
+                </dl>
+            </div>
+        {% endif %}
+        {% if ticket.knowledgebase_set.all|length > 0 %}
+            <div class="col-sm-12">
+                <hr/>
+            </div>
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Symptom : </dt>
+                    <dd>{{ ticket.knowledgebase_set.all.0.symptom }}</dd><br/>
+                    <dt>Cause : </dt>
+                    <dd>{{ ticket.knowledgebase_set.all.0.cause }}</dd>
+                </dl>
+            </div>
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Resolution : </dt>
+                    <dd>{{ ticket.knowledgebase_set.all.0.resolution }}</dd>
+                </dl>
+            </div>
+        {% endif %}
+    </div>
+</div>

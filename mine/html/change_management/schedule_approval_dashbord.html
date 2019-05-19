@@ -1,0 +1,61 @@
+{% extends "change_management/change_base.html" %}
+{% block title_content %} Schedule Approval Dashboard {% endblock title_content %}
+{% block page_head %} Change Management <small>| Schedule Approval Dashboard </small>{% endblock page_head %}
+
+{% block bread_crumb %} <li class="active"> Schedule Approval Dashboard </li>{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            {% if appr_n_hist %}
+                <div class="panel-control">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a data-toggle="tab" href="#approval_details">
+                                <i class="fa fa-lg"></i> Schedule Approvals
+                            </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#approvals_history">
+                                <i class="fa fa-lg"></i>Approval History
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+            <h3 class="panel-title">Schedule Approval Dashboard</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    {% if status_dat == 'BOTH' %}
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="approval_details">
+                                {% include "change_management/schedule_approvals.html" %}
+                            </div>
+                            <div class="tab-pane fade" id="approvals_history">
+                                {% include "change_management/schedule_history.html" %}
+                            </div>
+                        </div>
+                    {% elif status_dat == "APPR_ONLY" %}
+                        {% include "change_management/schedule_approvals.html" %}
+                    {% elif status_dat == "HIST_ONLY" %}
+                        {% include "change_management/schedule_history.html" %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script>
+        $('#approval_tabl').dataTable();
+        $('#approval_history_tab ').dataTable();
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        // $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

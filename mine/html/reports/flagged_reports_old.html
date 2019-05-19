@@ -1,0 +1,405 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Reports</title>
+        {% include "components/css.html"%}
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        <script src="/static/js/highcharts/highcharts.js"></script>
+        <script src="/static/js/highcharts/highcharts-more.js"></script>
+        <script src="/static/js/highcharts/exporting.js"></script>
+        <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h3 class="text-thin">Reports | <small>Flagged Report</small></h3>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/reports">Reports</a></li>
+                        <li class="active">Flagged Reports</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% if report_result %}
+                         <div class="row">
+                            <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                                {{report_heading}} <br />
+                                Total Tickets Created: {{flaged_tickets|length}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="controls">
+                                <form action="/export/excel/" method="post" target="_blank">
+                                    {% csrf_token %}
+                                    <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                                    <input type="hidden" name="export_type" id="export_type" value="flagged_reports" />
+                                    <input type="hidden" name="is_egate_included" value="{{is_egate_included}}">
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>
+                                        Overall Response Time (#)</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="overall_resp_sla_container"></div>
+                                        <script type="text/javascript">
+                                            $('#overall_resp_sla_container').highcharts({
+                                                chart: {
+                                                    type: 'column',
+                                                    backgroundColor: 'white'                        
+                                                },
+                                                title: {
+                                                    text: 'Overall Response Time'
+                                                },                                
+                                                xAxis: {
+                                                    categories: [
+                                                        'Within SLA',
+                                                        'Crossed SLA'                        
+                                                    ]
+                                                },
+                                                yAxis: {
+                                                    title: {
+                                                        text: 'Overall Response SLA #'
+                                                    }
+                                                },
+                                                tooltip: {
+                                                    formatter: function() {
+                                                        return ''+
+                                                        this.series.name +': '+ this.y;
+                                                    }
+                                                },
+                                                exporting: {
+                                                    enabled: false
+                                                },
+                                                plotOptions: {
+                                                    column: {
+                                                        pointPadding: 0.2,
+                                                        borderWidth: 0
+                                                    },
+                                                },
+                                                series: [{
+                                                        name:"Within SLA",
+                                                        color: '#008000',                            
+                                                        data: [{{overall_details.within_response}}]
+                                                    },
+                                                    {
+                                                        name:"Crossed SLA",
+                                                        color:'#FF0000',                            
+                                                        data: [0,{{overall_details.crossed_response}}]
+                                                    }
+                                                ]
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                               <div class="panel">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>
+                                        Overall Resolution Time (#)</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="overall_reso_sla_container"></div>
+                                        <script type="text/javascript">
+                                            $('#overall_reso_sla_container').highcharts({
+                                                chart: {
+                                                    type: 'column',
+                                                    backgroundColor: 'white'                          
+                                                },
+                                                title: {
+                                                    text: 'Overall Resolution Time'
+                                                },                                
+                                                xAxis: {
+                                                    categories: [
+                                                        'Within SLA',
+                                                        'Crossed SLA'                        
+                                                    ]
+                                                },
+                                                yAxis: {
+                                                    title: {
+                                                        text: 'Overall Resolution SLA #'
+                                                    }
+                                                },
+                                                tooltip: {
+                                                    formatter: function() {
+                                                        return ''+
+                                                        this.series.name +': '+ this.y;
+                                                    }
+                                                },
+                                                exporting: {
+                                                    enabled: false
+                                                },
+                                                plotOptions: {
+                                                    column: {
+                                                        pointPadding: 0.2,
+                                                        borderWidth: 0
+                                                    },
+                                                },
+                                                series: [{
+                                                        name:"Within SLA",
+                                                        color: '#008000',                            
+                                                        data: [{{overall_details.within_resolution}}]
+                                                    },
+                                                    {
+                                                        name:"Crossed SLA",
+                                                        color:'#FF0000',                            
+                                                        data: [0,{{overall_details.crossed_resolution}}]
+                                                    }
+                                                ]
+                                            });
+                                        </script>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h3 class="panel-title text-center">Flagged Reports</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <table class="table table-stripped" id="report_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Ticket No</th>
+                                                <th>Title</th>
+                                                <th>Created Date</th>
+                                                <th>Engineer</th>
+                                                <th>Affected Email</th>
+                                                <th>Ticket Priority</th>
+                                                <th>Ticket Type</th>
+                                                <th>Category</th>
+                                                <th>Subcategory</th>
+                                                <th>Case Status</th>
+                                                <th>Ticket Age</th>                
+                                                <th>First Response Time</th>
+                                                <th>Resolved Time</th>
+                                                <th>Response Duration</th>
+                                                <th>Resolved Duration</th>
+                                                <th>Last Updated</th>
+                                                <th>Work Hours (in minutes) </th>
+                                                {% if is_egate_included == True %}
+                                                    <th>Carrier</th>
+                                                {% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ticket in flaged_tickets %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="/ticket/{{ticket.id}}" target="_blank" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="bottom" title="Important">{{ticket.ticketid}}</a>
+                                                    </td>
+                                                    <td>{{ticket.summary}}</td>
+                                                    <td><span style="display:none;">{{ticket.creationdate.year}} {% if ticket.creationdate.month >= 10 %}{{ticket.creationdate.month}}{% else %}0{{ticket.creationdate.month}}{%endif%}{% if ticket.creationdate.day >= 10 %}{{ticket.creationdate.day}}{% else %}0{{ticket.creationdate.day}}{%endif%} {{ticket.creationdate.time | time}}</span>{% tzone ticket.creationdate %}</td>
+                                                    <td>{{ticket.owner}}</td>
+                                                    <td>{{ticket.affectedemail}}</td>
+                                                    <td>{{ticket.internalpriority}}</td>
+                                                    <td>
+                                                        {% if ticket.cls == "SR"  %}
+                                                            Service Request
+                                                        {% elif ticket.cls == "IN" %}
+                                                            Incident
+                                                        {% elif ticket.cls == "PB" %}
+                                                            Problem
+                                                        {% elif ticket.cls == "CH" %}
+                                                            Change
+                                                        {% else %}
+                                                            {{ ticket.cls }}
+                                                        {% endif %}
+                                                    </td>            
+                                                    <td>{{ ticket.category}}</td>
+                                                    <td>{{ ticket.subcategory }}</td>
+                                                    <td>{{ticket.status | real:ticket.customer_id}}</td>
+                                                    <td>{{ticket.id|ticket_age}}</td>
+                                                    <td><span style="display:none;">{{ticket.first_response.year}}{% if ticket.first_response.month >= 10 %}{{ticket.first_response.month}}{% else %}0{{ticket.first_response.month}}{%endif%}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                    <td><span style="display:none;">{{ticket.resolved_time.year}}{% if ticket.resolved_time.month >= 10 %}{{ticket.resolved_time.month}}{% else %}0{{ticket.resolved_time.month}}{%endif%}{% if ticket.resolved_time.day >= 10 %}{{ticket.resolved_time.day}}{% else %}0{{ticket.resolved_time.day}}{%endif%} {{ticket.resolved_time.time | time}}</span>{% tzone ticket.resolved_time %}</td>
+                                                    <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                    <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                    <td><span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                                                    {% tzone ticket.changedate %}
+                                                    </td>
+                                                    <td>{{ ticket.id | work_hour}}</td>
+                                                    {% if is_egate_included == True %}
+                                                        <td>{{ ticket.carrier }}</td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h3 class="panel-title text-center">Flagged Reports</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form method="POST" action="/flaged/reports/" onsubmit="return submit_report()" target="_blank">{% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <label>Customers: </label>
+                                            <select class="form-control" name="customers" required id="cust">
+                                               <option value="">--Choose Customers--</option>
+                                                {% for cust in customers %}
+                                                    <option value="{{ cust.id }}" {% if cust.id in customer_list %}selected="true"{% endif %}> {{cust.customername}} </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label>Status: </label>
+                                            <select class="form-control" name="status_data" multiple id="status">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4">
+                                             <label>Ticket Created</label>
+                                            <select name="duration" id="duration_set" required class="form-control">
+                                                <option value="on">On</option>
+                                                <option value="between">Between</option>
+                                                <option value="after">After</option>
+                                                <option value="before">Before</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row pad-all">
+                                        <div class="col-sm-4">
+                                            <div class="duration_div_start">
+                                                <label>Start Date :</label>
+                                                <input type="text" class="form-control" readonly id="start_date" name="start_date" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4" >
+                                            <div class="duration_div_end" style="display:none">
+                                                <label>End Date :</label>
+                                                <input type="text" class="form-control" readonly id="end_date" name="end_date" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4"></div>
+                                    </div>
+                                    <div class="row pad-all">
+                                        <div class="col-sm-3">
+                                            <br/>
+                                            <input type="submit" class="btn btn-success" value="Fetch Reports">
+                                        </div>
+                                        <div class="col-sm-6">
+                                             <label style = "font-weight: bold;color:red;display:none;margin-left:27px;margin-top: 7px;" id="error_section"></label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% include "components/dashboard_footer.html"%}
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#report_table').DataTable({
+                    // "aaSorting": [[2, 'desc']],
+                    "bPaginate": false,
+                    "bFilter": false,
+                    "scrollX": true
+                });
+            })
+        </script>
+        <script type="text/javascript">
+            $(function() {
+                $( "#start_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+                $( "#end_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+            });
+            $('#duration_set').on('click', function() {
+                $('.duration_div_start').show();
+                var duration_choosed = $('#duration').val();
+                if ($('#duration_set').val() == "between") {
+                    $('.duration_div_end').show();
+                } else {
+                    $('.duration_div_end').hide();
+                }
+            });
+            function submit_report(){
+                if($('#duration_set').val() == "between"){
+                    if ($('#start_date').val() != "" && $('#end_date').val() != ''){
+                        var start = $('#start_date').val().replace(/-/g, '/');
+                        var end = $('#end_date').val().replace(/-/g, '/');
+                        val_1 = new Date(start);
+                        val_2 = new Date(end);
+                        var diff = val_2 - val_1;
+                        if (diff < 0) {
+                            $('#error_section').show();
+                            $( "#error_section" ).text( "Please choose valid start and end date !" ).show();
+                            return false;
+                        } else {
+                            $('#error_section').hide();
+                            return true;
+                        }
+                    } else {
+                        $('#error_section').show();
+                        $( "#error_section" ).text( "Please choose start and end date !" ).show();
+                        return false;
+                    }
+                } else if ($('#start_date').val() == "") {
+                    $('#error_section').show();
+                    $( "#error_section" ).text( "Please choose start date !" ).show();
+                    return false;
+                } else {
+                    $('#error_section').hide();
+                    return true;
+                } 
+            }
+        </script>
+        <script type="text/javascript">
+            $('#cust').on('change', function(){
+                $('#status option').remove().end();
+                if (this.value) {
+                    $.ajax({
+                        url: "/reports/?data_list=true&customer="+this.value,
+                        type: "GET",
+                        success: function(data) {
+                            var status_list = data['status_list'];
+                            for (var i in status_list) {
+                                $('#status').append($('<option>', {
+                                    value: status_list[i].status,
+                                    text: status_list[i].display_status
+                                }));
+                            }
+                        }
+                    });
+                }
+            })
+        </script>
+    </body>
+</style>

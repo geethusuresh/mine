@@ -1,0 +1,140 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ldap Details</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <script src="/static/js/common.js"></script>
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 ">
+            <h4 style="color:#FFF">Ldap Details</h4>
+          </div>
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+                <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+
+                <div style="float:right" id="tour-searchbox" class="input-group searchbox">
+                <form role="search" action="/psearch/" method="post">{% csrf_token %}
+                  <input type="search" name="search" class="form-control" placeholder="enter ticket">
+                  </form>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+            <!-- main-nav -->
+            <nav class="main-nav">              
+              <ul class="main-menu">
+              <div class="sidebar-content">
+                <img src="/static/img/logo.png">
+              </div>            
+                 {% include "side_bar/sidebar.html" %} 
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>           
+            <!-- main -->
+            <div class="content"> 
+              <div class="main-header">
+                <h2>View Ldap Details</h2>              
+              </div>
+              {% if status_text %}
+                <div class="alert {{style_class}}" role="alert">{{ status_text }}</div>
+               {% endif %}           
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="col-sm-12">    
+                
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Customers LDAP Details</h3></div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                      <table class="table">
+                        <thead>
+                        <th>Ldap Server IP</th>                        
+                        <th>Ldap Username</th> 
+                        <th>&nbsp;</th>                                                  
+                        </thead>                        
+                        <tbody>
+                        {% if ldap_details %}
+                        {% for details in ldap_details %}
+                          <tr>
+                            <td>{{ details.ldapserverip}}</td>                          
+                            <td>{{ details.ldapusername}}</td>                 
+                          
+                            <td>
+                            <form name="frm_update_op" id="frm_update_op" action="/ldap_setting_op/" method="POST">{% csrf_token %}                                          
+                              <a href="/ldap_setting_op_update/{{details.id}}" class="btn btn-default  active btn-sm" role="button">Edit</a> 
+                                <a href="javascript:void(0);" class="btn btn-default  active btn-sm" role="button"  onclick="update_op('{{details.id}}','delete')">Delete</a>
+                                  <a href="/ldap_authentication/{{details.id}}" class="btn btn-default  active btn-sm" role="button" target="_blank">Test Run</a>
+                              <input type="hidden" name="ldap_id" id="ldap_id" />
+                              <input type="hidden" name="op_action" id="op_action" /> 
+                               </form>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                        {% else %}
+                           <tr>
+                            <td colspan="5" style="text-align:center;">No Details found</td>
+                          </tr>
+                        {% endif %}                        
+                        </tbody>
+                      </table>
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->                 
+              </div>
+             </div>
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+</html>

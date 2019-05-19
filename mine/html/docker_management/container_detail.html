@@ -1,0 +1,497 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+<script type="text/javascript">
+
+  server_id = {{server_id}}
+  application_id = {{application_id}}
+  container_id = {{container_id}}
+  docker_container_id = '{{container_detail.Cont_Id}}'
+</script>
+
+<h1 class="text-thin" style="text-transform:capitalize">{{container_name}} |
+  <small>Container details</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_container' server_id application_id %}">{{application_name}}</a></li>
+  <li class="active">Container Details</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+
+    <div class="col-md-12">
+      <div class="alert alert-success alert_div" id= "status_alert_success" style="display:none;">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <center id="status_message_success"></center>
+      </div>
+      <div class="alert alert-danger alert_div" id= "status_alert_danger" style="display:none;">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <center id="status_message_danger"></center>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+    	<div class="col-md-12">
+        {% if container_detail %}
+
+        <div class="col-md-6 eq-box-sm">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Basic Details</h3>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+
+                <div class="col-md-12 pad-all">
+                  <div class="col-md-4">
+                    <label class="control-label">Container Name</label>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="row">
+                     <div class="col-md-10" id="name">
+                      <input type="text" id="newname" name="newname" value="{{container_detail.Name}}" readonly class="form-control" style="border:0px;">
+                     </div>
+                     <div class="col-md-2">
+                      <button class="btn btn-twitter btn-primary btn-xs" type="button" name="changename" onclick="container_rename()" id="changename" ><i class="fa fa-edit"></i></button>
+                      <button type="button" name="rename" id="rename" class="btn btn-twitter btn-primary btn-xs" onclick="perform_container_operation('rename');" style="display:none;"><i class="fa fa-save"></i></button>
+                     </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-12 pad-all">
+                  <div class="col-md-4">
+                    <label class="control-label">Base Image</label>
+                  </div>
+                  <div class="col-md-8">
+                    <a href="{% url 'image_detail' server_id %}?image_id={{container_detail.Image}}" class="control-label" data-toggle="tooltip" title="{{container_detail.Image}}">{{container_detail.Image|truncatechars:15}}</a>
+                  </div>
+                </div>
+
+                <div class="col-md-12 pad-all">
+                  <div class="col-md-4">
+                    <label class="control-label">Created Time</label>
+                  </div>
+                  <div class="col-md-8">
+                    <label class="control-label">{{container_detail.Created_date}}&nbsp;&nbsp;{{container_detail.Created_time}}</label>
+                  </div>
+                </div>
+
+                <div class="col-md-12 pad-all">
+                  <div class="col-md-4">
+                    <label class="control-label">Container State</label>
+                  </div>
+                  <div class="col-md-8">
+                    <div id="container_status" style="visibility: hidden;">
+                      <span id="paused" class="label label-table label-warning container-status">Paused</span>
+                      <span id="running" class="label label-table label-success container-status">Running</span>
+                      <span id="stopped" class="label label-table label-danger container-status">Stopped</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 eq-box-sm">
+          <div class="panel">
+            <div class="panel-heading">
+              <div class="panel-control">
+                <a id="div_container_performance_enable" href="{% url 'container_stats_template' server_id application_id container_id %}" class="btn btn-mint btn-small">CPU/Memory statitics</a>
+              </div>
+              <h3 class="panel-title">CPU/Memory</h3>
+            </div>
+            <div class="panel-body">
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">CPU Share</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{{container_detail.CpuShares}}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">CPU Set</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% if container_detail.Cpuset %}{{container_detail.Cpuset}}{% else %}None{% endif %}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Memory Limit(in MB)</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% widthratio container_detail.Memory 1000000 1 %}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Memory Swap(in MB)</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% widthratio container_detail.Memory_swap 1000000 1 %}</label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12 eq-box-sm">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Commands</h3>
+            </div>
+            <div class="panel-body">
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Entry Point</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{{container_detail.Entry_point}}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Command</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{{container_detail.Cmd}}</label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-12">
+          <div class="panel">
+            <div class="panel-heading">
+              <div class="panel-control">
+                <button onclick="refresh_process_list()" class="btn btn-mint btn-small"><i class="fa fa-rotate-right"></i></button>
+              </div>
+              <h3 class="panel-title">Process List</h3>
+            </div>
+
+            <div class="panel-body">
+              <div class="row">
+                <div id="div_process_list_loading" class="col-md-12">
+                  <center><i class="fa fa-spinner fa-pulse fa-2x"></i></center>
+                </div>
+                <div id="div_process_list" style="display:none;" class="col-md-12">
+                  <div class="table-responsive">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr id="process_heading">
+                        </tr>
+                      </thead>
+                      <tbody id="process_boby">
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-md-12 eq-box-sm">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Other Details</h3>
+            </div>
+            <div class="panel-body">
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Links to Containers</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{{container_detail.Links}}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Port Binding (hostport:containerport)</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% if container_detail.port_map %}<ul>{% for each in container_detail.port_map %}<li>{{each}}</li>{% endfor %}</ul>{% else %}None{% endif %}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Volume Shared (hostvolume:containervolume)</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% if container_detail.VolumesFrom %}{{container_detail.VolumesFrom}}:{{container_detail.Volumes}}{% else %}None{% endif %}</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 pad-all">
+                <div class="col-md-4">
+                  <label class="control-label">Envt Variables</label>
+                </div>
+                <div class="col-md-8">
+                  <label class="control-label">{% if container_detail.Env %}<ul>{% for env in container_detail.Env %}<li>{{env}}</li>{% endfor %}</ul>{% else %}None{% endif %}</label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="panel panel-bordered-default">
+        <div class="panel-body">
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="start" id="start" onclick="perform_container_operation('start')"> <i class="fa fa-play"></i>Start Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="stop" id="stop" onclick="perform_container_operation('stop')"><i class="fa fa-stop"></i>Stop Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="restart" id="restart" onclick="perform_container_operation('restart')"><i class="fa fa-undo"></i>Restart Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="pause" id="pause" onclick="perform_container_operation('pause')"><i class="fa fa-pause"></i>Pause Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="unpause" id="unpause" onclick="perform_container_operation('unpause')"><i class="fa fa-pause"></i>Unpause Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" name="kill" id="kill" onclick="perform_container_operation('kill')"><i class="fa fa-ban"></i>Kill Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all container-action-button" type="button" id="remove" onclick="show_remove_container_modal()"><i class="fa fa-trash-o"></i>Remove Container</button>
+
+          <button class="btn btn-block btn-social btn-twitter btn-mint pad-all" type="button" onclick="show_save_container_modal()"><i class="fa fa-save"></i>Save Container</button>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="modal fade" id="remove_container_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Remove Container</h4>
+        </div>
+        <div class="modal-body">
+          <h4>Are you sure you want to remove container?</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <a href="{% url 'remove_container' server_id application_id container_id %}" class="btn btn-primary" name="remove">Remove</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="save_container_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title head-color">Save Container</h4>
+          <h4><small>Save the container with all features to a new Image</small></h4>
+        </div>
+        <form class="form-horizontal" role="form" method="post" action="{% url 'save_container' server_id application_id container_id %}">
+          {% csrf_token %}
+          <div class="modal-body">
+              <div class="form-group">
+                  <label class="control-label col-md-3" for="imageName">Image Name</label>
+                  <div class="col-md-8">
+                      <input type="text" class="form-control" id="image_name" name="image_name" placeholder="save container with new name. eg: busybox-new" required>
+                  </div>
+                  <div class="col-md-1 pull-right"></div>
+              </div>
+              <div class="form-group">
+                  <label class="control-label col-md-3" for="tag">Tag</label>
+                  <div class="col-md-8">
+                      <input type="text" class="form-control" id="tag" name="tag" placeholder="eg: latest">
+                  </div>
+                  <div class="col-md-1 pull-right"></div>
+              </div>
+              <div class="form-group">
+                  <label class="control-label col-md-3" for="comment">Comment</label>
+                  <div class="col-md-8">
+                      <input type="text" class="form-control" id="commit_message" name="commit_message" placeholder="eg: Image with new features">
+                  </div>
+                  <div class="col-md-1 pull-right"></div>
+              </div>
+              <div class="form-group">
+                  <label class="control-label col-md-3" for="comment">Author</label>
+                  <div class="col-md-8">
+                      <input type="text" class="form-control" id="author" name="author" placeholder="eg: John Hannibal Smith <hannibal@a-team.com>">
+                  </div>
+                  <div class="col-md-1 pull-right"></div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save Container</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  function show_remove_container_modal(){
+    $('#remove_container_modal').modal('show');
+  }
+
+  function show_save_container_modal(){
+    $('#save_container_modal').modal('show');
+  }
+
+  function container_rename(){
+    $('#newname').removeAttr('readonly');
+    $('#changename').hide();
+    $('#rename').show();
+    document.getElementById("newname").style.border="1px solid";
+    document.getElementById("newname").style.cursor = "pointer";
+  }
+
+  function perform_container_operation(action){
+    url = '/docker_management/server/' + server_id + '/container/' + docker_container_id + '/action/' + action;
+    if(action=='rename'){
+      $('#newname').attr('readonly',true);
+      $('#changename').show();
+      $('#rename').hide();
+      url = url + '?name=' + $('#newname').val();
+    }
+    $.ajax({
+        url: url,
+        type: 'get',
+        success: function(data){
+          data = JSON.parse(data);
+          status = data.status;
+          running = data.running;
+          paused = data.paused;
+          if(status == 'success'){
+            $('#status_message_success').empty();
+            $('#status_message_success').append(data.message);
+            $('#status_alert_success').show();
+          }
+          else{
+            $('#status_message_danger').empty();
+            $('#status_message_danger').append(data.message)
+            $('#status_alert_danger').show();
+          }
+          show_action_button(running, paused);
+        },
+        error: function(xhr,errmsg,err){
+        },
+    });
+  }
+
+  $( document ).ready(function() {
+
+    show_action_button('{{container_detail.State_running}}', '{{container_detail.State_paused}}');
+
+    $('#container_status').css("visibility", "visible");
+
+    refresh_process_list();
+
+  });
+
+  function refresh_process_list(){
+    $('#div_process_list_loading').show();
+    $('#div_process_list').hide();
+    $.ajax({
+        url: '/docker_management/server/' + server_id + '/container/' + docker_container_id + '/process/list/',
+        type: 'get',
+        success: function(data){
+          $('#div_process_list_loading').hide();
+          $('#div_process_list').show();
+          $('#process_heading').empty();
+          $('#process_boby').empty();
+          if(data != ''){
+            data = JSON.parse(data);
+            $.each(data.Titles, function( index, value ) {
+              $('#process_heading').append('<th>' + value + '</th>');
+            });
+            $.each(data.Processes, function( index, row_value ) {
+              row = '<tr>';
+              $.each(row_value, function( indx, value ) {
+                row = row + '<td>' + value + '</td>';
+              });
+              row = row + '</tr>';
+              $('#process_boby').append(row);
+            });
+          }
+          else{
+            $('#process_boby').append('No data in process list');
+          }
+        },
+        error: function(xhr,errmsg,err){
+        },
+    });
+  }
+
+  var fade_out = function() {
+    $(".alert_div").fadeOut();
+  }
+
+  function show_action_button(running, paused){
+    $('.container-status').hide();
+    $('.container-action-button').show();
+    $('.container-action-button').removeAttr('disabled');
+    if (running == 'True'){
+      if(paused == 'True'){
+        $('#pause').hide();
+        $('#start').hide();
+        $('#stop').attr('disabled','disabled');
+        $('#restart').attr('disabled','disabled');
+        $('#kill').attr('disabled','disabled');
+        $('#remove').attr('disabled','disabled');
+        $('#paused').show();
+        $('#div_container_performance_enable').attr('disabled', true);
+      }
+      else{
+      $('#start').hide();
+      $('#unpause').hide();
+      $('#running').show();
+      $('#div_container_performance_enable').attr('disabled', false);
+      }
+    }
+    else{
+        $('#unpause').hide();
+        $('#stop').hide();
+        $('#pause').attr('disabled','disabled');
+        $('#kill').attr('disabled','disabled');
+        $('#stopped').show();
+        $('#div_container_performance_enable').attr('disabled', true);
+    }
+    setTimeout(fade_out, 5000);
+  }
+
+</script>
+
+{% endblock %}

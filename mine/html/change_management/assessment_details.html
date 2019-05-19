@@ -1,0 +1,152 @@
+{% extends "change_management/change_base.html" %}
+{% load zone %}
+{% block title_content %} Assessment Details{% endblock title_content %}
+
+{% block page_head %} Change Management | <small>Assessment Details</small> {% endblock page_head %}
+
+{% block bread_crumb %} <li class="active">Assessment Details</li> {% endblock bread_crumb %}
+
+{% block extra_head %}
+    <style>
+        .main-heading {
+            background-color: #8effb6;
+        }
+        .sub-heading{
+            background-color: #ffbaba;
+            border-bottom: none;
+        }
+        .sub-title {
+            font-size: 1.2em;
+        }
+    </style>
+{% endblock extra_head %}
+
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <h5 class="panel-title">Assessment Details - {{assessment.assessment_id}}</h5>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="col-sm-4">
+                        <dl class="dl-horizontal">
+                            <dt>Change Id : </dt>
+                            <dd>{{assessment.change_req.change_id}}</dd><br/>
+                            <dt>Type of Assessment : </dt>
+                            <dd>{{assessment.assessment_type}}</dd>
+                            <br/>
+                        </dl>
+                    </div>
+                    <div class="col-sm-4">
+                        <dl class="dl-horizontal">
+                            <dt>Group : </dt>
+                            <dd>{{assessment.group.workgroup}}</dd><br/>
+                            <dt>Owner : </dt>
+                            <dd>{{assessment.assessor.user.email}}</dd>
+                        </dl>
+                    </div>
+                    <div class="col-sm-4">
+                        <dl class="dl-horizontal">
+                            <dt>Subgroup : </dt>
+                            <dd>{{assessment.subgroup.subgroupname}}</dd><br/>
+                            <dt>Created Date : </dt>
+                            <dd>{% tzone assessment.created_date %}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Description : </strong></label>
+                    <p>{{assessment.description|safe}}</p>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                {% if assessment.is_approved != None %}
+                    <div class="col-sm-12">
+                        <div class="col-sm-4">
+                            <dl class="dl-horizontal">
+                                <dt>Approval Status : </dt>
+                                <dd>{{assessment.is_approved}}</dd><br/>
+                                <dt>Impact : </dt>
+                                <dd>{{assessment.impact}}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-sm-4">
+                            <dl class="dl-horizontal">
+                                <dt>Approved Date : </dt>
+                                <dd>{% tzone assessment.finished_date %}</dd><br/>
+                                <dt>Cost : </dt>
+                                <dd>{{assessment.cost}}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-sm-4">
+                            <dl class="dl-horizontal">
+                                <dt>Effort : </dt>
+                                <dd>{{assessment.effort}}</dd><br/>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <hr/>
+                    </div>
+                    <div class="col-sm-12">
+                        <label><strong>Implementation Notes : </strong></label>
+                        <p>{{assessment.implementation_notes}}</p>
+                    </div>
+                {% elif assessment.assessor == profile %}
+                    <div class="col-sm-12">
+                        <form method="post" action="/rfc/assessment/{{assessment.id}}/" >
+                            {% csrf_token %}
+                            <div class="col-sm-12">
+                                <div class="col-sm-6">
+                                    <label><strong>Approval Status</strong></label>
+                                    <select name="approval_stat" class="form-control" required>
+                                        <option value="">--Select--</option>
+                                        <option value="approved">Completed</option>
+                                        <option value="rejected">Pending</option>
+                                    </select> <br/>
+                                    <label><strong>Effort (in minutes)</strong></label>
+                                    <input type="number" name="effort" class="form-control" required min="0"/>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label><strong>Cost</strong></label>
+                                    <input type="number" class="form-control" name="cost" required min="0"/><br/>
+                                    <label><strong>Impact</strong></label>
+                                    <select name="impact" class="form-control" required>
+                                        <option value="">--Select--</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select><br/><br/>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <label><strong>Implementation Notes:</strong></label>
+                                <textarea class="form-control" name="implementation_notes" required>
+                                </textarea><br/>
+                                <div class="col-sm-6">
+                                    <button class="btn btn-success" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+
+
+{% block footer_content %}
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        // $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

@@ -1,0 +1,20 @@
+
+<li id="dash"><a href="/"><i class="glyphicon glyphicon-dashboard"></i><span class="text">Dashboard</span></a></li>
+{% if approver %}                  
+<li id="approval"><a href="/ticket/approval/"><i class="glyphicon glyphicon-plus"></i><span class="text">Approvals</span></a></li>
+{% endif %}              
+
+<li><a href="#" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-book"></i><span class="text">Service Desk</span>
+  <i class="toggle-icon fa fa-angle-left"></i></a>
+  <ul class="sub-menu " id="open">
+    <li id="view"><a href="/dashboard/tickets"><i class="glyphicon glyphicon-plus"></i><span class="text">View Tickets</span></a></li>
+    <li id="sub"><a href="/ticket/group/sub/"><i class="glyphicon glyphicon-plus"></i><span class="text">View Sub Group Tickets</span></a></li>
+    <li id="owns"><a href="/tickets/owned/"><i class="glyphicon glyphicon-plus"></i><span class="text">Owned Tickets</span></a></li>
+    <!-- <li><a href="/ticket/incident/create"><i class="glyphicon glyphicon-plus"></i><span class="text">Incident Ticket</span></a></li> -->
+  </ul>
+</li> 
+ <li id="noti"><a href="/notifications/"><i class="glyphicon glyphicon-plus"></i><span class="text">Notification Center</span></a></li>
+<li id="inci"><a href="/ticket/incident/create"><i class="glyphicon glyphicon-plus"></i><span class="text">Create New Ticket</span></a></li>
+<li ><a href="/monitor_dashboard"><i class="glyphicon glyphicon-info-sign"></i><span class="text">Monitoring System</span></a></li> 
+ <li id="faq"><a href="/faq/view"><i class="glyphicon glyphicon-book"></i><span class="text">Faq</span></a></li> 
+

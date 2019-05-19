@@ -1,0 +1,303 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+   {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+  {% else %}
+      {% include "components/asset_header.html"%}
+  {% endif %}
+
+
+
+        <div class="wrapper">
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Infrastructure | <small>Monitoring Analysis</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                   <li><a href="/">Home</a></li>
+                   <li><a href="/management/infrastructure">Datacenter</a></li>
+                   <li><a href="/management/host/{{host_id}}">Hosts</a></li>
+                    <li><a href="/management/host/monitoring/{{host_id}}">Monitoring Analysis</a></li>
+                    <li class="active">Monitoring Items</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if op_status == 'success' %}
+            <div class="alert alert-success fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              Monitoring Items are successfully related to CI
+            </div>
+            {% elif op_status == 'failed'  %}
+            <div class="alert alert-danger fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              Error occured while relating monitoring item with CI
+            </div>
+            {% endif %}
+
+             <div class="alert alert-danger fade in" id="message_error" style="display:none;">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              Please select atleast one monitoring item
+            </div>
+
+             {% if host_details %}
+              <div class="row">
+                <div class="col-sm-12">
+                <div class="panel">
+                  <div class="panel-heading">                   
+                    <h3 class="panel-title">List Of Monitored Items - {{host_details.0.name}}</h3>
+                  </div>
+                <div id="alerter"></div>
+                <div class="panel-body">
+                  <div class="pad-btm form-inline">
+                    <div class="row">
+                      <div class="col-sm-6 table-toolbar-left">                        
+                      </div>
+                      <div class="col-sm-6 table-toolbar-right">
+                      <form name="frm_relate" id="frm_relate" action="/management/host/monitor_relate_host/" method="POST">{% csrf_token %} 
+                       <a href="#"  class="btn btn-purple btn-labeled fa fa-plus" onclick=" relate_ci_items()">Relate</a>
+                        <div class="btn-group btn-group">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>Item Name</th>
+                          <th>Template Name</th>                          
+                          <th>Monitored Status</th>
+                          <th class="text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for app_host_item in monitored_items %}
+                        <tr>
+                          <td><a href="">{{app_host_item.itemname}}</a></td>
+                          <td>{{app_host_item.templatename}}</td>                          
+                          <td>
+                          {% if app_host_item.itemstatus == "0" %}
+                            <span style="color:green;">Monitored</span>
+                          {% else %}
+                             <span style="color:red;">Not Monitored</span>
+                          {% endif %}
+                          </td>
+                          <td class="text-right">  
+                            <input type="checkbox" name="action_monitor[]" id="action_monitor_{{app_host_item.itemid}}" {% if app_host_item.ci_status == 1 %} checked  {% endif %} value="{{app_host_item.itemid}}" />
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <input type="hidden" name="ci_id" id="ci_id" value="{{ci_id}}" />
+                  </form>
+                </div>
+              </div>
+             {% else %}
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-header">
+                      <p class="panel-title"></p>
+                    </div>
+                    <div class="panel-body text-center">
+                      <div class="alert alert-danger" role="alert">    
+                          Resource is not monitored, Please contact Marlabs Helpdesk                    
+                          <!-- Oh! This host is not monitored yet. <a href="/advanced_monitoring/monitoring_package/" class="alert-link" target="_blank">Please click here </a> to download the monitoring package and start monitoring  -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+              
+            </div>
+          </div>
+        </div>
+
+
+{% include "asset/addtostock.html" %}
+<div class="modal fade" id="ci_relate" tabindex="-1" role="dialog" aria-labelledby="Larges" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Relate Monitoring Items</h4>
+      </div>
+      <div class="modal-body">
+        <div id="ci_relation_area" style="display:none;">      
+          <form method="POST" action="/management/host/monitor_items/{{host_id}}">{% csrf_token %}
+              <div class="row">          
+                <div class="col-sm-4">
+                  <label>Select CI</label>
+                  <select class="form-control" name="ci" required>
+                     {% for ci in cies %}
+                      <option value="{{ci.id}}">{{ci.name}}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-sm-4">
+                  <label>Type of relation</label>
+                  <select class="form-control" name="relation">
+                     {% for ci in all_relations %}
+                    <option value="{{ci.id}}">{{ci.name}}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-sm-2">
+                  <input type="hidden" name="itemids" id="itemids" value="" />
+                  <button class="btn btn-info pull-right" type="submit" style="margin-top:19%;">Relate</button>
+                </div>
+                
+                <br>
+              </div>
+            </form>
+          </div>
+
+          <div id="ci_relation_message" style="display:block;">
+              <div class="row">
+                  <div class="col-sm-12">
+                    Please select the monitoring items from the list and relate those items to CI
+                  </div>
+              </div>
+          </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+<script type="text/javascript">
+$("#tbl_monitor_list").DataTable();
+$("#asset").addClass("active");
+$(".close").click(function () { 
+    $("div").remove('.alert-wrap'); 
+  });
+
+function relate_ci_items(){
+  var itemids = ""    
+  if($('input[name="action_monitor[]"]').is(':checked')){  
+    $('#frm_relate').submit();
+  }
+  else{
+    $('#message_error').show(100);
+  }
+}   
+</script>
+
+<script type="text/javascript">
+{% for app in relation_list %}
+var {{app.names}} = graph.newNode  ({
+  // label: '{{app.names}}', image: {src: '/media/{{app.image}}', width:80}, 
+  label: '{{app.names}}', 
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.name}}, {{app.obj2.name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+</script>
+</body>
+</html>

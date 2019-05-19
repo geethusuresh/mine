@@ -1,0 +1,110 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+<script type="text/javascript">
+  server_id = {{server_id}}
+</script>
+
+<h1 class="text-thin">Download Images |
+  <small>Images from Docker Hub/Repository</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_image' server_id %}">Images</a></li>
+  <li class="active">Search Image</li>
+</ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+  <div class="row">
+
+    <div class="col-md-12 pad-all">
+      <div class="col-md-8 col-md-offset-1">
+        <input type="text" class="form-control" value="{{search_keyword}}" id="search_keyword" name="search_keyword" style="width:100%" required>
+      </div>
+      <div class="col-md-3">
+        <span class="input-group-btn">
+          <button type="button" onclick="get_search_image_keyword()" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+        </span>
+      </div>
+    </div>
+
+    <div class="col-md-12">
+      <div class="panel panel-bordered-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title">Official Repositories</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row pad-all">
+            <div class="col-md-4 border-image">
+                <img src="/static/docker_management/img/official_centos.png" align="right" id="centos" onclick="perform_image_search('centos')" style="cursor:pointer">
+            </div>
+            <div class="col-md-4 border-image">
+                <img src="/static/docker_management/img/official_ubuntu-h.png" align="right" id="ubuntu" onclick="perform_image_search('ubuntu')" style="cursor:pointer">
+            </div>
+            <div class="col-md-3 border-image">
+               <img src="/static/docker_management/img/official_mongodb.png" align="right" id="mongodb" onclick="perform_image_search('mongodb')" style="cursor:pointer">
+            </div>
+            <div class="col-md-6 border-image">
+                <img src="/static/docker_management/img/official_mysql.png" align="right" id="mysql" onclick="perform_image_search('mysql')" style="cursor:pointer">
+            </div>
+            <div class="col-md-5 border-image">
+                <img src="/static/docker_management/img/official_redis.png" id="redis" onclick="perform_image_search('redis')" style="cursor:pointer">
+            </div>
+            <div class="col-md-5 border-image">
+                <img src="/static/docker_management/img/official_wordpress.png" align="middle" id="wordpress" onclick="perform_image_search('wordpress')" style="cursor:pointer">
+            </div>
+            <div class="col-md-5 border-image">
+                <img src="/static/docker_management/img/official_node.png" align="middle" id="nodejs" onclick="perform_image_search('nodejs')" style="cursor:pointer">
+            </div>
+            <div class="col-md-5 border-image">
+                <img src="/static/docker_management/img/official_nginx.png" align="middle" id="nginx" onclick="perform_image_search('nginx')" style="cursor:pointer">
+            </div>
+            <div class="col-md-5 border-image">
+                <img src="/static/docker_management/img/official_postgres.png" align="middle" id="postgres" onclick="perform_image_search('postgres')" style="cursor:pointer">
+            </div>
+            <div class="col-md-6 border-image">
+                <img src="/static/docker_management/img/official_elasticsearch.png" style="width:100%" align="middle" id="elasticsearch" onclick="perform_image_search('elasticsearch')" style="cursor:pointer">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  $("#search_keyword").keyup(function(event){
+      if(event.keyCode == 13){
+          get_search_image_keyword()
+      }
+  });
+
+  function get_search_image_keyword(){
+    search_keyword = $('#search_keyword').val();
+    if(search_keyword != ""){
+      perform_image_search(search_keyword);
+    }
+    else{
+      alert('Please enter search keyword')
+    }
+  }
+
+  function perform_image_search(search_keyword){
+    url = '/docker_management/server/' + server_id + '/image/search/list?name=' + search_keyword
+    window.location.href = url;
+  }
+
+</script>
+
+{% endblock %}

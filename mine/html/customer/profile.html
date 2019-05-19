@@ -1,0 +1,573 @@
+{% load humanize %} {% load zone %} {% load zone %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+    .list-info li label {
+        width: 100px;
+    }
+    
+    .clb {
+        display: inline-block;
+        max-width: 100%;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .img-lg {
+        width: 130px;
+        height: 130px;
+    }
+    
+    .form-group {
+        margin-bottom: 2%;
+    }
+    </style>
+    <script type="text/javascript" src="/static/customer/Chart.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+</head>
+
+<body class="fixed" style="font-size:13px">
+    {% if "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+        {% include "components/header.html"%}        
+    {% elif "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+        {% include "components/monitoring_header.html"%}
+    {% else %}
+        {% include "components/cust_header.html"%}
+    {% endif %}
+
+    <div class="wrapper">
+        {% if "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+            {% include "side_bar/sidebar.html"%}
+        {% elif "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+             {% include "side_bar/monitoring_customer.html" %}
+        {% else %}
+            {% include "side_bar/customer.html"%}
+        {% endif %}
+        <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Profile  <small></small></h1>
+                <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Profile</li>
+                </ol>
+            </div>
+            <div class="content">
+
+                <div class="panel">
+                    <div class="eq-height clearfix">
+                        <div class="row">
+                            <div class="col-md-3 eq-box-md text-center box-vmiddle-wrap">
+                                <div class="text-center">
+                                    <div class="panel-body">
+                                        {% if profile.image %}
+                                        <img alt="Avatar" class="img-lg img-circle img-border mar-btm" src="/media/{{profile.image}}"> {% else %}
+                                        <img alt="Avatar" class="img-lg img-circle img-border mar-btm" src="/static/img/photo.jpg"> {% endif %}
+                                        <h4 class="mar-no">{{profile.user.first_name}} {{profile.user.last_name}}</h4>
+                                        <p>{{profile.customer}}</p>
+
+                                    </div>
+                                    <div class="pad-all">
+                                        <ul class="list-group bg-trans">
+                                            <li class="list-group-item list-item-sm">
+                                                <i class="fa fa-envelope fa-fw"></i> {{profile.user.email}}
+                                            </li>
+                                            <!-- <li class="list-group-item list-item-sm">
+                                                <i class="fa fa-phone fa-fw"></i> +XX XXX XX XXXXX
+                                            </li> -->
+                                            <!-- <ul class="apps-icons list-inline" style="text-align:center;color:black;font-size: 20px;">
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-apple"></i></a></li>
+                                                <li><a style="color:#424242" href="https://play.google.com/store/apps/details?id=com.marlabs.oneconsole_M&hl=en" target="_blank"><i class="fa fa-android"></i></a></li>
+                                                <li><a style="color:#424242" href="https://chrome.google.com/webstore/detail/oneconsole-for-google-chr/kpejccjkdmadoanlpfpkfjejoilakenm" target="_blank"><i class="fa fa-chrome"></i></a></li>
+                                                <li><a style="color:#424242" href="https://addons.mozilla.org/en-US/firefox/addon/oneconsole-for-firefox/" target="_blank"><i class="fa fa-firefox"></i></a></li>
+                                                <li><a style="color:#424242" href="#" target="_blank"><i class="fa fa-safari"></i></a></li>
+                                                <li><a  style="color:#424242" href="http://www.amazon.com/Marlabs-Inc-OneConsole/dp/B016KIDG5Q/ref=sr_1_1?ie=UTF8&qid=1444808589&sr=8-1" target="_blank"><i class="fa fa-amazon"></i></a></li>
+                                                <li>
+                                                <a style="color:#424242" href="http://www.amazon.com/Marlabs-Inc-OneConsole/dp/B016KIDG5Q/ref=sr_1_1?ie=UTF8&qid=1444808589&sr=8-1" target="_blank"><i class="icon-blackberry"></i></a>
+                                                </li>
+                                            </ul> -->
+                                            <ul class="apps-icons list-inline" style="text-align:center;color:black;font-size: 20px;">
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-apple"></i></a></li>
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-android"></i></a></li>
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-chrome"></i></a></li>
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-firefox"></i></a></li>
+                                                <li><a style="color:#424242" href="#"><i class="fa fa-safari"></i></a></li>
+                                                <li><a  style="color:#424242" href="#"><i class="fa fa-amazon"></i></a></li>
+                                                <li>
+                                                <a style="color:#424242" href="#"><i class="icon-blackberry"></i></a>
+                                                </li>
+                                            </ul>
+
+                                            <li class="list-group-item list-item-sm text-primary text-semibold">
+                                                <a class="btn btn-info btn-labeled fa fa-shield" href="/two_factor_auth/setup/">Enable/Disable Two Factor Auth</a>
+                                            </li>
+                                           <!--  <li class="list-group-item list-item-sm text-primary text-semibold">
+                                                <a href="{% url 'slack_auth' %}"><img src="https://platform.slack-edge.com/img/add_to_slack.png"></a>
+                                            </li> -->
+                                            <!-- {{slack_list}} -->
+                                            <!-- <a href="/slack/callback/">test purpose</a> -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9 eq-box-md eq-no-panel">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <div class="panel-control">
+                                            <ul class="nav nav-tabs">                                           
+                                                <li class="active"><a href="#basic" data-toggle="tab">
+                                                {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+                                                    Basic Info
+                                                {% else %}
+                                                   Subscription
+                                                {% endif %}
+                                                </a></li>
+                                            
+                                                <!-- <li><a href="#email" data-toggle="tab">Email Signature</a></li> -->
+                                                <li><a href="#settings" data-toggle="tab">My Profile</a></li>
+                                                <li><a href="#logins" data-toggle="tab">Logged Devices</a></li>
+                                                {% if "Monitoring_Main_Dashboard" not in request.session.logged_user_priv %}
+                                                <li><a href="#notifications" data-toggle="tab">Notification</a></li>
+                                                {% endif %}
+                                                {% if profile.slacked %}
+                                                <li><a href="#slack" data-toggle="tab">Slack</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                        <h3 class="panel-title">Details</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="tab-content">
+                                            <div class="tab-pane fade in active" id="basic">
+                                                <div class="col-sm-6">
+                                                    <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;color:grey;margin-top:5%">
+                                                        <li style="padding: 10px;">
+                                                            <span class="fa fa-user"></span>
+                                                            <label class="clb">Username</label>
+                                                            {{profile.user.username}}
+                                                        </li>
+                                                        <li style="padding: 10px;">
+                                                            <span class="fa fa-file"></span>
+                                                            <label class="clb">Role</label>
+                                                            {% if profile.is_admin %} Admin - {{profile.customer}}{% else %} User - {{profile.customer}} {% endif %}
+                                                        </li>
+                                                        {% if profile.location %}
+                                                        <li style="padding: 10px;">
+                                                            <span class="fa fa-map-marker"></span>
+                                                            <label class="clb">Location</label>
+                                                            {{profile.location}}
+                                                        </li>
+                                                        {% endif %}
+                                                        <li style="padding: 10px;">
+                                                            <span class="fa fa-globe"></span>
+                                                            <label class="clb">TimeZone</label>
+                                                            {{profile.timezone}}
+                                                        </li>
+                                                        <li style="padding: 10px;">
+                                                            <span class="fa fa-sign-out"></span>
+                                                            <label class="clb">Last Login</label>
+                                                            {{profile.user.last_login}}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                {% if "Monitoring_Main_Dashboard" not in request.session.logged_user_priv %}
+                                                <div class="col-sm-6">
+                                                    <h4 class="text-thin text-center">OneConsole modules</h4> {% for mod in access %}
+                                                    <span class="col-sm-3 col-sm-3 text-center" style="margin-top:8%" data-toggle="tooltip" data-original-title="{{mod}}" data-placement="bottom">
+                                <l class="fa {{mod.icon}} fa-3x" style="color:grey"></l>
+                              </span> {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="tab-pane fade" id="logins">
+                                                <div class="text-center">
+                                                    <p class="h4 text-thin">Where You're Logged In</p>
+                                                    <small>If you notice any unfamiliar devices or locations, Please contact marlabs helpdesk</small>
+                                                </div>
+                                                <br>
+                                                <div class="row">
+                                                    <div class="col-sm-2"></div>
+                                                    <div class="col-sm-8">
+                                                        {% for device in devices %}
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Last Accessed</dt>
+                                                            <dd>{% tzone device.time %}</dd>
+                                                            <dt>Device</dt>
+                                                            <dd>{{device.browser}} on {{device.os}}</dd>
+                                                            {% if device.ip %}
+                                                            <dt>IP</dt>
+                                                            <dd>{{device.ip}} somewhere in {{device.country}}</dd>
+                                                            {% endif %}
+                                                        </dl>
+                                                        <hr> {% endfor %}
+                                                    </div>
+                                                    <div class="col-sm-2"></div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="notifications">
+                                                <div class="text-center">
+                                                    <p>Get updated with whats relevent for you, customize your notification</p>
+                                                    <br>
+                                                  
+                                                    <p>Currently Subscribed Notifications</p>
+
+                                                    {% for lahm in current_login.notifications.all %}
+                                                        <label class="label label-default" style="margin:2px"> {{lahm}} </label> 
+                                                    {% endfor %}
+                                                    <br>
+                                                    <small>changes will reflect across platforms</small>
+                                                </div>
+                                                <br>
+                                                <div class="row">
+                                                    <form method="POST" action="/profile/notification/preference/save/"> {% csrf_token %}
+                                                        <div class="col-sm-3">
+                                                            <label>Select Notifications Type</label>
+                                                        </div> 
+                                                        <div class="col-sm-9">  
+                                                            {% for each in roledon %}
+                                                            <span class="col-sm-6">
+                                                                 <input type="checkbox" value="{{each.id}}" {% if each.is = "on" %}checked {% endif %} name="preference"> {{each.not}}
+                                                            </span>
+                                                           
+                                                            {% endfor %}
+                                                        </div>  
+                                                        <button class="btn btn-success pull-right" type="submit">Save Changes</button>
+                                                    </form>
+                                                    <div></div>
+                                                </div>
+                                                <div class="row"><hr></div>
+                                                <div class="row">
+                                                    <h4 class="text-thin text-center">Mobile Notification Settings</h4>
+                                                    <div class="text-center">
+                                                        <p>Customize mobile notification settings for getting mobile notifications on your mobile.</p>
+                                                        <br>
+                                                        {% if profile.mobile_notify %}
+                                                            <a href="{% url 'change_mobile_notification' %}?status=disable" class="btn btn-danger pull-right">Disable Mobile Notification </a>
+                                                        {% else %}
+                                                            <a href="{% url 'change_mobile_notification' %}?status=enable" class="btn btn-success pull-right">Enable Mobile Notification </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade" id="slack">
+                                                <p class="text-thin h4 text-center">Customize your slack settings</p>
+                                                <br>
+                                                <div class="col-sm-6">
+                                                    Current Group : {% if token.team %} {{token.team}} {% else %} general {% endif %}
+                                                </div>
+                                                <form action="/slack/update/" method="POST">{% csrf_token %}
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label class="col-md-4 control-label">Select group</label>
+                                                            <div class="col-md-8">
+                                                                <select name="slack" class="form-control">
+                                                                    <option value="" selected disabled>-select group-</option>
+                                                                    {% for gru in slack_list %}
+                                                                    <option value="{{gru}}">{{gru}}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success pull-right">Update</button>
+                                                </form>
+                                            </div>
+                                            <div class="tab-pane fade" id="settings">
+                                                <form action="/profile/" method="post" class="panel-body form-horizontal form-padding" enctype="multipart/form-data" onsubmit="return validate()">{% csrf_token %}
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">First Name</label>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" name="first_name" class="form-control" value="{{profile.user.first_name}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">Last Name</label>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" name="last_name" class="form-control" value="{{profile.user.last_name}}" readonly>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">Location</label>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" name="location" class="form-control" {% if profile.location %} value="{{profile.location}}" {% else %} value="" {% endif %}>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">TimeZone</label>
+                                                                <div class="col-md-8">
+                                                                    <select class="form-control" name="tz">
+                                                                        {% if profile.timezone %}
+                                                                        <option value="{{profile.timezone}}">{{profile.timezone}}</option>
+                                                                        {% endif %} {% for tz in timezone %}
+                                                                        <option>{{tz}}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">Phone Number</label>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" name="phone" class="form-control" value="{{profile.phonenumber_set.all.0.primary}}">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label class="col-md-4 control-label">Designation</label>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" name="descig" class="form-control" {% if profile.title %} value="{{profile.title}}" {% endif %}>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-10">
+                                                            <div class="form-group">
+                                                                <label class="col-md-3 control-label">Profile Picture</label>
+                                                                <div class="col-md-9">
+                                                                    <input type="file" name="image" id="image" class="pull-left btn btn-default btn-file" style="width:auto">
+                                                                    <!-- <span class="pull-left btn btn-default btn-file">
+                                      </span> -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <button type="submit" class="btn btn-success pull-right">Save Changes</button>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div id="file_error" class="alert alert-danger" style="display:none;margin-top:5px;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                                <p class="h4 text-thin text-center">Change Password</p>
+                                                <hr>
+                                                <form name="change_password" action="#" class="form-horizontal" method="POST">{% csrf_token %}
+                                                    <div class="form-group">
+                                                        <input type="text" name="user" class="hidden" value="{{puser}}">
+                                                        <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">Old Password</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="password" name="old_pass" id="old_pass" class="form-control" placeholder="Old Password" / required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">New Password</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="password" name="pass1" id="pass1" class="form-control" placeholder="New Password" onchange="checkPass(); return false;" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">Repeat New Password </label>
+                                                        <div class="col-sm-6">
+                                                            <input type="password" name="pass2" id="pass2" onkeyup="checkPass(); return false;" class="form-control" placeholder="Repeat New Password" / required>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <br/>
+                                                            <br/>
+                                                            <div class="alert alert-danger" id="message">{{ message|safe }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-center">You will be logged off automatically after a successful password change</p>
+                                                    <div class="row">
+                                                        <a href="#" class=" btn btn-info" style="color:#FFF" onclick="clear_all()">Clear</a>
+                                                        <span class="col-sm-7"></span>
+                                                        <button type="button" id="submitt" class=" btn btn-success" onclick="reset_password()">Update Password</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if messages %}
+        <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+            {% for message in messages %}
+            <div class="alert-wrap in animated jellyIn">
+                <div class="alert alert-success" role="alert">
+                    <button class="close" type="button">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                    <div class="media">
+                        <div class="media-body">
+                            <h4 class="alert-title"></h4>
+                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %} {% include "components/customer_footer.html" %}
+        <script>
+        $("#profile").addClass("active")
+        </script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $('#message').hide();
+        })
+        </script>
+        <!--   <script>
+    var ctx = document.getElementById("profilechart").getContext("2d");
+          var data = [
+        {
+            value: {{news}},
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "New"
+        },
+        {
+            value: {{resolved}},
+            color: "#1d364f",
+            highlight: "#1d3640",
+            label: "Resolved"
+        },
+        {
+            value: {{queued}},
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Queued"
+        },
+        {
+            value: {{progress}},
+            color: "#27ae60",
+            highlight: "#5cb85c",
+            label: "In Progress"
+        },
+        {
+            value: {{await}},
+            color: "#3498db",
+            highlight: "#5bc0de",
+            label: "Awaiting"
+        }
+    ]
+    var myDoughnutChart = new Chart(ctx).Doughnut(data, {
+    animateScale: true
+});
+    </script> -->
+        <script type="text/javascript">
+        function reset_password() {
+            var pass1 = $('#pass1').val();
+            var pass2 = $('#pass2').val();
+            var old_pass = $('#old_pass').val();
+            if (pass1 && pass2 && old_pass) {
+                $.ajax({
+                    url: "/change_password/",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        "pass1": pass1,
+                        "pass2": pass2,
+                        "old_pass": old_pass,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        message = document.getElementById('message');
+                        message.style.display = 'none';
+                        message.innerHTML = '';
+                        if (data.result == 'ok') {
+                            document.location.href = "/";
+                        } else if (data.result == 'invalid_pass') {
+                            message.innerHTML = "Invalid Old password";
+                            message.style.display = 'block';
+                        } else if (data.result == 'not_valid') {
+                            message.style.display = 'block';
+                            message.innerHTML = "Invalid new passwords";
+                        }
+                    }
+                });
+            } else {
+                message = document.getElementById('message');
+                message.innerHTML = "Please fill all the fields";
+                message.style.display = 'block';
+            }
+        }
+        </script>
+        <script type="text/javascript">
+        function clear_all() {
+            $('#pass1').val('');
+            $('#pass2').val('');
+            $('#old_pass').val('');
+            var pass2 = document.getElementById('pass2');
+            pass2.style.backgroundColor = '#fff';
+        }
+        </script>
+        <script>
+        function checkPass() {
+            //Store the password field objects into variables ...
+            var pass1 = document.getElementById('pass1');
+            var pass2 = document.getElementById('pass2');
+            //Set the colors we will be using ...
+            var goodColor = "#66cc66";
+            var badColor = "#ff6666";
+            //Compare the values in the password field
+            //and the confirmation field
+            if (pass1.value == pass2.value) {
+                //The passwords match.
+                //Set the color to the good color and inform
+                //the user that they have entered the correct password
+                pass2.style.backgroundColor = goodColor;
+                $("#submitt").prop("disabled", false);
+            } else {
+                //The passwords do not match.
+                //Set the color to the bad color and
+                //notify the user.
+                pass2.style.backgroundColor = badColor;
+                $("#submitt").prop("disabled", true);
+            }
+        }
+        </script>
+        <script type="text/javascript">
+        function validate() {
+            var extensions = new Array("jpg", "jpeg", "png");
+            var image_file = $('#image').val();
+            var image_length = image_file.length;
+            if (image_length > 0) {
+                var image_input = document.getElementById('image');
+                if (image_input.files[0].size > 1000000){
+                    $('#file_error').html("Maximum allowded image size is 1 mb, please check your image size" );
+                    $('#file_error').show();
+                    return false;
+                } else {
+                    var pos = image_file.lastIndexOf('.') + 1;
+                    var ext = image_file.substring(pos, image_length);
+                    var final_ext = ext.toLowerCase();
+                    for (i = 0; i < extensions.length; i++) {
+                        if (extensions[i] == final_ext) {
+                            return true;
+                        }
+                    }
+                    $('#file_error').html("You must upload an image file with one of the following extensions: " + extensions.join(', ') + ".");
+                    $('#file_error').show();
+                    return false;
+                }
+            }
+        }
+        </script>
+</body>
+
+</html>

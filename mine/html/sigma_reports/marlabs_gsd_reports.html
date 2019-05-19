@@ -1,0 +1,189 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Marlabs GSD Reports</title>
+    {% include "components/css.html"%} 
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">   
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Marlabs GSD Reports<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Marlabs GSD Reports</li>
+                </ol>
+            </div>
+            <div class="content">
+            <form id="frm_gsd_reports" name ="frm_gsd_reports" method='post' action='' onsubmit="return submit_report()" target="_blank">
+              {% csrf_token %}
+
+              <div class="row" style="background:none repeat scroll 0 0 #ffffff;">
+                <div class="box">
+                  <div class="col-sm-12">
+                    <div style="margin-bottom:20px;">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-danger " style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                  </div>
+
+                <div class="col-sm-12"> 
+                  <div style="margin-bottom:20px;">                     
+                    <fieldset>
+                      <div class="controls" >
+                        <div class="col-sm-3">
+                          <label style = "font-weight: bold" for ="engineer_name">Report Type</label>
+                          <select name="report_type" id="report_type" class="form-control" style="font-size:12px;width:190px;" required onchange="report_type_change();">
+                            <option value="">Select any report type</option>
+                            <option value="l1_handled_report">Ticket Handled by L1 Workgroups</option>
+                            <option value="l15_handled_report">Ticket Handled by L1.5 Workgroups</option>
+                            <option value="l2_handled_report">Ticket Handled by L2 SAP Workgroups</option>
+                            <option value="status_report">Ticket Distribution by Status</option>
+                            <option value="priority_report">Ticket Distribution by Priority</option>
+                          </select>                           
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                </div>               
+                  
+
+                  <div class="col-sm-12" id="date_duration_area"> 
+                    <div style="margin-bottom:20px;">
+                        <div class="controls">
+                            <div class="col-sm-2">
+                                <label style = "font-weight:bold;" for="ticket_action">Report Duration</label>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <!--Start row-->
+                  <div class="col-sm-12" id="date_attr_filter"> 
+                    <div style="margin-bottom:20px;">                     
+                      <fieldset>
+                        <div class="controls">                         
+                          <div class="col-sm-2">
+                              <select name="ticket_action" id="ticket_action" class="form-control" style="font-size:10px;width:100px;">
+                                <option value="created">Ticket Created</option>                      
+                              </select>
+                          </div>
+                          <div class="col-sm-2">
+                            <select name="duration" id="duration" class="form-control" style="font-size:10px;width:85px;" onchange="duration_change(this.value)">
+                              <option value="on">On</option>
+                              <option value="between">Between</option>                              
+                            </select>
+                          </div>
+                          <div class="col-sm-2" id="start_date_div">
+                            <input type="text" name="start_date" id="start_date" class="form-control" />
+                          </div>                          
+                          <div class="col-sm-2" id="end_date_div" style="display:none;">
+                            <input type="text" name="end_date" id="end_date" class="form-control" />
+                          </div>
+                      </div>
+                      </fieldset>
+                    </div>
+                  </div>
+                  <!--End row -->
+
+                  <!--Start row -->
+                  <div class="col-sm-12"> 
+                    <div style="margin-bottom:20px;">                     
+                      <fieldset>
+                        <div class="controls">
+                          <input type="submit" value="Fetch Report" class="btn btn-success" style="float:right;min-width:20%;margin-right: 69px;">
+                          <label style = "font-weight: bold;color:red;display:none;margin-left:27px;
+                            margin-top: 7px;" id="error_section"></label>
+                        </div>
+                      </fieldset>
+                      </div>
+                  </div>
+                  <!--End row -->
+                  </div>
+                  </div> 
+                </form>
+                               
+                <!--end box -->
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}   
+    {% include "components/service_request.html"%}
+    <script type="text/javascript">
+    $(function() {
+      $( "#start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+      $( "#end_date" ).datepicker({ dateFormat: "yy-mm-dd" });      
+    });
+   
+    function duration_change(obj_val){
+      if(obj_val == "between"){
+          $('#end_date_div').show();
+      }
+      else{
+         $('#end_date_div').hide();
+      }
+    }
+
+    function submit_report(){      
+      var report_type = $('#report_type').val();
+      if(report_type == "l1_handled_report" ||
+          report_type == "l15_handled_report" ||
+          report_type == "l2_handled_report" ||
+          report_type == "status_report" ||
+          report_type == "priority_report"){
+
+          if($('#start_date').val() == ""){         
+              $('#error_section').html("Please select date field for the report generation");
+              $('#error_section').show(100);
+              return false;          
+          }
+          else if($('#duration').val() == "between"){
+              if($('#end_date').val() == ""){
+                $('#error_section').html("Please select end date, as you have selected between date range");
+                $('#error_section').show(100);
+                return false;
+              }
+              else{
+                $('#error_section').hide();
+                return true;
+              }
+          }
+          else{
+               $('#error_section').hide();
+                return true;
+          }
+      }      
+  }
+
+  function report_type_change(){
+      if($('#report_type').val() == "l1_handled_report"){
+          $('#frm_gsd_reports').attr("action","/l1_handled_report/");          
+      }
+      else if($('#report_type').val() == "l15_handled_report"){
+         $('#frm_gsd_reports').attr("action","/l15_handled_report/");         
+      }
+      else if($('#report_type').val() == "l2_handled_report"){
+         $('#frm_gsd_reports').attr("action","/l2_handled_report/");         
+      }
+      else if($('#report_type').val() == "status_report"){
+         $('#frm_gsd_reports').attr("action","/status_report/");        
+      }
+      else if($('#report_type').val() == "priority_report"){
+         $('#frm_gsd_reports').attr("action","/priority_report/");        
+      }    
+  }    
+  </script>
+  </body>
+</html>

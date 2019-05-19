@@ -1,0 +1,504 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+
+          {% include "side_bar/customer.html"%}
+          <div class="rightside">
+ 
+        {% if alert_message %}
+        {% for alert in alert_message %}
+        <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+        {% endfor %}
+        {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Security Analysis  | <small>{{app}}</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active"><a href="/dashboard/index/">Security Dashboard</a></li>
+                    <li><a href="/security/host/details/">Host Details</a></li>
+                    <li>Security Analysis</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+
+            {% if response %}
+
+                <div class="row">
+                  <div class="col-sm-8" >
+
+                          <div class="panel">
+                            <div class="panel-title">
+                              <h4 class="panel-header" style="text-align:center">Recent data</h4>
+                            </div>
+                            <div class="panel-body table-responsive no-padding">
+                              <div class="row col-sm-12" style="text-align:center">
+                                 {% if graph %}
+                                <canvas id="charter" width="700" height="400"></canvas>
+                                   {% else %}
+
+                                   <div class="alert alert-mint" style="margin-top:10%;margin-bottom:20%">
+                                    <l class="fa fa-warning fa-2x"></l>
+                                    <p class="h4 text-thin"> No data available </p>
+                                    </div>
+                                  {% endif %}
+                              </div>
+                            </div>
+                          </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="panel">
+                      <div class="panel-body bg-purple text-center"> 
+                        <l class="fa fa-globe fa-4x"></l> 
+                        <h4 class="text-center">Events Summary</h4>
+                        <p></p>
+                
+                      </div>
+                      {% if country %}
+                      <table class="table" id="table_id">
+                        <thead>
+                          <th class="text-center">Country</th>
+                          <th class="text-center">Event Occered</th>
+                        </thead>
+                        <tbody>
+                          {% for sm in country %}
+                          <tr>
+                            <td class="text-center">{{sm.country}}</td>
+                            <td class="text-center">{{sm.count}}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                      {% else %}
+
+                      <div class="text-center">
+                        <div class="alert alert-warning" style="margin-top:10%;margin-bottom:20%">
+                                    <l class="fa fa-warning fa-2x"></l>
+                                    <p class="h4 text-thin"> No data available </p>
+                          </div>
+                          </div>
+
+                      {% endif %}
+
+                    </div>
+                   <!--  <div class="">
+                      <div class="panel">
+                        <a href="/dashboard/realtime/map/{{host.id}}">
+                          <div class="panel-body bg-info text-center"> 
+                            <l class="fa fa-globe fa-3x"></l> 
+                            <h4 class="text-center">View Real Time Events Map</h4>
+                          </div>
+                        </a>
+                      </div>
+                    </div> -->
+                  </div>
+          
+                  </div>
+
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <div class="panel">
+                        <div class="panel-heading" style="text-align:center">
+                          <p class="panel-title">
+                            Events (Recent)
+                          </p>
+                        </div>
+                        <div class="panel-body">
+                          <table class="table table-striped" id="table_ids" class="display" >
+                            <thead>
+                               <tr>
+                                  <!-- <th>View</th> -->
+                                  <!-- <th>No</th> -->
+                                  <th class="text-center">Source IP</th>
+                                  <th class="text-center">Location</th>
+                                  <th class="text-center">Total Attacks</th>
+                                  <th class="text-center">Alert</th>
+                                  <!-- <th>Insert time</th> -->
+                               </tr>
+                            </thead>
+                            <tbody>
+                               {% for attacker in tables%}
+                                <tr>
+                                  <!-- <td><a href="/dashboard/index/host/{{host_details.id}}/{{attacker.key}}/"><l class="btn btn-success btn-sm fa fa-search"></l> </a></td> -->
+                                  <!-- <td style="cursor:pointer;" onclick="eventsPopup('{{attacker.key}}')">{{forloop.counter}}</td> -->
+                                  <td class="text-center" style="cursor:pointer;" onclick="eventsPopup('{{attacker.key}}')">{{ attacker.host }}</td>
+                                  <td class="text-center" style="cursor:pointer;">{{ attacker.desc }}</td>
+                                  <td class="text-center" style="cursor:pointer;">{{ attacker.time }}</td>
+                                  <td class="text-center" style="cursor:pointer;" onclick="eventsPopup('{{attacker.alert}}')">{{ attacker.alert }}</td>
+                                </tr>
+                               {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% else %}
+
+                  <div class="row">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-8">
+                      <div class="panel btn-danger">
+                        <div class="panel-title">
+                          <p class="panel-header">Sorry! <l class="fa fa-cab"></l></p>
+                        </div>
+                        <div class="panel-body">
+                          <p>Sorry we dont have any data to analyse. Please contact administrator</p>
+                        </div>
+                        
+                      </div>
+                    </div>
+                    <div class="col-sm-2"></div>
+                  </div>
+
+
+                  {% endif %}
+            </div>
+          </div>
+        </div>
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script type="text/javascript" src="/static/map/d3.min.js"></script>
+    <script type="text/javascript" src="/static/map/topojson.min.js"></script>
+    <script type="text/javascript" src="/static/map/datamaps.world.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+    <script type="text/javascript" src="/static/angular/controllers.js"></script>
+    <script src="/static/chartjs/Chart.js"></script>
+    <div class="modal fade" id="chart_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" style="width:60%;">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="row" id="chart_change_div">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title text text-center">Events from &nbsp&nbsp<b style="font-size:20px;" id="src_ip"></b></h4>
+                  </div>
+
+                  <ul class="test2 nav nav-pills nav-justified">
+                   <li style="text-align:right;">
+                      <button onclick="create_security_ticket()" type="button" style="margin:0 10px 0 0;" class="btn btn-primary btn-sm">Create Ticket</button>
+                    </li>                   
+                  </ul>
+
+                  <ul class="test2 nav nav-pills nav-justified" id="processing_ticket" style="display:none;">
+                   <li style="text-align:center;" class="alert alert-info" id="info_box">
+                      Processing...
+                    </li>                   
+                  </ul>
+
+                  <ul class="test2 nav nav-pills nav-justified" id="success_box" style="display:none;">
+                   <li style="text-align:center;" class="alert alert-success fade in">                      
+                      Ticket has been created successfully
+                    </li>                   
+                  </ul>
+
+                  <ul class="test2 nav nav-pills nav-justified" id="error_box" style="display:none;">
+                   <li style="text-align:center;" class="alert alert-danger">                      
+                      Error occured while creating ticket
+                    </li>                   
+                  </ul>
+
+                  <div class="tab-content ">
+                    <div class="tab-pane active"  id="tab1">
+                      <table class="table table-hover table-striped" style="table-layout: fixed;    word-wrap: break-word;" id="modal_events_table">
+                        <thead>
+                          <tr>                            
+                            <th>Event Data</th>
+                            <th>Event Record Time</th>
+                            <th>Alert Level</th>
+                            <th>ID</th>
+                            <th>Ticket</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>                                             
+                        </tbody>
+                      </table>
+                    </div>
+                    <div id="chart_div" class="col-md-8 tab-pane">
+                      sadfsdf
+                      <canvas id="events_from_ip" style="width:100%" height="50"></canvas>
+                    </div>
+                  </div>
+                
+              </div>
+            </div>
+          
+            <div class="modal-footer" style="border:0px">
+            
+            </form>
+            </div>
+            </div>
+        </div><!-- /.modal-content -->
+  </div>
+     <script>
+      // var results = {{graph|safe}};
+      var data = {
+          labels: [{% for app in graph %}'{{app.time}}'{% if forloop.couter != 0 %},{% endif %} {% endfor %}],
+          datasets: [
+              {
+                  label: "Attacks",
+                  fillColor: "#9cc96b",
+                  strokeColor: "#27ae60",
+                  highlightFill: "#27ae60",
+                  highlightStroke: "rgba(220,220,220,1)",
+                  data: [{% for app in graph %} {{app.count}} {% if forloop.couter != 0 %},{% endif %} {% endfor %}]
+              },
+          ]
+      };
+      var ctx = document.getElementById("charter").getContext("2d");
+      var myLineChart = new Chart(ctx).Bar(data, {showXLabels: 5 , responsive: true});
+
+     </script>
+     <script type="text/javascript">
+      $(document).ready(function(){
+        $('#table_ids').DataTable({
+          'bLengthChange':false
+        });  
+         $('#table_id').DataTable({
+          'bLengthChange':false
+        });      
+      });
+      var data_table;
+      var eventlist_checked = [];
+      var source_ip_selected = "";
+     </script>
+     <script type="text/javascript">     
+      function eventsPopup(dat){
+      $("#src_ip").html(dat);
+      source_ip_selected = dat
+      
+      if($("#modal_events_table").hasClass('initialized')){
+          $('#modal_events_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#modal_events_table").addClass('initialized')
+        }
+
+        data_table = $('#modal_events_table').DataTable({
+              "bLengthChange": false,
+              "bFilter": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/security/host/events",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      sourceip : dat,
+                      type : 'events',
+                      host : '{{host_details.host}}',
+                      event_time : '{{event_time}}',
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                       { "": "fields.3" },
+                       { "": "fields.4" },
+                       { "": "" },
+                   ],
+              "columnDefs": [{
+                "targets": -1,
+                "data": null,
+                "defaultContent": "<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>"
+              },
+              {
+                "targets": -3,
+                "visible": false,
+                "searchable": false
+                },
+              ]
+      });
+      
+      $("#chart_popup").modal('show'); 
+      $('#info_box').text('Processing....');
+      $('#processing_ticket').hide();
+      $('#success_box').hide(); 
+      $('#error_box').hide();
+      eventlist_checked = [];      
+    }
+
+    
+    function insert_eventid(obj){
+        if($(obj).is(':checked')){
+            data_values = data_table.row($(obj).closest('tr')).data();
+            event_id = data_values[3]            
+            eventlist_checked.push(event_id) 
+        }
+        else{
+            data_values = data_table.row($(obj).closest('tr')).data();
+            event_id = data_values[3]
+            var index = eventlist_checked.indexOf(event_id);
+            if (index >= 0) {
+              eventlist_checked.splice(index, 1);
+            }
+        }
+    }
+
+    function create_security_ticket(){        
+        if(eventlist_checked.length > 0){
+          var eventlist = eventlist_checked.join();
+          $('#info_box').text('Processing....');
+          $('#processing_ticket').show();
+          $('#success_box').hide(); 
+          $('#error_box').hide();     
+          $.ajax({
+                  url:"/security/eventsticket",
+                  type: "POST", 
+                  dataType:"json",
+                  data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    eventid: eventlist,
+                    dest_ip:'{{host_details.host}}'
+                  },
+                  success: function(data){
+                    status = data.message;
+                    $('#processing_ticket').hide();
+                    if(status == "success"){                       
+                        $('#success_box').show();
+                        datatable_reload(source_ip_selected);
+                    }
+                    else if(status == "error"){
+                        $('#error_box').show();
+                    }                                                        
+                  },
+                  error: function(data){
+                     $('#processing_ticket').hide();
+                     $('#error_box').show();                     
+                  }
+            });
+        }
+        else{
+            $('#info_box').text('Please select atleast one event');
+            $('#processing_ticket').show();            
+            $('#success_box').hide(); 
+            $('#error_box').hide();             
+        }
+    }
+
+    function datatable_reload(src_ip){
+      if($("#modal_events_table").hasClass('initialized')){
+          $('#modal_events_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#modal_events_table").addClass('initialized')
+        }
+
+        data_table = $('#modal_events_table').DataTable({
+              "bLengthChange": false,
+              "bFilter": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/security/host/events",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      sourceip : src_ip,
+                      type : 'events',
+                      host : '{{host_details.host}}',
+                      event_time : '{{event_time}}',
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                       { "": "fields.3" },
+                       { "": "fields.4" },
+                       { "": "" },
+                   ],
+              "columnDefs": [{
+                "targets": -1,
+                "data": null,
+                "defaultContent": "<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>"
+              },
+              {
+                "targets": -3,
+                "visible": false,
+                "searchable": false
+                },
+              ]
+      });
+      eventlist_checked = [];
+    }  
+    </script>
+              <script>
+
+
+          $("#sec_dash").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

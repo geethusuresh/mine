@@ -1,0 +1,103 @@
+{% extends 'cloud_management/home.html'%}
+{% block aside %}
+
+
+<li>
+    <a href="{% url 'aws_accounts_view' %}"><i class="fa fa-home"></i>
+        <span>AWS Home</span>
+    </a>
+</li>
+<!-- <li>
+    <a href="{% url 'aws_details_dashboard' cloud_account_id %}"><i class="fa fa-laptop"></i>
+        <span>EC2 Dashboard</span>
+    </a>
+</li> -->
+<li>
+    <a href="{% url 'aws_billing' cloud_account_id %}"><i class="fa fa-credit-card"></i>
+        <span>Billing Information</span>
+    </a>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-server"></i><span>Instances</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu" id="subm">
+      <li>
+        <a href="{% url 'aws_node_list' cloud_account_id %}">
+          <i class="fa fa-circle-o text-aqua"></i></i>instances
+        </a>
+      </li>
+    </ul>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-cube"></i><span>Elastic Block Store</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu" id="subm">
+      <li>
+        <a href="{% url 'aws_volume_list' cloud_account_id %}"><i class="fa fa-circle-o"></i>volumes
+        </a>
+      </li>
+    </ul>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-picture-o"></i> <span>Images</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu">
+      <li>
+          <a href="{%url 'aws_image_list' cloud_account_id %}"><i class="fa fa-circle-o"></i>AMIs
+          </a>
+      </li>
+    </ul>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-unlock-alt"></i> <span>Security</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu">
+      <li>
+            <a href="{% url 'aws_keypair_list' cloud_account_id %}"><i class="fa fa-circle-o"></i>key Pair
+            </a>
+      </li>
+    </ul>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-flash"></i> <span>Orchestration</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu">
+      <li>
+          <a href="{% url 'get_aws_opswork_list' cloud_account_id %}"><i class="fa fa-circle-o"></i>Dashboard
+          </a>
+      </li>
+    </ul>
+</li>
+<li class="sub-nav">
+    <a href="#">
+      <i class="fa fa-bitbucket"></i> <span>AWS S3</span>
+      <i class="fa fa-angle-left pull-right"></i>
+    </a>
+    <ul class="sub-menu">
+      <li>
+          <a href="{% url 'get_awsS3_bucket_list' cloud_account_id %}"><i class="fa fa-circle-o"></i>Bucket List
+          </a>
+      </li>
+    </ul>
+</li>
+
+<li>
+   <a href="{% url 'iam_overview' cloud_account_id %}"><i class="fa fa-user-plus"></i>
+        <span>IAM Management </span>
+    </a>
+</li>
+
+
+
+
+{% endblock %}

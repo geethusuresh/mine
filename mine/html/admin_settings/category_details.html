@@ -1,0 +1,152 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/customers/all/">Customers</a></li>
+                        <li><a href="/admin_settings/customers/{{category.customer.id}}/">Customer Details</a></li>
+                        <li class="active">Category Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title pull-left"> Category Details</h3>
+                                    <!-- <a href="/admin_settings/workgroup/{{subgroup.workgroup.id}}/" class="btn btn-info pull-right" style="margin:10px">View Workgroup</a> -->
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-12">
+                                        <form method="POST" action="/admin_settings/categories/{{ category.id }}/">{% csrf_token %}
+                                            <div class="col-sm-6">
+                                                <dl class="dl-horizontal">
+                                                    <dt>Name :</dt>
+                                                    <dd> <input type="text" name="cat_name" value="{{ category.name }}" class="form-control" required></dd>
+                                                    <br>
+                                                    <dt>Description :</dt>
+                                                    <dd><textarea class="form-control" name="cat_desc" required>{{ category.description }}</textarea></dd>
+                                                </dl>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <dl class="dl-horizontal">
+                                                    <dt>Customer :</dt>
+                                                    <dd><input type="text" value="{{ category.customer.customername }}" class="form-control" readonly></dd>
+                                                    <br>
+                                                    <dt>Visibility </dt>
+                                                    <dd>
+                                                        <select name="visibility" class="form-control" required>
+                                                            <option value="">--Select Visibility--</option>
+                                                            <option value="Yes" {% if category.visibility %} selected {% endif %} >Yes</option>
+                                                            <option value="No" {% if category.visibility == False %} selected {% endif %}>No</option>
+                                                        </select>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <input type="submit" class="btn btn-success pull-right" value="Save" />
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Subcategories</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table id="subcategories" class="table table-stripped">
+                                        <thead>
+                                            <tr>
+                                                <th style="display:none;">ID</th>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Edit</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#subcategories').dataTable( {
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/categories/{{category.id}}/",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "": "id",sClass: "hidden" },
+                    { "": "name" },
+                    { "": "description" },
+                    { "": "","bSortable": false, },
+                    { "": "","bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 3,
+                    "data": "null",
+                    "defaultContent": "<button class='btn btn-success'><i class='fa fa-edit'></i> </button>"
+                }, {
+                    "targets": 4,
+                    "data": "null",
+                    "defaultContent": "<button class='btn btn-danger'> <i class='fa fa-trash-o'> </i> </button> "
+                }]
+            });
+        </script>
+        <script type="text/javascript">
+            $('#subcategories').on('click', 'td', function(e){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == "Edit") {
+                    var row = $(this).prev().prev().prev().html();
+                    if (row) {
+                        document.location.href = "/admin_settings/categories/sub/"+row+"/";
+                    }
+                } else if (th.html() == "Delete") {
+                    var row = $(this).prev().prev().prev().prev().html();
+                    if (row) {
+                        document.location.href = "/admin_settings/category/delete/"+row+"/?sub_category=True";
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

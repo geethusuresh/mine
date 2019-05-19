@@ -1,0 +1,139 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Functionality Add</title>
+    {% include "components/css.html"%}
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Add Functionality <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Functionality</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="row">
+                <div class="col-md-10">
+                  <div class="box">
+                    <div class="box-title">
+                      <h4>Added Functionalities</h4>
+                    </div>
+                    <div class="widget">                  
+                      <div class="widget-content">
+                        <div class="wizard-wrapper">
+                          <div id="" class="wizard">                              
+                            <div class="box-body">
+                              <table class="table table-hover table-striped" id="faqcat_table">
+                                <div id="slaadd_div" >
+                                <thead>
+                                 <tr>
+                                  <th>Sl No.</th>
+                                  <th>Functionality Name</th>
+                                  <th>Description</th>
+                                 </tr>
+                                </thead> 
+                                <tbody>
+                                  {% for func_item in functionality_details %}
+                                  <tr>
+                                    <td>{{ forloop.counter}}</td>
+                                    <td>{{ func_item.func_name }}</td>
+                                    <td>{{ func_item.func_description}}</td>                    
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_funtionality"><i  ></i><span class="text" > Add New Functionality </span></a>
+                </div>
+              </div>
+            </div>        
+            
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <div class="modal fade" id="add_funtionality" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Add New </h4>
+      </div>
+      <div class="modal-body">
+        <div class="row" id="message_box" style="display:none;">
+              <div class="col-sm-12">
+                <div class="alert alert-danger">
+                Functionality names only support underscores and uppercase alphabets
+                </div>
+              </div> 
+            </div>
+        <form id="frm_functionality" name ="frm_functionality" method='post' action='' onsubmit="return validate_function_details();"> {% csrf_token %}
+        <fieldset>
+        <div class="controls" style="width:400px;margin-left:20%">
+          <input class="form-control" type="text" id="functionality_name" name="functionality_name" placeholder="Functionality Name" required> <br />
+          <textarea class="form-control" id="functionality_desc" name="functionality_desc" placeholder="Description" required></textarea><br />
+          <button type="submit" class="btn btn-success pull-right">Add Functionality</button>
+        </div>
+        </fieldset>
+        </form>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        </div>
+      </div>
+    </div>
+  </div>  
+    </body>
+    <script type="text/javascript">
+      window.onerror = function(message, url, lineNumber) {  
+          // code to execute on an error  
+          return true; // prevents browser error messages  
+      };
+    </script>
+    <script type="text/javascript">
+    function validate_function_details(){
+      var regX = /^[a-zA-Z\_]+$/;
+      if(!regX.test($('#functionality_name').val())){
+        $('#message_box').show();
+        return false;
+      }
+      else{
+        $('#message_box').hide();
+        return true;
+      }
+    }
+    </script>
+</html>
+
+       
+         
+

@@ -1,0 +1,170 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oneconsole | search</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 ">
+            <h4 style="color:#FFF">OneConsole</h4>
+          </div>  
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- <div id="tour-searchbox" class="input-group searchbox">
+                  <input type="search" class="form-control" placeholder="enter keyword here...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                  </span>
+                </div> -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+
+                  <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+                  <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+                {% include "side_bar/sidebar.html"%}
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Search</h2>
+                <em>Results</em>
+              </div>
+
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Search Results</h3></div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+ <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Issue</th>
+          <th>User</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td>SR{{ ticket.id }}</td>
+          <td>{{ ticket.summary }}</td>
+          <td>{{ ticket.reportedby }}</td>
+        </tr>
+        {% endfor %}
+
+
+        {% for result in results %}
+        <tr class='clickableRow' href='/ticket/{{result.id}}'>
+          <td>SR{{ result.id }}</td>
+          <td>{{ result.summary }}</td>
+          <td>{{ result.reportedby }}</td>
+
+        </a>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+  </body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

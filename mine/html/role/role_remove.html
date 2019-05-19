@@ -1,0 +1,263 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Person Group</title>
+        <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html" %}  
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            
+            
+            <!-- main -->
+            <div class="content">
+
+              <div class="main-header">
+                <h2>Remove Role</h2>
+                
+              </div>
+{% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="main-content">
+                <div class="row">
+                  <div class="col-sm-10">
+                    <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Remove Role</h3>
+                    <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-success btn-xs"  style=" float:right;margin-right:10px;margin-top:5px">Add New </a>
+                    <a href="" data-toggle="modal" data-target="#register" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Register New </a> -->
+                  </div>
+                  <div class="widget-content">
+                          <div class="wizard-wrapper">
+                            <div id="" class="wizard">
+                              <fieldset>
+                                <div class="controls" style="width:400px;margin-left:20%;text-align:center;">  <form method="post" action="">
+                                  <select class="form-control" id="customer_ajax" name="customer" required>
+                                  <option value="">Select Customer</option>
+                                  {% for customer in customers %}
+                                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                  {% endfor %}
+                                </select></p>
+                                <select class="form-control"  id="role" name="role" required>
+                                  <option value="">Select Role</option>
+                                </select></p>
+                                <!-- <input type="button" value="add person" id="addperson">
+                                <input type="button" value="remove person" id="removeperson"> -->
+                                <!-- <label>Search</label><input class="form-control" type="text" id="search_person" placeholder="search person"> -->
+                                </p>
+                                <div id="personadd_div" style="display:none">
+                                  <table class="table" id="person_table">
+                                    <tr>
+                                      <th>Select</th>
+                                      <th>Name</th>
+                                      <th>Department</th>
+                                      <th>Location</th>
+                                    </tr>     
+                                  </table>
+                                </div>
+                                </p>
+                                <button class="btn btn-success" type="submit">Remove Role</button>
+                                </div>
+                               </fieldset>
+                              </form>        
+                            </div>
+                          </div>
+                      </div>
+ 
+                    </div>
+
+
+                    <div class="widget">
+                      <div class="widget-header"><h3><i class="fa fa-magic"></i>Person Roles</h3>
+                    
+                      </div>
+                      <div class="widget-content">
+                          <table class="table borderless fixed" id="example">
+                              <thead>
+                              <tr>
+                                <tr>
+                                  <th>No</th>
+                                  <th>Role</th>
+                                  <th>Person</th>
+                              </tr> 
+                              </thead>
+                              <tbody>
+                              {% for personrole in personrole_list %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                                <td>{{ personrole.role }}</td>
+                                <td>{{ personrole.person }}</td>
+                                <!-- <td><a href="/personadmin/update/{{person.id}}"><input type="button" value="update" class="btn btn-success btn-sm" ></a></td> -->
+                                <!-- <td><a href="/personadmin/deactivate/{{person.id}}" ><input type="button" value="delete" class="btn btn-success btn-sm"></a></td> -->
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                            </table>
+                      </div>
+ 
+                    </div>
+                  </div>
+                  <div class="col-sm-2">
+                    <div class="widget">
+                      <div class="widget-header"><h3></h3>
+                          
+                      </div>
+                      <div class="widget-content">
+                          <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-link btn-block"  >Add New Person</a><p><p>
+                          <a href="" data-toggle="modal" data-target="#register" class="btn btn-link btn-block"  >Register New Person</a> -->
+                          <ul class="main-menu">
+                              <li><a href="/role/add"></i><span class="text">Add New Role</span></a></li><p>
+                              <li  ><a href="/role/manage" ></i><span class="text ">Assign Role</span></a>
+                              </li><p>
+                              <!-- <li  ><a href="/role/remove" ></i><span class="text ">Person Role</span></a>
+                              </li> -->
+                              
+                          </ul>
+                      </div>
+ 
+                    </div>
+                  </div>
+                </div>
+                  </div>
+                </div>
+             
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+      
+  </body>
+  <script type="text/javascript">
+    var list = [];
+    //var p_dict = [];
+      $("#customer_ajax").on('change',function(){
+        $("#personadd_div").hide();
+        $('#role option:gt(0)').remove().end()
+        if($("#customer :selected").text()!="Select Customer"){
+          $.ajax({
+            url:"/role/remove/",
+            type:"POST",
+            dataType:"json",
+            data:{
+              customerid : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data);
+              for (var i in data){
+              //console.log(p_);  
+                $("#role").append($('<option>', {text:data[i].fields.rolename,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              //alert(err);
+            }
+          });
+          return false;
+        }
+      });
+      $("#role").on('change',function(){
+        list = [];
+        $("#personadd_div").hide();
+        if($("#role :selected").text()!="Select Role"){
+          $.ajax({
+            url:"/role/remove/",
+            type:"POST",
+            dataType:"json",
+            data:{
+              roleid : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              p_dict = JSON.parse(data[0]);
+              p_names = data[1];
+              console.log(data);
+              $("#person_table td").parent().remove();
+              $("#personadd_div").show();
+              for(i=0;i<p_dict.length;i++){
+                $("#person_table").append('<tr><td><input type="checkbox" name="checkbox[]" value="'+p_dict[i].pk+'"/></td><td><input class="form-control" style="border:0px;" readonly type="text" name="'+p_names[i]+'" value="'+p_names[i]+'"/></td><td><input class="form-control" style="border:0px;" readonly type="text" name="'+p_dict[i].fields.department+'" value="'+p_dict[i].fields.department+'"/></td><td><input class="form-control" readonly type="text" style="border:0px;" name="'+p_dict[i].fields.city+'" value="'+p_dict[i].fields.city+'"/></td></tr>');
+              }
+              //alert("yeah");
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+</script>
+</html>
+

@@ -1,0 +1,31 @@
+<div class="col-md-12">
+  {% if object_list %}
+    {% for template in object_list %}
+    <div class="col-lg-3">
+      <div class="panel">
+        <div class="panel-body">
+          <div class="media-body">
+            <div class="mar-btm text-center">
+              <a class="btn-link text-semibold media-heading box-inline">{{template.name}}</a>
+              <p class="text-center">{{template.description}}</p>
+            </div>
+            <div class="pad-ver text-center">
+              <div class="btn-group">
+                <button class="btn btn-sm btn-default btn-hover-danger" onclick="show_delete_template_modal({{template.id}})"><i class="fa fa-trash-o"></i></button>
+              </div>
+              <button class="btn btn-sm btn-primary btn-hover-primary select_template" onclick="show_run_template_modal({{template.id}})">Load Template</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="row">
+      <div class="col-md-11 col-md-offset-1">
+        <h4>No Templates Available {% if search_keyword %}for <span class="text-info">
+        &nbsp;"{{search_keyword}}"</span>{% endif %}</h4>
+      </div>
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title></title>
+	<style type="text/css">
+		html, body {
+		    overflow: -moz-scrollbars-vertical;
+		}
+		body {
+			height: 700px;
+		}
+	</style>
+</head>
+<body class="fixed">
+	<pre>{% spaceless %} {{model_data.html_description|safe}} {% endspaceless %}</pre>
+</body>
+</html>

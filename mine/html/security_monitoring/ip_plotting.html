@@ -1,0 +1,415 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | IP Plotting</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/maps/modules/map.js"></script>
+    <script src="/static/js/highcharts/mapdata/world.js"></script>
+
+    
+
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Source IP Locations | <small>(Last One Week)</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class=""><a href="/dashboard/index/">Security Dashboard</a></li>
+                    <li class=""><a href="/security/dashboard">Monitoring</a></li>
+                    <li class="active">IP Plotting</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+              <div class="row">
+                 <div class="col-sm-12">
+                  {% if messages %}                  
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}                  
+                  {% endif %}
+                 </div>
+              </div>
+
+
+              <!-- <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                  <a class="btn btn-info pull-right" href="/security/dashboard">Dashboard</a>
+                </div>
+              </div> -->
+
+              <!--start row -->
+              <!-- <div class="row">
+                <form method="POST" action=".">{% csrf_token %}
+                  <div class="col-md-3">
+                    <span class="pull-right label label-info" style="font-size:15px;">Alerts Source</span>
+                  </div>
+                  <div class="col-md-6" style="background:white;">
+                      <div class="col-md-6" id="from_div">
+                        {% if from_date %}
+                          From:<input type="text" class="form" name="from_date" id="from_date" value="{{from_date}}" required/>
+                        {% else %}
+                          From:<input type="text" class="form" name="from_date" id="from_date" required/>
+                        {% endif %}
+                      </div>
+                      <div class="col-md-6" id="to_div" >
+                        {% if to_date %}
+                          To:<input type="text" class="form" name="to_date" id="to_date" value="{{to_date}}" required/>
+                        {% else %}
+                          To:<input type="text" class="form" name="to_date" id="to_date"/ required>
+                        {% endif %}
+                      </div>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="submit" class="btn btn-success" value="Fetch Report">
+                    <a href="/sd/performance/report/" class="btn btn-success">Reset</a>
+                  </div>
+                </form>
+              </div> -->
+              <!--End row -->
+
+              <br>
+                <!-- Start row-->
+                <div class="row">
+                    <!-- start First widgett-->
+                      <div class="col-md-12">
+                        <div class="panel panel-default">
+                          {% if show_chart %}
+                            <!-- <div class="panel-heading">
+                              <i class="fa fa-bar-chart-o fa-fw"></h3><i>
+                              <h4>World Map (Last One Week)</h4>
+                            </div> -->
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="world-chart" ></div>
+                                <div id="country-chart"></div>
+                                
+                            </div>
+                          {% else %}
+                            <div class="panel-body">
+                                No Data Found from the system. 
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                    <!--End First widget -->
+
+                  <!--End second widget -->
+                </div>
+                <!--End row -->                          
+
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/dashboard_footer.html" %}
+      {% endif %}        
+      
+      {% include "reports/reports_js.html" %}
+    </body>
+    <script type="text/javascript">
+      $("#from_date").datepicker({
+        format: 'yyyy/mm/dd'
+      }).on('changeDate', function(e){
+      $(this).datepicker('hide');
+      });
+      $("#to_date").datepicker({
+        format: 'yyyy/mm/dd'
+      }).on('changeDate', function(e){
+        $(this).datepicker('hide');
+      });
+       
+    </script>
+</html>
+
+
+
+
+
+<!-- Flag sprites service provided by Martijn Lafeber, https://github.com/lafeber/world-flags-sprite/blob/master/LICENSE -->
+
+<script type="text/javascript">
+  $(function () {
+
+    /**
+     * This is a complicated demo of Highmaps, not intended to get you up to speed
+     * quickly, but to show off some basic maps and features in one single place.
+     * For the basic demo, check out http://www.highcharts.com/maps/demo/geojson instead.
+     */
+
+    // Base path to maps
+
+    //second map
+    function loadSecondMap(data,c_name){
+        cat = []
+        count_list = []
+        for (var x in data) {
+          cat.push(data[x][0]);
+          count_list.push(data[x][1])
+        }
+        $('#country-chart').highcharts({
+              chart: {
+                  type: 'area'
+              },
+              title: {
+                  text: 'Attacks From '+c_name
+              },
+              subtitle: {
+                  text: ''
+              },
+              xAxis: {
+                  // allowDecimals: false,
+                  categories: cat,
+                  labels: {
+                      rotation: -45,
+                      formatter: function () {
+                          // console.log(this.value)
+                          return this.value; // clean, unformatted number for year
+                      }
+                  }
+              },
+              yAxis: {
+                  title: {
+                      text: 'Events Count'
+                  },
+                  labels: {
+                      formatter: function () {
+                          return this.value / 1000 + 'k';
+                      }
+                  }
+              },
+              tooltip: {
+                  pointFormat: 'ip:{series.name} <b>Count:{point.y:,.0f}</b><br/>warheads in {point.x}'
+              },
+              plotOptions: {
+                  area: {
+                      // pointStart: 1750,
+                      marker: {
+                          enabled: false,
+                          symbol: 'circle',
+                          radius: 2,
+                          states: {
+                              hover: {
+                                  enabled: true
+                              }
+                          }
+                      }
+                  }
+              },
+              series: [{
+                  name: c_name,
+                  data: count_list
+              },]
+          });
+    }
+        function secondMap(key,c_name){
+          console.log(key,c_name)
+          // var points = mapChart.getSelectedPoints();
+          // alert("success");
+          $.ajax({
+              url:"/rich/plotting",
+              type:"POST",
+              dataType:"json",
+              data:{
+                world_key : key.toUpperCase(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success : function(data) {
+                // data = JSON.parse(data);
+                loadSecondMap(data,c_name);
+              },
+              error : function(xhr,errmsg,err) {
+                alert(err);
+              }
+            });
+            return false;
+              
+        }
+        
+       
+        
+
+
+        // When the map is loaded or ready from cache...
+        function mapReady() { 
+            // console.log(mapKey);
+
+            var mapGeoJSON = Highcharts.maps['custom/world'],
+                data = [],
+                parent,
+                match;
+
+            temp_data = JSON.parse("{{events_count}}".replace(/&quot;/g,'"'));
+            // Generate non-random data for the map
+            // console.log(mapGeoJSON.features);
+
+            $.each(mapGeoJSON.features, function (index, feature) {
+              flag = 0;
+              for (var x in temp_data) {
+                if(temp_data[x].indexOf(feature.properties['hc-key'].toUpperCase())>-1){
+                  flag=1;
+                  data.push(
+                  {
+                      key: feature.properties['hc-key'],
+                      value: temp_data[x][1]
+                  });
+                }
+              }
+              if(flag==0){
+                  data.push(
+                  {
+                      key: feature.properties['hc-key'],
+                      value: 0
+                  });  
+                }
+            });
+
+            
+
+
+            // Instantiate chart
+            mapChart = $("#world-chart").highcharts('Map', {
+
+                title: {
+                    text: null
+                },
+
+                mapNavigation: {
+                    enabled: true
+                },
+
+                colorAxis: {
+                    min: 0,
+                    stops: [
+                        [0, '#FFFFFF'],
+                        [0.5, '#FF8080'],
+                        [1, Highcharts.Color('#B20000').brighten().get()]
+                    ]
+                },
+
+                legend: {
+                    layout: 'vertical',
+                    align: 'left',
+                    verticalAlign: 'bottom'
+                },
+
+                series: [{
+                    data: data,
+                    mapData: mapGeoJSON,
+                    allowPointSelect: true,
+                    joinBy: ['hc-key', 'key'],
+                    name: 'Events Count',
+                    states: {
+                        hover: {
+                            color: '#8085e8'
+                        },
+                        select: {
+                            color: '#91e8e1',
+                            borderColor: 'black',
+                            dashStyle: 'shortdot'
+                        }
+                    },
+                    dataLabels: {
+                        // enabled: showDataLabels,
+                        formatter: function () {
+                            return mapKey === 'custom/world' || mapKey === 'countries/us/us-all' ?
+                                    (this.point.properties && this.point.properties['hc-a2']) :
+                                    this.point.name;
+                        }
+                    },
+                    point: {
+                        events: {
+                            // On click, look for a detailed map
+                            click: function () {
+                              // console.log(this.name);
+                                var key = this.key;
+                                // console.log();
+                                secondMap(key,this.name);
+                            }
+                        }
+                    }
+                }, {
+                    type: 'mapline',
+                    name: "Separators",
+                    data: Highcharts.geojson(mapGeoJSON, 'mapline'),
+                    nullColor: 'gray',
+                    showInLegend: false,
+                    enableMouseTracking: false
+                }]
+            });
+
+            showDataLabels = $("#chkDataLabels").attr('checked');
+
+        }
+
+        
+          // console.log(javascriptPath);
+          //javascriptPath = set script path=http://code.highcharts.com/mapdata/custom/world.js
+            // $.getScript(javascriptPath, mapReady);
+            mapReady();
+    
+});
+</script>
+
+          <script>
+
+
+          $("#sec_protection").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>

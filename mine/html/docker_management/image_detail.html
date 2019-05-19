@@ -1,0 +1,263 @@
+{% extends 'docker_management/base.html' %}
+
+{% load timestamp_to_time %}
+
+{% block section_header %}
+
+  <script type="text/javascript">
+
+    server_id = {{server_id}}
+    image_id = '{{image_id}}'
+
+  </script>
+
+    <h1 class="text-thin">Image Details |
+      <small class="text-capitalize">Basic Details of {{image_id|truncatechars:15}}</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{% url 'home' %}">Home</a></li>
+      <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+      <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+      <li><a href="{% url 'list_image' server_id %}">Images</a></li>
+      <li class="active">{{image_id|truncatechars:9}}</li>
+    </ol>
+
+{% endblock %}
+
+{% block basecontent %}
+  
+  <div class="row">
+    <div class="col-lg-9">
+      {% if status %}
+        <div class="col-lg-12">
+          {% if image_detail %}
+            <div class="col-sm-6 eq-box-sm">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Basic Details</h3>
+                </div>
+                <div class="panel-body">
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Image Name</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label add-tooltip" title="{{image_id}}" data-toggle="tooltip" data-container="body">{{image_id|truncatechars:15}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Build with</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{{image_detail.DockerVersion}} on {{image_detail.Os}}, {{image_detail.Architecture}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Created Date</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{{image_detail.Created}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Size(Virtual Size)</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{% widthratio image_detail.Size 1000000 1 %} MB ({% widthratio image_detail.VirtualSize 1000000 1 %} MB)</label>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 eq-box-sm">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Other Details</h3>
+                </div>
+                <div class="panel-body">
+                  
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Host Name</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{{image_detail.Config.Hostname}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">User</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{{image_detail.Config.User}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Command</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label" style="word-wrap: break-word;">{{image_detail.ContainerConfig.Cmd}}</label>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 pad-all">
+                    <div class="col-md-4">
+                      <label class="control-label">Volume</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label class="control-label">{{image_detail.ContainerConfig.Volumes}}</label>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Image Repo tags</h3>
+                </div>
+                <div class="panel-body">
+                  {% if repotags %}
+                    <div class="col-md-12 pad-all">
+                      <ul>
+                        {% for tag in repotags %}
+                          <li>
+                            {{tag}}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% else %}
+                    <h5 class="text-danger">Cannot fetch/not found</h5>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Application or Containers running with Image</h3>
+                </div>
+                <div class="panel-body">
+                  <div class="col-md-6">
+                    <h5>Applications</h5>
+                    <ul id="application_list">
+                    </ul>
+                  </div>
+                  <div class="col-md-6">
+                    <h5>Containers</h5>
+                    <ul id="container_list">
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-12 eq-box-sm">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Image History</h3>
+                </div>
+                <div class="panel-body">
+
+                  <div class="col-md-12 pad-all">
+                    {% if image_history %}
+                      <div class="timeline">
+                        <div class="timeline-header">
+                          <div class="timeline-header-title bg-info">Now</div>
+                        </div>
+                          {% for history in image_history %}
+                            <div class="timeline-entry">
+                              <div class="timeline-stat">
+                                <div class="timeline-icon"></div>
+                                <div class="timeline-time">{{history.Created|timestamp_to_time|date:"jS N, Y"}}</div>
+                              </div>
+                              <div class="timeline-label">
+                                <p class="mar-no pad-btm"><a class="btn-link text-semibold">Size</a> {% widthratio history.Size 1000000 1 %} MB</p>
+                                <p class="mar-no pad-btm"><a class="btn-link text-semibold">Repotag</a>{% if history.Tags %}{% for tag in history.Tags %} {{tag}} {% endfor %}{% else %} None{% endif %}</p>
+                                <blockquote class="bq-sm">{% if history.CreatedBy %}{{history.CreatedBy}}{% else %}None{% endif %}</blockquote>
+                              </div>
+                            </div>
+                          {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-3">
+      <div class="panel" style="visibility:hidden">
+        <div class="panel-body">
+          <a class="btn btn-block btn-social btn-twitter btn-primary button-margin-botton-2" type="button" href="{% url 'push_image' server_id%}?image_id={{image_id}}"><i class="fa fa-upload"></i>Push to Docker Repo</a>
+          <!-- <a class="btn btn-block btn-social btn-twitter btn-primary button-margin-botton-2" type="button" href="" name="build" id="build"><i class="fa fa-edit"></i>Build Container</a> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  $(document).ready(function(){
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    $.ajax({
+      url: "/docker_management/server/" + server_id + "/image/" + image_id + "/application-and-container/list/",
+      type: 'GET',
+      async: false,
+      success : function(data) {
+        data = JSON.parse(data);
+        application_list = data.application_list
+        container_list = data.container_list
+        if(application_list.length > 0){
+          $.each(application_list, function( index, element ){
+            li_obj = '<a href="/docker_management/server/' + server_id + '/application/' + element['id'] + '/container/list/"><li class="text-primary">' + element['name'] + '</li></a>'
+            $('#application_list').append(li_obj);
+          });
+        }
+        else{
+          $('#application_list').append('<li class="text-danger">No Applications Found</li>');
+        }
+        if(container_list.length > 0){
+          $.each(container_list, function( index, element ){
+            li_obj = '<a href="/docker_management/server/' + server_id + '/container/' + element['id'] + '/detail/"><li class="text-primary">' + element['name'] + '</li></a>'
+            $('#container_list').append(li_obj);
+          });
+        }
+        else{
+          $('#container_list').append('<li class="text-danger">No Container Found</li>');
+        }
+      },
+      error : function(xhr,errmsg,err) {
+      },
+  });
+
+  });
+
+</script>
+{% endblock %}

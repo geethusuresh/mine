@@ -1,0 +1,469 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+<script type="text/javascript">
+	server_id = {{server_id}}
+</script>
+<h1 class="text-thin">Images |<small>Images downloaded '{{server_name}}'</small></h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li class="active">Images</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+
+    <div class="col-sm-12">
+      <div class="col-sm-2 col-sm-offset-10 pad-all">
+        <a href="{% url 'search_image' server_id %}"><button type="button" class="btn btn-primary">Download Image</button></a>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Docker Images</h3>
+        </div>
+        <div class="panel-body">
+          <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+            <div class="row">
+                <table class="table table-striped table-bordered dataTable no-footer dtr-inline" id="show_image_table" role="grid" aria-describedby="demo-dt-basic_info">
+                    <thead>
+                      <tr role="row">
+                        <th></th>
+                        <th class="sorting_asc" tabindex="0" aria-controls="demo-dt-basic" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">Name</th>
+                        <th class="sorting_asc" tabindex="0" aria-controls="demo-dt-basic" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">Size/ Virtual Size (in MB)</th>
+                        <th class="sorting_asc" tabindex="0" aria-controls="demo-dt-basic" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">Created Date</th>
+                        <th class="sorting_asc" tabindex="0" aria-controls="demo-dt-basic" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">Delete</th>
+                        <th class="sorting_asc" tabindex="0" aria-controls="demo-dt-basic" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending">Documents</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+	                  {% if image_list %}
+	                    {% for image in image_list %}
+	                    <tr role="row">
+	                      <td class="details-control" id="{{image.id}}"><button class="btn bg-blue" type="button"><i class="fa fa-chevron-right"></i></button></td>
+	                      <td class="sorting_1" id="imagename">
+		                      {% if image.repotags %}
+		                      	<table>
+	                      			{% for tag in image.repotags %}
+	                      				<tr> <td>
+	                      					<a class="text-primary add-tooltip" href="{% url 'image_detail' server_id %}?image_id={{image.id}}" data-toggle="tooltip" title="{{tag}}">{{tag|truncatechars:26}}
+	                      				</td> </tr>
+	                      			{% endfor %}
+		                      	</table>
+		                      {% endif %}
+	                      </td>
+	                      <td>{{image.size}} / {{image.virtualsize}}</td>
+	                      <td>{{image.created_on}}</td>
+	                      <td>
+	                        <center><button class="btn btn-danger" onclick="show_delete_image_modal('{{image.id}}')"><i class="fa fa-trash-o"></i></button></center>
+	                      </td>
+	                      <td>
+	                        <center><button class="btn bg-blue" type="button" onclick="show_image_documentaion_modal('{{image.id}}')"><i class="fa fa-link"></i></button></center>
+	                      </td>
+	                    </tr>
+	                    {% endfor %}
+	                  {% else %}
+	                    <h4>No Images Found!!</h4>
+	                  {% endif %}
+                </tbody>
+              </table>
+          	</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="panel panel-bordered panel-mint">
+        <div class="panel-heading ">
+          <div class="panel-control">
+          	<button class="text-primary btn btn-link" onclick="show_pull_status_list_modal()" >Details</i></button>
+		  </div>
+          <h3 class="panel-title">Image Pulling Status</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="morris-donut" id="morris_image_pull_count">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <ul class="list-unstyled">
+                <li><i class="fa fa-circle-o" style="color:#0c8dbc"></i>Pulling </li>
+                <li><i class="fa fa-circle-o text-success"></i>Success</li>
+                <li><i class="fa fa-circle-o text-danger"></i> Failed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="modal fade" id="delete_image_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Delete Image</h4>
+        </div>
+        <div class="modal-body">
+          <h4>Are you sure you want to delete?</h4>
+		    <div class="checkbox checkbox-danger pad-all">
+			  <input type="checkbox"  id="checkbox_forceful_delete_image">
+			  <label for="checkbox">
+			    Forceful Deletion
+			  </label>
+			</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <a id="delete_url"><button type="submit" class="btn btn-primary">Confirm</button></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+	<div class="modal fade" id="image_documentaion_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title head-color">Add Documentation</h4>
+	      </div>
+	      <div class="modal-body">
+  			<div class="form-group">
+	      		<div id="image_documentation_div"></div>
+	      		<div class="form-group">
+					<div class="row">
+					  <div class="col-md-2">
+					    <button type="button" class="btn btn-primary" id="id_image_documentation">Add New</button>
+					  </div>
+					</div>
+				</div>
+			</div>
+			<div id="image_documentation_create_div" style="display:none">
+				<form class="form-horizontal" id="create_image_documentation_form" role="form">
+				{% csrf_token %}
+				  <input type="hidden" id="id_image">
+				  <div class="form-group">
+				    <div class="row">
+				      <div class="col-md-12">
+				        <div class="col-sm-8 col-md-offset-1">
+				            <input type="text" name="document" id="id_document" required
+				            >
+				        </div>
+				        <div class="col-md-1">
+				          <button type="button" class="btn btn-primary" id="id_add_image_documentation">Add</button>
+				        </div>
+				        <div class="col-md-1">
+				          <button type="button" id="id_clear" class="btn btn-default">Clear</button>
+				        </div>
+				      </div>
+				    </div>
+				  </div>
+				</form>
+			</div>
+	      </div>
+	      <div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<div class="modal fade" id="pull_status_list_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Pull Status</h4>
+        </div>
+        <div class="modal-body">
+        	<div class="col-md-2 col-md-offset-10 pad-btm">
+        		<button type="button" id="button_delete" class="btn btn-primary" onclick="delete_pull_status()">Delete</button>
+        	</div>
+        	<div class="col-md-12"><center id="status_image_pull_delete"></center></div>
+			<div class="col-md-12">
+				<div class="table-responsive">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>Image Name</th>
+								<th>Created on</th>
+								<th>Status</th>
+								<th>Delete</th>
+							</tr>
+						</thead>
+						<tbody id="data_pull_status">
+						</tbody>
+					</table>
+				</div>
+			</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+{% block js %}
+	<script type="text/javascript">
+
+		$(document).ready(function() {
+			draw_image_pull_status_graph();
+		});
+
+		var table = $('#show_image_table').DataTable({ });
+
+		$('#show_image_table tbody').on('click', 'td.details-control', function () {
+	        var tr = $(this).closest('tr');
+	        var row = table.row( tr );
+	        if ( row.child.isShown() ) {
+	            // This row is already open - close it
+	            row.child.hide();
+	            detail_button = tr.find(".fa-chevron-down")
+	            detail_button.removeClass("fa-chevron-down");
+	            detail_button.addClass('fa-chevron-right');
+	        }
+	        else {
+	            // Open this row
+	            image_id = $(this).attr('id');
+	            row.child( format(row.data(), image_id )).show();
+	            tr.addClass('shown');
+	            tr.find(".fa-chevron-right").toggleClass("fa-chevron-down");
+	        }
+	    });
+
+	    function format ( d, image_name ) {
+		    var table_content_app_detail = '';
+		    var table_content_container_detail = '';
+		    $.ajax({
+		      url: "/docker_management/server/" + server_id + "/image/" + image_name + "/application-and-container/list/",
+		      type: 'GET',
+		      async: false,
+		      success : function(data) {
+		        data = JSON.parse(data);
+		        application_list = data.application_list
+		        container_list = data.container_list
+		        $.each(application_list, function( index, element ){
+		          app_url = "/docker_management/server/" + server_id + "/application/" + element.id + "/container/list/";
+		          app_item = '<li><a href=' + app_url + ' class="list-group-item">' + element.name + '</a></li>'
+		          table_content_app_detail = table_content_app_detail + app_item
+		        });
+		        if(table_content_app_detail==''){
+		          table_content_app_detail = '<li class="text-danger">No Applications Available</li>'
+		        }
+		        $.each(container_list, function( index, element ){
+		          cont_url = "/docker_management/server/" + server_id + "/container/" + element.id + "/detail/"
+		          container_item = '<li><a href=' + cont_url + ' class="list-group-item">' + element.name + '</a></li>'
+		          table_content_container_detail = table_content_container_detail + container_item
+		        });
+		        if(table_content_container_detail==''){
+		          table_content_container_detail = '<li class="text-danger">No Containers Available</li>'
+		        }
+		      },
+		      error : function(xhr,errmsg,err) {
+		      },
+		    });
+		    table_content = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+		        '<tr>'+
+		              '<div class="row"><div class="col-md-6">' + '<h4>Applications</h4><ul>' + table_content_app_detail + '</ul></div>' +
+		              '<div class="col-md-6">' + '<h4>Containers</h4><ul>' + table_content_container_detail + '</ul></div></div>' +
+		    '</table>';
+		    return table_content;
+	    }
+
+		function show_delete_image_modal(image_id){
+			$('#delete_image_modal').modal('show');
+			$('#delete_url').attr('href', '/docker_management/server/' + server_id + '/image/' + image_id + '/delete/?force=false')
+		}
+
+		function show_image_documentaion_modal(image_id){
+			$('#image_documentaion_modal').modal('show');
+			$('#id_image').val(image_id);
+			$('#image_documentation_div').empty();
+			$.ajax({
+		        url: '/docker_management/server/' + server_id + '/image/' + image_id + '/documentation/list/',
+		        type: 'get',
+		        success: function(image_documentation_list){
+		          $('#image_documentation_div').append(image_documentation_list);
+		        },
+		        error: function(xhr,errmsg,err){
+		        },
+		    });
+		}
+
+		$('#id_image_documentation').click(function(){
+			$('#id_image_documentation').hide();
+			$('#image_documentation_create_div').show();
+			$('#id_document').val('');
+		});
+
+		$('#id_clear').click(function(){
+		    $('#id_document').val('');
+		});
+
+		function is_url(s) {
+
+			var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+
+			return regexp.test(s);
+
+		}
+
+	    $('#id_add_image_documentation').on('click', function(){
+	      if($('#id_document').val() && is_url($('#id_document').val())){
+		      image_id = $('#id_image').val();
+		      var form = $('#create_image_documentation_form');
+		      $.ajax({
+		            url: '/docker_management/server/' + server_id + '/image/' + image_id + '/documentation/create/',
+		            type: 'post',
+		            data: form.serialize('document'),
+		            'csrfmiddilewaretoken': form.serialize('csrfmiddilewaretoken'),
+		            success: function(image_documentation_list){
+		              $('#image_documentation_div').empty();
+		              $('#image_documentation_div').append(image_documentation_list);
+		              $('#image_documentation_create_div').hide();
+		              $('#id_image_documentation').show();
+		            },
+		            error: function(xhr,errmsg,err){
+		            },
+		      });
+		  }
+		  else{
+		  	alert("Please enter a valid URL.")
+		  }
+	    });
+
+		$('#checkbox_forceful_delete_image').click(function(){
+			url = $('#delete_url').attr('href');
+			if ($('#checkbox_forceful_delete_image').is(":checked")){
+				delete_url = url.substring(0, url.indexOf("=")) + '=true';
+			}
+			else{
+				delete_url = url.substring(0, url.indexOf("=")) + '=false';
+			}
+			$('#delete_url').attr('href', delete_url);
+		});
+
+	function draw_image_pull_status_graph(){
+		$.ajax({
+	      url: "/docker_management/server/" + server_id + "/image/pull-status/",
+	      type: 'GET',
+	      success : function(data) {
+	        $('#morris_image_pull_count').empty();
+	        data = JSON.parse(data);
+	        pulling_image_count = data.pulling_image_count;
+	        pulling_success_count = data.pulling_success_count;
+	        pulling_failed_count = data.pulling_failed_count;
+	        if(pulling_image_count||pulling_success_count||pulling_failed_count){
+	          Morris.Donut({
+	            element: 'morris_image_pull_count',
+	            data: [
+	              {label: "Pulling", value: pulling_image_count},
+	              {label: "Pulled", value: pulling_success_count},
+	              {label: "Failed", value: pulling_failed_count}
+	            ],
+	            colors:['#0c8dbc','#27904D','#B73B3B']
+	          });
+	        }
+	        else{
+	          $('#morris_image_pull_count').append('<div class="row"><div class="col-sm-10"></div><div class="col-sm-2 pull-right"><center><strong><h2>0</h2><h4></strong></center>Images</h4></div></div>');
+	        }
+	        if(pulling_image_count > 0){
+	        	setTimeout(draw_image_pull_status_graph, 5000);
+	        }
+	      },
+	      error : function(xhr,errmsg,err) {
+	      },
+	    });
+	}
+
+	function show_pull_status_list_modal(){
+		$('#pull_status_list_modal').modal('show');
+		$('#status_image_pull_delete').empty();
+		list_pull_status();
+	}
+
+	function list_pull_status(){
+		$.ajax({
+	      url: "/docker_management/server/" + server_id + "/image/pull-status/detail/",
+	      type: 'GET',
+	      success : function(data) {
+	 		data = JSON.parse(data);
+	 		$('#data_pull_status').empty();
+	 		if(data.length > 0){
+	 			$('#button_delete').prop('disabled', false);
+	 			status_specs = [
+	 				{
+	 					'status_class': 'label-warning',
+		 				'status_string':'Downloading'
+	 				},
+	 				{
+	 					'status_class': 'label-success',
+		 				'status_string':'Success'
+	 				},
+	 				{
+	 					'status_class': 'label-danger',
+		 				'status_string':'Failed'
+	 				},
+	 			]
+		 		$.each(data, function( index, element ){
+		 			row = '<tr><td>' + element.fields.name + '</td><td>' + element.fields.created_on.slice(0, element.fields.created_on.indexOf("T")) + '</td><td><small class="label ' + status_specs[element.fields.status].status_class + '">' + status_specs[element.fields.status].status_string + '</small></td><td><input type="checkbox" class="checkbox-delete" name="delete_status[]" id="' + element.pk + '"></td></tr>';
+		 			$('#data_pull_status').append(row);
+	 			});
+	 		}
+	 		else{
+	 			$('#button_delete').prop('disabled', true);
+	 			$('#data_pull_status').append('<tr><td colspan="4"><center>No data found</center></td></tr>');
+	 		}
+	      },
+	      error : function(xhr,errmsg,err) {
+	      },
+	    });
+	}
+
+	function delete_pull_status(){
+		var delete_status_list = new Array();
+		$('.checkbox-delete').each(function (index, element) {
+		    if(element.checked){
+		    	delete_status_list.push(element.id);
+		    }
+		});
+		if(delete_status_list.length > 0){
+			$.ajax({
+		      url: "/docker_management/server/" + server_id + "/image/pull-status/delete/",
+		      type: 'POST',
+		      data: {'delete_status':delete_status_list, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+		      dataType: 'json',
+		      success : function(data) {
+		      	$('#status_image_pull_delete').empty();
+		      	list_pull_status();
+		      	draw_image_pull_status_graph();
+		      	$('#status_image_pull_delete').append('<h6 class="text-danger">Pull Status deleted successfully</h6>');
+		      },
+		      error : function(xhr,errmsg,err) {
+		      },
+		    });
+	    	// list_pull_status();
+	    }
+	    else{
+	    	$('#status_image_pull_delete').empty();
+	    	$('#status_image_pull_delete').append('<h6 class="text-danger">Please select the checkbox to delete.</h6>');
+	    }
+	}
+
+	</script>
+
+{% endblock %}
+<small class="label"></small>

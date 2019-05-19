@@ -1,0 +1,204 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li class="active">SLA Management</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">SLAs</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-12">
+                                        <div class="alert alert-success media fade in" id="alert_div" style="display:none">
+                                            <strong>You successfully deleted the SLA.</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12" style="margin-bottom:5px;">
+                                        <div class="newtoolbar">
+                                            <div class="table-toolbar-left">
+                                                <a href="#" data-toggle="modal" data-target="#create_sla" class="btn btn-success btn-labeled fa fa-times" style="margin-right:5px;">Create SLA</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <table class="table table-stripped" id="sla_tab">
+                                        <thead>
+                                            <tr>
+                                                <th class="hidden">ID</th>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Condition</th>
+                                                <th>Edit</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_sla" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Create SLA </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/admin_settings/sla/create/" id="form_submit">
+                        {% csrf_token %}
+                            {{sla_form.as_p}}
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="alert alert-danger media fade in" id="alert_div_modal" style="display:none">
+                                        <strong></strong>
+                                    </div>
+                                </div>
+                                <button class="btn btn-mint btn-labeled fa fa-times" type="button" id="submit_id">Create</button><img src="/static/gif/wait.gif" id="img_id" style="display:none">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            function initialise_sla_tab (){
+                $('#sla_tab').DataTable( {
+                    "processing": true,
+                    "responsive": true,
+                    "ajax": {
+                        "processing": true,
+                        "url": "/admin_settings/sla_management/",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "": "id",sClass: "hidden" },
+                        { "": "name" },
+                        { "": "desc" },
+                        { "": "condition" },
+                        { "": "","bSortable": false, },
+                        { "": "","bSortable": false, }
+                    ],
+                    "columnDefs": [ {
+                        "targets": 4,
+                        "data": "null",
+                        "defaultContent": "<a href='#' class='btn btn-success'><i class='fa fa-edit'> </i></a>"
+                    },{
+                        "targets": 5,
+                        "data": "null",
+                        "defaultContent": "<button class='btn btn-danger'><i class='fa fa-trash'> </i></button>"
+                    }],
+                    "bInfo": false,
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            initialise_sla_tab();
+        </script>
+        <script type="text/javascript">
+            $('#sla_tab').on('click','td' , function(e){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == "Delete"){
+                    var sla_id = $(this).prev().prev().prev().prev().prev().html();
+                    $.ajax({
+                        url :"/admin_settings/sla/delete/"+sla_id+"/",
+                        type:"GET",
+                        success:function(data){
+                            if (data.result == 'ok') {
+                                $("#sla_tab").DataTable().destroy()
+                                initialise_sla_tab();
+                                $('#alert_div').show()
+                                setTimeout(function() {$('#alert_div').hide()}, 6000);
+                            } else {
+                                $("#sla_tab").DataTable().destroy()
+                                initialise_sla_tab();
+                                document.getElementById('alert_div').innerHTML = "<strong>Unable to delete the SLA as it has dependancies with ticket </strong>";
+                                $('#alert_div').show()
+                                setTimeout(function() {$('#alert_div').hide()}, 6000);
+                            }
+                        }
+                    });
+                } else if (th.html() == "Edit") {
+                    var sla_id = $(this).prev().prev().prev().prev().html();
+                    document.location.href = "/admin_settings/sla/edit/"+sla_id+"/";
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $('#submit_id').on('click', function(event) {
+                $('#img_id').show();
+                var sla_customer = $('#sla_cust').val();
+                var sla_condition = $('#sla_condition').val();
+                var table_name = $('#table_name').val();
+                $.ajax({
+                    url: "/admin_settings/sla/validator/",
+                    method:'POST',
+                    data: {
+                        'cust_id': sla_customer,
+                        'condition': sla_condition,
+                        'table_name': table_name,
+                        'csrfmiddlewaretoken': "{{ csrf_token }}",
+                    },
+                    success: function(data) {
+                        $('#img_id').hide();
+                        if (data == 'invalid') {
+                            document.getElementById('alert_div_modal').innerHTML = "<strong> SLA Condition is not valid </strong>";
+                            $('#alert_div_modal').show();
+                            $('#create_sla').modal('show');
+                            event.preventDefault();
+                        } else {
+                            $('#alert_div_modal').hide();
+                            $('#create_sla').modal('hide');
+                            $('#form_submit').submit();
+                        }
+                    },
+                    error: function(data) {
+                        $('#img_id').hide();
+                        event.preventDefault();
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>

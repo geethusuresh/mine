@@ -1,0 +1,308 @@
+        <header>
+            <a href="/" class="logo"><i class="fa fa-bolt"></i> <span style="font-family: marlabs;">Oneconsole</span></a>
+            <nav class="navbar navbar-static-top">
+                <a href="#" class="navbar-btn sidebar-toggle">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+
+
+<!--                            Cust Header Html              -->
+
+                <div class="navbar-left">
+                    <ul class="nav navbar-nav">
+                        <li class="mega-dropdown" id="megamind">
+                            <!-- <a href="#" class="mega-dropdown-toggle"> -->
+                                <!-- <i class="fa fa-th-large fa-lg"></i> -->
+                            <!-- </a> -->
+                            <div class="dropdown-menu mega-dropdown-menu" style="background-color:white;width:90%;margin-top:10px !important">
+                                <div class="clearfix">
+                                    <div class="col-sm-12 col-md-3">
+                                        <div class="text-center bg-purple pad-all">
+                                            <h3 class="text-thin mar-no">OneConsole</h3>
+                                            <div class="pad-ver box-inline">
+                                                <span class="icon-wrap icon-wrap-lg icon-circle bg-trans-light">
+                                                    <i class="fa fa-shopping-cart fa-4x"></i>
+                                                </span>
+                                            </div>
+                                            <p class="pad-btm">
+                                                Business Service Management <span class="text-lg text-bold"></span> 
+                                                <strong>Anywhere,Anytime</strong>
+                                            </p>
+                                            <a href="#" class="btn btn-purple"></a>
+                                        </div>
+
+                                    </div>
+
+
+
+
+                                        {% if "cloud" in request.session.logged_user_priv  %}
+                                            <!--Mega menu list-->
+                                             <div class="col-sm-4 col-md-3">
+                                            <ul class="list-unstyled">                                            
+                                                <li class="dropdown-header">Cloud Management</li>
+                                                <li><a href="/cloud_management/aws_accounts/">AWS Servers</a></li>
+                                                <li><a href="/cloud_management/openstack_accounts/">OpenStack Servers</a></li>
+                                                <li><a href="/cloud_management/azure/">Azure Servers</a></li>
+                                                <li><a href="/docker_management/">Docker Management</a></li>
+                                                <li class="divider"></li>
+                                            </ul>
+                                                 </div>
+                                        {% endif %}
+
+                                        {% if "Monitoring_view" in request.session.logged_user_priv  %}
+                                        <!-- <div class="col-sm-4 col-md-3"> -->
+                                            <!--Mega menu list-->
+                                             <div class="col-sm-4 col-md-3">
+                                            <ul class="list-unstyled">
+                                                <li class="dropdown-header">Monitoring Service</li>
+                                                <li><a href="/monitor_dashboard/">Dashboard</a></li>
+                                                <li><a href="/monitor_details/">Monitoring Details </a></li>
+                                                <li class="divider"></li>
+                                            </ul>
+                                        <!-- </div> -->
+                                                 </div>
+                                        {% endif %}
+
+
+                                    
+                                    <div class="col-sm-4 col-md-3">
+                                        {% if "helpdesk" in request.session.logged_user_priv  %}
+                                            <!--Mega menu list-->
+                                            <ul class="list-unstyled">                                            
+                                                <li class="dropdown-header">Service Desk</li>
+                                                <li><a href="#" data-target="#forcust" data-toggle="modal">Create New ticket</a></li>
+                                                <li><a href="/customer/tickets/raised/">My Tickets </a></li>
+                                                <li><a href="/customer/tickets/">All Tickets</a></li>
+                                                <li class="divider"></li>    
+                                            </ul>
+                                         {% endif %}
+
+
+                                        {% if "security" in request.session.logged_user_priv  %}
+                                        <!-- <div class="col-sm-4 col-md-3"> -->
+                                            <!--Mega menu list-->
+                                            {% if "niksun_dashboard" in request.session.logged_user_priv %}
+                                                <ul class="list-unstyled">
+                                                    <li class="dropdown-header">Threat Management</li>
+
+                                                    <li><a href="/security_tool/security/dashboard/">
+                                                    <!-- <span class="pull-right label label-danger"></span> -->
+                                                    Events</a></li>
+                                                    {% for event in sources_niksun %}
+                                                        <li><a href="/security_tool/dashboard/{{ event }}">{{ event }} Events</a></li>
+                                                    {% endfor %}
+ 
+                                                    <li class="divider"></li>
+                                                </ul>
+                                            <!-- </div> -->
+                                            {% else %}
+                                            <ul class="list-unstyled">
+                                                    <li class="dropdown-header">Threat Management</li>
+                                                    <li><a href="/dashboard/index/">Dashboard</a></li>
+                                                    <li><a href="/security/dashboard">
+                                                    <!-- <span class="pull-right label label-danger"></span> -->
+                                                    Events</a></li>
+                                                    <li><a href="/security/host/details/">Protection</a></li>
+                                                    <li><a href="/dashboard/realtime/map/customer/">Real-time Events</a></li>
+                                                    <li><a href="/security/settings/">Settings</a></li>
+                                                    <li class="divider"></li>
+                                                </ul>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+
+                                    {% if "infrastructure" in request.session.logged_user_priv  %}
+                                    <div class="col-sm-4 col-md-3">
+                                        <!--Mega menu list-->
+
+                                        <ul class="list-unstyled" style="">                                            
+                                            <li class="dropdown-header">Infrastructure</li>
+                                            <li><a href="/management/infradashboard/">Dashboard</a></li>
+                                            <li><a href="/management/infrastructure/">Data Centers</a></li>
+                                            <li><a href="/management/application/">Applications</a></li>
+                                            <li class="divider"></li>         
+                                        </ul>
+
+                                    </div>
+                                    {% endif %}
+
+                                    {% if "Report_Management" in request.session.logged_user_priv  %}
+                                    <div class="col-sm-4 col-md-3">
+                                        <!--Mega menu list-->
+                                        {% if "niksun_dashboard" in request.session.logged_user_priv %}
+                                        <ul class="list-unstyled" style="">                                            
+                                            <li>
+                                                 <li class="dropdown-header"><a href="/reports/">Reports</a></li>
+                                            </li>
+                                            <li class="divider"></li>
+                                        </ul>
+                                        {% else %}
+                                            <ul class="list-unstyled" style="">
+                                            <li>
+                                                <li class="dropdown-header">Analytics</li>
+                                                <li><a href="/reports/">Reports</a></li>
+                                            </li>
+                                            <li class="divider"></li>
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}                        
+
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="navbar-header">
+                    <form role="search" class="navbar-form" method="post" action="/asset/search/">{% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" style="height: 2.4em;" name="serial" placeholder="Serial Number..." required/>
+                            <span class="input-group-btn">
+                                <button type="submit" id="search-btn" class="btn"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="navbar-right">
+                    <ul class="nav navbar-top-links pull-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#addstock" >
+                                <i class="fa fa-shopping-cart fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Add to stock"></i>
+                            </a>
+                        </li>
+                        
+                        <li class="dropdown"  ng-app="oneconsole"  ng-controller="notification">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                                <i class="fa fa-bell fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Notification Center"></i>
+                                <span class="badge badge-header badge-warning">[[count]]</span>
+                            </a>
+
+                            <!--Message dropdown menu-->
+                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-md with-arrow" >
+                                <div class="pad-all bord-btm">
+                                    <p class="text-lg text-muted text-thin mar-no"><l class="fa fa-bell"></l> Recent Notifications </p>
+                                </div>
+                                <div class="nano scrollable" style="min-height:150px">
+                                    <div class="nano-content" >
+                                        <ul class="head-list">
+                                    
+                                            <!-- Dropdown list-->
+                                            <li ng-repeat="noti in data">
+                                                <!-- <li id="noti"></li> -->
+
+                                                <a class="media">
+                                                    <div class="media-body">
+                                                        <l class="pull-right fa fa-times-circle" ng-click="readme([[noti.id]], $event)"></l>
+                                                        <div>[[noti.notify]]</div>
+                                                        <!-- <small class="text-muted pull-right">15 minutes ago</small> -->
+
+                                                    </div>
+
+                                                </a>
+
+                                            </li>
+                                           <p ng-show="nonoti==true" class="text-center" style="margin-top:5%;color:#606060">no new notifications</p>
+                                    
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!--Dropdown footer-->
+                                <div class="pad-all bord-top">
+                                    <a href="/notifications/" style="text-decoration: none;" class="btn-link text-dark box-block">
+                                        <i class="fa fa-angle-right fa-lg pull-right"></i>Show All Notifications
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        {% if "oneconsole_help" in request.session.logged_user_priv  %}
+                        <li>
+                            <a href="{% url 'help:help_details' %}?url_path={{ request.path }}" id="modal_sidehelp">
+                                <i class="fa fa-info fa-fw fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Help"></i> 
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li id="dropdown-user" class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle text-right">
+                                <span class="pull-right">
+                                    {% if profile.image %}
+                                    <img class="img-circle img-user media-object" src="/media/{{profile.image}}" alt="Profile Picture">
+                                    {% else %}
+                                    <img class="img-circle img-user media-object" src="/static/img/photo.jpg" alt="Profile Picture">
+                                    {% endif %}
+                                </span>
+                                <div class="username hidden-xs">{{profile.user.username}}</div>
+                            </a>
+
+
+                            <div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default">
+
+                                <!-- Dropdown heading  -->
+                                <!-- <div class="pad-all bord-btm">
+                                    <p class="text-lg text-muted text-thin mar-btm">750Gb of 1,000Gb Used</p>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar" style="width: 70%;">
+                                            <span class="sr-only">70%</span>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+
+                                <!-- User dropdown menu -->
+                                <ul class="head-list" >
+                                    <li>
+                                        <a href="/customer/profile/">
+                                            <i class="fa fa-user fa-fw fa-lg"></i> Profile
+                                        </a>
+                                    </li>
+                                   <!--  <li>
+                                        <a href="/customize/dashboard/">
+                                            <span class="badge badge-danger pull-right"></span>
+                                            <i class="fa fa-dashboard fa-fw fa-lg"></i>Customize
+                                        </a>
+                                    </li> -->
+
+                                    <li>
+                                        <a href="/logout/">
+                                            <i class="fa fa-sign-out fa-fw"></i> Logout
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <!-- Dropdown footer -->
+                                <!-- <div class="pad-all text-right">
+                                    <a href="/logout/" class="btn btn-danger" style="color:white">
+                                        <i class="fa fa-sign-out fa-fw"></i> Logout
+                                    </a>
+                                </div> -->
+                            </div>
+                        </li>
+
+            
+                        <!-- <li class="dropdown widget-user">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img src="/static/img/photo.jpg" class="pull-left" alt="image" />
+                                <span>{{profile}} <i class="fa fa-caret-down"></i></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                  <a href="/customer/profile/"><i class="fa fa-user"></i>Profile</a>
+                                </li>
+
+                                <li class="footer" >
+                                  <a href="/logout/"><i class="fa fa-power-off"></i>Logout</a>
+                                </li>
+                                
+                            </ul>
+                        </li> -->
+                    </ul>
+                </div>
+            </nav>
+        </header>

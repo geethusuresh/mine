@@ -1,0 +1,150 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+<script type="text/javascript">
+  server_id = {{server_id}}
+  application_id = {{application_id}}
+</script>
+<h1 class="text-thin">
+    Container Configuration |
+  <small>Search Container Configuration</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_container' server_id application_id %}">{{application_name}}</a></li>
+  <li class="active">Container Configuration</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-body">
+          <p><h5>Search for already saved Container configuration.</h5></p>
+          <div class="row">
+            <div class="col-md-7" id="required-field" style="display:none"><p><center class="text-danger">This field is required.</center></p></div>
+            <div class="col-md-10">
+              <input class="form-control" type="text" id="configuration_search_keyword" name="configuration_search_keyword" placeholder="Container configuration name" style="width:100%" required>
+            </div>
+            <div class="col-md-2">
+              <button type="button" onclick="search_container_configuration()" class="btn btn-primary"><i class="fa fa-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12">
+      {% if object_list %}
+        {% for configuration in object_list %}
+          <div class="col-sm-6 col-lg-4">
+            <div class="panel panel-colorful">
+              <div class="pad-all media">
+                <div class="media-left">
+                  <p class="h3 text-thin media-heading">{{configuration.name}}</p>
+                </div>
+                <div class="media-body">
+                <a onclick="show_delete_configuration_modal({{configuration.id}});" class="pull-right" title="Remove" style="cursor:pointer;"><i class="fa fa-trash-o"></i></a>
+                </div>
+              </div>
+              <div class="pad-all text-right">
+                <button type="button" id="{{configuration.id}}" onclick="show_container_configuration_run_modal({{configuration.id}})"  value="{{configuration.configuration}}" class="btn btn-primary btn-block">Details</button>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        {% else %}
+        <div class="row">
+          <div class="col-md-1"></div>
+          <div class="col-md-11">
+            <h4>No Configurations Available {% if search_keyword %}for <span class="text-info">
+            &nbsp;"{{search_keyword}}"</span>{% endif %}</h4>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="container_configuration_run_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title head-color" id="myModalLabel">Edit and Run Container</h4>
+        </div>
+        <form class="form-horizontal" role="form" id="form_run_configuration" method="post">
+          {% csrf_token %}
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-12"><label>Container Configuration</label></div>
+                <div class="col-md-12">
+                  <textarea name="configuration" id="configuration" class="form-control" rows="10">
+                  </textarea>
+                </div>
+                <div class="col-md-12"><label>Name of the Container</label></div>
+                <div class="col-md-12">
+                  <input type="text" name="container_name" id="container_name" class="form-control" required>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Run Container</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="delete_configuration_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Delete Configuration</h4>
+        </div>
+        <div class="modal-body">
+          <h4>Are you sure you want to delete?</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <a type="btn btn-primary btn-link" id="delete_url" class="btn btn-primary">Confirm</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+
+  function search_container_configuration(){
+    search_keyword = $('#configuration_search_keyword').val();
+    if(search_keyword != ''){
+      url = '/docker_management/server/' + server_id + '/application/' + application_id + '/container/configuration/list?search=' + search_keyword
+      window.location.href = url;
+    }
+    else{
+      $('#required-field').show();
+    }
+  }
+
+  function show_delete_configuration_modal(configuration_id){
+    $('#delete_configuration_modal').modal('show');
+    url = '/docker_management/server/' + server_id + '/application/' + application_id + '/container/configuration/' + configuration_id + '/delete/'
+    $('#delete_url').attr('href',url);
+  }
+
+  function show_container_configuration_run_modal(configuration_id){
+    $('#container_configuration_run_modal').modal('show');
+    url = '/docker_management/server/' + server_id + '/application/' + application_id + '/container/configuration/' + configuration_id + '/run/'
+    $('#form_run_configuration').attr('action', url)
+    $('#configuration').val($('#'+configuration_id).val());
+  }
+</script>
+
+{% endblock %}

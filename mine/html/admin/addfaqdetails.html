@@ -1,0 +1,171 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Faq Details</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Add FAQ <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Add Faq Details</li>
+                </ol>
+            </div>
+
+             <div class="content">
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <form id = "" method = "POST" action = "" enctype="multipart/form-data">
+              <div class="box">
+                <div class="box-title">
+                  <h4>Add Faq Details</h4>
+                </div>
+                <div class="box-body">
+                <div class="row">
+                <!-- <div class="col-md-4 col-md-offset-4"> -->
+                <div class="col-sm-6">                  
+                <!-- <label style = "font-weight: bold" for = "faqcat">Customer :  </label> -->
+
+                <select class="form-control" id="customer21" name = "customer" required>
+                  <option value ="">--Select Customer--</option>
+                  {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                  {% endfor %}
+                </select> <br>
+
+                <!-- <label style = "font-weight: bold" for = "faqcat">FAQ Category :  </label> -->
+
+                <select class="form-control" id="drpStatus" name = "category" required>
+                  <option value ="">--Select Category--</option>
+                  <!-- {% for faqCat in faqCat %}
+                    <option value="{{ faqCat.id }}">{{ faqCat.category }}</option>
+                  {% endfor %} -->
+                </select> <br>
+
+                  <!-- <label style = "font-weight: bold" for = "faqcat">FAQ Sub Category :  </label> -->
+                  <select class="form-control" id = "subcategory" name="subcategory">
+                  <option value=0>--Select Subcategory--</option>
+                  </select> <br>
+                  <!-- <label style = "font-weight: bold" for = "faqcat" >Question</label>  -->
+                  <textarea class="form-control" name = "question" required placeholder="Enter a question Here"></textarea><br>
+                  </div>
+
+                  <div class="col-sm-6"> 
+                  
+
+                  <!-- <label style = "font-weight: bold" for = "faqcat" >Answer</label>  -->
+                  <textarea class="form-control" name = "answer" required placeholder="Enter an answer  Here"></textarea><br>
+                  
+                  <!-- <label style = "font-weight: bold" for = "faqcat">Upload File</label>  -->
+                  <input type ="file" id = "faqupload" name= "faqupload"  accept="application/pdf,image/*"><br>
+
+                  <!-- <label style = "font-weight: bold" for = "faqcat">Document Title</label>   -->
+                   <input type ="text" id="faqtitle" name = "faqtitle" class="form-control" placeholder="Enter a title for the document"><br>
+
+                  <!-- <label style = "font-weight: bold" for = "faqcat">Faq Tags</label>   -->
+                   <input type ="text" id="faqkeyword" name = "faqkeyword" class="form-control" placeholder="Enter comma seperated keywords" title="Enter comma seperated keywords" required><br>
+
+                    <button type = "submit" class="btn btn-success">Submit</button>
+                </div>
+              </div>     
+                </div>
+              </div>
+                                     
+                </form>  
+              </div>
+            
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+    var item;
+    $(document).ready(function(){
+      $('#drpStatus').on('change',function(){
+         item = $('#drpStatus').val(); 
+         $.ajax({
+           url:"/faq/add",
+           type:"POST",
+           data:{categoryid:item, 
+                 csrfmiddlewaretoken: '{{ csrf_token }}'},
+
+           success: function(data){
+            // alert('success');
+            $("#subcategory option:gt(0)").remove();
+            data = JSON.parse(data);
+            for (var i in data){
+              
+              $("#subcategory").append($('<option>', {value:data[i].pk, text:data[i].fields['subcategory']}));
+            } 
+            console.log(data);
+           },
+           error: function(xhr,errmsg,err){
+            alert(xhr);
+           }
+         });
+         return false;
+      });
+    });
+
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#customer21').on('change',function(){
+        console.log("aDas");
+        customerId = $('#customer21').val();
+        $.ajax({
+          url:'/faq/add',
+          type:"POST",
+          datatype:"json",
+          data:{customerId: customerId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+          success: function(data){
+            $("#drpStatus option:gt(0)").remove();
+            data = JSON.parse(data);
+            for (var i in data){              
+              $("#drpStatus").append($('<option>', {value:data[i].pk, text:data[i].fields['category']}));
+            } 
+            console.log(data);
+            
+          },
+          error: function(){
+            alert("error");
+          }
+        });
+        return false;
+      });
+
+    });
+    </script>
+</html>
+
+       
+                    
+

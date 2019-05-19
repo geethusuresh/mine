@@ -1,0 +1,921 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Reports</title>
+        {% include "components/css.html"%}
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+        <script src="/static/js/highcharts/highcharts.js"></script>
+        <script src="/static/js/highcharts/highcharts-more.js"></script>
+        <script src="/static/js/highcharts/exporting.js"></script>
+        <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        <div class="content">
+            <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                    {{report_heading}} <br />
+                    {% if graph_type == "ticket_created" %}                
+                      Total Tickets Created: {{total_tickets_count}}
+                    {% endif %}
+                </div>
+            </div>
+            {% if status_tickets %}
+                <!--Export Row -->
+                <!-- <div class="row">
+                  <div class="controls">
+                    <form action="/export_toexcel/" method="post" target="_blank">
+                        {% csrf_token %}
+                        <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                        <input type="hidden" name="export_type" id="export_type" value="statusresp_perform" />
+                    </form>
+                  </div>          
+                </div> -->
+                <!--End export row -->
+                <div class="row">                        
+                    <div class="col-sm-12">
+                        <div class="box">
+                            <div class="box-title">
+                                <h3>{{report_heading}} </h3>
+                            </div>
+                            <div class="box-body table-responsive no-padding">                
+                                <table class="table table-bordered" id="report_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticket No</th>
+                                            <th>Title</th>
+                                            <th>Created Date</th>
+                                            <th>Affected Email</th>
+                                            <th>Ticket Priority</th>
+                                            <th>Ticket Type</th>
+                                            <th>Workgroup</th>
+                                            <th>Case Status</th>
+                                            <th>Reported Date</th>
+                                            <th>First Response Time</th>
+                                            <th style="display:none"> Response Duration Color Code </th>
+                                            <th>Response Duration</th>
+                                            <th style="display:none"> Resolved Duration color code </th>
+                                            <th>Resolved Duration </th>
+                                            <th>Work Hours( in minutes)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% comment %}
+                                        {% for ticket in status_tickets %}
+                                            {% if workgroup %} 
+                                                {% if ticket.status == status and ticket.engineer == engineer %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% elif engineer %} 
+                                                {% if ticket.status == status and ticket.engineer == engineer %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% elif priority %} 
+                                                {% if ticket.status == status and ticket.internal_priority == priority %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% elif category %} 
+                                                {% if ticket.status == status and ticket.category == category %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% elif subdomain %} 
+                                                {% if ticket.status == status and ticket.subgroup == subdomain %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% elif is_status_wise %}
+                                                {% if ticket.status == status %}
+                                                    <tr>
+                                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                        <td>{{ticket.title}}</td>
+                                                        <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                        <td>{{ticket.affected_email}}</td>
+                                                        <td>{{ticket.internal_priority}}</td>
+                                                        {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                        {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                        {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                        {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                        {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                        {% endif %}     
+                                                        <td>{{ticket.workgroup}}</td>
+                                                        <td>{{ticket.status|real}}</td>
+                                                        <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                        <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                        <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                        <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                        <td>{{ticket.ticket_id|work_hour}}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% endcomment %}
+                                    </tbody>                         
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% elif sla_wise_tickets %}
+                <!-- <div class="row">
+                    <div class="controls">
+                      <form action="/export_toexcel/" method="post" target="_blank">
+                          {% csrf_token %}
+                          <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                          <input type="hidden" name="export_type" id="export_type" value="statusresp_perform" />
+                      </form>
+                    </div>          
+                </div> -->
+                  <!--End export row -->
+                <div class="row">                        
+                    <div class="col-sm-12">
+                        <div class="box">
+                            <div class="box-title">
+                                <h3>{{report_heading}}</h3>
+                            </div>
+                            <div class="box-body table-responsive no-padding">                
+                                <table class="table table-bordered" id="report_table">
+                                    <thead>
+                                      <tr>
+                                        <th>Ticket No</th>
+                                        <th>Title</th>
+                                        <th>Created Date</th>
+                                        <th>Affected Email</th>
+                                        <th>Ticket Priority</th>
+                                        <th>Ticket Type</th>
+                                        <th>Workgroup</th>
+                                        <th>Case Status</th>
+                                        <th>Reported Date</th>
+                                        <th>First Response Time</th>
+                                        <th style="display:none"> Response Duration Color Code </th>
+                                        <th>Response Duration</th>
+                                        <th style="display:none"> Resolved Duration Color Code </th>
+                                        <th>Resolved Duration</th>
+                                        <th>Work Hours( in minutes )</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% comment %}
+                                        {% for ticket in sla_wise_tickets %}
+                                            {% if sla_type_choosed  == "response" %}
+                                                {% if workgroup %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.workgroup == workgroup and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                              <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif engineer %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.engineer == engineer and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                                {% if ticket.ticket_type == "SR"  %}
+                                                                    <td>Service Request</td>
+                                                                {% elif ticket.ticket_type == "IN" %}
+                                                                    <td>Incident</td>
+                                                                {% elif ticket.ticket_type == "PB" %}
+                                                                    <td>Problem</td>
+                                                                {% elif ticket.ticket_type == "CH" %}
+                                                                    <td>Change</td>
+                                                                {% else %}
+                                                                    <td>{{ticket.ticket_type}}</td>
+                                                                {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif status %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.status == status and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                                <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif priority %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.internal_priority == priority and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                                <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif category %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.category == category and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                                <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif subdomain %}
+                                                    {% if ticket.sla_response_exists == "response" and ticket.subgroup == subdomain and ticket.sla_response_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                                <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% elif sla_type_choosed == "resolution" %}
+                                                {% if workgroup %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.workgroup == workgroup and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                                <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                                <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                                <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                                <td>Change</td>
+                                                            {% else %}
+                                                                <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif engineer %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.engineer == engineer and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                            {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif status %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.status == status and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                            {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif priority %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.internal_priority == priority and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                            {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif category %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.category == category and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                            {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% elif subdomain %}
+                                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.subgroup == subdomain and ticket.sla_resolution_status == sla_status %}
+                                                        <tr>
+                                                            <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                                            <td>{{ticket.title}}</td>
+                                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                                            <td>{{ticket.affected_email}}</td>
+                                                            <td>{{ticket.internal_priority}}</td>
+                                                            {% if ticket.ticket_type == "SR"  %}
+                                                            <td>Service Request</td>
+                                                            {% elif ticket.ticket_type == "IN" %}
+                                                            <td>Incident</td>
+                                                            {% elif ticket.ticket_type == "PB" %}
+                                                            <td>Problem</td>
+                                                            {% elif ticket.ticket_type == "CH" %}
+                                                            <td>Change</td>
+                                                            {% else %}
+                                                            <td>{{ticket.ticket_type}}</td>
+                                                            {% endif %}     
+                                                            <td>{{ticket.workgroup}}</td>
+                                                            <td>{{ticket.status|real}}</td>
+                                                            <!-- <td>{{ticket.first_response}}</td> -->
+                                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                                            <!-- <td>{{ticket.resolved_time}}</td> -->
+                                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% endcomment %}
+                                    </tbody>                         
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% elif priority_wise_tickets %}
+            <!--Export Row -->
+            <!-- <div class="row">
+              <div class="controls">
+                <form action="/export_toexcel/" method="post" target="_blank">
+                    {% csrf_token %}
+                    <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                    <input type="hidden" name="export_type" id="export_type" value="statusresp_perform" />
+                </form>
+              </div>          
+            </div> -->
+            <!--End export row -->
+            <div class="row">                        
+              <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-title">
+                    <h3>{{report_heading}}</h3>
+                  </div>
+                  <div class="box-body table-responsive no-padding">                
+                    <table class="table table-bordered" id="report_table">
+                      <thead>
+                        <tr>
+
+
+                          <th>Ticket No</th>
+                          <th>Title</th>
+                          <th>Created Date</th>                                  
+                          <th>Affected Email</th>
+                          <th>Ticket Priority</th>
+                          <th>Ticket Type</th>
+                          <th>Workgroup</th>
+                          <th>Case Status</th>
+                          <th>Reported Date</th>
+                          <th>First Response Time</th>
+                          <th style="display:none"> Response Duration Color Code </th>                              
+                          <th>Response Duration</th>
+                          <th style="display:none"> Resolved Duration Color Code </th>
+                          <th>Resolved Duration</th>
+                          <th>Work Hours( in minutes)</th>
+                        </tr>
+                      </thead>  
+                      <tbody>
+                      {% comment %}
+                      {% for ticket in priority_wise_tickets %}
+                          {% if sla_type_choosed  == "response" %}
+                                      {% if ticket.sla_response_exists == "response" and ticket.internal_priority == priority and ticket.sla_response_status == sla_status %}
+                                          <tr>
+                                          <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                            <td>{{ticket.title}}</td>
+                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                            <td>{{ticket.affected_email}}</td>
+                                            <td>{{ticket.internal_priority}}</td>
+                                            {% if ticket.ticket_type == "SR"  %}
+                                              <td>Service Request</td>
+                                            {% elif ticket.ticket_type == "IN" %}
+                                              <td>Incident</td>
+                                            {% elif ticket.ticket_type == "PB" %}
+                                              <td>Problem</td>
+                                            {% elif ticket.ticket_type == "CH" %}
+                                              <td>Change</td>
+                                            {% else %}
+                                               <td>{{ticket.ticket_type}}</td>
+                                            {% endif %}     
+                                            <td>{{ticket.workgroup}}</td>
+                                            <td>{{ticket.status|real}}</td>
+                                            <!-- <td>{{ticket.first_response}}</td> -->
+                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                            <!-- <td>{{ticket.resolved_time}}</td> -->
+                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                          </tr>
+                                    {% endif %}
+                                {% elif sla_type_choosed == "resolution" %}
+                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.internal_priority == priority and ticket.sla_resolution_status == sla_status %}
+                                      <tr>
+                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                          <td>{{ticket.title}}</td>
+                                          <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                          <td>{{ticket.affected_email}}</td>
+                                          <td>{{ticket.internal_priority}}</td>
+                                          {% if ticket.ticket_type == "SR"  %}
+                                            <td>Service Request</td>
+                                          {% elif ticket.ticket_type == "IN" %}
+                                            <td>Incident</td>
+                                          {% elif ticket.ticket_type == "PB" %}
+                                            <td>Problem</td>
+                                          {% elif ticket.ticket_type == "CH" %}
+                                            <td>Change</td>
+                                          {% else %}
+                                             <td>{{ticket.ticket_type}}</td>
+                                          {% endif %}     
+                                          <td>{{ticket.workgroup}}</td>
+                                          <td>{{ticket.status|real}}</td>
+                                          <!-- <td>{{ticket.first_response}}</td> -->
+                                          <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                          <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                          <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                          <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                          <td>{{ticket.ticket_id|work_hour}}</td>
+                                        </tr>
+                                    {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% endcomment %}
+                      </tbody>                         
+                    </table> 
+
+                  </div>
+                </div>
+                </div>
+            </div>
+            {% elif overall_tickets %}
+            <!--Export Row -->
+            <!-- <div class="row">
+              <div class="controls">
+                <form action="/export_toexcel/" method="post" target="_blank">
+                    {% csrf_token %}
+                    <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                    <input type="hidden" name="export_type" id="export_type" value="statusresp_perform" />
+                </form>
+              </div>          
+            </div> -->
+            <!--End export row -->
+
+            <div class="row">                        
+              <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-title">
+                    <h3>{{report_heading}}</h3>
+                  </div>
+                  <div class="box-body table-responsive no-padding">                
+                    <table class="table table-bordered" id="report_table">
+                      <thead>
+                        <tr>
+                          <th>Ticket No</th>
+                          <th>Title</th>
+                          <th>Created Date</th> 
+                          <th>Affected Email</th>
+                          <th>Ticket Priority</th>
+                          <th>Ticket Type</th>
+                          <th>Workgroup</th>
+                          <th>Case Status</th>
+                          <th>Reported Date</th>
+                          <th>First Response Time</th> 
+                          <th style="display:none"> Response Duration Color Code </th>
+                          <th>Response Duration</th>
+                          <th style="display:none"> Resolved Duration Color Code </th>
+                          <th>Resolved Duration</th>
+                          <th>Work Hours( in minutes)</th>
+                        </tr>
+                      </thead>  
+                      <tbody>
+                      {% comment %}
+                      {% for ticket in overall_tickets %}
+                          {% if sla_type_choosed  == "response" %}
+                                      {% if ticket.sla_response_exists == "response" and ticket.sla_response_status == sla_status %}
+                                          <tr>
+                                          <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                            <td>{{ticket.title}}</td>
+                                            <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                            <td>{{ticket.affected_email}}</td>
+                                            <td>{{ticket.internal_priority}}</td>
+                                            {% if ticket.ticket_type == "SR"  %}
+                                              <td>Service Request</td>
+                                            {% elif ticket.ticket_type == "IN" %}
+                                              <td>Incident</td>
+                                            {% elif ticket.ticket_type == "PB" %}
+                                              <td>Problem</td>
+                                            {% elif ticket.ticket_type == "CH" %}
+                                              <td>Change</td>
+                                            {% else %}
+                                               <td>{{ticket.ticket_type}}</td>
+                                            {% endif %}     
+                                            <td>{{ticket.workgroup}}</td>
+                                            <td>{{ticket.status|real}}</td>
+                                            <!-- <td>{{ticket.first_response}}</td> -->
+                                            <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                            <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                            <!-- <td>{{ticket.resolved_time}}</td> -->
+                                            <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                            <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                            <td>{{ticket.ticket_id|work_hour}}</td>
+                                          </tr>
+                                    {% endif %}
+                                {% elif sla_type_choosed == "resolution" %}
+                                    {% if ticket.sla_resolution_exists == "resolution" and ticket.sla_resolution_status == sla_status %}
+                                      <tr>
+                                        <td><a href="/ticket/{{ticket.ticket_id}}" target="_blank">{{ticket.ticket_number}}</a></td>
+                                          <td>{{ticket.title}}</td>
+                                          <td><span style="display:none;">{{ticket.created_date.year}}{{ticket.created_date.month}}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                          <td>{{ticket.affected_email}}</td>
+                                          <td>{{ticket.internal_priority}}</td>
+                                          {% if ticket.ticket_type == "SR"  %}
+                                            <td>Service Request</td>
+                                          {% elif ticket.ticket_type == "IN" %}
+                                            <td>Incident</td>
+                                          {% elif ticket.ticket_type == "PB" %}
+                                            <td>Problem</td>
+                                          {% elif ticket.ticket_type == "CH" %}
+                                            <td>Change</td>
+                                          {% else %}
+                                             <td>{{ticket.ticket_type}}</td>
+                                          {% endif %}     
+                                          <td>{{ticket.workgroup}}</td>
+                                          <td>{{ticket.status}}</td>
+                                          <!-- <td>{{ticket.first_response}}</td> -->
+                                          <td><span style="display:none;">{{ticket.reported_time.year}}{{ticket.reported_time.month}}{% if ticket.reported_time.day >= 10 %}{{ticket.reported_time.day}}{% else %}0{{ticket.reported_time.day}}{%endif%} {{ticket.reported_time.time | time}}</span>{% tzone ticket.reported_time %}</td>
+                                          <td><span style="display:none;">{{ticket.first_response.year}}{{ticket.first_response.month}}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                          <!-- <td>{{ticket.resolved_time}}</td> -->
+                                          <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                          <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                          <td>{{ticket.ticket_id|work_hour}}</td>
+                                        </tr>
+                                    {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% endcomment %}
+                      </tbody>                         
+                    </table> 
+
+                  </div>
+                </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                console.log('{{sla_wise_tickets}}')
+    
+                $('#report_table').dataTable({
+                  aaSorting: [[2, 'desc']],
+                  "bPaginate": true,
+                  "bFilter": false,
+                  "responsive":true,
+                  "scrollX": true,
+                  "processing":true,
+                  "serverSide": true,
+                  "pageLength":10,
+                  "searching": true,
+                  "oLanguage": {
+                            "sProcessing": "Loading Data...Please Wait"
+                        },
+                  "ajax":{
+                        "processing":true,
+                        "url" : "/ajax_tickets_data/",
+                        "traditional": true,
+                        "type":"POST",
+                        "dataType":"json",
+                        async:false,
+                        "data":function ( d ) {
+                            console.log(d);
+                            return {"tkid[]":{% if sla_wise_tickets %}'{{sla_wise_tickets}}' {% elif status_tickets %} '{{status_tickets}}' {% elif priority_wise_tickets %} '{{priority_wise_tickets}}' {% elif overall_tickets %} '{{overall_tickets}}' {% endif %}, 'search':d.search.value, 'start':d.start,'length':d.length, draw:d.draw, "popup":true};
+
+
+                        //data:{"tkid[]": ,"csrfmiddlewaretoken": '{{ csrf_token }}',"popup":'true',
+                        },
+                        },
+                        "createdRow": function( row, data, dataIndex ) {
+                            //console.log(data)
+                            $('td:eq(11)', row).attr('bgcolor', data[10]);
+                            $('td:eq(10)', row).hide();
+                            $('td:eq(13)', row).attr('bgcolor', data[12]);
+                            $('td:eq(12)', row).hide();
+                          },
+                });
+              });
+      
+        </script>
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      {% include "components/dashboard_footer.html" %}
+      {% include "reports/reports_js.html" %}
+    </body>
+</html>

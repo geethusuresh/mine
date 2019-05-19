@@ -1,0 +1,117 @@
+
+{% load humanize %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/static/gridster/css/jquery.gridster.css">
+    <link rel="stylesheet" type="text/css" href="/static/gridster/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+      .demo {
+    margin: 50px;
+    padding: 0px;
+    background: transparent;
+    }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">               
+                 <h1 class="text-thin pull-left">Customize Dashboard |<small> Step 3 : Preview and Save</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             <section class="demo">
+              <div class="gridster">
+                <ul>
+                  {% for fin in cc %}
+                  {% if fin.ico == "ico-md" %}
+                  <li data-row="{{fin.y}}" data-col="{{fin.x}}" data-sizex="{{fin.width}}" data-sizey="{{fin.height}}" class=" panel"  type="{{fin.ico}}" href="{{fin.href}}" name="{{fin.name}}" fa="{{fin.fa}}" id="{{fin.id}}">
+                    <div class=" panel-mint panel-colorful text-center">
+                      <div class="panel-body" style="padding:2%">
+                        <h1 class="text-thin">{% cycle "22" "12" "43" "9" %}</h1>
+            
+                      </div>
+                      <div class="bg-light pad-ver">
+                        <h4 class="mar-no text-thin"><i class="fa {{fin.fa}}"></i> {{fin.name}}</h4>
+                      </div>
+                    </div>
+                  </li>     
+                  {% elif fin.ico == "ico-lg" %}
+                   <li data-row="{{fin.y}}" data-col="{{fin.x}}" data-sizex="{{fin.width}}" data-sizey="{{fin.height}}"   type="{{fin.ico}}" class=" panel {{fin.class}}" href="{{fin.href}}"  name="{{fin.name}}" fa="{{fin.fa}}" id="{{fin.id}}">
+                     <div class="panel panel-danger panel-colorful" style="height:100%">
+                      <div class="panel-body text-center">
+                        <p class="text-uppercase mar-btm text-sm">Comments</p>
+                        <i class="fa {{fin.fa}} fa-5x"></i>
+                        <hr>
+                        <p class="h2 text-thin">873</p>
+                        <small><span class="text-semibold"><i class="fa fa-unlock-alt fa-fw"></i> 154</span> Unapproved comments</small>
+                      </div>
+                    </div>
+                  </li>    
+                  {% else %}
+                  <li data-row="{{fin.y}}"   type="{{fin.ico}}" data-col="{{fin.x}}" data-sizex="{{fin.width}}" data-sizey="{{fin.height}}" class=" panel {{fin.class}}" href="{{fin.href}}"  name="{{fin.name}}" fa="{{fin.fa}}" id="{{fin.id}}">
+                    <div class="panel panel-purple panel-colorful">
+                    <div class="pad-all text-center">
+                      <span class="text-5x text-thin">{% cycle "22" "12" "43" "9" %}</span>
+                      <p>{{fin.name}}</p>
+                      <i class="fa {{fin.fa}}"></i>
+                    </div>
+                  </div> 
+                  </li>   
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            </section>
+              <a href="/" class="btn btn-mint btn-lg pull-right">Save Changes</a>
+
+
+
+            </div>
+          </div>
+        </div>
+    {% include "components/customer_footer.html"%}
+    <script type="text/javascript" src="/static/gridster/jquery.js"></script>
+    <script type="text/javascript" src="/static/gridster/jquery.gridster.js" charster="utf-8"></script>
+    <script type="text/javascript">
+      var thenga_kola = $(".gridster ul").gridster({
+      widget_margins: [10, 10], 
+      widget_base_dimensions: [140, 140],
+      serialize_params: function($w, wgd) {
+            return {
+                x: wgd.col,
+                y: wgd.row,
+                width: wgd.size_x,
+                height: wgd.size_y,
+                id: $($w).attr('id'),
+                name: $($w).attr('name'),
+                fa:  $($w).attr('fa'),
+                color:  $($w).attr('color'),
+                ico: $($w).attr('type'),
+                href:  $($w).attr('href'),
+                class: $($w).attr('class'),
+            }
+        }
+    }).data('gridster');
+    </script>
+    </body>
+</html>

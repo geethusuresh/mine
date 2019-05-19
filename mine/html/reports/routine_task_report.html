@@ -1,0 +1,449 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Routine Task Report</title>
+    {% include "components/css.html"%}
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+<!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+    <!-- Highcharts -->
+    <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>
+    <style type="text/css">
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; } 
+      .bs{
+        background-color: transparent;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        {% include "components/msg_div.html"%}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Task Management | <small> Task Report</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active"> Routine Task Report</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <form method='POST' action='#' target="_blank" onsubmit="return submit_report()" id="problem_report_fetch">
+                                        {% csrf_token %}
+                                        <div class="col-sm-12">
+                                            <div class="col-sm-4">
+                                                <label>Customer</label>
+                                                <select name="cust" id="cust" multiple class="form-control" required>
+                                                    <option value="">--Select Customers--</option>
+                                                    {% for customer in customers %}
+                                                        <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                                    {% endfor %}
+                                                </select><br/>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <label>Group</label>
+                                                <select name="group" id="group_id" multiple class="form-control" required>
+                                                    <option value="">--Select Groups--</option>
+                                                </select><br/>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <label>Subgroup</label>
+                                                <select name="subgroup" id="sub_group_id" multiple class="form-control">
+                                                    <option value="">--Select Subgroups--</option>
+                                                </select><br/>
+                                            </div><br/>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="col-sm-4">
+                                                <label>Engineers</label>
+                                                <select name="engineers" id="engineer" class="form-control" multiple>
+                                                    <option value="">--Select Engineer--</option>
+                                                </select><br/>
+                                            </div>
+                                            <!-- <div class="col-sm-4">
+                                                <label>Priority</label>
+                                                <select name="priority" class="form-control" multiple>
+                                                    <option value="">--Select--</option>
+                                                    {% for priority in priority_list %}
+                                                        <option value="{{ priority }}">{{ priority }}</option>
+                                                    {% endfor %}
+                                                </select><br/>
+                                            </div> -->
+                                            <div class="col-sm-4">
+                                                <label>Status</label>
+                                                <select name="status" id="stat" multiple class="form-control">
+                                                    <option value="">--Select Status--</option>
+                                                    {% for stat in status_list %}
+                                                        <option value="{{ stat.id }}">{{ stat.status|title }}</option>
+                                                    {% endfor %}
+                                                </select><br/>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="col-sm-4">
+                                                <label>Task Created</label>
+                                                <select name="duration" id="duration_set" required class="form-control">
+                                                    <option value="">--Select--</option>
+                                                    <option value="on">On</option>
+                                                    <option value="between">Between</option>
+                                                    <option value="after">After</option>
+                                                    <option value="before">Before</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="duration_div_start">
+                                                    <label>Start Date</label>
+                                                    <input type="text" class="form-control" id="start_date" name="start_date" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="duration_div_end" style="display:none">
+                                                    <label>End Date</label>
+                                                    <input type="text" class="form-control" id="end_date" name="end_date" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 pad-all">
+                                            <input type="submit" value="Fetch Report" class="btn btn-success" />
+                                            <img src="/static/gif/loader_1.gif" style="display:none" id="image_id">
+                                            <label style = "font-weight: bold;color:red;display:none;margin-left:27px;margin-top: 7px;" id="error_section"></label>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pad-all">
+                        <div class="panel">
+                            <div class="panel-heading"></div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <form action="{% url 'task_export' %}" method="post" target="_blank" id="form_export_to_excel">
+                                        {% csrf_token %}
+                                        <input id="export_to_excel" name="export_to_excel" type="submit" class="btn btn-success" value="Export To Excel">
+                                        <input type="hidden" name="report_type" id="export_to_excel_data" value="routine_task_report">
+                                        <input type="hidden" name="resulant_dat" id="resultant_dat" />
+                                    </form>
+                                </div>
+                                <table id="pblm_report" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>View/Edit</th>
+                                            <th>Task ID</th>
+                                            <th>Title</th>
+                                            <th>Created</th>
+                                            <th>Engineer</th>
+                                            <th>Priority</th>
+                                            <th>Workgroup</th>
+                                            <th>Subgroup</th>
+                                            <th>Category</th>
+                                            <th>Subcategory</th>
+                                            <th>Status</th>
+                                            <th>Work Hours( in min ) </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/dashboard_footer.html"%}
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+        <script type="text/javascript">
+            $('#pblm_report').DataTable({
+                'scrollX':true
+            });
+            $('#export_to_excel').hide();
+        </script>
+        <script type="text/javascript">
+            $(function() {
+              $( "#start_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+              $( "#end_date" ).datepicker({ dateFormat: "mm-dd-yy" });
+            });
+            $('#cust').on('change', function(){
+                // $('#cate option:gt(0)').remove().end();
+                // $('#sub_cat option:gt(0)').remove().end();
+                // $('#engineer option:gt(0)').remove().end();
+                var customers = $('#cust').val();
+                // category, engineer data, according to the customer
+                // $.ajax({
+                //     url: "/category_wise_report/?categories=true",
+                //     type:"GET",
+                //     data: {
+                //         'customers': customers.toString(),
+                //     },
+                //     success: function(data){
+                //         var categories = data['categories'];
+                //         for (var i in categories) {
+                //             $('#cate').append($('<option>',
+                //                 {
+                //                     value: categories[i][0],
+                //                     text: categories[i][1]
+                //                 }
+                //             ))
+                //         }
+                //         var engineers = data['engineers'];
+                //         for (var i in engineers) {
+                //             $('#engineer').append($('<option>', {
+                //                 value: engineers[i][0],
+                //                 text: engineers[i][1]
+                //             }))
+                //         }
+                //     }
+                // });
+                $('#group_id option:gt(0)').remove().end();
+                $('#sub_group_id option:gt(0)').remove().end();
+                $('#engineer option:gt(0)').remove().end();
+                $.ajax({
+                    url: "/subdomain_wise_report/?domains=true",
+                    type:"GET",
+                    data: {
+                        'customers': customers.toString(),
+                    },
+                    success: function(data){
+                        var groups = data;
+                        for (var i in groups) {
+                            $('#group_id').append($('<option>',
+                                {
+                                    value: groups[i][0],
+                                    text: groups[i][1]
+                                }
+                            ))
+                        }
+                    }
+                })
+            });
+            $('#group_id').on('change', function(){
+                $('#sub_group_id option:gt(0)').remove().end();
+                $('#engineer option:gt(0)').remove().end();
+                var domains = $('#group_id').val();
+                $.ajax({
+                    url: "/subdomain_wise_report/?subdomains=true",
+                    data: {
+                        'domains': domains.toString(),
+                    },
+                    type: "GET",
+                    success: function(data) {
+                        for (var i in data){
+                            $("#sub_group_id").append($('<option>', 
+                                { 
+                                    value:data[i][0],
+                                    text:data[i][1] + " - " + data[i][2],
+                                }
+                            ))
+                        }
+                    }
+                })
+            });
+            $('#sub_group_id').on('change', function() {
+                $('#engineer option:gt(0)').remove().end();
+                var subdomains = $('#sub_group_id').val();
+                $.ajax({
+                    url: "/subdomain_wise_report/?engineers=true",
+                    data: {
+                        "subdomains": subdomains.toString(),
+                    },
+                    type: "GET",
+                    success: function(data) {
+                        for (var i in data) {
+                            $('#engineer').append($('<option>', {
+                                value: data[i][0],
+                                text: data[i][1]
+                            }))
+                        }
+                    }
+                })
+            })
+            // $('#cate').on('change', function(){
+            //     $('#sub_cat option:gt(0)').remove().end();
+            //     var cat_val = $('#cate').val();
+            //     $.ajax({
+            //         url: "/category_wise_report/?subcategories=true",
+            //         data: {
+            //             'categories': cat_val.toString(),
+            //         },
+            //         type: "GET",
+            //         success: function(data) {
+            //             for (var i in data){
+            //                 $("#sub_cat").append($('<option>', 
+            //                     { 
+            //                         value:data[i][0],
+            //                         text:data[i][1]
+            //                     }
+            //                 ))
+            //             }
+            //         }
+            //     })
+            // });
+            $('#duration_set').on('click', function() {
+                var duration_choosed = $('#duration').val();
+                if ($('#duration_set').val() == "between") {
+                    $('.duration_div_end').show();
+                } else {
+                    $('.duration_div_end').hide();
+                    $('#end_date').value = "";
+                }
+            });
+            $(document).ready(function(){
+                $('.duration_div_end').hide();
+            })
+            function submit_report(){
+                if($('#duration_set').val() == "between"){
+                    if ($('#start_date').val() != "" && $('#end_date').val() != ''){
+                        var start = $('#start_date').val().replace(/-/g, '/');
+                        var end = $('#end_date').val().replace(/-/g, '/');
+                        val_1 = new Date(start);
+                        val_2 = new Date(end);
+                        var diff = val_2 - val_1;
+                        if (diff < 0) {
+                            $('#error_section').show();
+                            $( "#error_section" ).text( "Please choose valid start and end date !" ).show();
+                            return false;
+                        } else {
+                            $('#error_section').hide();
+                            return true;
+                        }
+                    } else {
+                        $('#error_section').show();
+                        $( "#error_section" ).text( "Please choose start and end date !" ).show();
+                        return false;
+                    }
+                } else if ($('#start_date').val() == "") {
+                    $('#error_section').show();
+                    $( "#error_section" ).text( "Please choose start date !" ).show();
+                    return false;
+                } else {
+                    $('#error_section').hide();
+                    if ($('#duration_set').val() != "between") {
+                        $('#end_date').val("");
+                    }
+                    return true;
+                } 
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#report_table').dataTable({
+                    aaSorting: [[2, 'desc']],
+                    "bPaginate": false,
+                    "bFilter": false,
+                    "scrollX": true
+                });
+            })
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $('#problem_report_fetch').submit(function(e) {
+                if (submit_report()) {
+                    $('#image_id').show();
+                    e.preventDefault();
+                    var formData = {};
+                    $("#problem_report_fetch").find("input[name]").each(function (index, node) {
+                        formData[node.name] = node.value;
+                    });
+                    $("#problem_report_fetch").children().find("select[name]").each(function (index, node) {
+                        formData[node.name] = $('#'+node.id).val()
+                    });
+                    $('#pblm_report').DataTable({
+                        "processing": true,
+                        "serverSide": false,
+                        // "iDisplayLength": 10,
+                        // "bAutoWidth": true,
+                        // "searching": true,
+                        "bDestroy": true,
+                        // "pageLength": 10,
+                        // "pagingType": "simple_numbers",
+                        "bScrollCollapse": true,
+                        "scrollX": true,
+                        "language": {
+                            "emptyTable": "No Tasks available"
+                        },
+                        "ajax": {
+                            "url": "/task_report/",
+                            "type": "POST",
+                            "data": formData,
+                            "dataType": 'json',
+                            "dataSrc": function(data){
+                                $('#image_id').hide();
+                                if(data.length > 0){
+                                    $('#export_to_excel').show();
+                                    $('#resultant_dat').val(JSON.stringify(data));
+                                }
+                                else{
+                                    $('#export_to_excel').hide();
+                                }
+                                return data;
+                            },
+                        },
+                        "columns": [
+                            { "data": "task_edit_url",
+                                "orderable": false,
+                                "searchable": false
+                            },
+                            { "data": "taskid" },
+                            { "data": "title" },
+                            { "data": "created" },
+                            { "data": "engineer" },
+                            { "data": "priority" },
+                            { "data": "group" },
+                            { "data": "subgroup" },
+                            { "data": "category" },
+                            { "data": "subcategory" },
+                            { "data": "status" },
+                            { "data": "work_hours" }
+                        ]
+                    });
+                } else {
+                    console.log("error section enabled");
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            $('#task_manage_main').addClass("active");
+            $('#task_management_dash').addClass("active");
+            $('#task_sub_nav').css("display", "block");
+            $('#task_report').addClass('active');
+            $('#task_manage_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

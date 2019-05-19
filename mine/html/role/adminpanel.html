@@ -1,0 +1,138 @@
+
+
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Admin Panel  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">                
+                <div style="padding:30px;margin-top:10px">
+                  <div class="row">
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-alizarin"><a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Person</p>
+                              <i class="fa fa-ticket"></i></a>
+                          </div>
+                      </div>
+                       <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-midnight-blue"><a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Workgroup</p>
+                              <i class="fa fa-users"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-nephritis" >
+                              <a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p style="">Subgroup</p>
+                              <i class="fa fa-dashboard"></i>
+{% load zone %}
+
+                            </a>
+                          </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-peter-river">
+                              <a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                                <p style="">Role</p>
+                                <i class="fa fa-bar-chart-o"></i>
+
+                              </a>
+                          </div>
+                      </div><!-- ./col -->
+                      <div class="row">                
+                <div style="padding:30px;margin-top:10px">
+                  <div class="row">
+                      <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-green-sea"><a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Privilage</p>
+                              <i class="fa fa-ticket"></i></a>
+                          </div>
+                      </div>
+                       <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-pumpkin"><a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Subgroup Mapping</p>
+                              <i class="fa fa-users"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-wisteria" >
+                              <a href="" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p style="">Role Privilage</p>
+                              <i class="fa fa-dashboard"></i>
+{% load zone %}
+
+                            </a>
+                          </div>
+                      </div>
+
+                    
+                      
+                  </div>
+                </div>
+              </div>
+     
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

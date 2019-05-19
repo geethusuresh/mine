@@ -1,0 +1,285 @@
+{% extends 'cloud_management/home.html'%}
+{% block content %}{% load staticfiles %}
+
+
+<link href="{% static 'cloud-static-files/aws_dashboard.css' %}" rel="stylesheet" type="text/css" />
+
+
+<link rel="stylesheet"  href="{% static 'cloud-static-files/plugins/lightSlider/css/lightslider.css' %}"/>
+
+
+
+<!-- <script src="{% static 'js/reviews.js' %}" type="text/javascript"></script>
+ -->
+
+
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-danger fade in">
+            <button data-dismiss="alert" class="close"><span>×</span></button>
+            <strong>Oh Snap!</strong>  {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success fade in">
+            <button data-dismiss="alert" class="close"><span>×</span></button>
+            <strong>Well done!</strong> {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+ {% if not cloud_account_list and not error_message%}
+<div class="alert alert-warning alert-dismissable">
+      <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+      <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+      <p>Your have not added  any cloud accounts yet. Please add one.<br>
+        <a href="#" class="create-cloud" ><i class="fa fa-cloud"></i>
+            <span> Add Cloud</span>
+        </a>
+      </p>
+</div>
+{% endif %}
+
+
+<ul class="adaptive" id="adaptive">
+
+{% for each in cloud_account_list %}
+
+<li class="lside">
+
+<div class="content animate-panel da-slide">
+
+<div class="row panel_container">
+<div class="row">
+    <div class="col-lg-12 text-center m-t-md animated-panel zoomIn" style="-webkit-animation-delay: 0.1s;">
+        <h2>
+           {{each.cloud_account_name}}
+        </h2>
+       <img src="/static/cloud-static-files/img/rsz_aws_logo.jpg" class="img-circle" width="60">
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-12 animated-panel zoomIn" style="-webkit-animation-delay: 0.2s;">
+        <div class="hpanel">
+            <div class="panel-heading">
+                Account Summary
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-3 text-center animated-panel zoomIn" style="-webkit-animation-delay: 0.2s;">
+                        <div class="small">
+                            <i class=""></i> Total Instances
+                        </div>
+                        <div>
+                            <h1 class="font-extra-bold m-t-xl m-b-xs">
+                                {{each.num_total_instances}}
+                            </h1>
+                            <small>Instances</small>
+                        </div>
+                        <div class="small m-t-xl">
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-6 animated-panel zoomIn" style="-webkit-animation-delay: 0.3s;">
+                        <div class="text-center small">
+                            <canvas id="cpu_usage_statistics-{{each.cloud_account_id}}" width="400" height="200"></canvas><br>
+                            <i class="fa fa-laptop"></i> Last one hour cpu usage (in %) 
+                        </div>
+
+                    </div>
+                    <div class="col-md-3 text-center animated-panel zoomIn" style="-webkit-animation-delay: 0.4s;">
+                        <div class="small">
+                            <i class=""></i> Running Instances
+                        </div>
+                        <div>
+                            <h1 class="font-extra-bold m-t-xl m-b-xs">
+                                {{each.num_running_instances}}
+                            </h1>
+                            <small>Running</small>
+                        </div>
+                        <div class="small m-t-xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                    <span class="pull-right">
+                          <i class="fa fa-arrow-circle-right">
+                            <a href="{% url 'aws_node_list' each.cloud_account_id %}">
+                                Go to Instance Details... 
+                            </a>
+                          </i>
+                    </span>
+               </br>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.4s;">
+        <div class="hpanel">
+            <div class="panel-body text-center h-200">
+                <i class="pe-7s-graph1 fa-4x"></i>
+
+                <h1 class="m-xs">${{each.total_amount}}</h1>
+
+                <h3 class="font-extra-bold no-margins text-success">
+                    Bill Amount
+                </h3>
+                <small>Current Month Expenses.</small>
+            </div>
+            <div class="panel-footer">
+                <a href="{% url 'aws_billing' each.cloud_account_id %}">
+                    <i class="fa fa-arrow-circle-right"> Billing details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.5s;">
+        <div class="hpanel stats">
+            <div class="panel-body text-center h-200">
+
+                <h1 class="m-xs">{{each.num_volumes}}</h1>
+                <div class="stats-icon pull-right">
+                    <i class="pe-7s-share fa-4x"></i>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                Volumes
+                </h3>
+                <small>Total Number of Volumes Used.</small>
+            </div>
+            <div class="panel-footer">
+                <a href="{% url 'aws_volume_list' each.cloud_account_id %}">
+                   <i class="fa fa-arrow-circle-right"> Volume details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.7s;">
+        <div class="hpanel stats">
+
+
+            <div class="panel-body text-center h-200">
+                <h1 class="m-xs">{{each.num_key_pairs}}</h1>
+                <div class="stats-icon pull-right">
+                    <i class="pe-7s-share fa-4x"></i>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                Key Pairs
+                </h3>
+                <small>Available Keypairs.</small>
+            </div>
+
+
+            <div class="panel-footer">
+                <a href="{% url 'aws_keypair_list' each.cloud_account_id %}">
+                    <i class="fa fa-arrow-circle-right"> Keypair details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-lg-3 animated-panel zoomIn" style="-webkit-animation-delay: 0.7s;">
+        <div class="hpanel stats">
+
+
+            <div class="panel-body text-center h-200">
+                <h1 class="m-xs">{{each.opswork_application_group}}</h1>
+                <div class="stats-icon pull-right">
+                    <i class="pe-7s-share fa-4x"></i>
+                </div>
+                <h3 class="font-extra-bold no-margins text-success">
+                Orchestration
+                </h3>
+                <small>Available Application Groups in Orchestration</small>
+            </div>
+
+            <div class="panel-footer">
+                <a href="{% url 'get_aws_opswork_list' each.cloud_account_id %}" >
+                    <i class="fa fa-arrow-circle-right"> Orchestration details ..</i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+
+
+
+            console.log({{each.cpu_usage_statistics | safe}});
+            console.log({{each.cloud_account_id}});
+            
+
+
+
+
+
+
+            var test  = ({{each.cpu_usage_statistics | safe}})
+            var network_outgoing_statistics_xaxis = []
+            var network_outgoing_statistics_yaxis = []
+
+
+            jQuery.each(test, function(index, value){
+                time_stamp = value['Timestamp'].split("T")[1]
+                network_outgoing_statistics_xaxis.push(time_stamp)
+                network_outgoing_statistics_yaxis.push(value['Average'])
+            });
+
+            network_outgoing_statistics_yaxis = network_outgoing_statistics_yaxis.sort();
+            console.log( "ready!", network_outgoing_statistics_xaxis );
+            console.log( "ready!", network_outgoing_statistics_yaxis );
+
+
+            var volume_read_write_data = {
+                labels: network_outgoing_statistics_xaxis,
+                datasets: [
+                    {
+                        label: "My First dataset",
+                        fillColor: "#D4EDC8",
+                        strokeColor: "#62cb31",
+                        data: network_outgoing_statistics_yaxis
+                    }
+                ]
+            };
+
+            var ctx = $("#cpu_usage_statistics-{{each.cloud_account_id}}").get(0).getContext("2d");
+            var myLineChart = new Chart(ctx).Line(volume_read_write_data, {pointDot: false});
+
+
+});
+
+</script>
+</li>
+{% endfor %}
+</ul>
+<script src="{% static 'cloud-static-files/plugins/lightSlider/js/lightslider.js' %}"></script> 
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+    $('#adaptive').lightSlider({
+        adaptiveHeight:true,
+        item:1,
+        slideMargin:0,
+        loop:true
+    });
+});
+
+</script>   
+
+{% endblock %}

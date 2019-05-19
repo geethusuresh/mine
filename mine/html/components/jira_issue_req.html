@@ -1,0 +1,152 @@
+<div class="modal fade" id="jira_issue" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">New Jira Issue</h4>
+      </div>
+      <div class="modal-body">        
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="alert alert-danger" role="alert" id="error_message" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-bottom:10px;">          
+          <div class="col-sm-6">
+              <div class="col-sm-1">
+                <input type="radio" class="form-control" name="op_type" id="op_type" onclick="sel_op('create')" checked="checked">
+              </div>
+              <div class="col-sm-10" style="padding-top: 12px; text-align: left; padding-left: 4px;">
+                <label class="control-label" for="op_type">Create a new issue</label>
+              </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="col-sm-1">
+              <input type="radio" class="form-control" name="op_type" id="op_type1" onclick="sel_op('link')">
+            </div>
+            <div class="col-sm-10" style="padding-top: 12px; text-align: left; padding-left: 4px;">
+              <label class="control-label" for="op_type">Link an existing issue</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="createissue">
+            <form action="/jira/create_ticket/" name="frm_createtkt" method="POST">{% csrf_token %}
+            <div class="row">
+              <div class="col-sm-6">
+                  <select name="project" id="project" class="form-control" required>
+                    <option value="">Select any project</option>
+                  </select>
+              </div>
+              <div class="col-sm-6">
+                <select name="issuetype" id="issuetype" class="form-control" required>
+                    <option value="">Select any issue type</option>
+                </select>
+              </div>
+            </div>
+            <br />
+             <div class="row">
+              <div class="col-sm-12">              
+                  <input type="text" class="form-control" name="summary" id="summary" placeholder="Summary" required/>          
+              </div>            
+            </div>
+             <br />
+            <div class="row">
+              <div class="col-sm-12">
+                  <textarea name="description" style="max-width:100%" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>          
+              </div>            
+            </div>
+             <br />
+            <button class="btn btn-success" style="float:right;width:50%" type="submit">Create Issue</button>
+            <input type="hidden" name="op" id="op" value="create" />
+            <input type="hidden" id="ticketid" name="ticketid" value="{{ticket.id}}" />
+            </form>
+        </div>
+
+        <div id="linkissue" style="display:none;">
+            <form action="/jira/create_ticket/" method="POST" name="frm_linkissue">{% csrf_token %}            
+             <div class="row">
+              <div class="col-sm-12">              
+                  <input type="text" class="form-control" name="link" id="link" placeholder="Enter the full URL from Jira" required/>
+              </div>            
+            </div>           
+            
+             <br />
+            <button class="btn btn-success" style="float:right;width:50%" type="submit">Link Issue</button>
+            <input type="hidden" name="op" id="op" value="link" />
+            <input type="hidden" id="ticketid" name="ticketid" value="{{ticket.id}}" />
+            </form>
+        </div>
+        
+      </div>
+      <div class="modal-footer" style="border:0px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $.ajax({
+        url:"/jira/issuetypes/",
+        type: "POST",
+        dataType:"json",                      
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          ticket_id:'{{ticket.id}}'          
+        },
+        success: function(data){          
+          var issue_details = '<option value="">Select any issue type</option>';    
+          $.each(data, function(key, val) {
+              var issue_id = val.issue_id;
+              var issue_name = val.issue_name;                 
+              issue_details = issue_details + '<option value="'+issue_id+'">'+issue_name+'</option>';
+          });
+          $('#issuetype').html(issue_details);
+          $('#error_message').hide();
+        },
+        error: function () {
+          $('#error_message').html('Not able to fetch issue types. Please refresh the page and try.')
+          $('#error_message').show();        
+        }
+    });
+
+    $.ajax({
+        url:"/jira/projects/",
+        type: "POST",
+        dataType:"json",                      
+        data: {
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          ticket_id:'{{ticket.id}}'          
+        },
+        success: function(data){          
+          var project_details = '<option value="">Select any project</option>';    
+          $.each(data, function(key, val) {
+              var project_id = val.project_id;
+              var project_name = val.project_name;                 
+              project_details = project_details + '<option value="'+project_id+'">'+project_name+'</option>';
+          });
+          $('#project').html(project_details);
+          $('#error_message').hide();
+        },
+        error: function () {
+          $('#error_message').html('Not able to fetch project details. Please refresh the page and try.')
+          $('#error_message').show();        
+        }
+    });
+});
+
+function sel_op(op_details){
+  if(op_details == "create"){
+    $('#createissue').show();
+    $('#linkissue').hide();
+  }
+  else if(op_details == "link"){
+    $('#createissue').hide();
+    $('#linkissue').show();
+  }
+}
+</script>
+
+

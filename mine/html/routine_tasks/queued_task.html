@@ -1,0 +1,138 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Queued Routine Tasks</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+        .bs{
+            background-color: transparent;
+        }
+        .page {
+            width: 100%;
+            height: auto;
+        }
+        table.dataTable.no-footer {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable thead th, table.dataTable thead td {
+            border-bottom-color: #ddd;
+        }
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable tbody th, table.dataTable tbody td {
+            padding-bottom: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 8px;
+        }
+        #tick_details.tbody th, #tick_details.dataTable tbody td{
+            padding: 15px;
+        }
+        .sortorder:after {
+          content: '\25b2' !important;
+        }
+        .sortorder.reverse:after {
+          content: '\25bc' !important;
+        }
+        [ng-cloak]
+        {
+          display: none !important;
+        }
+        table.scroll tbody {
+            height: 100px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed ng-cloak" style="font-size:13px" ng-controller="RoutineTaskController" ng-init="init('{{csrf_token}}')" ng-cloak>
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        {% include "components/msg_div.html"%}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Task Management | <small>Queued Routine Tasks</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Queued Routine Tasks</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row pad-all">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <table id="routine_task_table">
+                                    <thead>
+                                        <tr>
+                                            <th>View/Edit</th>
+                                            <th>TaskID</th>
+                                            <th>Task Title</th>
+                                            <th>Customer</th>
+                                            <th>Workgroup</th>
+                                            <th>Subgroup</th>
+                                            <th>Created Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in tasks %}
+                                            <tr>
+                                                <td><a href="{% url 'task_details' task.id %}" data-toggle="tooltip" data-placement="bottom" class="btn btn-success" title="View/Edit" ><i class="fa fa-edit"></i></a></td>
+                                                <td>{{ task.taskid }}</td>
+                                                <td>{{task.task_name}}</td>
+                                                <td>{{task.customer.customername}}</td>
+                                                <td>{{task.group.workgroup}}</td>
+                                                <td>{{task.subgroup.subgroupname}}</td>
+                                                <td>{% tzone task.created_date %}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% comment %}
+            {% include "components/dashboard_footer.html"%}
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "components/sr_cust.html"%}
+            {% else %}
+                {% include "components/service_request.html"%}
+            {% endif %}
+        {% endcomment %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#routine_task_table').dataTable();
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        {% include "components/angular_files.html" %}
+        {% include "components/confirmation_box.html" %}
+        <script>
+            $('#task_manage_main').addClass("active");
+            $('#task_management_dash').addClass("active");
+            $('#task_sub_nav').css("display", "block");
+            $('#queued_task').addClass('active');
+            $('#task_manage_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+{% load zone%}
+<html>
+	<body>
+		Dear IT Manager, <br/><br/>
+		Below are the ticket details which are pending for your approval. <br/><br/>
+		<table width="100%" style="border-collapse: collapse;">
+			<tr>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">TicketId</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Ticket Summary</th>
+				<!-- <th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Reported Date</th> -->
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Affected Person</th>
+				<!-- <th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Priority</th> -->
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Status</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Approved By Manager</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Approved Date</th>
+			</tr>
+			{% for p_approval in pending_approvals %}
+				<tr>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.ticketid}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.summary}}</td>
+					<!-- <td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.reportdate|date:'d/m/Y P'}}</td> -->
+					<td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.affectedperson}}</td>
+					<!-- <td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.internalpriority}}</td> -->
+					<td style="border: 1px solid black; border-collapse: collapse;">{{p_approval.status|real}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">
+						{% if p_approval.approval_set.all|length > 0 %}
+							{% for approval in p_approval.approval_set.all %}
+								{% if approval.approvaltype == 'MANAGER' or approval.approver.user == p_approval.affectedperson.supervisor %}
+		                            {% if approval.approve %}
+		                              Yes
+		                            {% else %}
+		                              No
+		                            {% endif %}
+
+	                          	{% endif %}
+	                        {% endfor %}
+	                    {% else %}
+	                    	NA
+	                    {% endif %}
+                    </td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">
+                    	{% if p_approval.approval_set.all|length > 0 %}
+							{% for approval in p_approval.approval_set.all %}
+								{% if approval.approvaltype == 'MANAGER' or approval.approver.user == p_approval.affectedperson.supervisor %}
+		                            {{approval.approved_date}}
+
+	                          	{% endif %}
+	                        {% endfor %}
+	                    {% else %}
+	                    	NA
+	                    {% endif %}
+
+                    </td>
+				</tr>
+			{% endfor%}
+		</table>
+		<br/>
+		<br/>
+		Please Login to OneConsole and validate the request. 
+		<a href="https://oneconsole.marlabs.com/homepage/">Click here to Login for OneConsole</a><br/>
+		or Copy Paste the below URL in the browser window and login with your credentials.
+
+		<br/>
+		<br/>
+		<br/>
+
+		Regards,<br/>
+		Marlabs IT Support<br/>
+		VOIP: 732-694-1000 X4357<br/>
+		E-mail: helpdesk@marlabs.com<br/>
+
+		Note: This is an auto generated e-mail. Please do not reply to this mail. <br/>
+	</body>
+</html>

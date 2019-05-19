@@ -1,0 +1,163 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">User Delegation</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Choose Delegate User</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="/user/delegate/choose/" id="form_id">{% csrf_token %}
+                                        <div class="col-sm-6">
+                                            <input type="hidden" id="customer_id" value="{{ profile.customer.id }}">
+                                            <label>Delegation User</label>
+                                            <input type="text" name="new_delegate" id="new_delegate_email" class="form-control" required><br/>
+                                            <label>Start Date</label>
+                                            <input type="text" name="start_date" id="start_date" class="form-control" required readonly>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label>End Date</label>
+                                            <input type="text" name="end_date" id="end_date" class="form-control" required readonly><br/>
+                                            <label>Reason</label>
+                                            <textarea class="form-control" name="reason" required></textarea>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <input type="submit" value="Assign" class="btn btn-success">
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-danger col-sm-6" role="alert" style="display:none; margin-top:10px;" id="alert_id">
+                                                <span id="span_id"></span>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div> 
+                        </div>
+                        <!-- <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Choose Delegate User</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="/user/delegate/choose/" id="form_id">{% csrf_token %}
+                                        <div class="col-sm-6">
+                                            <input type="hidden" id="customer_id" value="{{ profile.customer.id }}">
+                                            <label>Delegation User</label>
+                                            <input type="text" name="new_delegate" id="new_delegate_email" class="form-control" required><br/>
+                                            <label>Start Date</label>
+                                            <input type="text" name="start_date" id="start_date" class="form-control" required readonly>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label>End Date</label>
+                                            <input type="text" name="end_date" id="end_date" class="form-control" required readonly><br/>
+                                            <label>Reason</label>
+                                            <textarea class="form-control" name="reason"></textarea>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <input type="submit" value="Assign" class="btn btn-success">
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-danger col-sm-6" role="alert" style="display:none; margin-top:10px;" id="alert_id">
+                                                <span id="span_id"></span>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div> 
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#new_delegate_email').autocomplete({
+                width: 300,
+                max: 10,
+                delay: 100,
+                minLength: 1,
+                autoFocus: true,
+                cacheLength: 1,
+                scroll: true,
+                highlight: false,
+                source: function(request, response) {
+                    var customer_id = $('#customer_id').val();
+                    var name = $('#new_delegate_email').val();
+                    $.ajax({
+                        url: "/admin_settings/users/search/?customer_id="+customer_id+'&name='+name,
+                        dataType: "json",
+                        data: request,
+                        success: function( data, textStatus, jqXHR) {
+                            var items = data;
+                            response(items);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                             console.log( textStatus);
+                        }
+                    });
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $('#start_date').datepicker({ minDate: 0 });
+            $('#end_date').datepicker({ minDate: 0 });
+        </script>
+        <script type="text/javascript">
+            $( "#form_id" ).submit(function( event ) {
+                var start = $('#start_date1').val()
+                var end = $('#end_date1').val()
+                val_1 = new Date(start);
+                val_2 = new Date(end);
+                var diff = val_2 - val_1;
+                if (diff < 0) {
+                    $('#alert_id').show();
+                    $( "#span_id" ).text( "Please choose valid start and end date !" ).show();
+                    event.preventDefault();
+                } else {
+                    return;
+                }
+            });
+        </script>
+    </body>
+</html>

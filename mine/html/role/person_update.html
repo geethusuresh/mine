@@ -1,0 +1,128 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Edit  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                  <ul >
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                      {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              <div class="col-md-12">
+              <div class="box">
+                <div class="box-title">
+                  <h3>{{ person.user.username }}</h3>
+                </div>
+                <div class="box-body">
+                  <form  method="post" action="#">{% csrf_token %}
+                    <div class="row">
+                     <div class="col-md-4">
+                        <label>First Name</label><input class="form-control"  type="text" name='first_name' value="{{person.user.first_name}}">
+                        <label>Last Name</label><input class="form-control"  type="text" name='last_name' value="{{person.user.last_name}}">
+                        <label>Username</label><input class="form-control"  type="text" name='username' value="{{person.user.username}}" readonly>
+                        <label>Email</label><input class="form-control"  type="text" name='email' value="{{person.user.email}}" required>
+                        <label>Gender</label><select class="form-control" id="gender" name="gender">
+                          <option value="">Select Gender</option>
+                          <option value="F" {% if person.gender == 'F' %} selected {% endif %}> Female</option>
+                          <option value="M" {% if person.gender == 'M' %} selected {% endif %}> Male</option>
+                        </select>
+                        <label>Customer</label><select class="form-control" id="customer" name="customer" required  >
+                        <option value="">Select Customer</option>
+                          {% for customer in customers %}
+                            {% if customer.id == person.customer.id %}
+                            <option value="{{ customer.id }}" selected>{{ customer.customername }}</option>
+                            {% else %}
+                            <option value="{{ customer.id }}" >{{ customer.customername }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                        <label>Supervisor</label><select class="form-control"  id="supervisor" name="supervisor"   >
+                        <option value="">Select Supervisor</option>
+                        {% for supervisor in supervisors %}
+                            {% if supervisor.user.id == person.supervisor.id %}
+                            <option value="{{ supervisor.id }}" selected>{{ supervisor.user.username }}</option>
+                            {% else %}
+                            &lt;!&ndash;
+                            <option value="{{ supervisor.id }}" >{{ supervisor.user.username }}</option>&ndash;&gt;
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                     </div>
+                     <div class="col-md-4">
+                        <label>Supervisor Name</label><input class="form-control"  type="text" name='supervisor_name' value="{{person.supervisor.first_name }} {{person.supervisor.last_name }}" readonly>
+                        <label>Department</label><input class="form-control"  type="text" name='department' value="{{person.department}}">
+                        <label>Title</label><input class="form-control" type="text"  name='title' value="{{person.title}}">
+                        <label>Employee Type</label><input class="form-control" type="text"  name='employeetype' value="{{person.employeetype}}">
+                        <label>Address Line 1</label><textarea class="form-control" style="height:100px;" name='address1'>{{person.addressline1}}</textarea>
+                        <label>Address Line 2</label><textarea class="form-control" style="height:100px;" name='address2'>{{person.addressline2}}</textarea>
+                    </div>
+                     <div class="col-md-4">
+                        <label>Location</label><input class="form-control" type="text"  name='location' value="{{person.location}}">
+                        <label>City</label><input class="form-control" type="text" name='city'  value="{{person.city}}">
+                        <label>District</label><input class="form-control" type="text"  name='district' value="{{person.district}}">
+                        <label>Country</label><input class="form-control" type="text"  name='country' value="{{person.country}}">
+                        <label>Postal code</label><input class="form-control" type="text"  name='postalcode' value="{{person.postalcode}}">
+                        <label>Phone Number</label>
+                        <input class="form-control" type="text" name="phone_no" value="{{person.phonenumber_set.all.0.primary}}"
+                        <br><br>
+                        {% if person.active %}
+                          Active:&nbsp&nbsp<input class="" type="radio" id="active" name="active" value="yes" checked style="margin: 0 auto; ">Yes&nbsp&nbsp
+                          <input class="" type="radio" id="active" name="active" value="no" style="margin: 0 auto;">No
+                        {% else %} 
+                          Active:&nbsp&nbsp<input class="" type="radio" id="active" name="active" value="yes" >Yes&nbsp&nbsp
+                          <input class="" type="radio" id="active" name="active" value="no" checked>No
+                        {% endif %}
+                        <br/> <br/>
+                        {% if person.notify %}
+                          Notify:&nbsp&nbsp<input class="" type="checkbox" id="notify" name="notify" checked style="margin: 0 auto; ">
+                        {% else %}
+                          Notify:&nbsp&nbsp<input class="" type="checkbox" id="notify" name="notify" style="margin: 0 auto; ">
+                        {% endif %}
+                        <input class="btn btn-success pull-right" type="submit" value="Update">
+                     </div>
+                    </div>
+                </form>
+                </div>
+              </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+
+ 

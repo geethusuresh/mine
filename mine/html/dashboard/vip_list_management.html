@@ -1,0 +1,98 @@
+{% extends "change_management/base.html" %}
+{% load zone %}
+{% block title_content %} Vip List Management {% endblock title_content %}
+{% block page_head %} SD Settings | <small> Vip List Management</small>{% endblock page_head %}
+{% block bread_crumb %} <li class="active">Vip List Management</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title"> Vip List Management</h3>
+                </div>
+                <div class="panel-body">
+                    <form method="post" action="{% url 'vip_list_management' %}" enctype="multipart/form-data" class="pad-btm">{% csrf_token %}
+                        <div class="col-sm-10">
+                            <div class="col-sm-6">
+                                <select class="form-control" name="customer_id" id="customer_id">
+                                    <option value="">Select</option>
+                                    {% for customer in customers %}
+                                        <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="email" name="vip_name" id="new_delegate_email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-success pull-left" style="float:right">Submit</button>
+                        </div>
+                    </form>
+                    <!-- <a href="#" class="btn btn-success" data-toggle="modal" data-target="#add_vip">Add VIP</a> -->
+                    <div class="col-sm-10">
+                        <table class="table table-stripped" id="task_table_id">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Email</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vip in vip_list %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ vip.profile.user.email }}</td>
+                                        <td><a href="{% url 'vip_list_removal' vip.id %}" class="btn btn-danger"><i class='fa fa-trash'></i></a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+
+{% block footer_content %}
+    <script type="text/javascript">
+        $("#tkt_sd_sett").addClass("active");
+        $("#sub_add_temp").css({'display' : 'block'});
+        $("#vip_management").addClass("active");
+        $(document).ready(function() {
+            $('#task_table_id').DataTable({
+                // aaSorting: [[4, 'desc']],
+                scrollX: true
+            });
+        });
+        $('#new_delegate_email').autocomplete({
+            width: 300,
+            max: 10,
+            delay: 100,
+            minLength: 1,
+            autoFocus: true,
+            cacheLength: 1,
+            scroll: true,
+            highlight: false,
+            source: function(request, response) {
+                var customer_id = $('#customer_id').val();
+                var name = $('#new_delegate_email').val();
+                $.ajax({
+                    url: "/admin_settings/users/search/?customer_id="+customer_id+'&name='+name,
+                    dataType: "json",
+                    data: request,
+                    success: function( data, textStatus, jqXHR) {
+                        var items = data;
+                        response(items);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                         console.log( textStatus);
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock footer_content %}
+

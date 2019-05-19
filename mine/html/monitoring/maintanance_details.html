@@ -1,0 +1,266 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+     <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>    -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->
+
+    <script type="text/javascript">
+      function box_items_details(app_ids){
+        $('#top_box_appid').val(app_ids);
+        $('#frm_top_box').submit();
+      }
+
+      function multi_customer_perm(){
+        $('#frm_multi_customer').submit();
+      }
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+  {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/monitoring_header.html"%}
+  {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/cust_header.html"%}
+  {% else %}
+    {% include "components/header.html"%}
+  {% endif %}
+        <div class="wrapper">
+        {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">{{selected_customer.customername}}  Scheduled Maintenance | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Maintenance Details</li>
+                </ol>
+            </div>
+            <div class="content">
+
+                <div class="row">
+                  <div class="alert alert-success" role="alert" id="success_alert" style="display:none;"></div>
+                  <div class="alert alert-danger" role="alert" id="failed_alert" style="display:none;"></div>
+                </div>
+
+                {% if customer_count > 1 %}
+                <div class="row">
+                    <div class="col-lg-12" style="margin-bottom:5px;">
+                    <form id="frm_multi_customer" name="frm_multi_customer" method="POST" action="/advanced_monitoring/maintanance_details/">
+                    {% csrf_token %} 
+                        <select name="customer" id="customer" class="form-control" onchange="multi_customer_perm()">
+                            <option value="">Select Customer</option>
+                            {% for customer_pem in customer_details %}
+                            {% if customer_pem.customer.id == selected_customer.id %}
+                            <option value="{{customer_pem.customer.id}}" selected="selected">
+                            {{customer_pem.customer.customername}}</option>
+                            {% else %}
+                            <option value="{{customer_pem.customer.id}}">{{customer_pem.customer.customername}}</option>
+                            {% endif  %}
+                            {% endfor %}
+                        </select>
+                    </form>
+                    </div>                   
+                </div>
+                {% endif %}
+
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="panel">
+                    <div class="panel-heading" style="position:relative;">
+                      <h3 class="panel-title">
+                      <i class="fa fa-list fa-fw"></i>&nbsp; Scheduled Maintenance Details
+                      </h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table">
+                         <thead>
+                              <th>Application Group</th>
+                              <th>Hostgroup</th>
+                              <th>Host</th>
+                              <th>Startdate</th> 
+                              <th>Enddate</th>
+                              <th>Status</th>
+                              <th>Details</th>                                              
+                          </thead>                        
+                          <tbody>
+                          {% if scheduled_details %}
+                            {% for scheduled_item in scheduled_details %}
+                              <tr>
+                                <td>{{scheduled_item.application_group}}</td>
+                                <td>{{scheduled_item.scheduled_hostgrp.hostgroup}}</td>
+                                <td>{{scheduled_item.hostname}}</td>
+                                <td>{% tzone scheduled_item.startdate %}</td>
+                                <td>{% tzone scheduled_item.enddate %}</td>
+                                {% if scheduled_item.status == 1  %}
+                                    <td style="color:#31708f;font-weight:bold;">In Progress</td>
+                                {% elif scheduled_item.status == 2  %}
+                                    <td style="color:#3c763d;font-weight:bold;">Completed</td>
+                                {% elif scheduled_item.status == 3  %}
+                                    <td style="color:#a94442;font-weight:bold;">Not Started</td>
+                                {% endif %}
+                                <td>
+                                  <a href="#" data-toggle="modal" data-target="#window_{{scheduled_item.window_id}}" class="btn btn-success btn-sm">
+                                    <i class="fa fa-search-plus" data-placement="right" data-toggle="tooltip" data-original-title="View Maintenance Details"></i>
+                                  </a>
+                                </td>
+                              </tr>
+                            {% endfor %} 
+                          {% else %}
+                               <tr>
+                                  <td colspan="7" style="text-align:center;">No Maintenance Details Found</td>
+                               </tr>
+                          {% endif  %}
+                          </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <!--End Incident ticket -->
+            
+<!--Scheduled Window -->
+ {% for scheduled_item in scheduled_details %}
+    <div class="modal fade" id="window_{{scheduled_item.window_id}}" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Scheduled Maintenanace Details</h4>
+          </div>
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-lg-12">
+                    <h3></h3>
+                  </div>
+                  <div class="col-lg-6">                                            
+                      <dl>
+                        <dt>Hostgroup :</dt>
+                        <dd>{{scheduled_item.scheduled_hostgrp.hostgroup}}</dd>
+                        <br />
+                        <dt>Host :</dt>
+                        <dd>{{scheduled_item.hostname}}</dd>
+                        <br />
+                        <dt>Maintenance Startdate :</dt>
+                        <dd>{% tzone scheduled_item.startdate %}</dd>
+                        <br />
+                        <dt>Maintenance Enddate :</dt>
+                        <dd>{% tzone scheduled_item.enddate %}</dd>
+                        <br />
+                        <dt>Impacted Service :</dt>
+                        <dd>
+                            {% if scheduled_item.impacted_services %}
+                                {% for impacted_item in scheduled_item.impacted_services %}
+                                    {{forloop.counter}}. {{impacted_item.itemname}} <br />
+                                {% endfor %}
+                            {% endif %}
+                        </dd>
+                      </dl>
+                  </div>
+                  
+                  <div class="col-lg-6">
+                      <dl>
+                          {% if scheduled_item.status == 1  %}
+                            <dt>Maintenance Status :</dt>
+                            <dd style="color:#31708f;font-weight:bold;">In Progress</dd>
+                            <br />
+                        {% elif scheduled_item.status == 2  %}
+                            <dt>Maintenance Status :</dt>
+                            <dd style="color:#3c763d;font-weight:bold;">Completed</dd>
+                            <br />
+                        {% elif scheduled_item.status == 3  %}
+                            <dt>Maintenance Status :</dt>
+                            <dd style="color:#a94442;font-weight:bold;">Not Started</dd>
+                            <br />
+                        {% endif %}
+                        <dt>Ticket Number :</dt>
+                        <dd>{{scheduled_item.ticket_number}}</dd>
+                        <br />
+                        <dt>Comments :</dt>
+                        <dd>{{scheduled_item.comments}}</dd>
+                      </dl>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer" style="border:0px">
+              
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+{% endfor %}
+<!--End scheduled window -->
+
+
+
+            </div>
+          </div>
+        </div>
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+     {% include "ticket/advanced_search_popup.html" %}
+    <script>            
+      $("#monitoring_nav").addClass("active");
+      $("#monitoring_sub").css({'display' : 'block'});
+      $("#maintten").addClass("active");        
+    </script>   
+     <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+     <script type="text/javascript">
+     function monitor_add_to_dashboard(item_id,report_type){ 
+      $.ajax({
+          type: "POST",
+          url: "/addreport_to_dashboard/",
+          data: { report_type: report_type, item_id: item_id, csrfmiddlewaretoken: '{{ csrf_token }}'}
+          })
+          .done(function( msg ) {             
+              $('#success_alert').html(msg);
+              $('#success_alert').show(1000);
+          })
+          .fail(function() {              
+              $('#failed_alert').html("Oh! Failed to move this report to your dashboard");
+              $('#failed_alert').hide(1000);
+          });                   
+    }
+    </script>
+    {% include "components/dashboard_footer.html" %}  
+    {% include "components/service_request.html" %}  
+    </body>
+</html>

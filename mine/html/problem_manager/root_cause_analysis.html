@@ -1,0 +1,206 @@
+
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Problem Management | Tickets</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            a:hover {
+                color: #515151 !important;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Problem Management <small>| Tickets</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active"> Tickets</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        {% if roles|length > 2 %}
+                            <div class="pannel-heading">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h3 class="panel-title">Dashboard</h3>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <form method="POST" action="/dashboard/">
+                                            <select name="role_name" class="form-control text-center" onchange="change_dashboard()" id="role_name" style="margin-top:10px">
+                                                {% for role in roles %}
+                                                    {% if first_role == role %}
+                                                        <option selected="selected" value="{{role}}"  >{{role}}</option>
+                                                    {% else %}
+                                                        <option value="{{role}}">{{role}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    </div>
+                                    <div class="col-sm-3"></div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="panel-body">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#resolved"  data-toggle="tab">Resolved Tickets</a></li>
+                                <li role="presentation"><a href="#rc_provided"  data-toggle="tab">RC Provided Tickets</a></li>
+                                <li role="presentation"><a href="#closed" data-toggle="tab">Closed Tickets</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="resolved">
+                                    <table class="table table-striped" id="resolved_tics">
+                                        <thead>
+                                            <tr>
+                                                <th>View</th>
+                                                <th>TicketID</th>
+                                                <th>Ticket Summary</th>
+                                                <th>Affected Person</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                                <th>Owner</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ticket in r_tickets %}
+                                                <tr>
+                                                    <td>
+                                                        <!-- <a href="/rc_analysis/{{ticket.id}}/">view</a> -->
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/problem_management/{{ticket.id}}/">
+                                                            <i class="fa fa-edit "></i>            
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ticket.ticketid}}</td>
+                                                    <td>{{ticket.summary}}</td>
+                                                    <td>
+                                                        {% if ticket.affectedperson.user.email %}
+                                                            {{ ticket.affectedperson.user.email}}
+                                                        {% else %}
+                                                            {{ ticket.affectedemail }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ticket.status}}</td>
+                                                    <td>{{ticket.internalpriority}}</td>
+                                                    <td>{{ticket.owner.user.email}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div> 
+                                <div class="tab-pane" id="rc_provided">
+                                    <table class="table table-striped" id="rc_provided_tics">
+                                        <thead>
+                                            <tr>
+                                                <th>View</th>
+                                                <th>TicketID</th>
+                                                <th>Ticket Summary</th>
+                                                <th>Affected Person</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                                <th>Owner</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for rc_ticket in rc_provided_tickets %}
+                                                <tr>
+                                                    <td>
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/problem_management/{{rc_ticket.ticket.id}}/">
+                                                            <i class="fa fa-edit "></i>            
+                                                        </a>
+                                                    </td>
+                                                    <td>{{rc_ticket.ticket.ticketid}}</td>
+                                                    <td>{{rc_ticket.ticket.summary}}</td>
+                                                    <td>
+                                                        {% if rc_ticket.ticket.affectedperson.user.email %}
+                                                            {{rc_ticket.ticket.affectedperson.user.email}}
+                                                        {% else %}
+                                                            {{ rc_ticket.ticket.affectedemail }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{rc_ticket.ticket.status}}</td>
+                                                    <td>{{rc_ticket.ticket.internalpriority}}</td>
+                                                    <td>{{rc_ticket.ticket.owner.user.email}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="tab-pane" id="closed">
+                                    <table class="table table-striped" id="closed_tics">
+                                        <thead>
+                                            <tr>
+                                                <th>View</th>
+                                                <th>TicketID</th>
+                                                <th>Ticket Summary</th>
+                                                <th>Affected Person</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                                <th>Owner</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for rc_ticket in closed_tickets %}
+                                                <tr>
+                                                    <td>
+                                                        <a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/problem_management/{{rc_ticket.ticket.id}}/">
+                                                            <i class="fa fa-edit "></i>            
+                                                        </a>
+                                                    </td>
+                                                    <td>{{rc_ticket.ticket.ticketid}}</td>
+                                                    <td>{{rc_ticket.ticket.summary}}</td>
+                                                    <td>
+                                                        {% if rc_ticket.ticket.affectedperson.user.email %}
+                                                            {{rc_ticket.ticket.affectedperson.user.email}}
+                                                        {% else %}
+                                                            {{ rc_ticket.ticket.affectedemail }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{rc_ticket.ticket.status}}</td>
+                                                    <td>{{rc_ticket.ticket.internalpriority}}</td>
+                                                    <td>{{rc_ticket.ticket.owner.user.email}}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $('#resolved_tics').DataTable();
+            $('#rc_provided_tics').DataTable();
+            $('#closed_tics').DataTable();
+        </script>
+        <script type="text/javascript">
+            function change_dashboard(){
+                var role_name = $('#role_name').val();
+                role_name = role_name.replace(/ /g, '_');
+                document.location.href = "/dashboard/?name="+role_name;
+            }
+        </script>
+        <script type="text/javascript">
+            $('#problm_managemnt').addClass("active");
+            $('#problem_head').addClass("active");
+            $('#prblm_sectn').css("display", "block");
+            $('#problem_tickets').addClass('active');
+            $('#problm_managemnt').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

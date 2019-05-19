@@ -1,0 +1,153 @@
+
+
+
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OneConsole | Login page</title>
+	<link href="/static/customer/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+	<link href="/static/customer/css/font-awesome.min.css" rel="stylesheet">
+	<link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+	<style>
+
+		@font-face
+			{
+			  font-family: marlabs;
+			  src: url('/static/fonts/LithosPro-Regular.otf');
+			}
+
+	</style>
+</head>
+<body class="nifty-ready">
+	<div id="container" class="cls-container" style="background-color:#172b3e">
+		<div class="cls-header cls-header-lg">
+			<div class="cls-brand">
+				<!-- <a class="box-inline" href="/">
+					<img alt="marlabs" src="/static/home/img/icon.png" class="brand-icon">
+					<span class="brand-title" style="font-family: marlabs;">OneConsole<span class="text-thin"></span></span>
+				</a> -->
+				<a class="box-inline" href="/">
+					<img alt="marlabs" src="/static/img/white_logo.png" class="brand-icon img-responsive">
+				</a>
+			</div>
+		</div>
+		<div class="cls-content">
+		<div class="col-sm-5">
+			<img class="img-responsive spot2-img " src="/static/landingpage/images/mockups/ios/mockup_4.png" alt="" title="" style="display: block;margin-left: auto;margin-right: auto;" align="middle">
+		</div>
+		<div class="col-sm-7">
+			<div class="cls-content-sm panel" style="width:100%;">
+				<div class="panel-body">
+					<br>
+					<div class="row">						
+						<div class="col-sm-12">	
+							<div class="logo">
+								<a href="/"><img class="img-responsive" src="/static/img/oneconsole-small.jpg"  alt="Oneconsole Logo" style="display: block;margin-left: auto;margin-right: auto;" /></a>
+							</div>
+						</div>
+					</div>
+					<br><br><br>
+
+					<form action="/request/demo/" method="POST">{% csrf_token %}
+						<div class="form-group">
+						<label class="col-sm-3 control-label" style="    padding-top: 7px;" for="demo-hor-inputemail">Name</label>
+							<div class="col-sm-9">
+								<input type="text" placeholder="John" id="demo-hor-inputemail" class="form-control"  style="margin-bottom: 4%;" name="name" required>
+							</div>
+						</div>
+						<div class="form-group">
+						<label class="col-sm-3 control-label" style="    padding-top: 7px;" for="demo-hor-inputemail">Company Name</label>
+							<div class="col-sm-9">
+								<input type="text" placeholder="marlabs" name="company" id="demo-hor-inputemail" class="form-control"  style="margin-bottom: 4%;" required>
+							</div>
+						</div>
+						<br>
+						<div class="form-group">
+						<label class="col-sm-3 control-label" style="    padding-top: 7px;" for="demo-hor-inputemail">Email</label>
+							<div class="col-sm-9">
+								<input type="email" placeholder="name@company.com" id="demo-hor-inputemail" class="form-control"  style="margin-bottom: 4%;" name="email" required>
+							</div>
+						</div>
+												<br>
+						<div class="form-group">
+						<label class="col-sm-3 control-label" style="    padding-top: 7px;" for="demo-hor-inputemail">Phone Number</label>
+							<div class="col-sm-9">
+								<input type="text" placeholder="+XX XXX XXX XXXX" id="phone_number" class="form-control" pattern='[(+)/0-9\-\(\)\s]+' style="margin-bottom: 4%;" name="phone" required>
+							</div>
+						</div>						<br>
+
+						<label class="col-sm-3 control-label" style="    padding-top: 7px;" for="demo-hor-inputemail">Purpose</label>
+							<div class="col-sm-9">
+								<input type="text" placeholder="Security, Infrastructure etc" id="demo-hor-inputemail" class="form-control" style="margin-bottom: 4%;" name="purpose" required>
+							</div>
+							<button class="btn btn-primary pull-right" data-animate="bounceIn" type="submit">Request</button>
+						</div>
+						
+					</form>
+					<br>
+				</div>
+				<div class="pad-ver">
+				<a href="/" class="btn-link text-center">Back to home</a>
+				</div>
+			</div>
+		</div>
+		</div>
+		
+		{% if messages %}
+			<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+			{% for message in messages %}
+			  {% if message.tags == 'error' %}
+			  <div class="alert-wrap in animated jellyIn">
+			    <div class="alert alert-danger" role="alert">
+			      <button class="close" type="button">
+			      <i class="fa fa-times-circle"></i>
+			      </button>
+			      <div class="media">
+			        <div class="media-body">
+			          <h4 class="alert-title"></h4>
+			          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+			        </div>
+			      </div>
+			    </div>
+			  </div>
+			  {% else %}
+			  <div class="alert-wrap in animated jellyIn">
+			    <div class="alert alert-success" role="alert">
+			      <button class="close" type="button">
+			      <i class="fa fa-times-circle"></i>
+			      </button>
+			      <div class="media">
+			        <div class="media-body">
+			          <h4 class="alert-title"></h4>
+			          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+			        </div>
+			      </div>
+			    </div>
+			  </div>
+			  {% endif %}
+			  {% endfor %}
+			</div>
+			{% endif %}
+
+	</div>
+	<script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+	<script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+	<script src="/static/customer/nifty.min.js"></script>
+	<script>
+        $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    </script>
+    <script type="text/javascript">
+		$("#phone_number").on("invalid", function () {
+        	this.setCustomValidity("Please enter a valid phone number.");
+    	});
+    </script>
+
+</body>
+</html>

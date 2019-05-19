@@ -1,0 +1,29 @@
+<div class="leftside">
+    <div class="sidebar">
+        <div class="" style="padding:10px;background-color:white">
+            <div>
+                <img style="width:100%" src="/media/{{profile.customer.logo}}" alt="" />
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li id="change_request_main">
+                <a href="/admin_settings/admin_dashboard/" id="main_change_dash">
+                    <i class="fa fa-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+        </ul>
+        <div class="sidebar-widget online-users">
+            <div class="body online-list">              
+                <div class="footer">
+                    <span class="btn btn-info" style="width:100%">
+                        <l class="fa fa-envelope-o" style="font-size:12px">
+                            {{profile.customer.help_text}}
+                        </l>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,203 @@
+{% extends 'cloud_management/home.html'%}
+
+
+
+{% block section_header %}
+      <h3>
+          Openstack Account Overview
+          <small>Select Your Account</small>
+      </h3>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+<section class="content">
+      <div class="row">
+      {% if not cloud_account_list and not error_message%}
+        <div class="alert alert-warning alert-dismissable">
+              <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+              <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+              <p>Your have not added cloud account. Please add one.<br>
+                <a href="#" class="create-cloud" ><i class="fa fa-cloud"></i>
+                    <span> Add Cloud</span>
+                </a>
+              </p>
+        </div>
+      {% endif %}
+       {% for each in cloud_account_list %}
+          <div class="col-md-4">
+              <!-- Success box -->
+              <div class="box disabled color-palette" style= "border-top: 3px solid #fff !important;">
+                  <div class="box-header">
+                  </div>
+                        <div class="box-body">
+                          <div class="row">
+                            <div class="col-md-12">
+                              <div class="info-box">
+                                <span class="info-box-icon bg-aqua"><img src="/static/img/openstack.png" class="img-circle" width="60"></span>
+                                <div class="info-box-content">
+                                  {% if each.status == '1' %}
+                                    <span class="info-box-text">
+                                    <h3>{{each.cloud_account_name}}</h3>
+                                    </span>
+                                    <span class="info-box-content">
+                                    <a class="small-box-footer" href="/cloud_management/{{each.account_type}}/{{each.cloud_account_id}}/dashboard">
+                                      <i class="fa fa-arrow-circle-right"> details ..</i>
+                                    </a>
+                                  </span>
+                                  {% else %}
+                                  <span class="info-box-text">
+                                    <h3>{{each.cloud_account_name}}</h3>
+                                    <h5>We are facing some connetivity </br> issue with this server</h5>
+                                    </span>
+                                  {% endif %}
+                                </div><!-- /.info-box-content -->
+                              </div><!-- /.info-box -->
+                            </div>
+                          </div>
+                          {% if each.status == '1' %}
+                          <div class="row">
+                              <div class="col-xs-12">
+                                  <div class="box box-solid">
+                                      <div class="box-header">
+                                            <h3 class="box-title">
+                                              <img src="/static/img/cpu.jpg" class="img-circle" width="30">
+                                              CPU Usage</h3>
+                                      </div>
+                                      <div class="row">
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                                <input type="text" value="{{each.cpu_usage_statistics.avg|floatformat}}" data-fgcolor="#f56954" class="dial" id = "memory_avg">
+                                                <div class="knob-label">AVG</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                                  <input  type="text" value="{{each.cpu_usage_statistics.min|floatformat}}" data-fgcolor="#00a65a" class="dial" id = "memory_min">
+                                                  <div class="knob-label">Min</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                                <input  type="text" value="{{each.cpu_usage_statistics.max|floatformat}}" data-fgcolor="#00c0ef" class="dial" id = "memory_max">
+                                                <div class="knob-label">Max</div>
+                                          </div><!-- ./col -->
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="row">
+                              <div class="col-xs-12">
+                                  <div class="box box-solid">
+                                      <div class="box-header">
+                                              <i class="fa fa-database"></i>
+                                              <h3 class="box-title">Memory Usage</h3>
+                                      </div>
+                                      <div class="row">
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                               <!--  <input type="text" value="{{each.memory_usage_statistics.avg|floatformat}}" data-fgcolor="#f56954" class="dial" id = "memory_avg"> -->
+                                               <input type="text" value="30" data-fgcolor="#f56954" class="dial" id = "memory_avg">
+                                                <div class="knob-label">AVG</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                                  <!-- <input  type="text" value="{{each.memory_usage_statistics.min|floatformat}}" data-fgcolor="#00a65a" class="dial" id = "memory_min"> -->
+                                                  <input  type="text" value="20" data-fgcolor="#00a65a" class="dial" id = "memory_min">
+                                                  <div class="knob-label">Min</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                                <!-- <input  type="text" value="{{each.memory_usage_statistics.max|floatformat}}" data-fgcolor="#00c0ef" class="dial" id = "memory_max"> -->
+                                                <input  type="text" value="67" data-fgcolor="#00c0ef" class="dial" id = "memory_max">
+                                                <div class="knob-label">Max</div>
+                                          </div><!-- ./col -->
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                           <div class="row">
+                              <div class="col-xs-12">
+                                  <div class="box box-solid">
+                                      <div class="box-header">
+                                              <i class="fa fa-arrow-up"></i>
+                                              <h3 class="box-title">
+                                                 Network Outgoing 
+                                                 <small>(B/s)</small>
+
+                                              </h3>
+                                      </div>
+                                      <div class="row">
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                              <h3>{{each.network_outgoing_speed.min|floatformat}}</h3>
+                                              <div class="knob-label">Min</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                              <h3>{{each.network_outgoing_speed.avg|floatformat:"-3"}}</h3>
+                                              <div class="knob-label">Avg</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                              <h3>{{each.network_outgoing_speed.max|floatformat}}</h3>
+                                              <div class="knob-label">Max</div>
+                                          </div><!-- ./col -->
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-xs-12">
+                                  <div class="box box-solid">
+                                      <div class="box-header">
+                                              <i class="fa fa-arrow-down"></i>
+                                              <h3 class="box-title">
+                                                   Network Incoming
+                                                   <small>(B/s)</small>
+                                              </h3>
+                                      </div>
+                                      <div class="row">
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                            <h3>{{each.network_incoming_speed.min|floatformat}}</h3>
+                                            <div class="knob-label">Min</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                            <h3>{{each.network_incoming_speed.avg|floatformat:"-3"}}</h3>
+                                            <div class="knob-label">Avg</div>
+                                          </div><!-- ./col -->
+                                          <div class="col-md-4 col-sm-6 col-xs-6 text-center">
+                                              <h3>{{each.network_incoming_speed.max|floatformat}}</h3>
+                                              <div class="knob-label">Max</div>
+                                          </div><!-- ./col -->
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                        {% endif %}
+
+                  </div><!-- /.box-body -->
+              </div><!-- /.box -->
+          </div><!-- /.col -->
+          {% endfor %} 
+        </div>
+</section>
+ <script>
+ 
+  $(".dial").knob({
+      'readOnly':true,
+      'width':60,
+      'height':60
+  });
+
+  var error_handler = function(){
+    $('#account_error').append('<div class="alert alert-danger alert-dismissable alert_div">'+
+    '<i class="fa fa-ban"></i>'+
+    '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'+
+    '<b>Faild! : </b>Invalid Credential'+
+    '</div>')
+  }
+   {% if openstack_status %}
+          $( document ).ready(function() {
+              $("#largeModal").modal('show');
+              error_handler()
+          });
+   {% endif %}
+    {% if aws_status %}
+          $( document ).ready(function() {
+              $("#largeModal").modal('show');
+              error_handler()
+              $('#myTab a[href="#aws_account"]').tab('show')
+          });
+   {% endif %}
+</script>
+{% endblock%}

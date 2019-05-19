@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Choices</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Survey | <small>Choices</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Choices</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        <a href="/survey/add_choice/" class="btn btn-info pull-right">Add Choice</a><br/>
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Choices</h3>
+                        </div>
+                        <div class="panel-body">
+                            {% if object_list|length > 0 %}
+    							<table class="table table-striped">
+    								<tr>
+    									<th> Choice Name</th>
+    									<th> Point </th>
+                                        <th> Edit </th>
+    								</tr>
+    								{% for choice in object_list %}
+    									<tr>
+    										<td>{{ choice.choice_name }}</td>
+    										<td>{{ choice.point }}</td>
+                                            <td><a href="/survey/edit_choice/{{choice.id}}/"><i class="fa fa-edit"></i></a></td>
+    									</tr>
+    								{% endfor %}
+    							</table>
+                            {% else %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        No Choices
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% include 'components/footer.html' %}
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_choices').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+	</body>
+</html>

@@ -1,0 +1,96 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Groups</title>
+        {% include "components/css.html"%}
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Workgroups <small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Administration</li>
+                        <li class="active">Workgroups</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                {% if message.tags == 'success' %}
+                                    <div class="alert alert-success" >{{ message|safe }}</div>
+                                {% else %}
+                                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <form id="" method="POST" action="" enctype="multipart/form-data">{% csrf_token %}
+                        <div class="box">
+                            {% if workgroups|length > 0 %}
+    							<table class="table table-striped" id="group_id">
+                                    <thead>
+        								<tr>
+        									<th> Name</th>
+        									<th> Customer</th>
+        									<th> Description</th>
+                                            <th> Status </th>
+                                            <th> SubGroups </th>
+        								</tr>
+                                    </thead>
+                                    <tbody>
+        								{% for group in workgroups %}
+        									<tr>
+        										<td>{{ group.workgroup }}</td>
+        										<td>{{ group.customer.customername }}</td>
+        										<td>{{ group.description }}</td>
+        										<td>{% if group.active %} Active {% else %} Not Active {% endif %} </td>
+        										<td>
+                                                    <table>
+                                                        {% for subgroup in group.subgroup_set.all %}
+                                                            <tr>
+                                                                {% if  subgroup.active %}
+                                                                    <td>{{forloop.counter}} ) {{subgroup.subgroupname}} <a href="{% url 'group_member_list' group_id=subgroup.id %}">View Members</a></td>
+                                                                {% endif %}
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                </td>
+        									</tr>
+        								{% endfor %}
+                                    </tbody>
+    							</table>
+                            {% else %}
+                                <div class="box-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            No Groups
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+        {% include "components/service_request.html"%}
+		{% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#group_id').DataTable({
+                    aaSorting: [[0, 'asc']],
+                });
+            });
+        </script>
+	</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Oneconsole</title>
+	{% include "components/css.html"%}
+
+
+</head>
+
+<body>
+	        <header>
+            <!-- <a href="/" class="logo"><i class="fa fa-bolt"></i> <span style="font-family: marlabs;">Oneconsole</span></a> -->
+            <nav class="navbar navbar-static-top" style="margin-left: 0px;">
+
+                <div class="navbar-left">
+                    <ul class="nav navbar-nav">
+                        
+                    </ul>
+                </div>
+
+                
+                <div class="navbar-right">
+                    <!-- <p class="navbar-text help_text">Help : {{profile.customer.help_text}}</p> -->
+                    <ul class="nav navbar-top-links pull-right">
+                       
+
+                       
+                        
+
+
+                        <li id="dropdown-user" class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle text-right">
+                                <span class="pull-right">
+                                    <img class="img-circle img-user media-object" src="/static/img/photo.jpg" alt="Profile Picture">
+                                </span>
+                                <div class="username hidden-xs">{{profile.user.username}}</div>
+                            </a>
+
+
+                            <div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default">
+
+                                <ul class="head-list" >
+                                    <li>
+                                        <a href="/customer/profile/">
+                                            <i class="fa fa-user fa-fw fa-lg"></i> Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/customize/dashboard/">
+                                            <span class="badge badge-danger pull-right"></span>
+                                            <i class="fa fa-dashboard fa-fw fa-lg"></i>Customize
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/logout/">
+                                            <i class="fa fa-sign-out fa-fw"></i> Logout
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <!-- Dropdown footer -->
+                                <!-- <div class="pad-all text-right">
+                                    <a href="/logout/" class="btn btn-danger" style="color:white">
+                                        <i class="fa fa-sign-out fa-fw"></i> Logout
+                                    </a>
+                                </div> -->
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+
+		
+
+        <div class="container" style="margin-top:5%">
+        	<div class="page-head" style="margin-top:10px">
+                <h2 class="text-thin">Customer | <small>{{customer}}</small></h2>
+            </div>
+        	<div class="row">
+        		<div class="panel">
+        			<div class="panel-heading">
+        				<div class="panel-title text-center">We are almost Done</div>
+        			</div>
+        			<div class="panel-body">
+        				<div class="row ">
+                            <div class="col-sm-3 text-center">
+                             <p class="h3 text-thin text-center">Customer Logo</p><br>
+                              <img src="/media/{{customer.logo}}" style="width:65%">
+                              <br>
+                              <form action="." method="POST" enctype="multipart/form-data" onsubmit="return validate()"> {% csrf_token %}
+                                <input type="file" name="logo" id="logo" required style="margin-left:10%">
+                                <br>
+                                <button type="submit" class="btn btn-sm btn-info">Update company Logo</button>
+                              </form>
+                              <div id="file_error" class="alert alert-danger" style="display:none;margin-top:5px;">
+                              </div>
+                            </div>
+
+                            <div class="col-sm-5">
+                                <p class="h3 text-thin text-center">Customer Status</p><br>
+                                <dl class="dl-horizontal">
+                                  <dt>Customer Name :</dt>
+                                  <dd>{{customer.customername}}</dd><br>
+                                  <dt>Package :</dt>
+                                  <dd> <label class="label label-info"> {{customer.package}}</label> </dd><br>
+                                  <dt>Language</dt>
+                                  <dd>English</dd><br>
+                                </dl>
+                            </div>
+                            <div class="col-sm-4">
+                              <p class="h3 text-thin text-center">Customer Modules</p><br>
+                                {% for mod in modules %}
+                                 <div class="col-sm-3">
+                                   <div class="panel panel-{% cycle "primary" "purple" "mint" "info" "success" %} panel-colorful">
+                                    <div class="pad-all text-center btn-hover-info add-tooltip" data-placement="bottom" data-toggle="tooltip" data-original-title="{{mod.module.module_name}}">
+                                      <span class="text-3x text-thin {{mod.module.icon}}"></span>
+                                    </div>
+                                  </div>
+                                </div>
+                                 {% endfor %}
+                            </div>
+                          </div>
+        				<a href="/welcome/continue/" class="btn btn-info pull-right">Continue to Oneconsole</a>
+        			</div>
+        		</div>
+        	</div>
+        </div>
+
+{% include "components/customer_footer.html"%}
+<script type="text/javascript">
+function validate()
+{
+    var extensions = new Array("jpg","jpeg","png"); 
+    var image_file = $('#logo').val(); 
+    var image_length = image_file.length; 
+    var pos = image_file.lastIndexOf('.') + 1; 
+    var ext = image_file.substring(pos, image_length); 
+    var final_ext = ext.toLowerCase(); 
+    for (i = 0; i < extensions.length; i++)
+    {
+        if(extensions[i] == final_ext)
+        {
+        return true;        
+        }
+    }
+    $('#file_error').html("You must upload an image file with one of the following extensions: "+ extensions.join(', ') +".");
+    $('#file_error').show();
+    return false;
+}
+</script>
+
+</body>
+</html>

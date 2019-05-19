@@ -1,0 +1,37 @@
+<ul class="pagination" style="display:block">
+    {% if page.has_previous %}
+        <li id="demo-dt-basic_previous" class="paginate_button previous" >
+            <a href="?page={{ page.previous_page_number }}">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        </li>
+    {% endif %}
+    {% for pnum in begin %}
+        <li class="paginate_button{% if page.number == pnum %} active{% endif %}" >
+            <a href="?page={{ pnum }}">{{ pnum }}</a>
+        </li>
+    {% endfor %}
+    {% if middle %}
+        <li class="paginate_button"><a href="#">.</a></li>
+        {% for pnum in middle %}
+            <li class="paginate_button{% if page.number == pnum %} active{% endif %}" >
+                <a href="?page={{ pnum }}">{{ pnum }}</a>
+            </li>
+        {% endfor %}
+    {% endif %}
+    {% if end %}
+        <li class="paginate_button"><a href="#">.</a></li>
+        {% for pnum in end %}
+            <li class="paginate_button{% if page.number == pnum %} active{% endif %}" >
+                <a href="?page={{ pnum }}">{{ pnum }}</a>
+            </li>
+        {% endfor %}
+    {% endif %}
+    {% if page.has_next %}
+        <li id="demo-dt-basic_next" class="paginate_button next" >
+            <a href="?page={{ page.next_page_number }}">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        </li>
+    {% endif %}
+</ul>

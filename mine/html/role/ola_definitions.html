@@ -1,0 +1,82 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>OLAs  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="box">
+              <div class="box-title">
+                <h3>List</h3>
+              </div>
+              <div class="box-body no-padding">
+                <table class="table borderless" id="ola_table">
+                  <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>SLA</th>
+                    <th>Commitment</th>
+                    <th>Condition</th>
+                    <th></th>
+                  </tr>
+                  </thead>
+                  {% for ola in olas %}
+                      <tr>
+                        <td><a href="/ola/edit/{{ola.id}}" style="color:inherit">{{ ola.name }}</a></td>
+                        <td>{{ ola.description }}</td>
+                        <td>{{ ola.sla_commitment.sla.name }}</td>
+                        <td>{{ ola.sla_commitment }}</td>
+                        <td>{{ ola.sla_commitment.sla.condition }}</td>
+                        {% if ola.id not in ola_actives %}
+                          <td><a  href="#" onclick="olaRemove({{ola.id}});" style="color:red;"><i class="glyphicon glyphicon-trash"></a></td>
+                        {% else %}
+                          <td style="color:green;"><i class="fa fa-check">Active</td>
+                        {% endif %}
+                      </tr>
+                  {% endfor %}
+              </table>  
+              </div>
+            </div>
+                        
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+    $("#ola_table").dataTable();
+    function olaRemove(olaid){
+          if (confirm("You are about to delete OLA.Do you want to continue?")){
+            window.location = '/ola/remove/'+olaid;
+          }
+          else{
+          }
+        }
+    </script>
+</html>

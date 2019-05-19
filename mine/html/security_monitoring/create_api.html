@@ -1,0 +1,125 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Create API Key  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="row">
+                <div class="well col-md-10">
+                    <div class="box">
+                       <table class="table table-hover table-stripped" id="person_table">
+                          <thead>
+                              <tr>
+                                <th style="display:none;">No</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Customer</th>
+                                <th></th>
+                                
+                              </tr> 
+                              </thead>
+                              <tbody>
+                            </tbody>
+
+                       </table>
+                       
+                    </div>
+                </div>
+                <div class="col-sm-2" style="margin-top:0px">  
+                    <div >
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="/all/events" ><i  ></i><span class="text" > View Events </span></a>
+                    </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    </body>
+
+<script type="text/javascript">
+  $('#person_table').dataTable( {
+
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/security/person/all",
+                   "dataSrc": ""
+               },
+               "columns": [
+                       { "": "fields.user__id",sClass: "hidden" },
+                       { "": "fields.user__username" },
+                       { "": "fields.department" },
+                       { "": "fields.customer__customername" },
+                       { "": ""},
+                       
+
+                   ],
+                "columnDefs": [ {
+            "targets": 4,
+            "data": null,
+            "defaultContent": "<button  class='btn btn-link' style='color:green;font-size: 12px;'>Create API Key</button>"},
+             ]
+           } );
+
+  $('#person_table tbody').on( 'click', 'td', function () {
+     //var data = table.row( $(this).parents('tr') ).data();
+        // console.log($(this).find("td").eq(index).html());
+        // console.log($(this).text());
+        // console.log($(this).text());
+        var th = $(this).closest('table').find('th').eq( this.cellIndex );
+        //console.log(th.html());
+       if ($(this).text()=="Create API Key"){
+          id = $(this).prev().prev().prev().prev().html();
+          location.href="/create/api/"+id;
+        }
+        
+    } );
+</script>
+</html>
+

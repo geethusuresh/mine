@@ -1,0 +1,307 @@
+<!-- /* ticket popup */ -->
+    <div class="modal fade" id="ticket_popup" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width:80%;">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: white!important;">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4>Tickets&nbsp Details <span id="date_span">{% if title_label = "True" %} ({{ date1|date:"M d, Y"|default:"" }} - {{ date2|date:"M d, Y"|default:"" }}){% else %}{% if title_label = "15 Days" %}({{ start_date|date:"M d, Y"|default:"" }} - {{ today|date:"M d, Y"|default:"" }}){% else %}{{ title_label }}{% endif %}{% endif %}</span> </h4>
+                        </div>
+                        <!-- <div class="col-md-2"> -->
+                        <!-- <div class="btn-group col-md-2" style="margin-left: -61px;">
+                            <a href="#" id="drop_thought" role="button" class="dropdown-toggle btn btn-info white-text" data-toggle="dropdown"><i class="fa fa-calendar"></i> </a>
+                            <ul class="dropdown-menu white-text" id="tools_drop" role="menu" aria- labelledby="drop_thought">
+                                <li id="l_week0"><a class="btn  white-text">Today</a></li>
+                                <li id="l_week"><a class="btn  white-text">Last Day</a></li> -->
+                                <!-- <li class="divider"></li> -->
+                                <!-- <li id="t_month"><a class="btn">Last Week</a></li> -->
+                                <!-- <li class="divider"></li> -->
+                                <!-- <li id="l_month"><a class="btn">Last Month</a></li> -->
+                                <!-- <li><a class="btn btn-primary">Permanent</a></li> -->
+                            <!-- </ul>
+                        </div> -->
+                        <!-- </div> -->
+                        <!-- </button> -->
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="tickets_change_div">
+                        <div id="tickets_div" class="col-md-12"></div>
+                        <div id="modal_tickets_div" class="col-md-12" style="display:none;">
+                            <div class="box">
+                                <table class="table table-hover table-striped" style="table-layout: fixed;    word-wrap: break-word;" id="modal_ticket_table">
+                                    <thead>
+                                        <tr>
+                                          <th style="width:60px;">Ticket ID</th>
+                                          <th style="width:100px;">Created Date</th>
+                                          <th>Ticket Summary</th>
+                                          <th style="width:60px;">Severity</th>
+                                          <th style="width:60px;">Status</th>
+                                          <th style="width:100px;">Escalated Date</th>
+                                          <th style="width:60px;">Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border:0px">
+                    <!-- <button class="btn btn-info" style="float:right;display:none;" id="host_submit" onclick="fetch_data()" type="submit">Fetch Events</button> -->
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+<!-- end ticket popup -->
+
+
+<script type="text/javascript">
+
+filter_type = ''
+filter_value = ''
+
+function changeChartTicket(dat) {
+            if (dat == 'bar') {
+                chart.series[0].update({
+                    type: "bar"
+                });
+                $("#tickets_div").show();
+                $("#modal_tickets_div").hide();
+            } else if (dat == 'line') {
+                chart.series[0].update({
+                    type: "line"
+                });
+                $("#chart_div").show();
+                $("#modal_events_div").hide();
+            } else if (dat == 'area') {
+                chart.series[0].update({
+                    type: "area"
+                });
+                $("#chart_div").show();
+                $("#modal_events_div").hide();
+            } else if (dat == 'events') {
+                $("#chart_div").hide();
+                $("#modal_events_div").show();
+            }
+        }
+
+function modalTicketTable(temp) {
+    console.log("temp"+temp)
+    if ($("#modal_ticket_table").hasClass('initialized')) {
+        $('#modal_ticket_table').dataTable().fnDestroy();
+    } else {
+        $("#modal_ticket_table").addClass('initialized')
+    }
+    $('#modal_ticket_table').dataTable({
+        "bLengthChange": false,
+        // "bFilter": false,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "processing": true,
+        "ajax": {
+            "processing": true,
+            "url": "/redcanary/popup/tickets",
+            "dataType": "json",
+            "type": "POST",
+            "data": {
+                filter_type: filter_type,
+                filter_value: filter_value,
+                date: temp,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            "dataSrc": ""
+        },
+        "columns": [{
+            "": "fields.0"
+        }, {
+            "": "fields.1"
+        }, {
+            "": "fields.2"
+        }, {
+            "": "fields.3"
+        }],
+    });
+    $("#tickets_div").hide();
+    $("#modal_tickets_div").show();
+
+}
+
+function draw_tickets(key, value) {
+    console.log('drawww')
+    chart = new Highcharts.Chart({
+        chart: {
+            type: 'column',
+            renderTo: 'tickets_div',
+        },
+        title: {
+            text: ''
+        },
+        exporting: {
+            enabled: false
+        },                
+        xAxis: {
+            min: 0,
+            max: 5,
+            categories: key,
+            labels: {
+                rotation: -45
+            },
+        },
+        scrollbar: {
+            enabled: false,
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Count'
+            }
+        },
+
+        tooltip: {
+            formatter: function() {
+                return '' +
+                    this.series.name + ': ' + this.y;
+            }
+        },
+
+        plotOptions: {
+            column: {
+                minPointLength: 4
+            },
+            series: {
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.y}'
+                }
+            }
+        },
+
+        series: [{
+            allowPointSelect: true,
+            type: 'column',
+            color: '#FF0000',
+            name: 'Tickets',
+            data: value,
+            point: {
+                events: {
+                    click: function() {
+                        modalTicketTable(this.category);
+                    }
+                }
+            }
+        }]
+    });
+}
+function view_tickets(name,type){
+
+    filter_type = type
+    filter_value = name
+
+        $.ajax({
+            url: "/redcanary/security/viewtickets",
+            type: "POST",
+            dataType: "json",
+            data: {
+                filter_value: name,
+                chart_type: type,
+                start_date: '{{ start_date }}',
+                end_date: '{{ end_date }}',
+                duration: '{{ duration }}',
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // var obj = $.parseJSON(data);
+                // draw_map(obj);
+                var key = [];
+                var value = [];
+                for (var prop in data) {
+                    // alert(prop + " is " + data[prop]);
+                    key.push(data[prop][1]);
+                    value.push(data[prop][0]);
+                }
+                draw_tickets(key, value)
+                $("#ticket_popup").modal('show');
+                $("#tickets_div").show();
+                $("#modal_tickets_div").hide();
+
+            },
+            error: function(xhr, errmsg, err) {
+                alert(err);
+            }
+        });
+        return false;
+    }
+function view_tickets_only(name,type){
+
+    filter_type = type
+    filter_value = name
+    // var header4 = "Header"
+    // var header3 = "Severity"
+    // if(filter_type == "Category"){
+    //     header4 = "Sub Category"
+    // }
+    // if(filter_type == "incident"){
+    //     header4 = "Workgroup"
+    // }
+    // if(filter_type == "tickets") {
+    //     header4 =  "Source"
+    // }
+    // if(filter_type == "severity"){
+    //     header4 =  "Source"
+    //     header3 = "Severity"
+    // }
+    // if(filter_type == "Escalated"){
+    //     header4 = "Workgroup"
+    // }
+            
+
+ if ($("#modal_ticket_table").hasClass('initialized')) {
+        $('#modal_ticket_table').dataTable().fnDestroy();
+    } else {
+        $("#modal_ticket_table").addClass('initialized')
+    }
+    $('#modal_ticket_table').dataTable({
+        "bLengthChange": false,
+        // "bFilter": false,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "processing": true,
+        "ajax": {
+            "processing": true,
+            "url": "/redcanary/popup/tickets",
+            "dataType": "json",
+            "type": "POST",
+            "data": {
+                filter_type: filter_type,
+                filter_value: filter_value,
+                start_date: '{{ start_date }}',
+                end_date: '{{ end_date }}',
+                ticket_action : '{{ ticket_action }}',
+                duration: '{{ duration }}',
+                creationdate__gte: '{{ creationdate__gte }}',
+                creationdate__lte: '{{ creationdate__lte }}',
+                creationdate__year: '{{ creationdate__year }}',
+                creationdate__month: '{{ creationdate__month }}',
+                creationdate__day: '{{ creationdate__day }}',
+                date1 : '{{ date1 }}',
+                date2 : '{{ date2 }}',
+                source : '{{ source }}',
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            "dataSrc": ""
+        },
+
+    });
+    $("#ticket_popup").modal('show');
+    $("#tickets_div").hide();
+    $("#modal_tickets_div").show();
+    }
+</script>

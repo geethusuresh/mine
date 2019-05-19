@@ -1,0 +1,504 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style type="text/css">
+        .jqstooltip{
+          box-sizing: content-box;
+        }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+        <div class="wrapper">
+                     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+ 
+{% if alert_message %}
+{% for alert in alert_message %}
+    {% if profile.customer in alert.viewable_custs.all %}
+        <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Event Index | <small>{{ip}}</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active"><a href="/dashboard/index/">Security Dashboard</a></li>
+                    <li><a href="/security/host/details/">Protection</a></li>
+                    <li><a href="/dashboard/index/host/{{hid}}">Security Analysis</a></li>
+                    <li class="active">Event Index</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+                  <div class="row">
+
+                    <div class="col-sm-8">
+                      <div class="panel">
+
+                        <div class="panel-heading">
+
+                          <h3 class="panel-title">Event Analysis</h3>
+                        </div>
+
+                        <div class="panel-body">
+                          <dl class="dl-horizontal">
+                            <dt>Event Location :</dt>
+                            <dd>{{country}}</dd>
+                            <dt>Event TimeZone :</dt>
+                            <dd>{{timezone}}</dd>
+                          </dl>
+                          <div id="arcs"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                  <!--   <div class="col-sm-4">
+                      <div class="panel">
+                        <div class="panel-title btn-warning">Attacked Location</div>
+                        <div class="panel-body">
+                          
+                        </div>
+                      </div>
+                    </div> -->
+
+                    <div class="col-sm-4">
+                      <div class="panel">
+                        <div class="panel-heading"><p class="panel-title">Global Blacklist Lookup Result</p></div>
+                          <a data-toggle="modal" data-target='#blacklist' class="pull-right btn btn-sm btn-info">Add to Blacklist</a>
+                        <div class="panel-body">
+
+                          <table class="table">
+                            <thead>
+                              <th>Server</th>
+                              <th>Status</th>
+                            </thead>
+                            <tbody>
+                            {% for app in lists %}
+                              <tr>
+                                
+                                <td> {{app.server}} </td>
+                                {% if app.status == False %}
+                                <td><label class="label label-success">Ok</label></td>
+                                {% else %}
+                                <td> <label class="label label-danger">Blacklisted</label></td>
+                                {% endif %}
+                                <!-- <td>{{app.status}}</td> -->
+                                
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          
+                        </div>
+                      </div>
+
+                      <div class="panel">
+                        <div class="panel-heading">
+                          <div class="panel-title">Events Count by Priority</div>
+                        </div>
+                        <div class="panel-body">
+                          <table class="table table-responsive text-center">
+                            <thead>
+                              <th>Event Type</th>
+                              <th>Count(today)</th>
+                              <th>Graph(one week)</th>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td><p class="text label label-info label-as-badge">Low</p></td>
+                                <td>{{events_counts.0}}</td>
+                                <td><span id="low_div"></span></td>
+                              </tr>
+                              <tr>
+                                <td><p class="text label label-primary label-as-badge" style="margin-top:5px;">Medium</p></td>
+                                <td>{{events_counts.1}}</td>
+                                <td><span id="medium_div"></span></td>
+                              </tr>
+                              <tr>
+                                <td><p class="text label label-warning label-as-badge" style="margin-top:5px;">High</p></td>
+                                <td>{{events_counts.2}}</td>
+                                <td><span id="high_div"></span></td>
+                              </tr>
+                              <tr>
+                                <td><p class="text label label-danger label-as-badge" style="margin-top:5px;">Severe</p></td>
+                                <td>{{events_counts.3}}</td>
+                                <td><span id="severe_div"></span></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+<!--                       <div class="row col-sm-12">
+                        <div class="panel">
+                          <div class="panel-heading">
+                            <div class="row">
+                              <div class="col-md-12 text-center">
+                                <div class="col-md-3">Event Type</div>
+                                <div class="col-md-3">Count(today)</div>
+                                <div class="col-md-6">Graph(one week)</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="panel-body table-responsive no-padding">
+                            <div class="row col-sm-12" style="">
+                              <div class="col-md-3">
+                                <p class="text label label-info label-as-badge">Low</p><hr>
+                                <p class="text label label-primary label-as-badge" style="margin-top:5px;">Medium</p><hr>
+                                <p class="text label label-warning label-as-badge" style="margin-top:5px;">High</p><hr>
+                                <p class="text label label-danger label-as-badge" style="margin-top:5px;">Severe</p><hr>
+                              </div>
+                              <div class="col-md-3 text-center">
+                                <p>{{events_counts.0}}</p><hr>
+                                <p>{{events_counts.1}}</p><hr>
+                                <p>{{events_counts.2}}</p><hr>
+                                <p>{{events_counts.3}}</p><hr>
+                              </div>
+                              <div class="col-md-6 text-center">
+                                <span id="low_div"></span><hr>
+                                <span id="medium_div"></span><hr>
+                                <span id="high_div"></span><hr>
+                                <span id="severe_div"></span><hr>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div> -->
+                        
+                    </div>
+                  </div>
+                  <!-- {{graph}} -->
+                  <div class="row col-sm-12">
+                    <div class="panel">
+                      <div class="panel-heading">
+                        <h4 class="panel-title text-center">Events From This IP (Last 24 Hours)</h4>
+                      </div>
+                      <div class="panel-body table-responsive no-padding">
+                        <div class="row col-sm-12" style="text-align:center">
+                          {% if graph %}
+                          <!-- <canvas id="charter" width="950" height="400"></canvas> -->
+                          <div id="charter" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                          {% else %}
+                          <div class="alert alert-mint">No security events found </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+            </div>
+          </div>
+        </div>
+
+
+
+      <div class="modal fade" id="blacklist" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+                </div>
+                <div class="modal-body">
+                  <form action="/blacklist/add/" method="post" enctype="multipart/form-data">{% csrf_token %}
+                  <input type="ip" name="source" value="{{ip}}" class="hidden">
+                  <input type="number" name="host" value="{{host_id}}" class="hidden">
+                  <p class="text-thin">Are you sure you want to add <strong> {{ip}} </strong>to blacklist </p>
+                  <button type="submit" class="btn btn-success pull-right">Add to Blacklist</button>
+                  </form>
+                </div>
+                <div class="modal-footer" style="border:0px">
+                <!-- <span style="color:red">* </span> are mandatory -->
+                </div>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+          </div>
+
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script type="text/javascript" src="/static/map/d3.min.js"></script>
+    <script type="text/javascript" src="/static/map/topojson.min.js"></script>
+    <script type="text/javascript" src="/static/map/datamaps.world.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-sparkline.min.js"></script>
+
+    </body>
+     <script>
+    var bombMap = new Datamap({
+        element: document.getElementById('arcs'),
+        scope: 'world',
+        responsive: true,
+        geographyConfig: {
+            popupOnHover: true,
+            highlightOnHover: true,      
+        },
+        fills: {
+            'USA': '#1f77b4',
+            'RUS': "#FF2C03",
+            'PRK': '#ff7f0e',
+            'PRC': '#2ca02c',
+            'IND': '#e377c2',
+            'GBR': '#8c564b',
+            'FRA': '#d62728',
+            'PAK': '#7f7f7f',
+            defaultFill: 'rgb(171, 221, 164)'
+        },
+        data: {
+
+        }
+      });
+      var bombs = [
+        {
+          name: '{{country}}',
+          radius: 10,
+          yeild: 10,
+          country: '{{country}}',
+          fillKey: 'RUS',
+          significance: 'First',
+          // date: '',
+          latitude: {{location.lat}},
+          longitude: {{location.longe}}
+        },
+
+      ];
+      bombMap.bubbles(bombs, {
+        popupTemplate: function (geo, data) { 
+                return ['<div class="hoverinfo">' +  data.name,
+                
+                // '<br/>Date: ' +  data.date + '',
+                '</div>'].join('');
+        }
+      });
+    </script>
+<!-- 
+     <script>
+      var arcs = new Datamap({
+        element: document.getElementById("arcs"),
+        scope: 'world',
+        responsive: true,
+        fills: {
+          defaultFill: "#ABDDA4",
+          win: '#0fa0fa'
+        },
+        data: {
+          'TX': { fillKey: 'win' },
+          'FL': { fillKey: 'win' },
+          'NC': { fillKey: 'win' },
+          'CA': { fillKey: 'win' },
+          'NY': { fillKey: 'win' },
+          'CO': { fillKey: 'win' }
+        }
+      });
+
+      arcs.arc([
+
+        {
+            origin: {
+                latitude: 30.194444,
+                longitude: -97.67
+            },
+            destination: {
+                latitude: 25.793333,
+                longitude: 80.290556
+            },
+            options: {
+              strokeWidth: 2,
+              strokeColor: 'rgba(100, 10, 200, 0.4)',
+      greatArc: true
+            }
+        },
+      ],  {strokeWidth: 1, arcSharpness: 1.4});
+                
+     </script> -->
+     <script src="/static/chartjs/Chart.js"></script>
+      <script>
+
+     //  var data = {
+     //      labels: [{% for app in graph %}'{{app.times}}'{% if forloop.couter != 0 %},{% endif %} {% endfor %}],
+     //      datasets: [
+     //          {
+     //              label: "My First dataset",
+     //              fillColor: " rgba(0,0,0,0)",
+     //              strokeColor: "#f76c51",
+     //              highlightFill: "rgba(220,220,220,0.75)",
+     //              highlightStroke: "rgba(220,220,220,1)",
+     //              data: [{% for app in graph %} {{app.count}} {% if forloop.couter != 0 %},{% endif %} {% endfor %}]
+     //          },
+     //      ]
+     //  };
+     //  var ctx = document.getElementById("charter").getContext("2d");
+     //  var myLineChart = new Chart(ctx).Line(data, {showXLabels: 5 });
+
+      </script>
+     <script>
+      $(document).ready(function(){
+      $('#table_id').DataTable();
+    })
+    </script>
+
+    <script type="text/javascript" src="/static/js/highcharts/highcharts.js"></script>
+    <script type="text/javascript">
+
+        var event_list_from_ip = {{graph | safe}}
+
+        // console.log(event_list_from_ip) 
+
+        var data = []
+        $.each(event_list_from_ip, function( index, value ){    
+          date = Date.parse(value.times);
+          data.push([date, value.count]);
+        });
+
+      $('#charter').highcharts({
+        chart: {
+            type: 'line'
+        },
+        title:{
+            text:''
+        },
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats : {
+                minute: '%H:%M'
+            },
+            title: {
+                text: 'Time'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Count'
+            },
+            allowDecimals: false,
+            min: 0
+        },
+        tooltip: {
+            formatter: function() {
+              return '<b>Date: </b>' + Highcharts.dateFormat('%m-%d %H:%M', new Date(this.x)) + 
+                      '<br/><b>Count:</b> ' + this.y;
+            }
+        },
+
+        plotOptions: {
+            spline: {
+                marker: {
+                    enabled: true
+                }
+            }
+        },
+
+        series: [{
+            showInLegend: false,
+            data: data,
+            color: '#f76c51',
+            dataGrouping: {
+                enabled: false
+            }
+        }]
+    });
+
+    </script>
+    
+    <script>
+
+          $("#sec_dash").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>
+
+          <script type="text/javascript">
+          $.ajax({
+              url:"/security/category/graph/"+'{{host}}',
+              type:"POST",
+              dataType:"json",
+              data:{
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                'source_ip': '{{ip}}'
+              },
+              success : function(data) {
+                $("#low_div").sparkline(data[0], {
+                    type: 'line',
+                    width: '60px'});
+             
+                $("#medium_div").sparkline(data[1], {
+                    type: 'line',
+                    width: '60px'});
+           
+                $("#high_div").sparkline(data[2], {
+                    type: 'line',
+                    width: '60px'});
+           
+                $("#severe_div").sparkline(data[3], {
+                    type: 'line',
+                    width: '60px'});
+
+              },
+              // error : function(xhr,errmsg,err) {
+              //   alert(err);
+              // }
+            });
+          </script>
+
+    
+
+</html>
+
+
+
+
+
+
+
+
+
+

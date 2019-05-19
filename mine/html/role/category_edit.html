@@ -1,0 +1,105 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Category Edit  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="col-md-10 ">
+              <div class="box">
+                <div class="box-title">
+                  <h2>{{ cat_item }}<small></small></h2>
+                </div>
+                <div class="box-body">
+                  <form method="POST" action ="">
+                          {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" >
+                                    <div class="col-sm-4">
+                                        Name<input class="form-control centered" type="text" id="category_name" name="category_name" value="{{ cat_item.name }}" ></p><br><br>
+                                        Description<input class="form-control centered" type="text" id="description" name="description" value="{{ cat_item.description }}" >
+                                          </p>
+                                    </div>
+                                    <div class="col-sm-4">
+                                          Customer<select class="form-control centered" id="customerid" name="customerid">
+                                            {% for customer in customers %}
+                                              {% if customer.id == cat_item.customer.id %}
+                                                <option selected value="{{ customer.id }}">{{ customer.customername }}</option>
+                                              {% else %}
+                                                <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                              {% endif %}
+                                              }
+                                            {% endfor %}
+                                          </select></p>
+                                      <br>
+                                      <br>
+                                      Parent<select class="form-control centered" id="parent" name="parent" >
+                                            {% if cat_item.parent == 0 %}
+                                              <option selected value="0">Root</option>
+                                                  {% for parent in parent_list %}
+                                                    {% if parent.id == cat_item.parent %}
+                                                      <option selected value="{{ parent.id }}">{{ parent.name }}</option>
+                                                    {% else %}
+                                                      <option value="{{ parent.id }}">{{ parent.name }}</option>
+                                                    {% endif %}
+                                                  {% endfor %}
+                                            {% else%}
+                                                <option  value="0">Root</option>
+                                                {% for parent in parent_list %}
+                                                {% if parent.id == cat_item.parent %}
+                                                  <option selected value="{{ parent.id }}">{{ parent.name }}</option>
+                                                {% else %}
+                                                  <option value="{{ parent.id }}">{{ parent.name }}</option>
+                                                {% endif %}
+                                              {% endfor %}
+                                            {% endif %}
+                                          </select></p>
+                                    </div>
+                                    <div class="col-sm-4">
+                                    {% if cat_item.visibility %}
+                                      Visibility::&nbsp&nbsp<input class="" type="radio" id="visibility" name="visibility" value="yes" checked>Yes&nbsp&nbsp
+                                      <input class="" type="radio" id="visibility" name="visibility" value="no">No
+                                    {% else %}
+                                      Visibility::&nbsp&nbsp<input class="" type="radio" id="visibility" name="visibility" value="yes">Yes&nbsp&nbsp
+                                      <input class="" type="radio" id="visibility" name="visibility" value="no"checked>No
+                                    {% endif %}
+                                      <button class="btn btn-success pull-right" style="margin-top:30%" type="submit">Update</button>
+                                    
+                                    </div>
+                                    </div>     
+                                </fieldset>
+                          </form>
+                </div>
+              </div>
+            </div>         
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>

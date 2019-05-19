@@ -1,0 +1,720 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Manage Zabbix Configuration File</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap_cmb_datepicker.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datetimepicker.min.css">
+    <style>
+    .dataTables_wrapper .dataTables_filter {color: #333333; margin-top: 5px;}
+    .choosefile{display: inline-block!important; margin-right: 10px; margin-left: 30px; border: 1px #ccc dashed; border-radius: 5px;    padding: 5px 3px;}
+    .zabbix-manage {padding-bottom:15px;}
+    .zabbix-manage .panel-body{padding:7px;}
+    .zabbix-manage h3{font-size:16px; font-weight:normal; color:#1a83ce; text-transform:uppercase}
+    .zabbix-manage h4{font-size:14px;  color:#04040c;}
+    .zabbix-manage .addlooparea{border:radius:10px; border:1px #f1f1f1 solid;}
+    .zabbix-manage .panel-title{padding:0px;}
+    .zabbix-manage .addmore-btn{margin-top:10px; border-radius:4px;}
+    .zabbix-manage .panel-body{border-bottom:1px #ccc solid;}
+    .zabbix-manage .panel-body:last-child{border-bottom:0px;}
+    .zabbix-manage .panel-body:nth-child(even){background-color:#f8f8f8;}
+    .zabbix-manage .panel-body{position:relative;}
+    .zabbix-manage .panel-body .clearkey{position:absolute; top:40%; right:50px; font-size:18px; color:#9b0f1f; cursor:pointer;}
+    .zabbix-manage .panel-body .requiredrow input{border-color:#9b0f1f!important;}
+    .zabbix-manage .panel-body .requiredrow .text-danger{padding-top:5px;}
+    .zabbix-manage .helpcolor{color:#999;}
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/hint.css">
+</head>
+<body class="fixed" style="font-size:13px">
+{% include "components/header.html"%}
+<div class="wrapper">
+    {% include "side_bar/sidebar.html"%}
+    <div class="rightside">
+        <div class="page-head" style="margin-top:10px">
+            <h1>Manage Zabbix Configuration File
+                <small></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li>You are here:</li>
+                <li><a href="/">Home</a></li>
+                <li class="active">Manage Zabbix Configuration File</li>
+            </ol>
+        </div>
+        <div class="content">
+            <div class="col-sm-12">
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <div class="alert alert-success">{{ message|safe }}</div>
+                {% else %}
+                <div class="alert alert-danger">{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% if not uploaded %}
+            <div class="col-sm-12 zabbix-manage">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <form method="post" action="/advanced_monitoring/zabbix-manage-conf-file/" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <b>Upload Configuration file:</b>
+                                            <input type="file" name="config_file" class="choosefile" onclick="$('#file_error').html('')">
+                                            <input class="btn btn-primary" style="display:inline-block;" type="submit" value="Upload">
+                                            {% if message %}<p id="file_error" style="color:red">{{ message }}</p>{% endif %}
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if uploaded %}
+            <div class="col-sm-12 zabbix-manage">
+                <form method="post" action="/advanced_monitoring/zabbix-update-conf-file/">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>VIRTUAL MACHINE</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="vm_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span>Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":2" == "vm" %}
+                                        <fieldset>
+                                            <div class="panel-body vm-mtr">
+                                                <div class="row">
+                                                    <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different virtual machines."  class="hint--right"> <i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                                    <div class="col-md-4"><input data-name="key" name="vm_key_{{ forloop.counter }}" prev-data="{{ key|slice:'3:' }}" type="text" class="form-control vm-key" value="{{ key|slice:'3:' }}" onchange="validate(this, 'vm')" required/></div>
+                                                    <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">Azure Username <span  class="hint--right" aria-label="Azure account username."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                    <div class="col-md-4"><input data-name="username" name="vm_username_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.username }}" required/></div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account password."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                    <div class="col-md-4"><input data-name="password" name="vm_password_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.password }}" required/></div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Virtual machine's subscription id."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                    <div class="col-md-4"><input data-name="subscription_id" name="vm_subscription_id_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.subscription_id }}" required/></div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="Virtual machine's resource group." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                    <div class="col-md-4"><input data-name="resource_group" name="vm_resource_group_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.resource_group_name }}" required/></div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">Virtual Machine Name <span  class="hint--right" aria-label="Virtual machine's name."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                    <div class="col-md-4"><input data-name="vm_name" name="vm_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.vm_name }}" required/></div>
+                                                </div>
+                                                <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'vm')"><i class="fa fa-trash-o"></i></div>
+                                            </div>
+                                        </fieldset>
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class='panel-body vm-mtr' style="display:none">
+                                        <div class='row'>
+                                            <div class='col-md-4'><h4>Key <span  class="hint--right" class="hint--right" aria-label="The key is used to differentiate between different virtual machines."><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class='col-md-4'>
+                                                <input data-name='key' type='text' class='form-control vm-key' onchange="validate(this, 'vm')"/>
+                                            </div>
+                                            <div class='col-md-4 text-danger' style='display:none'>Key already exist</div>
+                                        </div>
+                                        <div class='row'>
+                                            <div class='col-md-4'>Azure Username <span  class="hint--right" aria-label="Azure account username."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class='col-md-4'><input data-name='username' type='text' class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account password."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Virtual machine's subscription ID."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="subscription_id" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="virtual machine's resource group name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="resource_group" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Virtual Machine Name <span  class="hint--right" aria-label="Virtual machine's name."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="vm_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'vm')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>SQL DATABASE</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="sql_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span> Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":3" == "sql"  %}
+                                        <div class="panel-body sql-mtr">
+                                            <div class="row">
+                                                <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different SQLs."><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                                <div class="col-md-4"><input data-name="key" name="sql_key_{{ forloop.counter }}" prev-data="{{ key|slice:'4:' }}" type="text" class="form-control sql-key" value="{{ key|slice:'4:' }}" onchange="validate(this, 'sql')" required/></div>
+                                                <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="username" name="sql_username_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.username }}" required/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Password <span  class="hint--right" aria-label="Azure account password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="password" name="sql_password_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.password }}" required/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="SQL's subscription id."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="subscription_id" name="sql_subscription_id_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.subscription_id }}" required/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Resource Group <span  class="hint--right" aria-label="SQL's resource group." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="resource_group" name="sql_resource_group_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.resource_group }}" required/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Server Name <span  class="hint--right" aria-label="SQL server name."><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="server_name" name="sql_server_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.server_name }}" required/></div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">Database Name <span  class="hint--right" aria-label="SQL database name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                                <div class="col-md-4"><input data-name="database_name" name="sql_database_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.database_name }}" required/></div>
+                                            </div>
+                                            <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'sql')"><i class="fa fa-trash-o"></i></div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+
+                                <div class="panel-body sql-mtr" style="display:none">
+                                    <div class="row">
+                                        <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different SQLs." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                        <div class="col-md-4"><input data-name="key" type="text" class="form-control sql-key" onchange="validate(this, 'sql')"/></div>
+                                        <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="username" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Password <span  class="hint--right" aria-label="Azure account password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="password" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="SQL's subscription ID." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="subscription_id" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Resource Group <span  class="hint--right" aria-label="SQL's resource group." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="resource_group" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Server Name <span  class="hint--right" aria-label="SQL server name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="server_name" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">Database Name <span  class="hint--right" aria-label="SQL database name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                        <div class="col-md-4"><input data-name="database_name" type="text" class="form-control"/></div>
+                                    </div>
+                                    <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'sql')"><i class="fa fa-trash-o"></i></div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>AZURE REDIS</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="redis_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span>Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":5" == "redis"  %}
+                                    <div class="panel-body redis-mtr">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Redis." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" name="redis_key_{{ forloop.counter }}" prev-data="{{ key|slice:'6:' }}" type="text" class="form-control redis-key" value="{{ key|slice:'6:' }}" onchange="validate(this, 'redis')" required/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" name="redis_username_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.username }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" name="redis_password_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.password }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Redis's subscription ID." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="subscription_id" name="redis_subscription_id_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.subscription_id }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="Redis's resource group name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="resource_group_name" name="redis_resource_group_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.resource_group_name }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Redis Name <span  class="hint--right" aria-label="Redis name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="redis_name" name="redis_redis_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.redis_name }}" required/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'redis')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class="panel-body redis-mtr" style="display:none">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Redis." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" type="text" class="form-control redis-key" onchange="validate(this, 'redis')"/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Redis's subscription ID." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="subscription_id" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="Redis's resource group name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="resource_group_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Redis Name <span  class="hint--right" aria-label="Redis name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="redis_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'redis')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>AZURE WEB APP MONITOR</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="web_app_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span>Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":6" == "webapp"  %}
+                                    <div class="panel-body web-app-mtr">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Web apps." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" name="webapp_key_{{ forloop.counter }}" prev-data="{{ key|slice:'7:' }}" type="text" class="form-control webapp-key" value="{{ key|slice:'7:' }}" onchange="validate(this, 'webapp')" required/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" name="webapp_username_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.username }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" name="webapp_password_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.password }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Web app's subscription ID." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="subscription_id" name="webapp_subscription_id_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.subscription_id }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="Web app's resource group name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="resource_group_name" name="webapp_resource_group_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.resource_group_name }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Name <span  class="hint--right" aria-label="Web app name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_app_name" name="webapp_web_app_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.web_app_name }}" required/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'webapp')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class="panel-body web-app-mtr" style="display:none">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Web apps." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" type="text" class="form-control webapp-key" onchange="validate(this, 'webapp')"/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Username <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Azure Password <span  class="hint--right" aria-label="Azure account username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Subscription ID <span  class="hint--right" aria-label="Web app's subscription ID." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="subscription_id" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Resource Group Name <span  class="hint--right" aria-label="Web app's resource group." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="resource_group_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Name <span  class="hint--right" aria-label="Web app name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_app_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'webapp')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>AZURE WEB JOB STATUS MONITOR</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="web_job_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span>Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":6" == "webjob"  %}
+                                    <div class="panel-body web-job-status-mtr">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Web jobs." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" name="webjob_key_{{ forloop.counter }}" prev-data="{{ key|slice:'7:' }}" type="text" class="form-control webjob-key" value="{{ key|slice:'7:' }}" onchange="validate(this, 'webjob')" required/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Username <span  class="hint--right" aria-label="Web app's username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" name="webjob_username_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.username }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Password <span  class="hint--right" aria-label="Web app's password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" name="webjob_password_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.password }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Name <span  class="hint--right" aria-label="Web app name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_app_name" name="webjob_web_app_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.web_app_name }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web Job Name <span  class="hint--right" aria-label="Web job name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_job_name" name="webjob_web_job_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.web_job_name }}" required/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'webjob')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class="panel-body web-job-status-mtr" style="display:none">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Web jobs." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" type="text" class="form-control webjob-key" onchange="validate(this, 'webjob')"/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Username <span  class="hint--right" aria-label="Web app's username." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="username" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Password <span  class="hint--right" aria-label="Web app's password." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="password" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web App Name <span  class="hint--right" aria-label="Web app name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_app_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Web Job Name <span  class="hint--right" aria-label="Web job name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="web_job_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'webjob')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-title">
+                                    <div class="col-md-6 "><h3>AZURE STORAGE QUEUE MONITOR</h3></div>
+                                    <div class="col-md-6 ">
+                                        <a id="storage_queue_add_more" class="pull-right btn btn-success addmore-btn">
+                                            <span class="glyphicon glyphicon-plus"></span>Add more
+                                        </a>
+                                    </div>
+                                </div>
+                                {% for key, value in current_values.iteritems %}
+                                    {% if key|slice:":7" == "storage"  %}
+                                    <div class="panel-body storage-queue-mtr">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Storage accounts." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" name="storage_key_{{ forloop.counter }}" prev-data="{{ key|slice:'8:' }}" type="text" class="form-control storage-key" value="{{ key|slice:'8:' }}" onchange="validate(this, 'storage')" required/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Storage Account Name <span  class="hint--right" aria-label="Storage account name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="storage_account_name" name="storage_storage_account_name_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.storage_account_name }}" required/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Storage Account Key <span  class="hint--right" aria-label="Storage account key." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="storage_account_key" name="storage_storage_account_key_{{ forloop.counter }}" type="text" class="form-control" value="{{ value.key }}" required/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'storage')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                    <div class="panel-body storage-queue-mtr" style="display:none">
+                                        <div class="row">
+                                            <div class="col-md-4"><h4>Key <span  class="hint--right" aria-label="The key should be unique and is used to differentiate between different Storage accounts." ><i class="fa fa-question-circle helpcolor"></i></span></h4></div>
+                                            <div class="col-md-4"><input data-name="key" type="text" class="form-control storage-key" onchange="validate(this, 'storage')"/></div>
+                                            <div class="col-md-4 text-danger" style="display:none">Key already exist</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Storage Account Name <span  class="hint--right" aria-label="Storage account name." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="storage_account_name" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">Storage Account Key <span  class="hint--right" aria-label="Storage account key." ><i class="fa fa-question-circle helpcolor"></i></span></div>
+                                            <div class="col-md-4"><input data-name="storage_account_key" type="text" class="form-control"/></div>
+                                        </div>
+                                        <div class="clearkey" title="Remove this entry" data-placement="left" onclick="remove_entry(this, 'storage')"><i class="fa fa-trash-o"></i></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <input type="submit" class="btn btn-info" value="Submit">
+                            <a class="btn btn-warning" href="{% url 'zabbix_manage_conf_file' %}">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+    {% if uploaded %}
+    <script>
+        var vm = {{ vm|safe }};
+        var sql = {{ sql|safe }};
+        var storage = {{ storage|safe }};
+        var redis = {{ redis|safe }};
+        var webapp = {{ webapp|safe }};
+        var webjob = {{ webjob|safe }};
+        var total_items = {{ current_values|length }};
+
+
+        $( "#vm_add_more" ).click(function() {
+            var $self = $('.vm-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "vm_key_"+count);
+            $clone.find("[data-name='username']").attr("name", "vm_username_"+count);
+            $clone.find("[data-name='password']").attr("name", "vm_password_"+count);
+            $clone.find("[data-name='subscription_id']").attr("name", "vm_subscription_id_"+count);
+            $clone.find("[data-name='resource_group']").attr("name", "vm_resource_group_"+count);
+            $clone.find("[data-name='vm_name']").attr("name", "vm_name_"+count);
+            $self.before($clone);
+        });
+        $( "#sql_add_more" ).click(function() {
+            var $self = $('.sql-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "sql_key_"+count);
+            $clone.find("[data-name='username']").attr("name", "sql_username_"+count);
+            $clone.find("[data-name='password']").attr("name", "sql_password_"+count);
+            $clone.find("[data-name='subscription_id']").attr("name", "sql_subscription_id_"+count);
+            $clone.find("[data-name='resource_group']").attr("name", "sql_resource_group_"+count);
+            $clone.find("[data-name='server_name']").attr("name", "sql_server_name_"+count);
+            $clone.find("[data-name='database_name']").attr("name", "sql_database_name_"+count);
+            $self.before($clone);
+        });
+        $( "#redis_add_more" ).click(function() {
+            var $self = $('.redis-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "redis_key_"+count);
+            $clone.find("[data-name='username']").attr("name", "redis_username_"+count);
+            $clone.find("[data-name='password']").attr("name", "redis_password_"+count);
+            $clone.find("[data-name='subscription_id']").attr("name", "redis_subscription_id_"+count);
+            $clone.find("[data-name='redis_name']").attr("name", "redis_redis_name_"+count);
+            $clone.find("[data-name='resource_group_name']").attr("name", "redis_resource_group_name_"+count);
+            $self.before($clone);
+        });
+        $( "#web_app_add_more" ).click(function() {
+            var $self = $('.web-app-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "webapp_key_"+count);
+            $clone.find("[data-name='username']").attr("name", "webapp_username_"+count);
+            $clone.find("[data-name='password']").attr("name", "webapp_password_"+count);
+            $clone.find("[data-name='subscription_id']").attr("name", "webapp_subscription_id_"+count);
+            $clone.find("[data-name='web_app_name']").attr("name", "webapp_web_app_name_"+count);
+            $clone.find("[data-name='resource_group_name']").attr("name", "webapp_resource_group_name_"+count);
+            $self.before($clone);
+        });
+        $( "#web_job_add_more" ).click(function() {
+            var $self = $('.web-job-status-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "webjob_key_"+count);
+            $clone.find("[data-name='username']").attr("name", "webjob_username_"+count);
+            $clone.find("[data-name='password']").attr("name", "webjob_password_"+count);
+            $clone.find("[data-name='web_app_name']").attr("name", "webjob_web_app_name_"+count);
+            $clone.find("[data-name='web_job_name']").attr("name", "webjob_web_job_name_"+count);
+
+            $self.before($clone);
+        });
+        $( "#storage_queue_add_more" ).click(function() {
+            var $self = $('.storage-queue-mtr').last();
+            var $clone = $self.clone();
+            $clone.show();
+            total_items++;
+            count = total_items;
+            $clone.find("[data-name='key']").attr("name", "storage_key_"+count);
+            $clone.find("[data-name='storage_account_name']").attr("name", "storage_storage_account_name_"+count);
+            $clone.find("[data-name='storage_account_key']").attr("name", "storage_storage_account_key_"+count);
+            $self.before($clone);
+        });
+
+
+        window.validate = function($this, type){
+            var value = $this.value;
+            if(type=='vm' && $.inArray(value, vm) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else if(type=='sql' && $.inArray(value, sql) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else if(type=='storage' && $.inArray(value, storage) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else if(type=='redis' && $.inArray(value, redis) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else if(type=='webapp' && $.inArray(value, webapp) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else if(type=='webjob' && $.inArray(value, webjob) > -1){
+                $($this).parent().parent().addClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: block');
+            }
+            else{
+                $($this).parent().parent().removeClass('requiredrow');
+                $($this).parent().next().attr('style', 'display: none');
+                var prev_data = $($this).attr('prev-data');
+                update_key_data(value, type, prev_data);
+                $($this).attr('prev-data', value);
+            }
+        }
+
+        window.remove_entry = function($this, type){
+            if(type=='vm'){
+                value = $($this).parent().find('.vm-key').val();
+                if($.inArray(value, vm) > -1){ vm.splice(vm.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+            else if(type=='sql'){
+                value = $($this).parent().find('.sql-key').val();
+                if($.inArray(value, sql) > -1){ sql.splice(sql.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+            else if(type=='storage'){
+                value = $($this).parent().find('.storage-key').val();
+                if($.inArray(value, storage) > -1){ storage.splice(storage.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+            else if(type=='redis'){
+                value = $($this).parent().find('.redis-key').val();
+                if($.inArray(value, redis) > -1){ redis.splice(redis.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+            else if(type=='webapp'){
+                value = $($this).parent().find('.webapp-key').val();
+                if($.inArray(value, webapp) > -1){ webapp.splice(webapp.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+            else if(type=='webjob'){
+                value = $($this).parent().find('.webjob-key').val();
+                if($.inArray(value, webjob) > -1){ webjob.splice(webjob.indexOf(value), 1); }
+                $($this).parent().remove();
+            }
+        }
+
+        function update_key_data(value, type, prev_data){
+            if(type=='vm'){ vm.push(value); if($.inArray(prev_data, vm) > -1){ vm.splice(vm.indexOf(prev_data), 1);} }
+            else if(type=='sql'){ sql.push(value); if($.inArray(prev_data, sql) > -1){ sql.splice(sql.indexOf(prev_data), 1);}  }
+            else if(type=='storage'){ storage.push(value); if($.inArray(prev_data, storage) > -1){ storage.splice(storage.indexOf(prev_data), 1);} }
+            else if(type=='redis'){ redis.push(value); if($.inArray(prev_data, redis) > -1){ redis.splice(redis.indexOf(prev_data), 1);} }
+            else if(type=='webapp'){ webapp.push(value); if($.inArray(prev_data, webapp) > -1){ webapp.splice(webapp.indexOf(prev_data), 1);} }
+            else if(type=='webjob'){ webjob.push(value); if($.inArray(prev_data, webjob) > -1){ webjob.splice(webjob.indexOf(prev_data), 1);} }
+        }
+
+        $('body').tooltip({
+            selector: '[data-toggle="tooltip"]'
+        });
+
+    </script>
+
+
+    {% endif %}
+
+</body>
+</html>
+

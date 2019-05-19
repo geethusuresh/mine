@@ -1,0 +1,407 @@
+<!--
+
+<!DOCTYPE html> 
+<html>     
+    <head>
+        <title></title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+    </head>
+    <body>        
+        <div class="wrapper">
+            <div id="floating-top-right" class="floating-container display-none" style="margin-top:4%" >
+              <div class="alert-wrap in animated jellyIn">
+                <div class="alert alert-mint" role="alert">
+                  <button class="close" type="button">
+                  <i class="fa fa-times-circle"></i>
+                  </button>
+                  <div class="media">
+                    <div class="media-body">
+                      <h4 class="alert-title"></h4>
+                      <p class="alert-message" id="display-msg"><strong>Hi an important message to show</strong></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="content">
+                <div class="row">
+                        <div class="boxed">
+                            <div id="page-title">
+                                <h1 class="page-header text-overflow">Oneconsole Registration</h1>
+                            </div>
+                            <div id="page-content">
+                                <div class="panel">
+                                    <div class="eq-height clearfix">
+                                        <div class="col-md-4 eq-box-md text-center box-vmiddle-wrap bg-info">
+                                
+                                            <div class="box-vmiddle pad-all">
+                                                <h3 class="text-thin">Register Here</h3>
+                                                <span class="icon-wrap icon-wrap-lg icon-circle bg-trans-light">
+                                                    <i class="fa fa-gift fa-5x text-info"></i>
+                                                </span>
+                                                <p>OneConsole™ is a unified service and operations management Platform providing single pane of glass for Enterprises to provision, monitor, manage and govern IT services on-premise or in cloud..</p>
+                                                <a class="btn btn-lg btn-info btn-labeled fa fa-arrow-right" href="https://oneconsole.marlabs.com">Learn More...</a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 eq-box-md eq-no-panel">
+                                            <div class="panel">
+                                    
+                                                <div id="demo-cls-wz">
+                                                    <ul class="wz-nav-off wz-icon-inline wz-classic setup-panel">
+                                                        <li class="col-xs-3 bg-info active">
+                                                            <a aria-expanded="true" data-toggle="tab" href="#demo-cls-tab1">
+                                                                <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-info"></i></span> Account
+                                                            </a>
+                                                        </li>
+                                                        <li class="col-xs-3 bg-info ">
+                                                            <a data-toggle="tab" href="#demo-cls-tab2">
+                                                                <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-user"></i></span> Profile
+                                                            </a>
+                                                        </li>
+                                                        <li class="col-xs-3 bg-info">
+                                                            <a data-toggle="tab" href="#demo-cls-tab3">
+                                                                <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-home"></i></span> Address
+                                                            </a>
+                                                        </li>
+                                                        <li class="col-xs-3 bg-info">
+                                                            <a data-toggle="tab" href="#demo-cls-tab4">
+                                                                <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-industry"></i></span> Employee
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    
+                                                    <div class="panel-body">
+                                                        <form action="/registration/" method="post" id="regs_form">{% csrf_token %}
+                                                            <div class="tab-content">
+
+                                                                <div id="demo-cls-tab1" class="setup-content tab-pane active in">
+                                                                    <div class="form-group">
+                                                                        <label class="col-lg-3 control-label">Email Id</label>
+                                                                        <div class="col-lg-7">
+                                                                            <input type="text" name="email" required class="form-control" value="{{user_data.email}}" readonly />
+                                                                            
+                                                                        </div>
+                                                                        <button type="button" class="next btn btn-info" >Next</button> 
+                                                                    </div>
+                                                                </div>
+                                                                <div id="demo-cls-tab2" class="setup-content tab-pane fade ">
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">First name</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input placeholder="First name" name="first_name" class="form-control" type="text" value="{{user_data.first_name}}" required id="fn">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Last name</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input placeholder="Last name" name="last_name" class="form-control" type="text" required value="{{user_data.last_name}}" id="ln">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Manager</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="supervisor_name" placeholder="Manager" readonly value="{{user_data.supervisor}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Manager Email</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="supervisor_email" value="{{user_data.supervisor_email}}" readonly placeholder="Manager Email">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="box-inline pull-right">
+                                                                            <button type="button" class="previous btn btn-info disabled pull-left" style="margin-right:5px">Previous</button>
+                                                                            <button type="button" class="next btn btn-info pull-right">Next</button>
+                                                                    </div>
+                                                                    <input type="hidden" name="supervisor_id" value="{{user_data.supervisor_id}}"/>
+                                                                    <input type="hidden" name="register_id" value="{{user_data.register_id}}" />
+                                                                </div>
+                                                                <div id="demo-cls-tab3" class="setup-content tab-pane">
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Address Line1</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="addressline1" value="{{user_data.addressline1}}" placeholder="Address Line 1">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Address Line2</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="addressline2" value="{{user_data.addressline2}}" placeholder="Address Line 2">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">City</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="city" value="{{user_data.city}}" placeholder="City">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">District</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="district" placeholder="District">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Country</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="country" placeholder="Country">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Postal Code</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="postalcode" placeholder="Postal Code">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="box-inline pull-right">
+                                                                            <button type="button" class="previous btn btn-info disabled pull-left" style="margin-right:5px">Previous</button>
+                                                                            <button type="button" class="next btn btn-info pull-right">Next</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div id="demo-cls-tab4" class="setup-content tab-pane mar-btm">
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Department</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="department" placeholder="Department" value="{{user_data.department}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Title</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="title" placeholder="Title" value="{{user_data.title}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group pad-all">
+                                                                        <label class="col-lg-4 control-label">Location</label>
+                                                                        <div class="col-lg-8">
+                                                                            <input type="text" class="form-control" name="location" placeholder="Location">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="box-inline pull-right">
+                                                                            <button type="button" class="previous btn btn-info disabled pull-left" style="margin-right:5px">Previous</button>
+                                                                            <button type="submit" class="finish btn btn-info pull-right">Finish</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                    
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        
+        <script type="text/javascript" src="/static/js/form-wizard.js"></script>
+
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+
+        <script type="text/javascript">
+            $( "#regs_form" ).submit(function( event ) {
+                if ($('#fn').val() == "") {
+                    $('#floating-top-right').removeClass('display-none');
+                    $('#display-msg').text('The first name cannot be empty');
+                    event.preventDefault();
+                } else if ($('#ln').val() == "") {
+                    $('#floating-top-right').removeClass('display-none');
+                    $('#display-msg').text('The last name cannot be empty');
+                    event.preventDefault();
+                }
+                return true;
+            });
+        </script>
+        
+        <script type="text/javascript">
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+              }); 
+        </script>
+    </body>
+</html>
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneConsole | Registration </title>
+    <link href="/static/customer/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link href="/static/customer/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+    <style>
+        @font-face
+            {
+              font-family: marlabs;
+              src: url('/static/fonts/LithosPro-Regular.otf');
+            }
+
+    </style>
+</head>
+<body class="nifty-ready">
+    <div id="container" class="cls-container" style="background-color:#172b3e">
+        <div class="cls-header cls-header-lg">
+            <div class="cls-brand">
+                <a class="box-inline" href="/">
+                    <img alt="marlabs" src="/static/home/img/icon.png" class="brand-icon">
+                    <span class="brand-title" style="font-family: marlabs;">OneConsole<span class="text-thin"></span></span>
+                </a>
+            </div>
+        </div>
+       <div class="cls-content">
+            <div class="cls-content-lg panel">
+                <div class="panel-body">
+                    <br>
+                    <div class="logo"><a href=""><img src="/static/img/logo.png" style="width:40%" alt="" /></a></div>
+                    <br><br><br>
+                    <p class="pad-btm">Create an account</p>
+                    <form action="/registration/" method="post">{% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label pull-left">First Name</label><br/>
+                                    <input type="text" class="form-control" name="first_name" value="{{ user_data.first_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Last Name</label><br/>
+                                    <input type="text" class="form-control" name="last_name" value="{{ user_data.last_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Email</label><br/>
+                                    <input type="text" class="form-control" name="email" value="{{ user_data.email }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Department </label><br/>
+                                    <input type="text" class="form-control" name="department" value="{{ user_data.department }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Manager</label><br/>
+                                    <input type="text" class="form-control" name="supervisor_name" value="{{ user_data.supervisor }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Manager Email</label><br/>
+                                    <input type="text" class="form-control" name="supervisor_email" readonly value="{{ user_data.supervisor_email }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Job Title</label><br/>
+                                    <input type="text" class="form-control" name="title" value="{{ user_data.title }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Location</label><br/>
+                                    <input type="text" class="form-control" name="location">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Address Line1</label><br/>
+                                    <input type="text" class="form-control" name="addressline1" value="{{ user_data.addressline1 }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Address Line2</label><br/>
+                                    <input type="text" class="form-control" name="addressline2" value="{{ user_data.addressline2 }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">City</label><br/>
+                                    <input type="text" class="form-control" name="city" value="{{ user_data.city }}" >
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label pull-left">District</label><br/>
+                                    <input type="text" class="form-control" name="district">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Country</label><br/>
+                                    <input type="text" class="form-control" name="country">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label pull-left">Postal Code</label><br/>
+                                    <input type="text" class="form-control" name="postalcode" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="form-group text-right">
+                                    <button class="btn btn-success text-uppercase" type="submit">Sign Up</button>
+                                    <input type="hidden" name="supervisor_id" value="{{user_data.supervisor_id}}"/>
+                                    <input type="hidden" name="register_id" value="{{user_data.register_id}}" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="pad-ver">
+                Already have an account ? <a href="/login" class="btn-link mar-rgt">Sign In</a>
+            </div>
+        </div>
+        {% if messages %}
+            <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+            {% for message in messages %}
+              {% if message.tags == 'error' %}
+              <div class="alert-wrap in animated jellyIn">
+                <div class="alert alert-danger" role="alert">
+                  <button class="close" type="button">
+                  <i class="fa fa-times-circle"></i>
+                  </button>
+                  <div class="media">
+                    <div class="media-body">
+                      <h4 class="alert-title"></h4>
+                      <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div class="alert-wrap in animated jellyIn">
+                <div class="alert alert-success" role="alert">
+                  <button class="close" type="button">
+                  <i class="fa fa-times-circle"></i>
+                  </button>
+                  <div class="media">
+                    <div class="media-body">
+                      <h4 class="alert-title"></h4>
+                      <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
+
+    </div>
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/nifty.min.js"></script>
+    <script>
+        $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+<script type="text/javascript">
+  server_id = {{server_id}}
+  application_id = {{application_id}}
+</script>
+
+<h1 class="text-thin">
+  Application |
+   <small>Containers  for application '{{application_name}}'</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li class="active">{{application_name}}</li>
+</ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="alert alert-success center-block" id="alert_message" style="display:none;">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <center id="message_to_append"></center>
+      </div>
+    </div>
+
+    <div class="col-md-2 col-md-offset-6 pad-all">
+      <button type="button" class="btn btn-primary button-margin" onclick="show_create_container_modal();">Create Container</button>
+    </div>
+
+    <div class="col-md-12">
+      <div class="col-sm-8">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Container Details</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table toggle-circle phone breakpoint no-paging footable-loaded footable">
+              <thead>
+                <tr>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Container Name<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Base Image<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Created Date<span class="footable-sort-indicator"></span></th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">State</th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">View Details</th>
+                  <th data-toggle="true" class="footable-visible footable-first-column footable-sortable">Error Logs</th>
+                </tr>
+              </thead>
+              {% if container_list %}
+                <tbody>
+                  {% for container in container_list %}
+                  <tr class="footable-even">
+                    <td class="footable-visible footable-last-column">{{container.name}}</td>
+                    <td class="footable-visible footable-last-column"><a class="text-primary" href="{% url 'image_detail' server_id %}?image_id={{container.image}}">{{container.image|truncatechars:15}}</a></td>
+                    <td class="footable-visible footable-last-column">{{container.created}}</td>
+                    <td class="footable-visible footable-last-column">{% if container.state and container.pause %}<small class="label label-warning">Paused</small>{% elif container.state and not container.pause %}<small class="label label-success">Running</small>{% else %}<small class="label label-danger">Stopped</small>{% endif %} </td>
+                    <td class="footable-visible footable-last-column"><a class="btn bg-green" href="{% url 'detail_container' server_id application_id container.id %}"><i class="fa  fa-search"></i></a></td>
+                    <td class="footable-visible footable-last-column"><button class="btn btn-default" onclick="show_container_error_log_modal('{{container.name}}')"><i class="fa fa-file-text fa-lg"></i></button></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              {% endif %}
+            </table>
+          </div>
+
+          {% if container_list %}
+            <div class="panel-footer">
+              <div class="row">
+                <div class="col-md-12">
+                  <a href="{% url 'application_stats' server_id application_id %}" class="btn btn-primary btn-block">Get Statitcs</a>
+                </div>
+              </div>
+            </div>
+            {% else %}
+              <h4 class="pad-all text-center">No Containers Available</h4>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Application Design</h3>
+          </div>
+          <div class="panel-body">
+            <div id="no_links_alert">
+              <h4><p class="text-dark">No Links Available</p></h4>
+            </div>
+            <canvas id="springydemo" width="340" height="280" /></canvas>
+          </div>
+          <div class="pad-ver pad-all">
+              {% if container_list %}
+                <button class="btn btn-primary btn-block" onclick="show_save_design_as_template_modal()">Save design as Template</button>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="save_design_as_template_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Save design as Template</h4>
+        </div>
+        <form id="form_create_docker_compose_file" method="" >
+        {% csrf_token %}
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="Name">Template Name</label>
+                    <div class="col-sm-8">
+                        {{form.name}}
+                    </div>
+                    <!-- <div class="col-md-12">
+                      <div class="col-md-8 col-md-offset-4">
+                        <p class="text-danger">**Please fill this field</p>
+                      </div>
+                    </div> -->
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="Name">Template Description</label>
+                    <div class="col-sm-8">
+                        {{form.description}}
+                    </div>
+                    <div class="col-sm-2 pull-right"></div>
+                </div>
+              </div>
+              <div class="col-md-12" id="template_create_error_message" style="display:none;">
+                  <div class="col-md-8 col-md-offset-4">
+                    <p class="text-danger">**Please fill both the fields</p>
+                  </div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="return save_design_as_template()" >Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="create_container_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Create Container</h4>
+        </div>
+        <div class="modal-body" style="min-height:180px">
+          <div class="col-sm-6">
+            <a href="{% url 'create_container' server_id application_id %}">
+              <div class="panel panel-primary panel-colorful">
+              <div class="pad-all media">
+                <div class="media-left">
+                  <span class="icon-wrap icon-wrap-xs">
+                    <i class="fa fa-picture-o fa-3x"></i>
+                  </span>
+                </div>
+                <div class="media-body">
+                  <p class="h3 text-thin media-heading">From Docker Image</p>
+                </div>
+              </div>
+              <div class="progress progress-xs progress-dark-base mar-no">
+                <div style="width: 45.9%" class="progress-bar progress-bar-light" aria-valuemax="100" aria-valuemin="0" aria-valuenow="45.9" role="progressbar"></div>
+              </div>
+              <div class="pad-all text-right">
+                <small><span class="text-semibold"></span>From already downloaded docker image</small>
+              </div>
+            </div>
+            </a>
+          </div>
+          <div class="col-sm-6">
+            <a href="{% url 'list_configuration' server_id application_id %}">
+              <div class="panel panel-primary panel-colorful">
+                <div class="pad-all media">
+                  <div class="media-left">
+                    <span class="icon-wrap icon-wrap-xs">
+                      <i class="fa fa-file-text-o fa-3x"></i>
+                    </span>
+                  </div>
+                  <div class="media-body">
+                    <p class="h3 text-thin media-heading">From Configuration</p>
+                  </div>
+                </div>
+
+                <div class="progress progress-xs progress-dark-base mar-no">
+                  <div style="width: 45.9%" class="progress-bar progress-bar-light" aria-valuemax="100" aria-valuemin="0" aria-valuenow="45.9" role="progressbar"></div>
+                </div>
+
+                <div class="pad-all text-right">
+                  <small><span class="text-semibold"></span>From saved container configuration</small>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="container_error_log_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Container Logs</h4>
+        </div>
+        <div class="modal-body">
+          <ul id="container_error_log" class="mail-list mar-top">
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  $(document).ready(function(){
+    $('#no_links_alert').hide();
+    $.ajax({
+        url: '/docker_management/server/' + server_id + '/application/' + application_id + '/container/link/graph/',
+        type: 'get',
+        success: function(link_data){
+          link_data = JSON.parse(link_data);
+          var node_array = link_data.graph_node_list
+          var link_array = link_data.graph_links_list
+          if(node_array.length != 0){
+            graphJSON = {
+              "nodes": node_array,
+              "edges": link_array
+            };
+            var graph = new Springy.Graph();
+            graph.loadJSON(graphJSON);
+            var springy = window.springy = jQuery('#springydemo').springy({
+              graph: graph
+            });
+          }
+          else{
+            $('#springydemo').remove();
+            $('#no_links_alert').show();
+          }
+        },
+        error: function(xhr,errmsg,err){
+        },
+    });
+
+  });
+
+  function show_save_design_as_template_modal(){
+    $('#template_create_error_message').hide();
+    $('#id_name').val('');
+    $('#id_description').val('');
+    $('#save_design_as_template_modal').modal('show');
+  }
+
+  function save_design_as_template(){
+      var form = $('#form_create_docker_compose_file');
+      if(form[0].checkValidity()==false){
+        $('#template_create_error_message').show();
+        return false;
+      }
+        $.ajax({
+              url: '/docker_management/server/' + server_id + '/application/' + application_id + '/template/create/',
+              type: 'POST',
+              data: form.serialize(),
+              'csrfmiddilewaretoken': form.serialize('csrfmiddilewaretoken'),
+              success: function(data){
+                $('#save_design_as_template_modal').modal('hide');
+                data = JSON.parse(data);
+                status = data['status'];
+                message = data['message'];
+                $('#message_to_append').empty();
+                if(status==1){
+                  $('#alert_message').addClass('alert-success');
+                  $('#message_to_append').append(message);
+                }
+                else{
+                  $('#alert_message').addClass('alert-success');
+                  $('#message_to_append').append(message);
+                }
+                $('#alert_message').show();
+                setTimeout(fade_out, 5000);
+              },
+              error: function(xhr,errmsg,err){
+              },
+          });
+  }
+
+  var fade_out = function() {
+    $("#alert_message").fadeOut();
+  }
+
+  function show_create_container_modal(){
+    $('#create_container_modal').modal('show');
+  }
+
+  function show_container_error_log_modal(container_id){
+    $('#container_error_log_modal').modal('show');
+    // Fetch last 10 lines from container
+    get_container_logs(container_id, 20, true, false, false);
+  }
+
+  function get_container_logs(container_id, log_line_no, std_err, std_out, time_stamp){
+    $.ajax({
+      url: '/docker_management/server/' + server_id + '/container/' + container_id + '/logs',
+      type: 'get',
+      data: {'log_line_no': log_line_no, 'std_err': std_err, 'std_out': std_out, 'time_stamp': time_stamp},
+      success: function(data){
+        data = JSON.parse(data);
+        $('#container_error_log').empty();
+        if(data.status){
+          if(data.log){
+            $.each(data.log, function( index, value ) {
+              $('#container_error_log').append(value + '</br>')
+            });
+          }
+          else{
+            $('#container_error_log').append('<div class="text-center text-bold">No data found for container logs</div>');
+          }
+        }
+        else{
+          $('#container_error_log').append('<div class="text-center text-bold">Cannot fetch container logs</div>');
+        }
+      },
+      error: function(err){
+      },
+    });
+  }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,841 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+<!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+<!-- Charts -->
+
+<!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+<!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script>-->  
+    <!--End High Charts -->
+    <style type="text/css">
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; } 
+      .bs{
+        background-color: transparent;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+   {% if "Managed_Service_Admin" in request.session.roles %}
+          {% include "components/cust_header.html"%}
+      {% else %}
+          {% include "components/header.html"%}
+      {% endif %}
+
+        <div class="wrapper">
+          {% if "Managed_Service_Admin" in request.session.roles %}
+              {% include "side_bar/customer.html"%}
+          {% else %}
+              {% include "side_bar/sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>
+                 Priority Wise Reports
+                <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="/reports/">Reports</li>
+                    <li class="active">Engineer Wise Reports</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                    {{report_heading}} <br />
+                    Total Tickets Created: {{total_tickets_count}}
+                </div>               
+              </div>
+
+              <div class="row">
+                <div class="controls">
+                  <form action="/export_toexcel/" method="post" target="_blank">
+                      {% csrf_token %}
+                      <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                      <input type="hidden" name="export_type" id="export_type" value="priority_report" />
+                      <input type="hidden" name="is_egate_included" value="{{is_egate_included}}" />
+                      <input type="hidden" name="tabular_report" value="{{ticket_data}}" id="tabular_report">
+                      <input type="hidden" name="report_heading" value="{{report_heading}}">
+                  </form>
+                </div>          
+              </div>
+
+                <!-- Start row -->
+                <div class="row">
+                  <!--First widget -->     
+                  <div class="col-sm-6">                                             
+                      <div class="panel">
+                          <div class="panel-heading">
+                              <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                              Overall Response Time
+                             </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+
+                        <div id="overall_resp_container"></div>
+                         <script type="text/javascript">
+                         $(function () {
+                              $('#overall_resp_container').highcharts({
+                                  chart: {
+                                      type: 'column'                                      
+                                  },
+                                  title: {
+                                      text: 'Overall Response Time'
+                                  },                                
+                                  xAxis: {
+                                      categories: [
+                                          'Within SLA',
+                                          'Crossed SLA'                                  
+                                      ]
+                                  },
+                                  yAxis: {
+                                      min: 0,
+                                      max:100,
+                                      title: {
+                                          text: 'Overall Response SLA %'
+                                      }
+                                  },
+
+                                  tooltip: {
+                                  formatter: function() {
+                                      return ''+
+                                      this.series.name +': '+ this.y +' %';
+                                    }
+                                  },                                 
+                                  exporting: {
+                                      enabled: false
+                                  },
+                                  plotOptions: {
+                                      column: {
+                                          pointPadding: 0.2,
+                                          borderWidth: 0
+                                      },
+                                      series: {
+                                          cursor: 'pointer',
+                                          point: {
+                                              events: {
+                                                  click: function (event) {
+                                                  var str_name = this.series.name;
+                                                  str_name = str_name.replace(" ","_");
+                                                  window.open("/ticket_popup/?report_type=priority_wise&graph_section=overall&sla_type=response&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  },
+                                  series: [{
+                                      name:"Within SLA",
+                                      color: '#008000',                            
+                                      data: [{{overall_response_sla.perc_overall_within_sla}}]
+                                  },
+                                  {
+                                      name:"Crossed SLA",
+                                      color:'#FF0000',                            
+                                      data: [0,{{overall_response_sla.perc_overall_crossed_sla}}]
+                                  }
+                                  ]
+                              });
+                          });
+                        </script>                            
+                        </div>
+                      </div>
+                    </div>
+                  <!--End first widget -->
+
+                  <!--Second widget -->     
+                    <div class="col-sm-6">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                             Overall Resolution Time
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                          <div id="overall_reso_container"></div>
+                            <script type="text/javascript">
+                           $(function () {
+                                $('#overall_reso_container').highcharts({
+                                    chart: {
+                                        type: 'column'                                      
+                                    },
+                                    title: {
+                                        text: 'Overall Resolution Time'
+                                    },                                
+                                    xAxis: {
+                                        categories: [
+                                            'Within SLA',
+                                            'Crossed SLA'                                  
+                                        ]
+                                    },
+                                    yAxis: {
+                                        min: 0,
+                                        max:100,
+                                        title: {
+                                            text: 'Overall Resolution SLA %'
+                                        }
+                                    },
+
+                                    tooltip: {
+                                    formatter: function() {
+                                        return ''+
+                                        this.series.name +': '+ this.y +' %';
+                                      }
+                                    },                                 
+                                    exporting: {
+                                        enabled: false
+                                    },
+                                    plotOptions: {
+                                        column: {
+                                            pointPadding: 0.2,
+                                            borderWidth: 0
+                                        },
+                                        series: {
+                                            cursor: 'pointer',
+                                            point: {
+                                                events: {
+                                                    click: function (event) {
+                                                    var str_name = this.series.name;
+                                                    str_name = str_name.replace(" ","_");
+                                                    window.open("/ticket_popup/?report_type=priority_wise&graph_section=overall&sla_type=resolution&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    series: [{
+                                        name:"Within SLA",
+                                        color: '#008000',                            
+                                        data: [{{overall_resolution_sla.perc_overall_within_sla}}]
+                                    },
+                                    {
+                                        name:"Crossed SLA",
+                                        color:'#FF0000',                            
+                                        data: [0,{{overall_resolution_sla.perc_overall_crossed_sla}}]
+                                    }
+                                    ]
+                                });
+                            });
+                          </script>                            
+                        </div>
+                      </div>
+                    </div>
+                  <!--End second widget -->
+                  </div>
+                  <!--End row -->
+
+                  <!-- Start row-->
+                  <div class="row">
+
+                  <!--Thrid widget -->     
+                    <div class="col-sm-6">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                             Response Time - Priority Wise
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="overall_resp_container_prioritywise"></div>
+                            <script type="text/javascript">
+                             $(function () {
+                                  $('#overall_resp_container_prioritywise').highcharts({
+                                      chart: {
+                                          type: 'column'                                      
+                                      },
+                                      title: {
+                                          text: 'Response Time - Priority wise'
+                                      },                                
+                                      xAxis: {
+                                          categories: [
+                                              'Low',
+                                              'Medium',
+                                              'High',
+                                              'Critical',
+                                              'Urgent',
+                                              'Normal',
+                                              'Purchase',
+                                              'Change'                                  
+                                          ],
+                                          labels: {
+                                            rotation: -45                                         
+                                          } 
+                                      },
+                                      yAxis: {
+                                          min: 0,
+                                          max:100,
+                                          title: {
+                                              text: 'Response SLA %'
+                                          }
+                                      },
+
+                                      tooltip: {
+                                      formatter: function() {
+                                          return ''+
+                                          this.series.name +': '+ this.y +' %';
+                                        }
+                                      },                                 
+                                      exporting: {
+                                          enabled: false
+                                      },
+                                      plotOptions: {
+                                          column: {
+                                              minPointLength: 2
+                                          },
+                                          series: {
+                                              cursor: 'pointer',
+                                              point: {
+                                                  events: {
+                                                      click: function (event) {
+                                                      var str_name = this.series.name;
+                                                      var category_detail = this.category;
+                                                      str_name = str_name.replace(" ","_");
+                                                      window.open("/ticket_popup/?report_type=priority_wise&graph_section=priority_wise&priority="+category_detail+"&sla_type=response&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      },
+
+                                      series: [{
+                                            type: 'column',
+                                            color:'#008000',
+                                            name: 'Within SLA',
+                                            data: [{{overall_response_sla.perc_overall_low_within_sla}}, {{overall_response_sla.perc_overall_medium_within_sla}}, {{overall_response_sla.perc_overall_high_within_sla}},
+                                              {{overall_response_sla.perc_overall_critical_within_sla}},
+                                              {{overall_response_sla.perc_overall_urgent_within_sla}},
+                                              {{overall_response_sla.perc_overall_normal_within_sla}},
+                                              {{overall_response_sla.perc_overall_purchase_within_sla}},
+                                              {{overall_response_sla.perc_overall_change_within_sla}}]
+                                        }, {
+                                            type: 'column',
+                                            color:'#FF0000',
+                                            name: 'Crossed SLA',
+                                            data: [{{overall_response_sla.perc_overall_low_crossed_sla}}, {{overall_response_sla.perc_overall_medium_crossed_sla}}, {{overall_response_sla.perc_overall_high_crossed_sla}},
+                                            {{overall_response_sla.perc_overall_critical_crossed_sla}},
+                                            {{overall_response_sla.perc_overall_urgent_crossed_sla}},
+                                            {{overall_response_sla.perc_overall_normal_crossed_sla}},
+                                            {{overall_response_sla.perc_overall_purchase_crossed_sla}},
+                                            {{overall_response_sla.perc_overall_change_crossed_sla}}]
+                                      }]
+                                  });
+                              });
+                            </script>
+                            </div>
+                          </div>
+                        </div>                      
+                  <!--End second widget -->
+
+
+                  <!--Fourth widget -->     
+                    <div class="col-sm-6">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                             Resolution Time - Priority Wise
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                              <div id="overall_reso_container_prioritywise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_reso_container_prioritywise').highcharts({
+                                        chart: {
+                                            type: 'column'                                      
+                                        },
+                                        title: {
+                                            text: 'Resolution Time - Priority wise'
+                                        },                                
+                                        xAxis: {
+                                            categories: [
+                                                'Low',
+                                                'Medium',
+                                                'High',
+                                                'Critical',
+                                                'Urgent',
+                                                'Normal',
+                                                'Purchase',
+                                                'Change'                                  
+                                            ],
+                                            labels: {
+                                              rotation: -45                                         
+                                            } 
+                                        },
+                                        yAxis: {
+                                            min: 0,
+                                            max:100,
+                                            title: {
+                                                text: 'Resolution SLA %'
+                                            }
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y +' %';
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {                                          
+                                                minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category;
+                                                        str_name = str_name.replace(" ","_");
+                                                        window.open("/ticket_popup/?report_type=priority_wise&graph_section=priority_wise&priority="+category_detail+"&sla_type=resolution&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{{overall_resolution_sla.perc_overall_low_within_sla}}, {{overall_resolution_sla.perc_overall_medium_within_sla}}, {{overall_resolution_sla.perc_overall_high_within_sla}},
+                                              {{overall_resolution_sla.perc_overall_critical_within_sla}},
+                                              {{overall_resolution_sla.perc_overall_urgent_within_sla}},
+                                              {{overall_resolution_sla.perc_overall_normal_within_sla}},
+                                              {{overall_resolution_sla.perc_overall_purchase_within_sla}},
+                                              {{overall_resolution_sla.perc_overall_change_within_sla}}]
+                                          }, {
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{{overall_resolution_sla.perc_overall_low_crossed_sla}}, {{overall_resolution_sla.perc_overall_medium_crossed_sla}}, {{overall_resolution_sla.perc_overall_high_crossed_sla}},
+                                              {{overall_resolution_sla.perc_overall_critical_crossed_sla}},
+                                              {{overall_resolution_sla.perc_overall_urgent_crossed_sla}},
+                                              {{overall_resolution_sla.perc_overall_normal_crossed_sla}},
+                                              {{overall_resolution_sla.perc_overall_purchase_crossed_sla}},
+                                              {{overall_resolution_sla.perc_overall_change_crossed_sla}}]
+                                        }]
+                                    });
+                                });
+                              </script>                            
+                        </div>
+                      </div>
+                    </div>
+                  <!--End Fourth widget -->
+
+                </div>
+                <!--End row -->
+
+
+                <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                              Response Details - Priority Wise
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                              <div id="overall_resp_container_workgroupwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_resp_container_workgroupwise').highcharts({
+                                        chart: {
+                                            type: 'column'                                      
+                                        },
+                                        title: {
+                                            text: 'Response Time - Priority wise'
+                                            
+                                        },                                
+                                        xAxis: {
+                                            categories:[{% for x_item in priority_wise_resp_count %} "{{x_item.0}}", {% endfor %}],
+                                            labels: {
+                                              rotation: -45                                         
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,                                     
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                               minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category;
+                                                        str_name = str_name.replace(" ","_");
+                                                        console.log(str_name, category_detail)
+                                                        window.open("/ticket_popup/?report_type=priority_wise&graph_section=response_wise&priority="+category_detail+"&sla_type=response&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in priority_wise_resp_count %} {{sla_item.1}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in priority_wise_resp_count %} {{sla_item.2}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>                            
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+
+                <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                               Resolution Details - Priority wise
+                            </h3>
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                              <div id="overall_reso_container_workgroupwise"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#overall_reso_container_workgroupwise').highcharts({
+                                        chart: {
+                                            type: 'column'                                      
+                                        },
+                                        title: {
+                                            text: 'Resolution Time - Priority wise'
+                                        },                                
+                                        xAxis: {
+                                            categories:[{% for x_item in priority_wise_reso_count %} "{{x_item.0}}", {% endfor %}],
+                                            labels: {
+                                              rotation: -45                                         
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,                                     
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2
+                                            },
+                                            series: {
+                                                cursor: 'pointer',
+                                                point: {
+                                                    events: {
+                                                        click: function (event) {
+                                                        var str_name = this.series.name;
+                                                        var category_detail = this.category;
+                                                        str_name = str_name.replace(" ","_");
+                                                        console.log(str_name, category_detail)
+                                                        window.open("/ticket_popup/?report_type=priority_wise&graph_section=resolution_wise&priority="+category_detail+"&sla_type=resolution&sla_status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+
+                                        series: [{
+                                              type: 'column',
+                                              color:'#008000',
+                                              name: 'Within SLA',
+                                              data: [{% for sla_item in priority_wise_reso_count %} {{sla_item.1}}, {% endfor %}]
+                                          },{
+                                              type: 'column',
+                                              color:'#FF0000',
+                                              name: 'Crossed SLA',
+                                              data: [{% for sla_item in priority_wise_reso_count %} {{sla_item.2}}, {% endfor %}]
+                                          }]
+                                    });
+                                });
+                              </script>                            
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+
+                <!--Start row -->
+                <div class="row">            
+                <div class="col-sm-12">                                                           
+                      <div class="panel">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">
+                              <i class="fa fa-bar-chart-o fa-fw"></i>&nbsp;
+                            Priority wise status details
+                            </h3>
+                            
+                          </div>
+                          <!-- /.panel-heading -->
+                        <div class="panel-body">
+                              <div id="workgroup_wise_status_details"></div>
+                              <script type="text/javascript">
+                               $(function () {
+                                    $('#workgroup_wise_status_details').highcharts({
+                                        chart: {
+                                            type: 'column'                                      
+                                        },
+                                        title: {
+                                            text: 'Priority wise status details'
+                                          
+                                        },                                
+                                        xAxis: {
+                                            categories:[{% for key,value in status_wise_report.0.items %} {% for key1, value1 in value.items %}
+                                              {% if key1 != "colors" %}
+                                             "{{key1}}", {% endif %} {% endfor %} {% endfor %}],
+                                             labels: {
+                                              rotation: -45                                         
+                                            }                                              
+                                        },
+                                        yAxis: {
+                                            min: 0,                                     
+                                            title: {
+                                                text: 'No. of tickets'
+                                            },
+                                            allowDecimals: false
+                                        },
+
+                                        tooltip: {
+                                        formatter: function() {
+                                            return ''+
+                                            this.series.name +': '+ this.y;
+                                          }
+                                        },                                 
+                                        exporting: {
+                                            enabled: false
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                minPointLength: 2
+                                            },
+                                            series: {
+                                              cursor: 'pointer',
+                                              point: {
+                                                  events: {
+                                                      click: function (event) {
+                                                      var str_name = this.series.name;
+                                                      var category_detail = this.category;
+                                                      str_name = str_name.replace(" ","_");
+                                                      window.open("/ticket_popup/?report_type=priority_wise&graph_section=status_wise&priority="+category_detail+"&status="+str_name,"_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                        },
+
+                                        series: [
+                                        {% for status_details in status_wise_report %}
+                                        {% for key, value in status_details.items %}
+                                        {
+                                              type: 'column',
+                                              color:'{{value.colors}}',
+                                              name: '{{key | real}}',
+                                        
+                                              data: [{% for key_item, value_item in value.items %}
+                                              {% if key_item != "colors" %} {{value_item}},  {% endif %} {% endfor %}]
+                                        },
+                                        {% endfor %}
+                                        {% endfor %}
+                                        ]
+                                    });
+                                });
+                              </script>                            
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+
+                <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Tickets Details</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">                    
+                            <table class="table table-striped table-bordered" id="report_table">
+                                  <thead>
+                                    <tr>
+                                      <th>Ticket No</th>
+                                      <th>Title</th>
+                                      <th>Created Date</th>
+                                      <th>Engineer</th>
+                                      <th>Affected Email</th>
+                                      <th>Ticket Priority</th>
+                                      <th>Ticket Type</th>  
+                                      <th>Workgroup</th>
+                                      <th>Case Status</th>
+                                      <th>Ticket Age</th>                                      
+                                      <th>First Response Time</th>
+                                      <th>Resolved Time</th>
+                                      <th>Response Duration</th>
+                                      <th>Resolved Duration</th>
+                                      <th>Last Updated</th>
+                                      <th>Work Hours (in minutes)</th>
+                                      {% if is_egate_included %}
+                                        <th>Carrier</th>
+                                      {% endif %}
+                                    </tr>
+                                  </thead>                           
+                                  
+                                  <tbody>
+                                  {% if tabular_report %}
+                                  {% for ticket in tabular_report %}
+                                    <tr>
+                                    <td>
+                                        {% if ticket.priority_flag == True %}
+                                            <a href="/ticket/{{ticket.ticket_id}}" class="btn btn-sm btn-danger" data-toggle="tooltip" data-placement="bottom" title="Important" target="_blank">{{ticket.ticket_number}}</a>
+                                        {% else %}
+                                            <a href="/ticket/{{ticket.ticket_id}}" class="btn btn-sm btn-success" target="_blank">{{ticket.ticket_number}}</a>
+                                        {% endif %}
+                                      </td>
+                                      <td>{{ticket.title}}</td>
+                                      <td><span style="display:none;">{{ticket.created_date.year}}{% if ticket.created_date.month >= 10 %}{{ticket.created_date.month}}{% else %}0{{ticket.created_date.month}}{%endif%}{% if ticket.created_date.day >= 10 %}{{ticket.created_date.day}}{% else %}0{{ticket.created_date.day}}{%endif%} {{ticket.created_date.time | time}}</span>{% tzone ticket.created_date %}</td>
+                                      <td>{{ticket.engineer}}</td>
+                                      <td>{{ticket.affected_email}}</td>
+                                      <td>{{ticket.internal_priority}}</td>
+                                      {% if ticket.ticket_type == "SR"  %}
+                                        <td>Service Request</td>
+                                      {% elif ticket.ticket_type == "IN" %}
+                                        <td>Incident</td>
+                                      {% elif ticket.ticket_type == "PB" %}
+                                        <td>Problem</td>
+                                      {% elif ticket.ticket_type == "CH" %}
+                                        <td>Change</td>
+                                      {% else %}
+                                         <td>{{ticket.ticket_type}}</td>
+                                      {% endif %}                                      
+                                      <td>{{ticket.workgroup}}</td>
+                                      <td>{{ticket.status | real:ticket.customer_id}}</td>
+                                      <td>{{ ticket.ticket_id | ticket_age}}</td>
+                                      <td><span style="display:none;">{{ticket.first_response.year}}{% if ticket.first_response.month >= 10 %}{{ticket.first_response.month}}{% else %}0{{ticket.first_response.month}}{%endif%}{% if ticket.first_response.day >= 10 %}{{ticket.first_response.day}}{% else %}0{{ticket.first_response.day}}{%endif%} {{ticket.first_response.time | time}}</span>{% tzone ticket.first_response %}</td>
+                                      <!-- <td>{{ticket.resolved_time}}</td> -->
+                                      <td><span style="display:none;">{{ticket.resolved_time.year}}{% if ticket.resolved_time.month >= 10 %}{{ticket.resolved_time.month}}{% else %}0{{ticket.resolved_time.month}}{%endif%}{% if ticket.resolved_time.day >= 10 %}{{ticket.resolved_time.day}}{% else %}0{{ticket.resolved_time.day}}{%endif%} {{ticket.resolved_time.time | time}}</span>{% tzone ticket.resolved_time %}</td>
+                                      <td style="background-color:{{ticket.response_color}}">{{ticket.duration_response}}</td>
+                                      <td style="background-color:{{ticket.resolution_color}};">{{ticket.duration_resolution}}</td>
+                                      <td><span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                          {% tzone ticket.changedate %}</td>
+                                      <td>{{ ticket.ticket_id | work_hour}}</td>
+                                      {% if is_egate_included %}
+                                          <td>{{ ticket.carrier }}</td>
+                                      {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                  {% endif %}
+                                  </tbody>                         
+                                </table>                      
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+     
+
+            </div>
+          </div>
+        </div>
+
+    {% include "ticket/advanced_search_popup.html" %}
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('#report_table').dataTable({
+          aaSorting: [[2, 'desc']],
+          "bPaginate": false,
+          "bFilter": false,
+          "scrollX": true
+        });
+      })
+    </script>
+    <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+    {% include "components/dashboard_footer.html" %}
+    {% include "reports/reports_js.html" %}
+    {% include "components/service_request.html" %}
+    {% include "components/sr_cust.html" %}
+    </body>
+</html>

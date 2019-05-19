@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html ng-app="oneconsole" class="no-js">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Add Survey</title>
+        {% include "components/css.html"%}
+        {% include "components/loader_div.html" %}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px" ng-controller="SurveyController" ng-init="init('{{csrf_token}}')">
+        <div class="page-loader-js"></div>
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1> <small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/survey/list/">Survey List</a></li>
+                        <li class="active">Add Survey</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <form id="" method="POST" action="/survey/add/" enctype="multipart/form-data">{% csrf_token %}
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Add Survey</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-sm-6">                  
+                                        <label>Customer</label>
+                                        <select class="form-control" id="customer" name="customer" required>
+                                            <option value ="">--Select Customer--</option>
+                                            {% for customer in customers %}
+                                                <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                                            {% endfor %}
+                                        </select> <br>
+                                        <label>Title</label>
+                                        <input class="form-control" type="text" name="survey_title" placeholder="Enter survey title" required/><br/>
+                                        <label>Description</label>
+                                        <textarea class="form-control" id="survey_description" name="survey_description" placeholder="Enter survey description" value="" required></textarea>
+                                        <br/>    
+                                        <label>Condition (field name should be like as in ticket table, eg: cls='IN') </label>                                   
+                                        <textarea class="form-control" id="survey_condition" name="survey_condition" placeholder="Enter survey condition" required></textarea><br/>
+                                        <label>Questions</label>
+                                        <select class="form-control" id="questions" name="survey_questions" required multiple ng-model="surv_quest" ng-change="select_question()">
+                                            <option value ="">--Select Questions--</option>
+                                            {% for question in questions %}
+                                                <option value="{{ question.id }}">{{ question.question }}</option>
+                                            {% endfor %}
+                                        </select><br/>
+                                        <button type="submit" class="btn btn-success">Submit</button>
+                                    </div>
+                                    <div class="col-sm-6" id="question_details" ng-show="questions_data.length > 0">
+                                        <div class="form-control" style="height:auto;">
+                                            <h4>Questions and Choices</h4>
+                                            <div ng-repeat="question in questions_data" >
+                                                [[$index+1]]. [[question.question]]
+                                                <ul ng-show="question.choices.length > 0">
+                                                    <li ng-repeat="choice in question.choices">[[choice.choice]] - [[ choice.point]]</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>     
+                            </div>
+                        </div>    
+                    </form>  
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        <script type="text/javascript" src="/static/js/angular/controllers.js"></script>
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_survy').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+        {% include "components/loader_script.html" %}
+    </body>
+</html>
+
+       
+                    
+

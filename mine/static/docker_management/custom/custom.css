@@ -1,0 +1,32 @@
+/*manage host html*/
+.readonly {
+  background-color: white !important;
+  cursor: text !important;
+}
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file .file {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: red;
+  cursor: inherit;
+  display: block;
+}
+
+
+/* imageadd.html */
+.border-image {
+  border:2px solid rgba(0,0,0,0.1);
+  border-radius: 8px !important;
+  margin:3px 3px 3px 3px !important;
+  background-color: white !important;
+}

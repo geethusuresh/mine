@@ -1,0 +1,84 @@
+<script src="/static/js/amchart/amcharts.js"></script>
+<script src="/static/js/amchart/gauge.js"></script>
+<script src="/static/js/amchart/light.js"></script>
+
+<script type="text/javascript">
+    var gaugeChart = AmCharts.makeChart( "chartdiv", {
+      "type": "gauge",
+      "theme": "light",
+      "axes": [ {
+        "axisThickness": 1,
+        "axisAlpha": 0.2,
+        "tickAlpha": 0.2,
+        "valueInterval": 1,
+        "bands": [ {
+          "color": "#FFA500",
+          "endValue": 5,
+          "startValue": 0,
+          "innerRadius": "70%",
+        }, {
+          "color": "#9ACD32",
+          "endValue": 9,
+          "startValue": 5,
+          "innerRadius": "70%",
+        }, {
+          "color": "#1E90FF",
+          "endValue": 12,
+          "innerRadius": "70%",
+          "startValue": 9
+        },  {
+          "color": "#FF0000",
+          "endValue": 15,
+          "innerRadius": "70%",
+          "startValue": 12
+        }],
+        "bottomText": "0 km/h",
+        "bottomTextYOffset": -20,
+        "endValue": 15
+      } ],
+      "arrows": [ {} ],
+      "export": {
+        "enabled": true
+      }
+    } );
+
+
+    // set random value
+    function randomValue() {
+      $.ajax({
+          url: "/security/get/dialdata",
+          type: "POST",
+          dataType: "json",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success: function(data1) {
+              console.log(data1)
+              if(data1=='low'){
+                value = 3
+              }
+              else if (data1='medium'){
+                value = 7
+              }
+              else if (data1 = 'high'){
+                value = 10.5
+              }
+              else if (data1 = 'severe'){
+                value = 13.5
+              }
+              if ( gaugeChart ) {
+                if ( gaugeChart.arrows ) {
+                  if ( gaugeChart.arrows[ 0 ] ) {
+                    if ( gaugeChart.arrows[ 0 ].setValue ) {
+                      gaugeChart.arrows[ 0 ].setValue( value );
+                      gaugeChart.axes[ 0 ].setBottomText( "Severity with Highest Events Count : "+data1 );
+                    }
+                  }
+                }
+              }
+          },
+      });
+      return false;
+    }
+    randomValue();
+</script>

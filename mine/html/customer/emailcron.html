@@ -1,0 +1,232 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>MailBox Settings  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+
+            <div class="content">              
+              <div class="row">
+                  {% if error_code == 1%}
+                  <div class="alert alert-danger" role="alert">{{op_message}}</div>
+                  {% elif error_code == 2 %}
+                  <div class="alert alert-success" role="alert">{{op_message}}</div>
+                  {% endif %}
+
+              </div>
+
+              {% if messages %}
+                <div class="row">
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <div class="modal-body">
+              <form method="post" action="/emailcron/">
+              {% csrf_token %}
+                <fieldset>
+                <div class="controls" style="text-align: center;">
+                  <p>
+                    <select class="form-control" id="customers_id" name="customer" required style="width:300px;display: block;margin: 0 auto;" onchange="get_workgroup();">
+                      <option value="">Select Customer</option>
+                        {% for customer in customers %}
+                          {% if email_accounts.customer.id = customer.id %}
+                          <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                          {% else %}
+                           <option value="{{customer.id}}">{{ customer.customername }}</option>
+                          {% endif  %}
+                        {% endfor %}
+                    </select>
+                  </p>
+                  <p>
+                    <input class="form-control " type="text" id="server" name="server" required placeholder="Server" style="width:300px; display:table-cell;vertical-align:middle;" value="{{email_accounts.server}}">
+                  </p>
+                  <p>              
+                    <select name="protocol" id="protocol" class="form-control" required>
+                      <option value="">Select any protocol</option>
+                      {% if email_accounts.protocol == "IMAP" %}
+                      <option value="IMAP" selected="selected">IMAP</option>
+                      {% else %}
+                      <option value="IMAP">IMAP</option>
+                      {% endif %}
+                    </select>
+                  </p>
+                  <p>
+                    <input class="form-control" type="text" id="port" name="port" required placeholder="Port" style="width:300px; display:table-cell;vertical-align:middle;" value="{{email_accounts.port}}">
+                  </p>
+                  <p>
+                    <input class="form-control" type="text" id="username" name="username" required placeholder="Username eg:user@server.com" style="width:300px; display:table-cell;vertical-align:middle;" value="{{email_accounts.login}}">
+                   </p>
+                   <p>
+                    <input class="form-control" type="password" id="password" name="password" required placeholder="Password" style="width:300px; display:table-cell;vertical-align:middle;" value="{{email_accounts.paswd}}">
+                   </p>
+
+                  <p>
+                    <input class="form-control" type="text" id="from_email" name="from_email" required placeholder="Autoresponse From Address" style="width:300px; display:table-cell;vertical-align:middle;" value="{{email_accounts.from_email}}">
+                   </p>
+
+                  <p>
+                    <select class="form-control" id="workgroup" required name="workgroup"  style="width:300px;display: block;margin: 0 auto;">
+                    <option value="">Select Workgroup</option>
+                    {% if workgroup_customer %}
+                    {% for workgroup_item in workgroup_customer %}
+                      {% if workgroup_item.id == email_accounts.workgroup.id  %}
+                      <option value="{{workgroup_item.id}}" selected="selected">{{workgroup_item.workgroup}}</option>
+                      {% else %}
+                      <option value="{{workgroup_item.id}}">{{workgroup_item.workgroup}}</option>
+                      {% endif %}
+                    {% endfor %}
+                    {% endif %}              
+                    </select>
+                  </p>
+                  <p style="text-align:left !important;">          
+                    <label>Account Status &nbsp;</label>
+                    <input type="radio" class="form-control" value="1" {% if email_accounts.status == True %} checked="checked" {% endif %} required   name="status" />
+                    <label>Active</label>
+                    <input type="radio" class="form-control" value="2" {% if email_accounts.status == False %} checked="checked" {% endif %} required  name="status" />
+                    <label>Inactive</label>
+                  </p>
+
+                  <div class="btn-toolbar">
+                    <button class="btn btn-success pull-right"  name='save' type="submit">Save Settings</button>
+
+                    <input type="hidden" name="op_status" id="op_status" value="{{op_status}}" />
+                    <input type="hidden" name="op_id" id="op_id" value="{{email_accounts.id}}" />
+                    </div>
+                </div>
+              </fieldset>
+              </form>
+              </div>   
+
+              <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Email Accounts Details</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">                  
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th>Host/Username</th>
+                                  <th>Customer</th>
+                                  <th>Type</th>
+                                  <th>Valid/Invalid</th>
+                                  <th>Delete</th>
+                                  <th>Run Now</th>
+                                  <th>Check Login</th>
+                                </tr>
+                              </thead>                           
+                              
+                              <tbody>
+                              {% if email_details %}
+                              {% for email in email_details %}                            
+                                <tr>
+                                  <td><a href="/emailcron_update/{{email.id}}" style="text-decoration:underline;">{{email.server}}/{{email.login}}</a></td>
+                                  <td>{{email.customer.customername}}</td>                                  
+                                  <td>{{email.protocol}}</td>                                  
+                                  <td>
+                                  {% if email.status == True %}
+                                  Active
+                                  {% elif email.status == False %}
+                                  Inactive
+                                  {% endif %}                                  
+                                  </td>                                 
+                                  <td>
+                                      <a href="/emailcron_delete/{{email.id}}" onclick="return deletion_alert();">
+                                        <img src="/static/img/cancel-32.png" style="width:19px;" />
+                                      </a>                        
+                                  </td>
+                                  <td>
+                                     <a href="/emailcron/testrun/{{email.id}}">
+                                        <img src="/static/img/run.png" style="width:19px;" />
+                                      </a>  
+                                  </td>
+                                  <td>
+                                      <a href="/emailcron/checkauth/{{email.id}}">
+                                        <img src="/static/img/key.png" style="width:19px;" />
+                                      </a>
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                              {% else %}
+                              <tr><td colspan="5" style="text-align:center;">No Email Accounts Found</td></tr>
+                              {% endif %}
+                              </tbody>                         
+                            </table>                      
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+
+            </div>
+          </div>
+        </div>
+    {% include "components/customer_footer.html"%}
+    <script type="text/javascript">
+    function get_workgroup(){
+      var customer_id = $('#customers_id').val();      
+      $.ajax({
+          type: "POST",
+          url: "/workgroups_get_email/",
+          data: { customer_id: customer_id, csrfmiddlewaretoken: '{{ csrf_token }}'}
+          })
+          .done(function(data) {
+              workgroup_details = '<option value="">Select Workgroup</option>';
+              $.each(JSON.parse(data), function(idx, obj) {
+                  workgroup_id = obj.pk;
+                  workgroup_name = obj.fields.workgroup;
+                  workgroup_details = workgroup_details + '<option value="'+workgroup_id+'">'+workgroup_name+'</option>';
+              });
+              $('#workgroup').html(workgroup_details);
+          })
+          .fail(function() {
+              $('#ajax_loader').hide();
+              $('#failed_alert').html("Oh! Failed to move this report to your dashboard");
+              $('#failed_alert').hide(100);
+          });                   
+      }
+
+      function deletion_alert(){
+        if(confirm("Do you want to delete this account details?")){
+            return true;
+        }
+        else{
+          return false;
+        }
+      }   
+    </script>
+    </body>
+</html>

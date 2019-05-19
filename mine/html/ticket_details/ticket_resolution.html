@@ -1,0 +1,21 @@
+{% load zone %}
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr role="row">
+            <th >Ticket</th>
+            <th >Engineer</th>
+            <th >Time taken in hours</th>
+            <th >Updated On</th>
+        </tr>
+    </thead>
+    <tbody >
+        {% for resolution in ticket.ticketresolution_set.all %}
+            <tr class="odd">
+                <td class="grey"><a  style="color:#555">{{resolution.ticket}}</a></td>
+                <td class="grey"><a  style="color:#555">{{resolution.user}}</a></td>
+                <td class="grey"><a  style="color:#555">{{resolution.time_taken|hour_cal}}</a></td>
+                <td class="grey"><a  style="color:#555">{% tzone resolution.last_activity %}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

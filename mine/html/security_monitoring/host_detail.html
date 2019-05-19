@@ -1,0 +1,512 @@
+{% load humanize %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Events</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" href="/static/switch/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.js">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Threat Management | <small>Protection</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active"><a href="/dashboard/index/">Threat Management</a></li>
+                    <li>Protection</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="alert alert-success" id="message_div" style="display:none;"><span id="message_span"></span></div>
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                {% endfor %}
+                </ul>
+              {% endif %}
+              <!-- <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                  <a class="btn btn-info pull-right" href="/security/dashboard">Dashboard</a>
+                </div>
+              </div> -->
+              {% if not hosts %}
+              <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                <div class="alert-wrap in animated jellyIn">
+                  <div class="alert alert-purple" role="alert">
+                    <button class="close" type="button">
+                    <i class="fa fa-times-circle"></i>
+                    </button>
+                    <div class="media">
+                      <div class="media-body">
+                        <h4 class="alert-title"></h4>
+                        <p class="alert-message"><strong>No HOSTS Registered for protection</strong></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              <div class="row">
+                <div class="col-md-8 ">
+                    <div class="row-fluid">
+                      <div class="col-md-12">
+                        <div style=" border: 3px ;">
+                                <div style="background-color:#FFECD1;">
+                                  {% if intrusion_prevention %}
+                                    {% if intrusion_prevention.prevention %}
+                                    <div class="alert alert-success fade in text-center h5">Intrusion Prevention is
+                                      <strong>ON !</strong> 
+                                      <button class="btn btn-danger" onclick="changeSettings('deactivate')"><strong>Disable</strong> <span></span></button>
+                                    </div>
+
+                                  <!--   <blockquote class="">Intrusion Prevention is ON Click The Button to Disable <button onclick="changeSettings('deactivate')" class="btn btn-success">DISABLE</button></blockquote> -->
+                                    {% else %}
+                                    <div class="alert alert-warning fade in text-center h5">Intrusion Prevention is
+                                      <strong>OFF !</strong> 
+                                      <button class="btn btn-info" onclick="changeSettings('activate')"><strong>Enable</strong><span></span></button>
+                                    </div>
+
+                                   <!--    <blockquote class="">Intrusion Prevention is OFF Click The Button to Enable <button class="btn btn-success" onclick="changeSettings('activate')">ENABLE</button></blockquote> -->
+                                    {% endif %}
+                                  {% else %}
+                                  <div class="alert alert-info fade in text-center h5">Intrusion Prevention is
+                                    <strong>OFF !</strong> 
+                                    <button class="btn btn-purple " onclick="changeSettings('activate')"><strong>Enable</strong> <span></span></button>
+                                  </div>
+
+                                  <!--   <blockquote class="">Intrusion Prevention is OFF Click The Button to Enable <button class="btn btn-success" onclick="changeSettings('activate')">ENABLE</button></blockquote> -->
+                                  {% endif %}
+                                </div>
+                            </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="panel">
+                              <div class="panel-heading">
+                                <p class="panel-title text-center">Host IPs</p>
+                              </div>
+                              <div class="panel-body">
+                                 <table class="table table-hover table-stripped no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="host_table">
+                                    <thead>
+                                       <tr>
+                                          <th class="hidden">Select</th>
+                                          <th>View</th>
+                                          <th>Host Name</th>
+                                          <th>Host IP</th>
+                                          <th>Prevention Status</th>
+                                          <th>Action</th>
+                                          <!-- <th>Customer</th> -->
+                                          <!-- <th>Intrusion Prevention</th> -->
+                                          <!-- <th>Insert time</th> -->
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                       {% for ip in ip_list%}
+                                        <tr>
+                                          <td class="hidden" style="cursor:pointer;" onclick="changeCount2('{{ip.1}}','{{ip.0}}')"><input type='radio' name='person1' value='{{ip.0}}' id="radio_{{ip.0}}"></td>
+                                          <td><a class="btn btn-success btn-sm" href="/dashboard/index/host/{{ip.0}}"><i class="fa fa-search-plus "></i>
+                                          </a></td>
+                                          <td  style="cursor:pointer;" onclick="changeCount2('{{ip.1}}','{{ip.0}}')">{{ip.3}}</td>
+                                          <td style="cursor:pointer;" onclick="changeCount2('{{ip.1}}','{{ip.0}}')">{{ ip.1 }}</td>
+                                          {% if ip.4 %}
+                                            <td><span class="text label label-success">ON</span></td>
+                                            <td><a class="btn btn-danger btn-sm" onclick="disabelPrevention('{{ip.0}}')">Disable</a></td>
+                                          {% else %}
+                                            <td><span class="text label label-danger">OFF</span></td>
+                                            <td><a class="btn btn-success btn-sm" onclick="enablePrevention('{{ip.0}}')">Enable</a></td>
+                                          {% endif %}
+                                          <!-- <td>{{ ip.2 }}</td> -->
+                                          <!-- <td><input type="checkbox" class="switch-input" onclick="changeSettings({{ip.0}})" id="check{{ip.0}}" '{% if ip.3 == 'blocked'%}' checked '{% endif %}'></td> -->
+                                        </tr>
+                                       {% endfor %}
+                                    </tbody>
+
+                                 </table>
+                              </div>
+                            </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="panel">
+                              <div class="panel-heading">
+                                <p class="panel-title text-center">Blocked Source IPs</p>
+                              </div>
+                              <div class="panel-body ">
+                                 <table class="table table-hover table-stripped no-padding" style="" id="blocked_table">
+                                    <thead>
+                                       <tr>
+                                          <th>Protected Host</th>
+                                          <th>Source IP</th>
+                                          <!-- <th>Status</th> -->
+                                          <th>Last Blocked Time</th>
+                                          <!-- <th>Last Allowing Time</th> -->
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for ip in blocked_ips %}
+                                        <tr>
+                                          <td>{{ip.host.host}}</td>
+                                          <td>{{ip.ip}}</td>
+                                          <!-- <td>{{ip.status}}</td> -->
+                                          <td>{{ip.last_blocking_time}}</td>
+                                          <!-- <td>{{ip.last_allowing_time}}</td> -->
+                                        </tr>
+                                      {% endfor %}
+                                    </tbody>
+
+                                 </table>
+                              </div>
+                            </div>
+                      </div>
+                    </div>
+                    
+                </div>
+                <div class="col-sm-4" style="margin-top:0px">
+                  <div class="row">
+                    <div class="col-md-12">
+                          <!-- <div class="panel panel-success panel-colorful">
+                            <div class="pad-all text-center">
+                              <span class="text-3x text-thin timer" data-start="0" data-from="0" data-to="{{level_0_to_5}}" data-speed="300"  id="l05"></span>
+                              <p class="h4 text-thin">Events Count-Level 0 to 5(Last Week)</p>
+                              <i class="fa fa-tasks fa-2x"></i>
+                            </div>
+                          </div>
+
+                           <div class="panel panel-warning panel-colorful">
+                            <div class="pad-all text-center">
+                              <span class="text-3x text-thin timer" data-start="0" data-from="0" data-to="{{level_5_to_10}}" data-speed="300" id="l510"></span>
+                              <p class="h4 text-thin">Events Count-Level 6 to 10 (Last Week)</p>
+                              <i class="fa fa-tasks fa-2x"></i>
+                            </div>
+                          </div>
+
+
+                          <div class="panel panel-danger panel-colorful">
+                            <div class="pad-all text-center">
+                              <span class="text-5x text-thin timer" data-start="0" data-from="0" data-to="{{level_10_to_15}}" data-speed="300" id="l1015"></span>
+                              <p  class="h4 text-thin">Events Count-Level 11 to 15 (Last Week)</p>
+                              <i class="fa fa-shield fa-2x"></i>
+                            </div>
+                          </div> -->
+                    </div>
+                    <div class="col-md-12">
+                      <div class="panel">
+                            <div class="panel-heading">
+                                  <button class="pull-right btn btn-success btn-lg" data-toggle="modal" data-target="#add_allowed_ip" style="font-size: 85%;">
+                                  <i class="fa fa-plus "></i>
+                                </button>
+
+                                <p class="panel-title text-center">Whitelisted IPs</p>
+                              </div>
+
+                            <div class="panel-body ">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <table class="table table-hover table-stripped no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="allowed_table">
+                                    <thead>
+                                       <tr>
+                                          <!-- <th>No</th> -->
+                                          <!-- <th>No</th> -->
+                                          <th>IP</th>
+                                          <th>Remove</th>
+                                          <!-- <th>View</th> -->
+                                          <!-- <th>Insert time</th> -->
+                                       </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for ip in allowed_ips %}
+                                        <tr>
+                                          <!-- <td>{{forloop.counter}}</td> -->
+                                          <td>{{ip.ip}}</td>
+                                          <td>
+                                            <a class=" btn btn-danger" onclick="removeWhitelist('{{ip.id}}')"  style="font-size: 50%;">
+                                              <i class="fa fa-minus "></i>
+                                            </a>
+                                          </td>
+                                        </tr>
+                                      {% endfor %}
+                                    </tbody>
+
+                                 </table>
+                                </div>
+                                <div class="col-md-12">
+                                                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-sm-12">
+                      <div class="panel">
+                        <div class="panel-heading">
+                          <p class="panel-title text-center">Blacklisted IPs</p>
+                        </div>
+                        <div class="panel-body">
+                          {% if blacklists %}
+                          <table class="table table-stripped">
+                            <thead>
+                              <th>IPs</th>
+                              <th>View</th>
+                            </thead>
+                            <tbody>
+                              {% for blacklist in blacklists %}
+                              <tr>
+                                <td>{{blacklist.ip_address}}</td>
+                                <td> <a href="/dashboard/index/host/{{blacklist.host.id}}/{{blacklist.ip_address}}/" class="btn btn-success fa fa-eye"></td>
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          {% else %}
+                          <div class="text-center">
+                            <alert class="alert alert-info text-center">No IPs were added to Blacklist</alert>
+                          </div>
+                          
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    
+    </body>
+    <div class="modal fade" id="add_host" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        <form method="post" action=".">{% csrf_token %}
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Host IP</h4>
+          </div>
+          <div class="modal-body">
+            <label for="host_ip" style="font-size:15px;">Enter Host IP</label>
+            <input type="text" required class="form-control" id="host_ip" name="host_ip">
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Submit</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal fade" id="add_allowed_ip" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        <form method="post" action="/security/add/allowed/">{% csrf_token %}
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Whitelist IP</h4>
+          </div>
+          <div class="modal-body">
+            <label for="host_ip" style="font-size:15px;">Enter IP </label>
+            <input type="text" required class="form-control" id="ip" name="ip">
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Submit</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+</html>
+
+<script type="text/javascript">
+function disabelPrevention(dat){
+  if (confirm('Are You Sure')){
+    window.location = '/security/disable/prevention/'+dat
+  }
+}
+function enablePrevention(dat){
+  if (confirm('Are You Sure')){
+    window.location = '/security/enable/prevention/'+dat
+  }
+}
+function removeWhitelist(dat){
+  if (confirm('Are You Sure')){
+    window.location = '/security/remove/whitelist/'+dat
+  }
+}
+function changeSettings(dat){
+  var r = confirm("Confirm");
+  if (r == true) {
+      $.ajax({
+        url:"/security/start/prevention/",
+        type:"POST",
+        dataType:"json",
+        data:{
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          // 'host_id':dat,
+          'status':dat
+        },
+        success : function(data1) {
+         // $("#message_div").css("display", "block");
+         //  // $("message_div").show();
+         //  $("#message_span").html('thisssssssss');
+         location.href = '/security/host/details/' 
+        },
+        error : function(xhr,errmsg,err) {
+          alert(err);
+        }
+      });
+  } else {
+      $("#check"+dat).prop('checked',false)
+  }
+}
+
+$(document).ready( function () {
+  blocked_datatable = $("#blocked_table").dataTable({
+    "bLengthChange" :false,
+    "bDestroy" : true,
+    "oLanguage": { "sSearch": "Search Source Ips:" },
+    "aoColumns": [ 
+        {"bSearchable": false},
+        {"bSearchable": true}, 
+        {"bSearchable": false}
+    ]
+    // bInfo:false
+  });
+  $("#host_table").dataTable({
+    "bLengthChange" :false,
+  });
+  $("#allowed_table").dataTable({
+    "bLengthChange" :false,
+    'bInfo':false
+  });
+
+} );
+
+function changeCount(dat){
+  $.ajax({
+        url:"/security/host/details/",
+        type:"POST",
+        dataType:"json",
+        data:{
+          csrfmiddlewaretoken: '{{ csrf_token }}',
+          'host_id':dat,
+        },
+        success : function(data1) {
+          $("#l05").text(data1[0]);
+          $("#l510").text(data1[1]);
+          $("#l1015").text(data1[2]);
+          for(var i in data1){
+          }
+        },
+        error : function(xhr,errmsg,err) {
+          alert(err);
+        }
+      });
+      blocked_datatable.fnDestroy();
+      blocked_datatable.empty();
+      a = '<thead>';
+      a += '<tr><th>Protected Hosts</th><th>Source IP</th><th> Status </th> <th>Last Blocking Time</th></tr>'
+      a += '</thead>'
+      // $("#blocked_table").append('<thead>');
+      // $("#blocked_table").append('<tr><th>Host</th><th>IP</th><th>Status</th><th>Last Blocking Time</th><th>Last Allowed Time</th></tr>');
+      $("#blocked_table").append(a);
+      console.log($("#blocked_table"))
+      // blocked_datatable.fnClearTable();
+      $('#blocked_table').dataTable( {
+              "bLengthChange": false,
+              // "bFilter": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/security/host/details/",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      host_id : dat,
+                      request_type : 'blockedip',
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "columns": [
+                       { "": "fields.host__host" },
+                       { "": "fields.ip" },
+                       { "": "fields.status", "visible": false },
+                       { "": "fields.last_blocking_time"},
+                       // { "": "fields.last_allowing_time"},
+                   ],
+      } );
+      // $('#allowed_table').dataTable().fnDestroy();
+      // $('#allowed_table').dataTable( {
+      //         "bLengthChange": false,
+      //         // "bFilter": false,
+      //         "bInfo": false,
+      //         "bAutoWidth": false,
+      //          "processing": true,
+      //          "ajax": {
+      //              "processing": true,
+      //              "url": "/security/host/details/",
+      //              "dataType":"json",
+      //              "type":"POST",
+      //              "data":{
+      //                 host_id : dat,
+      //                 request_type : 'allowedip',
+      //                 csrfmiddlewaretoken: '{{ csrf_token }}'
+      //              },
+      //              "dataSrc": ""
+      //          },
+      //          "columns": [
+      //                  { "": "fields.server_name" },
+      //                  { "": "fields.ip" },
+      //                  { "": "fields.status" },
+      //              ],
+      // } );
+}
+function changeCount2(data,id){
+  $("#radio_"+id).prop("checked",true);
+  changeCount(data);
+}
+  
+</script>
+
+          <script>
+
+
+          $("#sec_protection").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>

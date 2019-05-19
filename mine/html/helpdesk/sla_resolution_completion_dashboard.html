@@ -1,0 +1,258 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="300">
+    <title>Oneconsole | SLA Resolution Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+      <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->  
+    <script type="text/javascript">
+    //     setInterval(function() {
+    //         window.location.reload();
+    //       }, 300000); 
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <!-- This body id is used to set the Data Table -->
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">SLA Dashboard | <small>Resolution Dashboard</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">SLA Resolution Dashboard</li>
+                </ol>
+            </div>
+            {% include "components/msg_div.html" %}
+            <div class="content">
+
+              <div class="col-md-12">
+                <div id="count_down" class="alert alert-primary fade in">
+                  <center>
+                    <label class="text-1x">Dashboard will reset in </label>
+                    <span id="count_clock" class="text-2x text-nowrap"></span>
+                    <label class="text-1x"> seconds</label>
+                  </center>
+                </div>
+                <div id="count_down_reset" class="alert alert-primary fade in" hidden="true">
+                  <center>
+                    <label class="text-1x">Processing <i class="fa fa-spinner fa-spin" aria-hidden="true"></i></label>
+                  </center>
+                </div>
+              </div>
+
+               
+              <!-- Start of SLA Critical Ticket list -->
+                <div class="col-xs-6">
+                  <div class="panel">
+                      <div class="panel-heading">
+                          <h3 class="panel-title">Tickets (SLA Crossed 90%)</h3>
+                      </div>
+          
+                      <!--Data Table-->
+                      <!--===================================================-->
+                      <div class="panel-body">
+                          <div class="table-responsive">
+                              <table id="sla_resolution_critical_ticket_table" class="table table-striped">
+                                  <thead>
+                                      <tr>
+                                          <!-- <th></th> -->
+                                          <th>Ticket ID</th>
+                                          <th>Summary</th>
+                                          <th>Target Finish</th>
+                                          <th>Group</th>
+                                          <th>Subgroup</th>
+                                      </tr>
+                                  </thead>
+                              </table>
+                          </div>
+                          <hr>
+                      </div>
+                      <!--===================================================-->
+                      <!--End Data Table-->
+          
+                  </div>
+                </div>
+              <!-- End of SLA Critical Ticket List -->
+
+              <!-- Start of SLA Midrange Ticket List -->
+                <div class="col-xs-6">
+                  <div class="panel">
+                      <div class="panel-heading">
+                          <h3 class="panel-title">Tickets (SLA crossed 75% to 90%)</h3>
+                      </div>
+          
+                      <!--Data Table-->
+                      <!--===================================================-->
+                      <div class="panel-body">
+                          <div class="table-responsive">
+                              <table id="sla_resolution_midrange_ticket_table" class="table table-striped">
+                                  <thead>
+                                      <tr>
+                                          <!-- <th></th> -->
+                                          <th>Ticket ID</th>
+                                          <th>Summary</th>
+                                          <th>Target Finish</th>
+                                          <th>Group</th>
+                                          <th>Subgroup</th>
+                                      </tr>
+                                  </thead>
+                              </table>
+                          </div>
+                          <hr>
+                      </div>
+                      <!--===================================================-->
+                      <!--End Data Table-->
+          
+                  </div>
+                </div>
+              <!-- End of SLA Midrange Ticket List -->
+
+            </div>
+          </div>
+        </div>      
+
+        {% include "ticket/advanced_search_popup.html" %}
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        <script>
+            $("#sla_crossed").addClass("active");
+            $("#sla_dashboard_sub_nav").css({'display' : 'block'});
+            $("#sla_resolution_crossed").addClass("active");
+            $('#sla_crossed').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+        {% include "components/dashboard_footer.html" %}
+        {% if "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html" %}
+        {% else %}
+            {% include "components/service_request.html" %}
+        {% endif %}
+        {% include "reports/reports_js.html" %}
+        <script type="text/javascript">
+        $(document).ready(function(){
+
+          $('#sla_critical_ticket_table').DataTable();
+          $('#sla_midrange_ticket_table').DataTable();
+
+          sla_cross_response_ticket_list();
+
+          show_countdown();
+
+        });
+
+        function show_or_reset_counter(){
+          $('#count_down').toggle();
+          $('#count_down_reset').toggle();
+        }
+
+        var current_timer_value = 0;
+        var max_timer_value = 30;
+        function show_countdown(){
+          $('#count_clock').html((max_timer_value - current_timer_value).toString())
+            if(current_timer_value < max_timer_value){
+              current_timer_value = current_timer_value + 1 ;
+            }
+            else{
+              sla_cross_response_ticket_list();
+            }
+          }
+        var countdown_interval = 1000; // In every seconds.
+        setInterval(show_countdown, countdown_interval);
+
+        function draw_sla_ticket_table(id, ticket_list){
+          $('#'+id).DataTable({
+            "bFilter": false,
+            "bInfo": false,
+            "paging":   false,
+            "bDestroy": true,
+            data: ticket_list,
+            // columns: [
+            //   { title: "" },
+            //   { title: "" },
+            //   { title: "" },
+            //   { title: "" },
+            //   { title: "" },
+            //   { title: "" },
+            //   { title: "" }
+            // ]
+          });          
+        }
+
+        function process_ticket_list(ticket_list, btn_color){
+          data = [];
+          href = '<a class="btn TYPE btn-sm" data-toggle="tooltip" data-placement="bottom" title="View" href="/ticket/status/edit/ID">VALUE</a>'
+          $.each(ticket_list, function(index, value){
+            href_link = href.replace("TYPE", btn_color).replace("ID", value.id.toString()).replace("VALUE", value.ticketid);
+            arr = [href_link, value.summary, value.targetfinish, value.group__workgroup, value.subgroup__subgroupname]
+            data.push(arr)
+          });
+          return data;
+        }
+
+        function sla_cross_response_ticket_list(){
+          
+          show_or_reset_counter();
+
+          $.ajax({
+            url: '/sla/resolution/crossed/tickets/',
+            type: 'get',
+            success: function(data){
+
+              sla_in_critical_ticket_list = data.sla_in_critical_ticket_list;
+              processed_critical_ticket_list = process_ticket_list(sla_in_critical_ticket_list, 'btn-danger');
+              draw_sla_ticket_table('sla_resolution_critical_ticket_table', processed_critical_ticket_list);
+
+              sla_in_midrange_ticket_list = data.sla_in_midrange_ticket_list;
+              processed_midrange_ticket_list = process_ticket_list(sla_in_midrange_ticket_list, 'btn-warning');
+              draw_sla_ticket_table('sla_resolution_midrange_ticket_table', processed_midrange_ticket_list);
+
+              current_timer_value = 0;
+              show_or_reset_counter();
+
+            }
+          });
+        }
+      </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+

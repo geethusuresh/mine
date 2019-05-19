@@ -1,0 +1,249 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+    <link href="{% static 'cloud-static-files/plugins/ng-sortable-dist/drag-drop.css' %}" rel="stylesheet" type="text/css">
+
+
+<style type="text/css">
+  
+
+ .dropdown-menu{
+
+  width: 1024px !important;
+}
+
+
+.icon-circle {
+  border-radius: 50%;
+}
+
+a:hover {
+ text-decoration: none;
+}
+
+
+</style>
+<script type="text/javascript">
+    
+var cloud_account_id = {{cloud_account_id}}
+
+</script>
+
+
+
+        <h1>Spin your Instance</h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+                </li>
+            <!--     <li>
+                   <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+                </li> -->
+
+
+                <li>
+                    <a href="{% url 'get_aws_opswork_list' cloud_account_id %}">Application Groups </a>
+                </li>
+                <li>
+                    <a href="{% url 'aws_opswork_instance_list' cloud_account_id stack_id %}">Instance List</a>
+                </li>
+
+
+                <li class="active">
+                    <strong>Select application</strong>
+                </li>
+            </ol>
+
+
+{% endblock %}
+
+{% block basecontent %}
+
+
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-error alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+
+<div ng-controller="oneCtrl">
+
+
+    <div class="alert alert-info alert-dismissable" ng-show="!list2.length">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-warning"></i> Info!</h4>
+        You have not selected any application, you can drag and drop application from list. if you don't select any application instance will spin without any application  
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-7">
+        <h4>select your application from list</h4>
+            <div class="row">
+                <div class="col-md-12">
+                     <div class="navbar-inner">
+                        <div class="container form-inline" style="text-align: center;">
+                            <div class="row">
+                                <div class="col-md-7">
+                                <span ng-if="noDataAvailable">No Applications Found</span>
+                                  <div class="btn btn-droppable" ng-repeat="item in list5" data-drop="true" ng-model='list5' data-jqyoui-options="{accept:'.btn-draggable:not([ng-model=list5])'}"  jqyoui-droppable="{index: {[{$index}]}}">
+                                    <div class="btn btn-info btn-draggable" data-drag="{[{item.drag}]}" data-jqyoui-options="{revert: 'invalid'}" ng-model="list5" jqyoui-draggable="{index: {[{$index}]},placeholder:true}" ng-hide="!item.title">
+                                        <i class=" {[{item.icon}]}" style="font-size: 62px; float: left;   padding-left: 6px;   padding-top: 8px;"></i>
+                                        <div class="row" style="padding-top: 64px;">
+                                            <span>{[{item.title}]}</span>
+                                        </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+        <h4>selected application</h4>
+            <div class="thumbnail" data-drop="true" ng-model='list2' data-jqyoui-options="{accept:'.btn-draggable:not([ng-model=list2])'}"  jqyoui-droppable="{multiple:true}" style="text-align: center">
+              <div class="caption">
+                <div class="btn btn-info btn-draggable" ng-repeat="item in list2" ng-show="item.title" data-drag="{[{item.drag}]}" data-jqyoui-options="{revert: 'invalid'}" ng-model="list2" jqyoui-draggable="{index: {[{$index}]}}" style="margin: 2%;">
+                    <i class=" {[{item.icon}]}" style="font-size: 62px; float: left;   padding-left: 6px;   padding-top: 8px;"></i>
+                    <div class="row" style="padding-top: 64px;">
+                        <span>{[{item.title}]}</span>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>    
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4">
+            </div>
+            <button class="my-btn" ng-click="spin_my_instance()">spin my instance</button>
+        </div>
+    </div>
+
+<div class="modal fade bs-example-modal-lg" id="submil_instance_Modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Create Your Instance</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" class="form-horizontal style-form" id="aws-form" action="{% url 'create_layer_aws_opswork' cloud_account_id stack_id %}">{% csrf_token %}
+            <input type="hidden" name="recipe_list" value="{[{list2}]}" >
+            <div class="form-group">
+                <label class="col-sm-4 col-sm-4 control-label">Instance Name :</label>
+                <div class="col-sm-5">
+                    <input type="text" name="name" id="instance_name" class="form-control" placeholder="Add Name for Your Instance">
+                </div>
+                    <p id = "instnce-name-sucess"> Enter the label that identifies your instance on the network.</p>
+                    <p id = "instnce-name-error" style="color:red; display:none"> Hostname must consist of lowercase letters.</p>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 col-sm-4 control-label">Instance Type :</label>
+                <div class="col-sm-5">
+                    <select class="form-control" id="id_size" name="size" placeholder="select your instance type" style="width:100%">
+                        <option value="2">Medium Instance</option>
+                        {% for type in instance_type %}
+                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit" id="form-submit" disabled="disabled">Create Instance</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </form>
+       </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script type="text/javascript">
+
+
+$(document).ready(
+    // Handler for document ready event
+    function () {
+
+        $('#instance_name').keyup(
+            // Handler for changes detected on yourNumberTextField
+            function () {
+                var regExp = /^[a-z]+$/;
+                mykey = $(this).val()
+                if(mykey.match(regExp)){
+                    $('#instnce-name-error').hide()
+                    $('#instnce-name-sucess').show()
+                    $('#form-submit').attr('disabled',false);
+
+                }
+                else{
+
+                    $('#instnce-name-error').show()
+                    $('#instnce-name-sucess').hide()
+                    $('#form-submit').attr('disabled',true);
+                }
+            } // end function()
+        ); // end $('#yourNumberTextField').change
+    } // end function
+
+); // end function $(document).ready
+</script>
+<style type="text/css">
+    
+
+.my-btn {
+  -webkit-border-radius: 9;
+  -moz-border-radius: 9;
+  border-radius: 5px;
+  font-family: Arial;
+  color: #fafafa;
+  font-size: 18px;
+  background: #605ca8;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+
+.my-btn:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+
+
+.modal-dialog {
+
+  z-index: 1041;
+}
+
+</style>
+{% endblock %}

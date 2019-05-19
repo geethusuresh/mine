@@ -1,0 +1,134 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "change_management/change_css.html"%}
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Add Field Values</li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"> Change Request Value Creation</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-1"> </div>
+                                <div class="col-sm-10">
+                                    <form action="/rfc/field_value/create/" method="post" enctype="multipart/form-data">    {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <select class="form-control" name="model_name" id="model_data" required>
+                                                    <option value="">-Select Table-</option>
+                                                        {% for model in models %}
+                                                            <option value="{{model}}">{{model}}</option>
+                                                        {% endfor %}
+                                                </select><br/>
+                                                <input type="text" class="form-control" name="display_name" placeholder="Display Name" required/>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <select class="form-control" name="field_name"  id="field_names" required>
+                                                    <option value="">-Select Field-</option>
+                                                </select><br>
+                                                <input type="text" class="form-control" name="field_value" placeholder="Field Value" required/><br/>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-huge">Submit</button>
+                                    </form>
+                                </div>
+                                <div class="col-sm-12">
+                                    <hr/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h3 class="panel-title" style="text-align:center">Field Values</h3>
+                                    <table class="table" id="field_value_data">
+                                        <thead>
+                                            <th>Table</th>
+                                            <th>Field</th>
+                                            <th>Display Name</th>
+                                            <th>Field Value</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            {% for field_val in field_values %}
+                                                <tr>
+                                                    <td>{{ field_val.table_name }}</td>
+                                                    <td>{{ field_val.field_name }}</td>
+                                                    <td>{{ field_val.display_value }}</td>
+                                                    <td>{{ field_val.field_value }}</td>
+                                                    <td><a href="/rfc/delete_field_value/{{field_val.id}}/" class="btn btn-danger" title="Delete" data-toggle="tooltip" data-placement="bottom"><i class="fa fa-trash-o fa-fw "> </i></a></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script>
+            $(document).ready(function(){
+                $('#model_data').on('change', function(){
+                    var model_name = $('#model_data').val(); 
+                    $.ajax({
+                        url :"/rfc/field_value/create/",
+                        type:"POST",
+                        dataype:"json",
+                        data:{
+                            model_name: model_name,
+                            app_name: 'change_management',
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            $("#field_names option:gt(0)").remove();
+                            field_list = data;
+                            for (var i in field_list){
+                                $("#field_names").append($('<option>', {value:field_list[i], text:field_list[i]}));
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }       
+                    });
+                });
+            });
+        </script>
+        <script>
+            $('#field_value_data').DataTable();
+        </script>
+        <script>
+            $('#create_field_value').addClass('active')
+        </script>
+    </body>
+</html>

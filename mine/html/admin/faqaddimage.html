@@ -1,0 +1,201 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Faq Category</title>
+    {% include "components/css.html"%}
+  <link rel="stylesheet" type="text/css" href="/static/css/jquery.fancybox.css" media="screen" />
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">    
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wizard-wrapper">
+        {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Faq Images | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Faq Category</li>
+                </ol>
+                <div class="content">
+            {% if messages %}
+              <ul>
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+            </div>
+            <div class="content">
+              <div class="col-sm-10">
+              <div class="widget">                  
+                  <div class="widget-content">
+                  <div class="wizard-wrapper">
+                    <div id="" class="wizard">                              
+                      <div class="box">
+                      <div class="box-body">
+                         <table class="table table-hover table-striped" id="faqcat_table">
+                          <div id="slaadd_div" style="line-height: 30px">
+                            <thead>
+                             <tr>
+                              <form method="post" action="/faq/image/add">
+                              <th>Sl No</th>
+                              <th>Question</th>
+                              <!-- <th>Category</th> -->
+                              <th>Images</th>
+
+                              <th>
+                                <input type="submit" name="name" id="name" value="Delete Image" class="btn btn-info" onclick="return confirmDelete()"/>
+                              </th>
+
+                             </tr>
+                             </thead>                         
+                            <!-- 
+                            <td>
+                              {% if images.enabledisable  %}
+                              <input type="checkbox" name="checkbox1[]"  value="{{images.id}}" checked />
+                              {% else %}
+                             <input type="checkbox" name="checkbox1[]"  value="{{images.id}}" />
+                              {% endif %}
+                            </td>
+                            -->
+                          {% for question in faq_details%}
+                          <tr>
+                            <td>{{ forloop.counter}}</td>
+                            <td>
+                              {{ question.faqquestion }}
+                            </td>
+                            <td colspan="2">
+                              {% for image in question.faqimages_set.all %}
+                              <div style="float:left;margin:2px 10px 20px 10px;">
+                              <input type="checkbox" name="checkbox1[]"  value="{{image.id}}" />
+                                <a class="fancybox" href="{{ image.faqimage.url }}" data-fancybox-group="gallery" ><img src="{{ image.faqimage.url }}" height="30px" width="35px" style="border:1px solid #000;" /></a>                                
+                              </div>
+                              {% endfor %}
+                            </td>
+                          </tr>
+                          {% endfor %}
+                          </form>               
+                          </div>
+                        </table>
+                       </div>
+                     </div>
+                                                
+                    </div>
+                    </div>
+                   </div>
+                  </div>
+                    
+                  </div>                  
+                 <div class="col-sm-2" style="margin-top:0px">  
+                  <div >
+                  <button class="btn btn-info" onclick="add_images()"> Add New Image</button>
+                  </div>                  
+                 </div>
+          </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        {% include "components/faq_image.html"%}
+    </body>  
+</html>
+<script >
+ var count=1;
+ function upload(){
+    var row='';
+    row = '<div class="row"> <div class="col-sm-4"> <input type="file" name="new_image'+count+'" id="new_image'+count+'" accept="image/*" required /> </div>';
+    $('.imageupload').append(row);
+    count++;
+    document.getElementById('count_var').value = count;
+
+ }
+</script>
+<script type="text/javascript">
+function confirmDelete()
+{
+  var x = confirm("Are you sure want to Delete the Images?")
+  if(x)
+    return true;
+  else
+    return false;
+}
+  
+  function add_images(){
+
+    $('#addCategory').modal('show');
+
+  }
+
+</script>
+
+ <div class="modal" id="addCategory" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Add New Image</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/faq/image/add" enctype="multipart/form-data">
+        {% csrf_token %}
+          <fieldset>
+<div class="controls" style="text-align: center;">                       
+  <select class="form-control" id="question" name="question" required style="width:300px;display: block;margin: 0 auto;">
+    <option value="">Select Question</option>
+    {% for details in faq_details %}
+    <option value="{{details.id}}">{{ details.faqquestion }}</option>
+    {% endfor %}
+  </select>
+  <!-- <div class="row" >
+    <div class="col-sm-3"> </div>
+    <div class="col-sm-3">
+      <a onclick="upload();"><u>Add More Image</u></a>
+   </div>
+  </div> -->
+  <div class="row">
+  <div class="col-sm-6"> 
+    <div id="add" class="imageupload">
+        <input type="file" name="new_image0" id="new_image0" accept="image/*" required /> 
+    </div>
+  </div>
+  <div class="col-sm-6" style="margin:10px">
+    <div class="btn btn-link">
+    <input type="hidden" id="one_image" name="one_image" value="1">
+    <a onclick="upload();" style="cursor:pointer;"><u>Upload More Image</u></a>
+  </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <div>
+      <input type="hidden" id="count_var" name="count_var" value="">
+    </div>  
+    <button class="btn btn-success " type="submit" name="addimage" id="addimage">Add</button> 
+  </div>
+</div>
+          </fieldset>
+        </form>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        </div>
+      </div>
+    </div>
+  </div> 

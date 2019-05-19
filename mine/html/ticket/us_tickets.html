@@ -1,0 +1,261 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+ 
+{% if alert_message %}
+    {% for alert in alert_message %}
+            <!-- <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert"></i></button><div class="media" style="margin-top:0px"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div> -->
+        {% if profile.customer in alert.viewable_custs.all %}
+            <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small>| US Tickets Dashboard</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">US Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+
+                <div class="row">
+                  <div class="col-sm-12" style="padding:30px">
+                    <!-- <div class="box">
+                      <div class="box-title">
+                        {% if roles|length > 2 %}
+                              <div class="row">
+                                <div class="col-sm-2">
+                                    <h3 style="font-weight: bold"> Dashboards : </h3>
+                                </div>
+                                <div class="col-sm-6">
+                                    <form method="POST" action="/dashboard/">
+                                      <select name="role_name" class="form-control" onchange="change_dashboard()" id="role_name">
+                                          {% for role in roles %}
+                                            {% if first_role == role.rol_name %}
+                                              <option selected="selected" value="{{role.rol_name}}"  >{{role.rol_name}}</option>
+                                            {% else %}
+                                              <option value="{{role.rol_name}}">{{role.rol_name}}</option>
+                                            {% endif %}
+
+                                          {% endfor %}
+                                      </select>
+                                    </form>
+                                  </div>
+                                </div>
+                            {% endif %}
+                      </div>
+                      <div class="box-body">
+                          <div class="box">
+                            <div class="box-title">
+                                <h3>Tickets</h3>
+                            </div>
+                            <div class="box-body table-responsive no-padding">
+                              <table class="table table-striped" id="table_id" class="display" >
+                                <thead>
+                                  <tr>
+                                    <th></th>
+                                    <th>Ticket Id</th>
+                                    <th>Ticket Summary</th>
+                                    <th>Affected Person</th>
+                                    <th>Reported Date</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Expected Resolution</th>
+                                    <th>Last Changed</th>
+                                    
+                                  </tr>
+                                </thead>   
+                                <tbody>
+                                {% for ticket in us_tickets %}
+                                <tr>
+                                  <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/{{ticket.id}}">
+                                    <i class="fa fa-edit "></i>       
+                                  </a></td>
+                                  <td class="grey">{{ticket.ticketid}}</td>
+                                  <td class="grey">{{ticket.summary}}</td>
+                                  <td class="grey">{{ticket.affectedperson.user.email}}</td>
+                                  <td class="grey"><span style="display:none;">{{ticket.creationdate.year}}{% if ticket.creationdate.month >= 10 %}{{ticket.creationdate.month}}{% else %}0{{ticket.creationdate.month}}{%endif%}{% if ticket.creationdate.day >= 10 %}{{ticket.creationdate.day}}{% else %}0{{ticket.creationdate.day}}{%endif%}{{ticket.creationdate.time | time}}</span>{% tzone ticket.creationdate %}</td>
+
+                                  <td class="grey" >{{ticket.internalpriority}}</td>
+                                  <td class="grey">{{ticket.status | real}}</td>
+                                  <td class="grey">
+                                    {% if ticket.status == 'CLOSED' %}
+                                Closed
+                              {% elif ticket.status == 'RESOLVED' %}
+                                Resolved
+                              {% else %}
+                                 <span style="display:none;">{{ticket.targetfinish.year}}{% if ticket.targetfinish.month >= 10 %}{{ticket.targetfinish.month}}{% else %}0{{ticket.targetfinish.month}}{%endif%}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                                {% tzone ticket.targetfinish %}
+                              {% endif %} 
+
+                                  </td>
+                                  <td class="grey">
+                                      <span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                                  {% tzone ticket.changedate %}
+                                  </td>
+                                  
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                              </table>        
+                            </div>
+                          </div>
+                        </div>
+
+                  </div> -->
+                    <div class="panel">
+                      <div class="panel-heading">
+                        {% if roles|length > 2 %}
+                              <div class="row">
+                                <div class="col-sm-3">
+                                    <h4 class="panel-title">Dashboards</h4>
+                                </div>
+                                <div class="col-sm-6 text-center">
+                                    <form method="POST" action="/dashboard/">
+                                      <select name="role_name" class="form-control" onchange="change_dashboard()" id="role_name" style="margin-top:10px">
+                                          {% for role in roles %}
+                                            {% if first_role == role %}
+                                              <option selected="selected" value="{{role}}"  >{{role}}</option>
+                                            {% else %}
+                                              <option value="{{role}}">{{role}}</option>
+                                            {% endif %}
+
+                                          {% endfor %}
+                                      </select>
+                                    </form>
+                                  </div>
+                                </div>
+                          {% else %}
+                             <div class="row">
+                                <div class="col-sm-3">
+                                    <h4 class="panel-title">Dashboards</h4>
+                                </div>
+                              </div>
+                          {% endif %}
+
+                      </div>
+                        <div class="panel-body">
+                            <h4 class="text-thin text-center">US Tickets</h4>
+                            <table class="table table-striped" id="table_id" class="display" >
+                                <thead>
+                                  <tr>
+                                    <th></th>
+                                    <th>Ticket Id</th>
+                                    <th>Ticket Summary</th>
+                                    <th>Affected Person</th>
+                                    <th>Reported Date</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Expected Resolution</th>
+                                    <th>Last Changed</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                {% for ticket in us_tickets %}
+                                <tr>
+                                  <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/{{ticket.id}}">
+                                    <i class="fa fa-edit "></i>
+                                  </a></td>
+                                  <td class="grey">{{ticket.ticketid}}</td>
+                                  <td class="grey">{{ticket.summary}}</td>
+                                  <td class="grey">{{ticket.affectedperson.user.email}}</td>
+                                  <td class="grey"><span style="display:none;">{{ticket.creationdate.year}}{{ticket.creationdate.month}}{% if ticket.creationdate.day >= 10 %}{{ticket.creationdate.day}}{% else %}0{{ticket.creationdate.day}}{%endif%}{{ticket.creationdate.time | time}}</span>{% tzone ticket.creationdate %}</td>
+                                  <td class="grey" >{{ticket.internalpriority}}</td>
+                                  <td class="grey">{{ticket.status | real}}</td>
+                                  <td class="grey">
+                                    {% if ticket.status == 'CLOSED' %}
+                                Closed
+                              {% elif ticket.status == 'RESOLVED' %}
+                                Resolved
+                              {% else %}
+                                 <span style="display:none;">{{ticket.targetfinish.year}}{{ticket.targetfinish.month}}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                                {% tzone ticket.targetfinish %}
+                              {% endif %}
+                                  </td>
+                                  <td class="grey">
+                                      <span style="display:none;">{{ticket.changedate.year}}{{ticket.changedate.month}}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                                  {% tzone ticket.changedate %}
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                              </table>
+                        </div>
+                    </div>
+                    <!-- <div class="panel-body">
+
+                    </div> -->
+                  </div>
+          
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    <script>
+    $("#dash").addClass("active")
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable({
+        aaSorting:[[3,'desc']]
+      });
+    })
+    </script>
+    <script type="text/javascript">
+        function change_dashboard(){
+            var role_name = $('#role_name').val();
+            role_name = role_name.replace(/ /g, '_');
+            document.location.href = "/dashboard/?name="+role_name;
+        }
+    </script>
+    <script>
+        function animate_alert_msg() {
+            $('#alert_msg').css({right:'0%'});
+            $('#alert_msg').animate({right: '-100%'}, 20000, 'linear', function(){animate_alert_msg();});
+        }
+        $(document).ready(function(){
+            animate_alert_msg();
+        });
+    </script>
+    </body>
+</html>

@@ -1,0 +1,159 @@
+{% extends "components/base/base.html" %}
+
+{% block title_content %} Ticket Details {% endblock title_content %}
+
+{% block page_head %} Ticket Details | <small>{{ ticket.ticketid }}</small> {% endblock page_head %}
+
+{% block bread_crumb %} <li class="active">Ticket Details</li> {% endblock bread_crumb %}
+{% block extra_head %}
+    <style type="text/css">
+        .timeline-centered .timeline-entry {
+            width: 78%;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+            position: absolute;
+            left: -152px;
+            text-align: right;
+            background: none;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .timeline-centered:before {
+            background: #A5A2A2;
+            left: 19%;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner {
+            margin-left: -40px;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label {
+            margin-left: 50px;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+            border-color: rgba(140, 126, 126, 0) #8C8787 transparent transparent;
+        }
+        .timeline-time {
+            color: #000;
+            left: -140px !important;
+            max-width: 125px !important;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label h2 {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .nav-tabs > li > a:hover {
+            color: #555;
+        }
+        .no-js #loader { display: none;  }
+        .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+        .page-loader-js {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url(/static/img/ajax-loader.gif) center no-repeat #fff;
+            opacity: 0.8;
+        }
+        .dl-horizontal dt {
+            width: 100px;
+        }
+        .dl-horizontal dd {
+            margin-left: 110px;
+        }
+    </style>
+    <link href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.css" rel="stylesheet">
+{% endblock extra_head %}
+{% block body_content %} 
+    <div class="panel">
+        <div class="panel-body">
+            <input type="hidden" id="zendesk_id" value="{{zendesk.zendesk_id}}">
+            <input type="hidden" id="customr_tic_val" value="{{ticket.customer.id}}">
+            <input type="hidden" id="customer_id_val" value="{{ticket.customer.customerid}}">
+            <input class="hidden" value="{{ticket.cls}}" id="tic_cls">
+            <input class="hidden" id="cust_sr_enabled" value="{{ ticket.customer.sr_approval_enabled}}">
+            <input class="hidden" id="ticketidval" value="{{ ticket.id }}">
+            <input class="hidden" id="destination_ip_val">
+            <input class="hidden" id="impacted_airline_id" value="{% if ticket.impacted_airline %}{{ ticket.impacted_airline.id }} {% endif %}">
+            <div class="row">
+                <div class="col-md-{% if ticket.status == 'NEW' %}8{% else %}9{% endif %}">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="active"><a href="#basic_details" role="tab" data-toggle="tab">Details</a></li>
+                        <li><a href="#worklog_details" role="tab" data-toggle="tab">Worklog</a></li>
+                        {% if attachments|length > 0 %}
+                            <li><a href="#ticket_attachments" role="tab" data-toggle="tab">Attachments</a></li>
+                        {% endif %}
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv %}
+                            <li><a href="#ticket_history" role="tab" data-toggle="tab">History</a></li>
+                            {% if relations|length > 0 or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                                <li><a href="#related_tickets" role="tab" data-toggle="tab">Related Ticket</a></li>
+                            {% endif %}
+                            {% if ticket.ticketresolution_set.all|length > 0 %}
+                                <li><a href="#ticket_resolution" role="tab" data-toggle="tab">Ticket Resolutions</a></li>
+                            {% endif %}
+                            <li style="display:none"><a href="#monitoring" role="tab" data-toggle="tab">Monitoring</a></li>
+                            <li style="display:none"><a href="#security" role="tab" data-toggle="tab">Host Overview</a></li>
+                            <li style="display:none"><a href="#securitymon" role="tab" data-toggle="tab" onclick="security_monitoring();">Security Events</a></li>
+                            {% if ticket.source == "Zabbix Command" %}
+                                <li><a href="#external_ticketing" role="tab" data-toggle="tab">Relate External Ticket</a></li>
+                            {% endif %}
+                            {% if ticket.changerequestrecord_set.all|length > 0 %}
+                                <li><a href="#change_details" role="tab" data-toggle="tab">Change Details</a></li>
+                            {% endif %}
+                            {% if ticket.status != "NEW" %}
+                                {% if zendesk_customer and ticket.source == "zendesk" %}
+                                    <a id="zendesk_log" class="btn btn-warning pull-right btn-sm mar-rgt" href="" style="width: 90px; height: 26px;"><i class="spinner_log fa fa-spinner fa-spin" style="display: none;" aria-hidden="true"></i><span class="text" > Zendesk Log</span></a>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </ul>
+                    <div class="tab-content pad-top">
+                        <div class="tab-pane active" id="basic_details">
+                            {% include "ticket_details/basic_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="worklog_details">
+                            {% include "ticket_details/worklog_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="ticket_attachments">
+                            {% include "ticket_details/ticket_attachments.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="ticket_history">
+                            {% include "ticket_details/ticket_history.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="related_tickets">
+                            {% include "ticket_details/related_tickets.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="ticket_resolution">
+                            {% include "ticket_details/ticket_resolution.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="monitoring">
+                            {% include "ticket_details/ticket_monitoring.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="security">
+                            {% include "ticket_details/ticket_security.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="securitymon">
+                            {% include "ticket_details/ticket_security_monitoring.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="external_ticketing">
+                            {% include "ticket_details/external_ticketing.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="change_details">
+                            {% include "ticket_details/change_details.html" %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-{% if ticket.status == 'NEW' %}4{% else %}3{% endif %}">
+                    {% include "ticket_details/buttons_list.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    {% include "ticket_details/footer_scripts.html" %}
+{% endblock footer_content %}
+{% block modal_content %}
+    {% include "ticket_details/modal_contents.html" %}
+{% endblock modal_content %}

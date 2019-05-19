@@ -1,0 +1,129 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Activation Requests <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/customer/activation/all/">Activation Request</a></li>
+                    <li class="active">Activation Details</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="col-sm-8">
+
+
+                <div class="panel">
+                  <div class="panel-heading">
+                    <div class="panel-control">
+                      
+                    </div>
+                    <h3 class="panel-title">Review Details</h3>
+                  </div>
+                  <div class="panel-body">
+                    title : {{feedback.title}}<br>
+                    desc :{{feedback.title}}
+                  </div>
+                </div>
+
+
+              
+              </div>
+              <div class="col-sm-4 text-center">
+                <div class="panel panel-success">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Phone Details</h3>
+                  </div>
+                  <div class="panel-body">
+                  manufact : {{feedback.manufact}}<br>
+                  platform : {{feedback.platform}}<br>
+                  ver : {{feedback.version}}<br>
+                  model : {{feedback.model}}<br>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+
+ 
+
+
+
+
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+    }); 
+    $("#table_id").dataTable();
+    $("#controlpanel").addClass("active");
+    $("#controlpanel_block").css('display','block');
+    $("#activation").addClass("active");
+    </script>
+
+
+
+    </body>
+</html>

@@ -1,0 +1,417 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | FAQ</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style type="text/css">
+     /* :-moz-ui-invalid:not(output){
+            box-shadow: none;
+        }*/
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">FAQ | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">FAQ</li>
+                </ol>
+            </div>
+
+            {% if crop %}
+
+              {% include "admin/crop_html.html"%}   
+              <!--End Image Crop Area -->
+
+            {% endif %}
+
+            <div class="content">
+
+              <div class="row pad-btm" id="div_search">
+                <div class="col-sm-12">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-9">
+                      <div class="col-md-8">
+                        <input type="text" name="search_keyword" id="search_keyword" class="form-control" placeholder="Search Keyword"  required>
+                      </div>
+                      <div class="col-sm-2">
+                        <button id="search" onclick="get_faq_details(null, true);" type="button" class="btn btn-success btn-block">Search</button>
+                      </div>
+                    <div class="col-sm-2">
+                      <button type="button" id="advanced_search" class="btn btn-info">Advanced Search</button>
+                    </div>
+                    <div class="col-sm-2">
+                      <button type="button" id="faq_catagory" class="btn btn-info">FAQ</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row" id="div_faq_search">
+
+                <div class="col-sm-3">
+                  <div class="box">
+                    <div class="box-title">
+                    <h3> FAQ Categories</h3>
+                    </div>
+                    <div class="box-body">
+                      <select class="form-control" id="faq_cat_list" style="margin-left:10%;max-width:80%">
+                          <option value="" selected>--Select Category--</option>
+                      </select><br>
+                      <select class="form-control" id="faq_subcat_list" style="margin-left:10%;max-width:80%" >
+                          <option value="">--Select Subcategory--</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-9">
+                  <div class="box">
+                    <div class="box-title">
+                      <h3>Available FAQs</h3>
+                    </div>
+                    <div class="box-body">
+                      <table class="table" id ="tbldetails">
+                      </table>
+                      <div class="row">
+                        <div class="col-md-8">
+                        </div>
+                        <div class="col-md-4" style="text-align:right;">
+                          <div class="btn-group mar-rgt">
+                            <button id="previous_page" class="btn btn-default btn-active-purple" onclick="get_faq_details(this.value);">←</button>
+                            <button class="btn btn-info active" id="current_page"></button>
+                            <button id="next_page" class="btn btn-default btn-active-purple" onclick="get_faq_details(this.value);">→</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="row" id="div_advanced_search" style="display:none">
+
+                <div class="col-md-10 col-md-offset-1">
+                  <div class="panel pad-all">
+
+                      <p class="text-center pad-all">
+                      FAQ Advanced Search allows you to search an FAQ entry from a screenshot.  The search result will display the corresponding FAQ entry based on the image uploaded for search.
+                      </p>
+                      <h3 class="pad-all text-muted text-center">Step1: Take a screenshot and upload</h3>
+                       <span class="pad-all text-muted" >
+                        Take a screenshot of your application which contains the error message or details you are looking for. For eg: outlook application or Browser settings page.  Save the image as jpg or png using a image editor (mspaint.exe at windows environment).
+                       </span>
+                      <form method="post" action="/faq/image_search/save/" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <div class="col-md-4"></div>
+                          <label class="col-md-2 control-label">Upload Image:</label>
+                          <div class="col-md-6">
+                            <input type="file" name="uploadimg" id="uploadimg" accept="image/*"  placeholder="Upload Image" required class="file_check">
+                            <span class="file_check_error" style="color:red"></span>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-sm-8 col-sm-offset-2"><button id="delay" type="submit" class="btn btn-info btn-block" >Next</button></div>
+                        </div>
+                      </form>
+
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+        </div>
+      </div>
+
+      {% include "components/footer.html"%}
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/sr_cust.html"%}
+      {% else %}
+          {% include "components/service_request.html"%}
+      {% endif %}
+      <script type="text/javascript" src="/static/js/jquery.Jcrop.js"></script>
+      <script type="text/javascript" src="/static/js/cropsetup.js"></script>
+
+      <script type="text/javascript">
+
+        $(document).ready(function(){
+          show_faq_search();
+          search_keyword = '{{search_keyword}}'
+          if(search_keyword){
+            $('#search_keyword').val(search_keyword);
+            get_faq_details(null, true);
+          }
+          else{
+            get_faq_details(null);
+          }
+          get_faq_catagory();
+        });
+        
+        function get_faq_details(page, search){
+
+          cat_id = $("#faq_cat_list").val();
+          subcat_id = $('#faq_subcat_list').val();
+          if(search == true){
+            search_keyword = $('#search_keyword').val();
+          }
+          else{
+            search_keyword = null 
+          }
+
+          $.ajax({
+            url:"/faq/list/",
+            type:"GET",
+            data:{
+                "current_page":page,
+                "cat_id":cat_id,
+                "subcat_id":subcat_id,
+                "search_keyword": search_keyword
+            },
+            success:function(data){
+              fill_faq_details(data);
+            },
+            error:function(xhr,errmsg,err){
+              console.log(err);
+            }
+          });
+          return false;
+        }
+
+        function get_faq_catagory(){
+          $.ajax({
+            url:"/faq/catagory/",
+            type:"GET",
+            success:function(data){
+              catagory_list = JSON.parse(data.data);
+              $.each(catagory_list, function( index, value ) {
+                 $('#faq_cat_list').append('<option value="'+value.pk+'">'+value.fields.category+'</option>');
+              });
+            },
+            error:function(xhr,errmsg,err){
+              console.log(err);
+            }
+          });
+        }
+
+        function get_faq_subcatagory(){
+          cat_id = $("#faq_cat_list").val();
+          $("#faq_subcat_list option:gt(0)").remove();
+          if(cat_id != ""){
+            $.ajax({
+              url:"/faq/subcatagory/",
+              type:"GET",
+              data:{
+                "catagory_id":cat_id,
+              },
+              success:function(data){
+                subcatagory_list = JSON.parse(data.data);
+                $.each(subcatagory_list, function( index, value ) {
+                   $('#faq_subcat_list').append('<option value="'+value.pk+'">'+value.fields.subcategory+'</option>');
+                });
+              },
+              error:function(xhr,errmsg,err){
+                console.log(err);
+              }
+            });
+          }
+        }
+
+        $("#faq_cat_list").on('change', function(){         
+          get_faq_subcatagory();
+          get_faq_details(null);
+         });
+
+        $('#faq_subcat_list').on('change', function(){
+          get_faq_details(null);
+        });
+
+        function fill_faq_details(data){
+
+          $('#current_page').val(data.current);
+          $('#current_page').html(data.current);
+              
+          if(data.previous != null){
+            $('#previous_page').show();
+            $('#previous_page').val(data.previous);
+          }
+          else{
+            $('#previous_page').hide(); 
+          }
+          
+          if(data.next != null){
+            $('#next_page').show();
+            $('#next_page').val(data.next);
+          }
+          else{
+            $('#next_page').hide(); 
+          }
+
+          faq = JSON.parse(data.faq);
+          $('#tbldetails').empty();
+          if ($.isEmptyObject(faq)){
+                $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>'+"No records found"+'</th></tr></thead>');                      
+           }else{     
+                  for(var j=0; j<faq.length; j++){
+                  $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>Q ' + (j+1) + " : "+faq[j].fields['faqquestion']+'</th></tr></thead><tbody><tr><td>Ans '+ (j+1) + " : "+faq[j].fields['faqanswer']+'</td></tr><tr><td><a href="/media/'+faq[j].fields['faqattachment']+'" target="_blank"><i class="fa fa-download fa-lg text-primary"></i> '+faq[j].fields['faqtitle']+'</a></td><td></td></tr></tbody></table>');
+                }
+            }
+        }       
+
+        $('#advanced_search').click(function(){
+          show_advanced_search();          
+        });
+
+        $('#faq_catagory').click(function(){
+          show_faq_search();  
+        });
+
+        function show_faq_search(){
+          $('#div_advanced_search').hide();
+          $('#advanced_search').show();
+          $('#faq_catagory').hide();
+          $('#div_faq_search').show();
+        }
+
+        function show_advanced_search(){
+          $('#div_faq_search').hide();
+          // $('#div_advanced_search').show();
+          $( "#div_advanced_search").slideDown( "slow", function() {});
+          $('#advanced_search').hide();
+          $('#faq_catagory').show();
+        }
+
+      </script>              
+
+      <script>
+        (function ($, $win) {
+        'use strict';
+            $( document ).ready(function() {
+                $('.file_check').bind('change', function() {
+                //this.files[0].size gets the size of your file.
+                    var ext = $('.file_check').val().split('.').pop().toLowerCase();
+                    //get upload file type
+                    var notAllowedFiles = ["png", "jpg", "gif", "tif", "jpeg"];
+                    var validFileStatus = 0;
+                    if(this.files[0].size > 1000000){
+                        $(".file_check_error").html('Upload error try again,  check your file size (maximum 1mb is allotted)')
+                        $('.file_check').val("")
+                        validFileStatus = 1;
+                    }
+                    if(notAllowedFiles.indexOf(ext) == -1){
+                        $(".file_check_error").html('Upload error try again, images are only allowed')
+                        $('.file_check').val("")
+                        validFileStatus = 1;
+                    }
+                    if(validFileStatus!=1){
+                        $(".file_check_error").empty()
+                    }
+                });
+            });
+          }(jQuery, jQuery(window)));
+        </script>
+
+      {% if crop %}
+         <script type="text/javascript">
+
+          var shadow = $('<div id="shadowElem"></div>');
+
+          $(document).ready(function() {
+            $('#div_search').hide();
+            $('#div_faq_search').hide();
+            $('#image_crop_area').prepend(shadow);
+            height  = (3 * ($(window).height()));
+            $('#shadowElem').height(height);
+
+            elemHeight = $('#dropElem').outerHeight(true)
+            
+            $('#dropElem').css({
+              'left': '-32%',
+              'width': '130%'
+            });
+
+            shadow.animate({
+              'opacity' : 0.7
+            });
+            
+            $('#dropClose').click( function() {
+              $('#image_crop_area').hide();
+              $('#div_search').show();
+              $('#div_faq_search').hide();
+              show_advanced_search();
+            });
+
+            $('#dropClose').click( function() {
+              shadow.animate({
+                'opacity' : 0
+              });
+
+            });
+          }); 
+
+      </script>
+        <style type="text/css">
+
+          .target {
+            border: 1px solid #000 !important;
+          }
+
+          #dropElem {
+            position: absolute;
+            border-radius: 10px 10px 10px 10px;
+            box-shadow: 0 0 25px 5px #999;
+            padding: 20px;
+            background: #fff;
+          }
+
+          #shadowElem {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: black;
+            opacity: 0.3;
+          }
+
+          #dropContent {
+            position: relative;
+          }
+
+          #dropClose {
+            position: absolute;
+            z-index: 99999;
+            cursor: pointer;
+            top: -22px;
+            right: -22px;
+            padding: 5px;
+            background-color: black;
+            border-radius: 6px 6px 6px 6px;
+            color: #fff;
+          }
+
+          .jcrop-holder1 {
+            height: 600px;
+            width: 1000px;
+          }
+
+        </style>
+      {% endif %}
+
+
+  </body>
+</html>

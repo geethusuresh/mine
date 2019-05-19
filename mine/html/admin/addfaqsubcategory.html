@@ -1,0 +1,213 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Faq Subcategory</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+
+<div class="modal fade" id="addSubCategory" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Add New SubCategory</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/faq/subcategory/add">
+        {% csrf_token %}
+          <fieldset>
+          <div class="controls" style="text-align: center;">                       
+            <select class="form-control" id="customer" name="customer" required style="width:300px;display: block;margin: 0 auto;">
+            <option value="">Select Customer</option>
+            {% for customer in customers %}
+              <option value="{{ customer.id }}">{{ customer.customername }}</option>
+            {% endfor %}
+            </select></p>
+
+            <select class="form-control" id="select" name="select" required style="width:300px;display: block;margin: 0 auto;">
+            <option value="0">Select Category</option>                                        
+            </select></p>
+            <input class="form-control centered" type="text" id="addfaqsub" name="addfaqsub" placeholder="Enter Sub Category" required>
+            </p>
+            <button class="btn btn-success " type="submit">Add</button> 
+          </div>
+          </fieldset>
+        </form>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        </div>
+      </div>
+    </div>
+  </div>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wizard-wrapper">
+        {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Faq Subcategory | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Faq Subcategory</li>
+                </ol>
+            </div>
+            <div class="content">
+            {% if messages %}
+              <ul>
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+              <div class="col-sm-10">
+              <div class="widget">                  
+                  <div class="widget-content">
+                  <div class="wizard-wrapper">
+                    <div id="" class="wizard">                              
+                      <div class="box">
+                      <div class="box-body">
+                         <table class="table table-hover table-striped" id="faqcat_table">
+                          <div id="slaadd_div" >
+                            <thead>
+                             <tr>
+                              <th>Sl No</th>
+                              <th>SubCategory</th>
+                              <th>Category</th>
+                              <th>Customer</th>                              
+                              <th>Delete</th>
+                             </tr>
+                             </thead>                         
+                            {% for subcategory in sublist %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                                <td><a href="/faq/subcategory/edit/{{ subcategory.id }}" id = "edit"  title="Click to edit category">{{ subcategory.subcategory}}</a></td>
+                                <td>{{ subcategory.category }}</td>
+                                <td>{{ subcategory.category.customer }}</td>
+                                <td><a href="/faq/subcategory/add/{{ subcategory.id }}" id = "delete" class ="glyphicon glyphicon-trash" title="Click to delete category"></a></td>            
+                                
+                              </tr>
+                            {% endfor %}               
+                          </div>
+                        </table>
+                       </div>
+                     </div>
+                                                
+                    </div>
+                    </div>
+                   </div>
+                    <!--Start Pagination -->
+                    <div class="row">
+                      <div class="col-md-6">
+                      </div>
+                      <div class="col-md-6">
+                        <div class="dataTables_paginate paging_bootstrap">
+                          <ul class="pagination">                      
+                            <li class="prev">
+                            {% if sublist.has_previous %}
+                              <a href="?page={{ sublist.previous_page_number }}">←</a>
+                              {% endif %}
+                            </li>
+                            <li class="active">
+                              <a href="">{{ sublist.number }}</a>
+                            </li>
+                            <li class="next">
+                            {% if sublist.has_next %}
+                            <a href="?page={{ sublist.next_page_number }}">→</a>
+                            {% endif %}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      </div>
+                      <!--End Pagination -->
+                  </div>
+                    
+                  </div>                  
+                 <div class="col-sm-2" style="margin-top:0px">  
+                  <div >
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#addSubCategory"><i  ></i><span class="text" > Add SubCategory </span></a>
+                  </div>                  
+                 </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    </body>
+    <script type="text/javascript">
+     $(document).ready(function(){
+     $('a#delete').on('click',function(){
+     // alert("s");
+      var answer=confirm('Are you sure you want to delete this?'); 
+        if(answer){
+          id = $(this).attr('href').split('/')[4]; 
+          $.ajax({
+               url: '/faq/subcategory/add',
+               type: "POST",
+               datatype:"json",
+               data: {delete_id:id,
+                       csrfmiddlewaretoken: '{{ csrf_token }}'},                  
+               success: function (data) {
+                  
+                 window.location = '/faq/subcategory/add';
+               },
+               error: function() {
+                 alert("error");
+               }
+           });
+           return false;
+          }
+          else{
+            // window.location = '/faq/category/view';
+            return false;
+          }
+       });  
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){      
+      $('#customer').on('change',function(){        
+        customerId = $('#customer').val();
+        $.ajax({
+          url:'/faq/subcategory/add',
+          type:"POST",
+          datatype:"json",
+          data:{customerId: customerId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+          success: function(data){
+            $("#select option:gt(0)").remove();
+            data = JSON.parse(data);
+            for (var i in data){              
+              $("#select").append($('<option>', {value:data[i].pk, text:data[i].fields['category']}));
+            } 
+            console.log(data);
+            
+          },
+          error: function(){
+            alert("error");
+          }
+        });
+        return false;
+      });
+    });
+    </script>
+</html>
+ 

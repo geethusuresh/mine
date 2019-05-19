@@ -1,0 +1,423 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Within 2 Weeks Report</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+
+    <style type="text/css">
+      .daily_report_head_td{
+        text-align:center;                
+      }
+
+      .daily_report_data_head{
+        text-align:left;
+        font-weight:bold;
+        color:#00628B;
+      }
+
+      .daily_report_data_sub_head{
+        text-align:left;
+        font-weight:bold;
+        color:#202020;
+      }
+
+      .daily_report_data_sub_total{
+        text-align:left;
+        font-weight:bold;
+        color:#202020;
+      }
+
+      .daily_report_data_td{
+        text-align:center;                
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Sigma Daily Report - Within 2 Weeks Report<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="/reports/">Reports</li>
+                    <li class="active">Daily Report</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                  {{report_heading}}                
+                </div>
+              </div>
+              <br>            
+                
+                <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Report Within 2 Weeks</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">                
+                                <table class="table table-striped table-bordered" id="report_table">
+                                  <thead>                                      
+                                      <tr>
+                                        <td rowspan="3"></td>               
+                                        <td colspan="7" class="daily_report_head_td">Within 2 weeks</td>
+                                      </tr>
+                                      <tr>                      
+                                        <td rowspan="2" class="daily_report_head_td">Incidents Inflow</td>
+                                        <td colspan="3" class="daily_report_head_td">Open Tickets</td>
+                                        <td rowspan="2" class="daily_report_head_td">Resolved</td>
+                                        <td rowspan="2" class="daily_report_head_td">Closed</td>
+                                        <td rowspan="2" class="daily_report_head_td">Transferred to Next Level</td>
+                                      </tr>
+                                      <tr>                    
+                                        <td class="daily_report_head_td">Open</td>
+                                        <td class="daily_report_head_td">WIP</td>
+                                        <td class="daily_report_head_td">Pending Waiting Cust/Vend</td> 
+                                      </tr>
+                                      <tr>
+                                        <td class="daily_report_data_head">Tier 1.0 Global Service Desk</td> 
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_sub_head">GSD Deactivation</td> 
+                                        <td class="daily_report_data_td">{{gsddeactivation_dailyreport.0.gsddeactivation_totalflow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{gsddeactivation_dailyreport.0.gsddeactivation_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsddeactivation_dailyreport.0.gsddeactivation_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsddeactivation_dailyreport.0.gsddeactivation_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsddeactivation_dailyreport.0.gsddeactivation_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{gsddeactivation_dailyreport.0.gsddeactivation_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsddeactivation_dailyreport.0.gsddeactivation_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_sub_head">GSD Profile Modification</td> 
+                                        <td class="daily_report_data_td">{{profilemod_dailyreport.0.gsdprofile_modif_totalflow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{profilemod_dailyreport.0.profile_modification_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{profilemod_dailyreport.0.profile_modification_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{profilemod_dailyreport.0.profile_modification_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{profilemod_dailyreport.0.profile_modification_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{profilemod_dailyreport.0.profile_modification_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{profilemod_dailyreport.0.profile_modification_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_sub_head">GSD New User</td> 
+                                        <td class="daily_report_data_td">{{gsdnewuser_dailyreport.0.newuser_inflow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{gsdnewuser_dailyreport.0.newuser_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsdnewuser_dailyreport.0.newuser_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsdnewuser_dailyreport.0.newuser_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsdnewuser_dailyreport.0.newuser_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{gsdnewuser_dailyreport.0.newuser_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsdnewuser_dailyreport.0.newuser_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_sub_head">GSD 1234-Global</td> 
+                                        <td class="daily_report_data_td">{{gsd1234global_dailyreport.0.1234global_inflow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{gsd1234global_dailyreport.0.1234global_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsd1234global_dailyreport.0.1234global_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{gsd1234global_dailyreport.0.1234global_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsd1234global_dailyreport.0.1234global_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{gsd1234global_dailyreport.0.1234global_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{gsd1234global_dailyreport.0.1234global_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_sub_head">Other</td> 
+                                        <td class="daily_report_data_td">{{other_dailyreport.0.others_l1_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{other_dailyreport.0.other_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{other_dailyreport.0.other_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{other_dailyreport.0.other_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{other_dailyreport.0.other_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{other_dailyreport.0.other_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{other_dailyreport.0.other_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr style="background-color:#bfbfbf;">
+                                        <td class="daily_report_data_sub_total">Total</td> 
+                                        <td class="daily_report_data_td">{{total_l1_dailyreport.0.l1_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{total_l1_dailyreport.0.l1_total_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{total_l1_dailyreport.0.l1_total_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{total_l1_dailyreport.0.l1_total_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{total_l1_dailyreport.0.l1_total_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{total_l1_dailyreport.0.l1_total_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{total_l1_dailyreport.0.l1_total_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_head">Tier 1.5 Global Service Desk</td> 
+                                        <td class="daily_report_data_td">{{l15_dailyreport.0.l15_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l15_dailyreport.0.l15_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l15_dailyreport.0.l15_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l15_dailyreport.0.l15_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr style="background-color:#bfbfbf;">
+                                        <td class="daily_report_data_sub_total">Total</td> 
+                                        <td class="daily_report_data_td">{{l15_dailyreport.0.l15_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l15_dailyreport.0.l15_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l15_dailyreport.0.l15_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l15_dailyreport.0.l15_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l15_dailyreport.0.l15_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                      <tr>
+                                        <td class="daily_report_data_head">Tier 2 Global Service Desk (Marlabs)</td> 
+                                        <td class="daily_report_data_td">{{l2_dailyreport.0.l2_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l2_dailyreport.0.l2_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l2_dailyreport.0.l2_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l2_dailyreport.0.l2_transferred}}
+                                        </td> 
+                                      </tr>
+
+                                     <tr style="background-color:#bfbfbf;">
+                                        <td class="daily_report_data_sub_total">Total</td> 
+                                        <td class="daily_report_data_td">{{l2_dailyreport.0.l2_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l2_dailyreport.0.l2_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l2_dailyreport.0.l2_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l2_dailyreport.0.l2_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l2_dailyreport.0.l2_transferred}}
+                                        </td> 
+                                     </tr>
+                                     {% for l3_item in l3_dailyreport %}
+                                     <tr>
+                                        <td class="daily_report_data_head">{{l3_item.l3_group_name}}</td>
+                                        <td class="daily_report_data_td">{{l3_item.l3_total_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_item.l3_open}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_item.l3_wip}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_item.l3_pendcus}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l3_item.l3_resolved}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l3_item.l3_closed}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l3_item.l3_transferred}}
+                                        </td> 
+                                      </tr>
+                                    {% endfor %}
+
+                                     <tr style="background-color:#bfbfbf;">
+                                        <td class="daily_report_data_sub_total">Total</td> 
+                                        <td class="daily_report_data_td">{{l3_total.l3_all_grp_flow}}</td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_total.l3_grp_open_total}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_total.l3_grp_wip_total}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                        {{l3_total.l3_grp_pendcus_total}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l3_total.l3_grp_resolved_total}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                           {{l3_total.l3_grp_closed_total}}
+                                        </td>
+                                        <td class="daily_report_data_td">
+                                          {{l3_total.l3_grp_transferred_total}}
+                                        </td> 
+                                    </tr>
+
+                                  </thead>              
+                                </table>                      
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->                     
+                
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      <script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>      
+      {% include "components/dashboard_footer.html" %}
+      {% include "reports/reports_js.html" %}
+    </body>   
+</html>

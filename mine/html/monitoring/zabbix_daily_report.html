@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Monitoring Billing Report</title>
+    <style>
+        td{word-wrap:break-word;}
+.wrapword{
+        max-width: 50px;
+        overflow: hidden;
+        white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+        white-space: -webkit-pre-wrap; /*Chrome & Safari */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        white-space: pre-wrap;       /* css-3 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        word-break: break-all;
+        white-space: normal;
+    }
+
+
+body{background:#E3E3E3;}
+html{background:#E3E3E3;}
+    </style>
+</head>
+<body style=" background:#E3E3E3;  background-color:#E3E3E3;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td bgcolor="#134a66" style="text-transform:uppercase; color:white;padding-bottom:1px;"  valign="middle"><h1 style="font-size:15px; margin:0px; padding-left:10px; padding-top:15px;">Monitoring Billing Report - {{last24hours}}</h1>
+      <div><img  src="{{static_dir}}img/line.png" alt=""/></div></td>
+    <td bgcolor="#134a66" style="padding-right:1px;" align="right"><img src="{{static_dir}}img/oneconsole-marlabs.jpg" alt=""/></td>
+  </tr></table>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+      <tr>
+    <td colspan="2"><br/></td>
+  </tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><table cellpadding="10" width="100%">
+        <tr>
+          <td bgcolor="#584382"  width="25%" align="center"style="height:80px;color:#ffffff; background:#584382;font-size:14px;"><h3 style="font-size:34px; margin:0px">{{host_count}}</h3>
+            New Host</td>
+          <td width="25%" align="center" style="height:80px;color:#ffffff; background:#744382;font-size:14px;"><h3 style="font-size:34px; margin:0px">{{item_count}}</h3>
+            New Items</td>
+          <td width="25%" align="center"  style="height:80px;color:#ffffff; background:#434982;font-size:14px;"><h3 style="font-size:34px; margin:0px">{{host_change_count}}</h3>
+            Hosts Updated</td>
+          <td width="25%" align="center"  style="height:80px;color:#ffffff; background:#06658C;font-size:14px;"><h3 style="font-size:34px; margin:0px">{{item_change_count}}</h3>
+            Items Updated</td>
+        </tr>
+      </table></td>
+  </tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><br/></td>
+  </tr></table>
+<!--start cust info-->
+ <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><h2 style="font-size:16px; text-transform:uppercase; color:#083556">Customer Overview</h2></td>
+  </tr></table>
+    <table style="border: 2px solid #0F99D3; font-size:13px; " cellpadding="5" cellspacing="0" width="100%" >
+        <tr>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">Customer</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">Total Hosts</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">New Hosts</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">Hosts Updated</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">New Items</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;background-color:#0F99D3; color:white;">Items Updated</td>
+        </tr></table>
+    <table style="border: 2px solid #0F99D3; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+         {% for key, value in customer_info.iteritems %}
+            {% if value.new_hosts != 0 or value.new_items != 0 or value.updated_hosts != 0 or value.updated_items != 0 %}
+                <tr>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{key}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{value.total_hosts}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}"> {{value.new_hosts}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{value.updated_hosts}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{value.new_items}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{value.updated_items}}</td>
+                </tr>
+
+            {% endif %}
+
+
+
+         {% endfor %}
+        {% load check_loop %}
+        {% check customer_info as ci %}
+
+        {% if not ci %}
+        <tr>
+                    <td align="center" colspan="6" bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">-- No data found --</td>
+
+         </tr>
+        {% endif %}
+
+      </table>
+
+
+
+
+<!--end-->
+    {% if new_hosts %}
+<br>
+ <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><h2 style="font-size:16px; text-transform:uppercase; color:#083556">New Host</h2></td>
+  </tr></table>
+<!--<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">-->
+  <!--<tr>-->
+    <!--<td colspan="2">-->
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+        <tr>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Name</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Group</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Customer</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Updated Time</td>
+        </tr></table>
+    <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+         {% for host in new_hosts %}
+
+                <tr>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{host.host_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{host.host_group}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{host.customer}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{host.created_date}}</td>
+                </tr>
+                {% endfor %}
+      </table>
+<!--</td>-->
+  <!--</tr></table>-->
+    {% endif %}
+
+
+    {% if new_items %}
+<br>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><br/></td>
+  </tr></table>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+      <tr>
+    <td colspan="2"><h2 style="font-size:16px; text-transform:uppercase; color:#083556">New Items</h2></td>
+  </tr></table>
+   <!--< width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">-->
+       <!--<tr>-->
+    <!--<td colspan="2">-->
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+        <tr>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">ItemName</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Name</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Group</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Customer</td>
+        </tr></table>
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+         {% for item in new_items %}
+
+                <tr>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{item.item_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{item.host_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{item.host_group}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{item.customer}}</td>
+
+                </tr>
+                {% endfor %}
+                    </table>
+      <!--</td>-->
+     <!--</tr></table>-->
+    {% endif %}
+
+
+
+    {% if host_status %}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><br/></td>
+  </tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><h2 style="font-size:16px; text-transform:uppercase; color:#083556">Hosts Updated</h2></td>
+  </tr></table>
+<!--<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">-->
+   <!--<tr>-->
+    <!--<td colspan="2">-->
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+        <tr>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Hostname</td>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Group</td>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Customer</td>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Old Status</td>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">New Status</td>
+          <td valign="middle" bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Updated Time</td>
+        </tr></table>
+         <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+         {% for status in host_status %}
+
+                <tr>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{status.host_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.host_group}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.customer}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.old_status}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.new_status}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.updated_time}}</td>
+
+                </tr>
+         {% endfor %}
+             </table>
+<!--</td>-->
+     <!--</tr></table>-->
+    {% endif %}
+
+    {% if item_status %}
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><br/></td>
+  </tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">
+  <tr>
+    <td colspan="2"><h2 style="font-size:16px; text-transform:uppercase; color:#083556">Items Updated</h2></td>
+  </tr>
+    </table>
+
+<!--<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, sans-serif;">-->
+   <!--<tr>-->
+    <!--<td colspan="2">-->
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+        <tr>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Itemname</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Host Group</td>
+            <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Customer</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Old Status</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">New Status</td>
+          <td bgcolor="#ccc" style="font-weight:bold; padding-top:5px;">Updated Time</td>
+        </tr></table>
+        <table style="border: 1px solid #B4B4B4; font-size:13px;" cellpadding="5" cellspacing="0" width="100%">
+        {% for status in item_status %}
+                <tr>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{status.item_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}" class="wrapword">{{status.host_name}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.host_group}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.customer}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.old_status}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.new_status}}</td>
+                    <td bgcolor="{% cycle '#ffffff' '#f1f1f1' %}">{{status.updated_time}}</td>
+                </tr>
+                {% endfor %}</table>
+      <!--</td>-->
+
+     <!--</tr>-->
+<!--</table>-->
+
+    {% endif %}
+
+
+
+</body>
+</html>

@@ -1,0 +1,311 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">  
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Graph Items Mapping<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Graph Items Mapping</li>
+                </ol>
+            </div>
+            <div class="content">
+            <div class="col-sm-12">
+              {% if messages %}               
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}               
+              {% endif %}
+            </div>
+
+            <div class="col-sm-12 alert alert-success" id="message_box_success" style="display:none;">
+            </div>
+            <div class="col-sm-12 alert alert-danger" id="message_box_failed" style="display:none;">
+            </div>
+
+              <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab">
+                      <li class="{% if graph_activate  %} active {% endif %}"><a data-toggle="tab" href="#graph">Graph Details</a></li>                      
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+
+                     <!--Graph Details -->
+                      <div id="graph" class="tab-pane fade in {% if graph_activate  %} active {% endif %}">
+                          <div class="row" style="margin-top:10px;">
+                            <div class="col-sm-8">
+                               <div class="box">
+                                <div class="box-title">
+                                  <h3>Graph Items Mapping</h3>
+                                </div>
+                                <div class="box-body">
+                                  <form method="post" action="/advanced_monitoring/graph_items_mapping/">
+                                  {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" style="text-align: center;">
+                                    <!--First section -->
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                            <select class="form-control" id="customer_graph" name="customer_graph" required style="width:300px;display: block;margin: 0 auto;" onchange="graph_details()">
+                                              <option value="" style="font-weight:bold;">Select Customer</option>
+                                                {% for customer in customers %}
+                                                  {% if obj_graph_config.graph.customer.id == customer.id %}
+                                                  <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                                                  {% else %}
+                                                  <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="col-sm-6">
+                                            <select class="form-control" id="graph_name" name="graph_name" required style="width:300px;display: block;margin: 0 auto;">
+                                              <option value="">Select Graph Box</option>
+                                                {% for graph_item in graph_details %}
+                                                  {% if obj_graph_config.graph.id == graph_item.id %}
+                                                  <option value="{{graph_item.id}}" selected="selected">{{ graph_item.graph_name }}</option>
+                                                  {% else %}
+                                                  <option value="{{graph_item.id}}">{{ graph_item.graph_name }}</option>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                          </div>
+                                      </div>
+                                      <!--End First section -->
+
+                                      <!--Second Section -->
+                                      {% if graph_op != "update" %}
+                                      <div class="row">                                     
+                                        <div class="col-sm-8" style="margin-top:10px;">
+                                            <select class="form-control" id="graph_hosts" name="graph_hosts[]" required style="display: block;margin: 0 auto;height:149px;" multiple>
+                                              <option value="">Select Hosts</option>
+                                                {% for hostitems in hostdetails %}
+                                                <option value="{{hostitems.hostid}}">{{hostitems.hostname}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4" style="margin-top:10px;">
+                                             <a class="btn btn-success" onclick="graph_fetch_monitored_items()">
+                                                Fetch Monitored items                                 
+                                              </a><br /> 
+                                              <img src="/static/img/ajax-loader.gif" id="monitored_items_graph_loader" style="display:none;margin-top:10px;" />
+                                        </div>                                      
+                                      </div>
+                                      {% endif %}
+                                      <!--End Second Section -->
+
+                                      <div class="row">
+                                        <div class="col-sm-12" style="margin-top:10px;">
+                                            <select class="form-control" name="monitored_items_graph[]" id="monitored_items_graph" multiple style="height:149px;" required>
+                                              <option value="" disabled="disabled" style="font-weight:bold;">Select Moniotred Items</option>
+                                              {% if graph_op == "update" %}
+                                               <option value="{{itemid}}" selected="selected">{{itemname}}</option>
+                                              {% endif %}
+                                            </select>
+                                        </div>                                        
+                                      </div>
+
+                                      <button class="btn btn-success" type="submit" style="margin-top:10px;">
+                                       {% if graph_op == "update" %}
+                                          Move Selected Monitored Items to the Graph
+                                       {% else %}
+                                          Add Selected Monitored Items to the Graph                                    
+                                       {% endif %}
+                                      </button> 
+                                    </div>
+                                    </fieldset>
+                                    {% if graph_op == "update" %}
+                                      <input type="hidden" name="graph_action" id="graph_action" value="update" />
+                                    {% else %}
+                                      <input type="hidden" name="graph_action" id="graph_action" value="add" />
+                                    {% endif  %}
+                                      <input type="hidden" name="graph_update_id" value="{{update_id}}" />
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <table class="table table-hover" id="graph_table">
+                              <thead>
+                              <tr>
+                                <th>No</th>
+                                <th>Graph Name</th>
+                                <th>Items</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Delete</th>
+                                <th>Edit</th>                              
+                              </tr> 
+                              </thead>
+                              <tbody>
+                            {% for items_mapped in graph_config_details %}                                                   
+                                <tr>
+                                  <td>{{ forloop.counter }}</td>
+                                  <td>{{items_mapped.graph_name}}</td>
+                                  <td>{{items_mapped.item_name}}</td>
+                                  <td>{{items_mapped.graph_customer.customername}}</td>
+                                  {% if items_mapped.item_active %}
+                                  <td>                                 
+                                    <input value="{{items_mapped.graph_config_id}}"  type="checkbox" name="graph_item_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                                  </td>
+                                  {% else %}
+                                  <td>                                  
+                                    <input value="{{items_mapped.graph_config_id}}" type="checkbox" class="switch" name="graph_item_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                                  </td>
+                                  {% endif %}
+                                  <td>
+                                    <a href="/advanced_monitoring/delete_graph_mapping/{{items_mapped.graph_config_id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                                  </td> 
+                                  <td>
+                                    <a class="btn btn-info btn-sm" href="/advanced_monitoring/graph_config_edit/{{items_mapped.graph_config_id}}">
+                                    <span class="text">Edit</span>
+                                    </a>
+                                  </td>                                
+                                </tr> 
+                            {% endfor %}                  
+                              </tbody>
+                            </table>          
+                          
+                      </div>                     
+                     <!--End Graph details -->
+                     
+                    </div>
+                  </div>
+                </div>
+              </div>             
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+
+  <script type="text/javascript">
+      $("#mon_admin_main").addClass("active");
+      $("#mon_admin_sub").css({'display' : 'block'});
+      $("#grp_details").addClass("active"); 
+  </script> 
+
+  <script type="text/javascript">
+    $(document).ready(function(){      
+      $("#graph_table").dataTable({
+        bLengthChange :false,
+        bInfo:false        
+      });              
+    });
+  </script>    
+  <script type="text/javascript">
+    var status=0;   
+
+    $("input[name='graph_item_status']").bootstrapSwitch();       
+    $('input[name="graph_item_status"]').on('switchChange.bootstrapSwitch', function(event, state) {
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/graph_item_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/graph_item_activate/'+this.value;
+        status = 1;
+      }
+    });
+
+
+    function graph_fetch_monitored_items(){
+      var selected_hosts = $('#graph_hosts').val();
+      if(selected_hosts != null){
+        selected_hosts = selected_hosts.toString();
+        $('#message_box_failed').html('');
+        $('#message_box_failed').hide(100);        
+        $('#monitored_items_graph_loader').show();            
+        $.ajax({
+              url:"/advanced_monitoring/monitoring_selected_items/",
+              type: "POST",
+              dataType:"json",                      
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                selected_hosts:selected_hosts
+              },
+              success: function(data){
+                var monitored_items = '<option value="">Select Monitored Items</option>';    
+                 $.each( data, function(key, val) {
+                    var itemid = val.itemid;
+                    var itemname = val.itemname;                 
+                    monitored_items = monitored_items + '<option value="'+itemid+'">'+itemname+'</option>';
+                });
+                $('#monitored_items_graph').html(monitored_items);
+                $('#monitored_items_graph_loader').hide();
+              },
+              error: function () {                
+                $('#message_box_failed').html("Not able to fetch monitored items");
+                $('#message_box_failed').show(100);              
+              }
+        });
+      }
+      else{
+        $('#message_box_failed').html("Please select any hosts");
+        $('#message_box_failed').show(100);
+      }      
+    }
+
+
+   
+    function graph_details(){
+      var selected_customer = $('#customer_graph').val();      
+      $.ajax({
+            url:"/advanced_monitoring/customer_graph/",
+            type: "POST",
+            dataType:"json",                      
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              selected_customer:selected_customer
+            },
+            success: function(data){
+              var graph_details = '<option value="">Select Graph Details</option>';    
+               $.each( data, function(key, val) {
+                  var graph_id = val.graph_id;
+                  var graph_name = val.graph_name;                 
+                  graph_details = graph_details + '<option value="'+graph_id+'">'+graph_name+'</option>';
+              });
+              $('#graph_name').html(graph_details);              
+            },
+            error: function () {
+              $('#message_box_failed').html("Not able to fetch Graph details");
+              $('#message_box_failed').show(100);             
+            }
+      });
+    } 
+
+    function delete_item(){
+      if(confirm("Are you sure. You want to delete it? ")){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }        
+    </script>  
+</html>
+

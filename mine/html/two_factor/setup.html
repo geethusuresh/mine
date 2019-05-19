@@ -1,0 +1,556 @@
+{% load i18n %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%} 
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style type="text/css">
+      .panel_modified{          
+          border-bottom: none;        
+      }
+      .page-loader-js {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url(/static/img/ajax-loader.gif) center no-repeat #fff;
+            opacity: 0.8;
+          }
+    </style>
+
+  </head>
+  <body class="fixed" style="font-size:13px" id="dashboard_tickets">
+     <div class="page-loader-js"></div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/cust_header.html"%}
+    {% else %}
+    {% include "components/header.html"%}
+    {% endif %}
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Two-Factor Authentication<small></small></h1>                
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active"><a href="/two_factor_auth/setup/">Account Security</a></li>
+                </ol>
+            </div>            
+            <div class="content">
+              {% if messages %}
+               <div class="row">
+                  <div class="col-sm-12">
+                {% for message in messages %}
+                 {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+
+               <div class="row">
+                <div class="col-sm-12">
+                    <div class="alert alert-danger" id="validation_alert" style="display:none;"></div>
+                </div>
+              </div>
+
+
+                <div class="row">
+                  <div class="col-sm-12">
+                    <!-- <div class="panel">
+                        <div class="panel-heading">                                    
+                          <h3 class="panel-title">Enable Two-Factor Authentication</h3>
+                        </div>
+                        <div class="panel-body"> -->
+                         <div class="pad-btm form-inline">
+                          <div class="row">
+                            <div class="col-sm-12">
+                            {% if two_factor_enabled %}                                
+                                <div class="row">
+                                  <div class="col-sm-12">
+                                    <div class="panel">
+                                      <div class="panel-body">
+                                        <div class="col-sm-1">
+                                          <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                                          <i class="fa fa-lock fa-2x"></i>
+                                          </span>
+                                        </div>
+                                        <div class="col-sm-11" style="padding-left:0px;">
+                                          <div class="alert alert-info media fade in">
+                                              <strong>You have enabled {{show_method}} based two-factor authentication method in your profile</strong> 
+                                          </div>   
+                                          <div class="col-sm-12" style="padding-left:0px;">
+                                             <a class="btn btn-purple" href="/two_factor_auth/disable/" role="button" onclick="return disable_confirm()">Disable Two Factor Authentication</a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                </div> 
+                              </div> 
+                            {% else %}
+                            <!--Panel starts -->
+                            <div class="panel">
+                              <!-- Classic Form Wizard -->
+                              <!--===================================================-->
+                              <div id="demo-cls-wz">
+                                <!--Nav-->
+                                <ul class="wz-nav-off wz-icon-inline wz-classic">
+                                  <li class="col-xs-4 bg-primary {% if step == 0 %} active {% endif %}">
+                                    <a href="#demo-cls-tab1" data-toggle="tab" aria-expanded="false">
+                                      <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-dashboard"></i></span> Select the mode
+                                    </a>
+                                  </li>
+                                  <li class="col-xs-4 bg-primary {% if step == 2 %} active  {% endif %}">
+                                    <a href="#demo-cls-tab2" data-toggle="tab" aria-expanded="false">
+                                      <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-info"></i></span> Information
+                                    </a>
+                                  </li>
+                                  <li class="col-xs-4 bg-primary {% if step == 3 %} active  {% endif %}">
+                                    <a href="#demo-cls-tab3" data-toggle="tab" aria-expanded="false">
+                                      <span class="icon-wrap icon-wrap-xs bg-trans-dark"><i class="fa fa-check"></i></span> Verification
+                                    </a>
+                                  </li>                                  
+                                </ul>
+                        
+                                <!--Progress bar-->
+                                <div class="progress progress-sm progress-striped">
+                                  <div class="progress-bar progress-bar-primary" style="width:33%"></div>
+                                </div>                        
+                        
+                                <!--Form-->
+                                <form class="form-horizontal mar-top" name="frm_wizard" id="frm_wizard" method="post" action="" onsubmit="return otp_setup()">
+                                {% csrf_token %}
+                                  <div class="panel-body">
+                                    <div class="tab-content">
+
+                                      <!--First tab-->
+                                      <div class="tab-pane {% if step == 0 %} active {% else %} fade {% endif %}" id="demo-cls-tab1">
+                                        
+                                        <div class="row">
+                                          <div class="col-sm-12">
+                                              <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">          
+                                                <!-- Alert layout example -->
+                                                <div class="alert alert-mint media fade in">
+                                                  <h4 class="alert-title"> Two step authentication will add extra layer of security to your Oneconsole login</h4>
+
+                                                 <!--  <p class="alert-message">Each time you log in you’ll be required to provide your username and password as usual, plus a randomly-generated code from your phone.
+                                                  </p> -->
+                                                  <p class="alert-message"></p>
+                                                </div>
+                                              </div>
+                                          </div>
+
+                                          <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            Please select which authentication method you would
+                                            like to use.
+                                          </div>
+
+
+                                          <div class="col-sm-12">                  
+                                            <div class="pad-ver">          
+                                              <!--Block level radio buttons-->         
+                                              <!-- <form class="form-block"> -->
+                                                <label class="form-normal form-text active">
+                                                <input type="radio" name="auth_method" value="call" {% if method == "call"%}checked="checked" {% endif %}>&nbsp;Call</label> <br/>
+                                                <label class="form-normal form-text">
+                                                <input type="radio" name="auth_method" value="sms" {% if method == "sms"%}checked="checked" {% endif %}>&nbsp;SMS</label> <br/>
+                                                <!-- <label class="form-normal form-text">
+                                                <input type="radio" name="auth_method" value="sms_whatsapp" {% if method == "sms_whatsapp"%}checked="checked" {% endif %}>&nbsp;SMS and Whatsapp</label> <br/> -->
+                                                <label class="form-normal form-text">
+                                                <input type="radio" name="auth_method" value="gauth" {% if method == "gauth"%}checked="checked" {% endif %}>&nbsp;Google authenticator</label> <br/>
+                                              <!-- </form> -->               
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>              
+
+                                      <!--Second tab-->
+                                      <div class="tab-pane {% if step == 2 %} active {% else %} fade {% endif %}" id="demo-cls-tab2">                                        
+                                        {% if sms_phone %}
+                                         <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                 <h4 class="alert-title">  
+                                                Which phone should we send token to?
+                                                  </h4>
+                                                  <p>
+                                                Oneconsole will send a numeric token to your phone whenever you sign in from an untrusted computer or device.
+                                                  </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-sm-12">
+                                            <div class="col-sm-6">
+                                                <input type="text" name="phone" maxlength="16" id="phone" class="form-control" placeholder="Enter phone number with country code for sms" value="{% if phone %}{{phone}}{% endif %}" title="Enter phone number with country code">
+                                            </div>
+                                          </div>
+                                        {% elif sms_whatsapp %}
+                                         <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                 <h4 class="alert-title">  
+                                                Which phone should we send token to?
+                                                  </h4>
+                                                  <p>
+                                                Oneconsole will send a numeric token to your phone whenever you sign in from an untrusted computer or device.
+                                                    </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-sm-12">
+                                            <div class="panel">
+                                                <div class="panel-heading">
+                                                  <h3 class="panel-title">Step1: Enter the phone number which you would like to recieve the token as an sms</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                  <p>
+                                                   <input type="text" name="phone" maxlength="16" id="phone" class="form-control" placeholder="Enter phone number with country code for sms" value="{% if phone %}{{phone}}{% endif %}" title="Enter phone number with country code">
+                                                  </p>
+                                                </div>
+
+                                                <div class="panel-heading">
+                                                  <h3 class="panel-title">Step2: Enter the phone number which you would like to recieve the token as a whatsapp message</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                  <p>
+                                                   <input type="text" name="whatsapp_phone" maxlength="16" id="whatsapp_phone" class="form-control" placeholder="Enter phone number with country code for whatsapp" value="{% if whatsapp_phone %}{{whatsapp_phone}}{% endif %}" title="Enter phone number with country code">
+                                                  </p>
+                                                </div>
+                                            </div>                                           
+                                          </div>                                        
+                                         {% elif call_phone %}
+                                         <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                <h4 class="alert-title">  
+                                                  Which phone should we send token to?
+                                                </h4>
+                                                <p>
+                                                Oneconsole will call with a numeric token to your phone whenever you sign in from an untrusted computer or device.
+                                                    </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-sm-6">
+                                              <input type="text" name="phone" maxlength="16" id="phone" class="form-control" placeholder="Enter phone number with country code" value="{% if phone %}{{phone}}{% endif %}" title="Enter phone number with country code">
+                                          </div>
+                                          {% elif gauth_sec %}
+                                            <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                              <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">          
+                                                  <!-- Alert layout example -->
+                                                  <div class="alert alert-mint media fade in">
+                                                    <h4 class="alert-title"> Download the Google Authenticator application from App Store for iOS or Google Play for Android and scan this code.</h4>
+
+                                                    <p>To start using a token generator, please use your                                               smartphone to scan the QR code below. Then, enter the token generated by the app.
+                                                    </p>
+                                                  </div>
+                                              </div>
+                                            </div>
+
+                                            <div class="col-sm-12" style="text-align:left">
+                                              <div class="panel">
+                                                <div class="panel-heading">
+                                                  <h3 class="panel-title">Step1: Scan the QR code below</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                  <p>
+                                                    <img src="/two_factor_auth/auth_qr_code" style="width:210px;" />
+                                                  </p>
+                                                </div>
+
+                                                <div class="panel-heading">
+                                                  <h3 class="panel-title">Step2: Enter the token generated by the app</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                  <p>
+                                                    <input type="text" name="qrcode" maxlength="6" id="qrcode" class="form-control" placeholder="Token">
+                                                  </p>                                                  
+                                                </div>                                                
+                                              </div>
+                                            </div>
+
+                                            <!-- <div class="col-sm-12" style="text-align:left">
+                                              <div class="panel">
+                                                <div class="panel-heading">
+                                                  <h3 class="panel-title">Step1: Enter the token generated by the app</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                  <p>
+                                                    <input type="text" name="qrcode" maxlength="16" id="qrcode" class="form-control" placeholder="Token">
+                                                  </p>
+                                                </div>
+                                              </div>                                               
+                                            </div> -->
+
+                                          {% endif %}                                          
+                                      </div>
+                                      
+                                      <!--Third tab-->
+                                      <div class="tab-pane {% if step == 3 %} active {% else %} fade {% endif %}" id="demo-cls-tab3">
+                                      
+                                        {% if sms_phone %}
+                                        <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                <h4 class="alert-title">  
+                                            We sent a text message to your phone with a token
+                                                </h4>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" name="token" maxlength="6" id="token" class="form-control" placeholder="Token">
+                                        </div>
+                                        {% elif sms_whatsapp %}
+                                        <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                            <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                <h4 class="alert-title">  
+                                            We sent a whatsapp message and text message to your phone with a token
+                                                </h4>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                          <div class="col-sm-6">
+                                              <input type="text" name="token" maxlength="6" id="token" class="form-control" placeholder="SMS Token">
+                                          </div>                                          
+                                        </div>
+                                        <br />
+                                        <br /> 
+                                        <div class="col-sm-12" style="margin-top:10px;">
+                                          <div class="col-sm-6">
+                                              <input type="text" name="whatsapp_token" maxlength="6" id="whatsapp_token" class="form-control" placeholder="Whatsapp Token">
+                                          </div>                                          
+                                        </div>                                         
+                                        {% elif call_phone %}
+                                        <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                          <div class="demo-preview-alert" id="demo-preview-alert-2" style="display: block;">
+                                              <div class="alert alert-mint media fade in">
+                                                <h4 class="alert-title">
+                                           We will call you at your number with a token
+                                                </h4>
+                                              </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" name="token" maxlength="6" id="token" class="form-control" placeholder="Token">
+                                        </div>
+                                        {% elif gauth_sec %}
+                                          <div class="col-sm-12" style="margin:0px 0px 10px 0px">
+                                                <div class="alert alert-mint media fade in">
+                                                    You have successfully verified your token. Please click finish button to complete the setup
+                                                </div>
+                                          </div>
+                                        {% endif %}                                        
+                                      </div>
+                                    </div>
+                                  </div>                        
+                        
+                                  <!--Footer button-->
+                                  <div class="panel-footer text-right">                                  
+                                    <div class="box-inline">
+                                      {% if step > 0 %}
+                                      <a class="previous btn btn-primary" type="button" href="/two_factor_auth/setup/?op=back">Back</a>
+                                      {% endif %}
+                                      {% if step < 3 %}
+                                      <button class="next1 btn btn-primary" type="submit" style="display: inline-block;">Proceed to Step {{proceed_step}}</button>
+                                      {% endif %}
+                                      {% if step == 3 %}
+                                      <button class="finish btn btn-primary" type="submit" style="display: none;" disabled="">Finish</button>
+                                      {% endif %}
+                                      <input type="hidden" name="otp_step" id="otp_step" value="{{step}}">
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                        
+                            </div>
+                            <!--Panel End here -->
+                            {% endif %}
+
+                            </div>
+                            </div>
+
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+             </div>
+          </div>
+      </div>
+{% include "components/footer.html"%}
+{% include "components/service_request.html" %}
+<script type="text/javascript" src="/static/angular/angular.min.js"></script>
+<script type="text/javascript" src="/static/angular/angular-route.js"></script>
+<script type="text/javascript" src="/static/angular/app.js"></script>
+<script type="text/javascript" src="/static/angular/controllers.js"></script> 
+<script src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+<script src="/static/js/form-wizard-auth.js"></script>
+<script type="text/javascript">
+      $(window).load(function() {
+        $(".page-loader-js").fadeOut("slow");;
+      });
+</script>
+
+<script type="text/javascript">  
+  function otp_setup(){
+    var step = $('#otp_step').val();    
+    if(step == "0"){
+        if($('input[name=auth_method]:checked').length<=0){
+            $('#validation_alert').html('Please select atleast one authentication method');
+            $('#validation_alert').show();
+            return false;
+        }
+        else{
+          return true;
+        }
+    }
+    else if(step == "2"){
+        var method = $('input[name=auth_method]:checked').val();
+        if(method == "call" || method == "sms"){
+          var phone = $('#phone').val();          
+          if(phone != ""){            
+            var er = /^-?[0-9]+$/;
+            if(!er.test(phone)){
+                $('#validation_alert').html('Please enter a valid phone number');
+                $('#validation_alert').show();
+                return false;          
+            }
+            else{
+              $('#validation_alert').hide();
+              return true;
+            }
+          }
+          else{
+            $('#validation_alert').html('Please enter a phone number with country code');
+            $('#validation_alert').show();
+            return false;
+          }          
+      }
+      else if(method == "sms_whatsapp"){
+        var phone = $('#phone').val();
+        var whatsapp = $('#whatsapp_phone').val();
+        if(phone != ""){         
+          var er = /^-?[0-9]+$/;
+          if(!er.test(phone)){
+              $('#validation_alert').html('Please enter a valid phone number for sms');
+              $('#validation_alert').show();
+              return false;          
+          }
+          else{
+            $('#validation_alert').hide();
+            //return true;
+          }
+        }
+        else{
+          $('#validation_alert').html('Please enter a phone number with country code for sms');
+          $('#validation_alert').show();
+          return false;
+        }
+
+        if(whatsapp != ""){            
+            var er = /^-?[0-9]+$/;
+            if(!er.test(whatsapp)){
+                $('#validation_alert').html('Please enter a valid phone number for whatsapp');
+                $('#validation_alert').show();
+                return false;          
+            }
+            else{
+              $('#validation_alert').hide();
+              return true;
+            }
+        }
+        else{
+            $('#validation_alert').html('Please enter a phone number with country code for whatsapp');
+            $('#validation_alert').show();
+            return false;
+        }
+
+      }else if(method == "gauth"){
+          var er = /^-?[0-9]+$/;
+          var qrcode = $('#qrcode').val();
+          if(!er.test(qrcode)){
+              $('#validation_alert').html('Please enter a valid token');
+              $('#validation_alert').show();
+              return false;          
+          }
+          else{
+            $('#validation_alert').hide();
+            return true;
+          }
+      }
+    }
+    else if(step == "3"){
+      var method = $('input[name=auth_method]:checked').val();
+      if(method == "call" || method == "sms"){            
+        var token = $('#token').val();
+        var er = /^-?[0-9]+$/;
+        if(!er.test(token)){
+            $('#validation_alert').html('Please enter a valid token');
+            $('#validation_alert').show();
+            return false;
+        }
+        else{
+            $('#validation_alert').hide();
+            return true;
+        }
+      }
+      else if(method == "sms_whatsapp"){
+        var token = $('#token').val();
+        var whatsapp_token = $('#whatsapp_token').val();
+        var er = /^-?[0-9]+$/;
+        if(!er.test(token)){
+            $('#validation_alert').html('Please enter a valid token for sms service');
+            $('#validation_alert').show();
+            return false;
+        }
+        else{
+            $('#validation_alert').hide();
+            //return true;
+        }
+
+        if(!er.test(whatsapp_token)){
+            $('#validation_alert').html('Please enter a valid token for whatsapp service');
+            $('#validation_alert').show();
+            return false;
+        }
+        else{
+            $('#validation_alert').hide();
+            return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  function disable_confirm(){
+    if(confirm("Do you really want to disable two factor from your account?")){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+</script>
+ </body>
+</html>

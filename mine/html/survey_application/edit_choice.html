@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Edit Choice</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/survey/choices/">Choices</a></li>
+                        <li class="active">Edit Choice</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Edit Choice</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form id="edit_choice" method="POST" action="/survey/edit_choice/{{choice.id}}/" name="edit_choice">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <label>Enter the Choice</label>
+                                        <input type="text" class="form-control" name="choice_name" required value="{{choice.choice_name}}"/><br/>
+                                        <label>Enter the Choice Point</label>
+                                        <input type="number" class="form-control" name="point" min="0" required value="{{ choice.point }}"/><br/>
+                                        <button type="submit" id="submit_button" class="btn btn-success">Submit</button><br/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_choices').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

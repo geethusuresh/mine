@@ -1,0 +1,481 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">First Call Resolution<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>                    
+                    <li class="active">First Call Resolution</li>
+                </ol>
+            </div>
+
+
+            <div class="content">
+            <div class="row">
+                <form method="POST" action="." name="frm_gsd" id="frm_gsd">{% csrf_token %}
+                  <div class="col-md-5">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <select id="report_type" name="report_type" class="form-control" required>
+                            
+                              <option value="1">First Call Resolution</option>
+                              
+                            </select>
+                      </div>
+                      <div class="col-md-4">
+                        <select id="period" name="period" class="form-control">
+                              <option value="1" {% if period_type == '1'%}selected{%endif%}>On</option>
+                              <option value="2" {% if period_type == '2'%}selected{%endif%}>Between</option>
+                          </select>
+                      </div>
+                    </div>
+                    <!-- <label class="label label-info pull-right" style="font-size:15px;">Tickets</label> -->
+                  </div>
+                  <div class="col-md-4" style="background:white;">
+                    <div class="row">
+                      <div class="col-md-12" id="on_div">
+                        {% if on_date %}
+                          <input type="text" class="form-control" name="on_date" id="on_date" value="{{on_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="on_date" id="on_date" />
+                        {% endif %}
+                      </div>
+                      <div class="col-md-6" id="from_div" style="display:none;">
+                        {% if from_date %}
+                          <input type="text" class="form-control" name="from_date" id="from_date" value="{{from_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="from_date" id="from_date" />
+                        {% endif %}
+                      </div>
+                      <div class="col-md-6" id="to_div" style="display:none;">
+                        {% if to_date %}
+                          <input type="text" class="form-control" name="to_date" id="to_date" value="{{to_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="to_date" id="to_date"/>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="submit" class="btn btn-success" value="Fetch Report">
+                    <a href="/gsd_dashboard/" class="btn btn-success">Reset</a>
+                  </div>
+                </form>
+                </div>
+                <br>
+              <div class="row">
+                <div style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;" class="panel panel-primary">
+                  <b style="font-size:14px"><center>{{report_box_heading}}</center></b>               
+                </div>
+              </div>
+              
+              <!--End row -->
+
+              <br>
+                <!-- Start row-->
+                <div class="row">
+                {% if msg %}
+                  <div class="col-md-12">
+                      <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <i class="fa fa-bar-chart-o fa-fw"></i>
+                          Date Range Exceeds                           
+                        </div>
+                      <div class="panel-body">
+                          <small style="color:red; font-size:20px !important">{{msg}}</small>
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  <!--Thrid widget -->     
+     
+
+
+
+
+
+
+
+    <div class="col-sm-6 col-lg-6">
+
+        <!--Registered User-->
+        <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <div class="panel">
+
+            <div class="panel-heading">
+              <h5 style="font-size:17px" class="panel-tiltle">
+              <i class="fa fa-bar-chart-o fa-fw"></i>
+              First Call Resolution - FCR (%)
+              </h5>
+            </div>
+
+
+
+            <div class="panel-body">
+
+
+              <div id="ticket_fcr_l1"></div>
+              <script type="text/javascript">
+               $(function () {
+                    $('#ticket_fcr_l1').highcharts({
+                        chart: {
+                            type: 'column'                                      
+                        },
+                        title: {
+                            text: ''
+                        },                                
+                        xAxis: {
+                          type: 'category',
+                           title: {
+                                text: ''
+                            },                                              
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            min: 0,                                            
+                            title: {
+                                text: '%'
+                            },
+                            labels: {
+                                formatter: function() {
+                                  return this.value;
+                                }
+                              }
+                        },
+
+                        tooltip: {
+                          formatter: function() {
+                              return ''+
+                              this.point.name +': '+ this.y 
+                            }
+                        },                                 
+                        
+                        plotOptions: {
+                            column: {
+                                minPointLength: 2,
+                                dataLabels: {
+                                    enabled: true,
+                                    crop: false,
+                                    overflow: 'none'
+                                }
+                            }
+                            // series: {
+                            //                 cursor: 'pointer',
+                            //                   point: {
+                            //                       events: {
+                            //                           click: function (event) {
+                            //                             var str_name = this.series.name;
+                            //                             str_name = str_name.replace(" ","-");
+                            //                             str_name = str_name.replace(/ /g,"-");
+                            //                             console.log(str_name)
+                            //                             console.log(this.y)
+                                                        
+                            //                             var str_category = this.category;
+                            //                           //   str_category = str_category.replace(/ /g,"_");
+
+                            //                             console.log(str_category)
+
+                                                        
+                            //                           window.open("/analytics/report/analytic_resolution_individual/?stringname="+str_name+"&category="+str_category+"");
+                            //                           }
+                            //                       }
+                            //                   }
+                            //                 }
+                        },
+
+                        series: [{
+                                type: 'column',
+                                showInLegend: false,
+                                name: 'FCR Status',
+                                data: [
+                                    {  
+                                    name:'%', 
+                                    color:'#27AE60',
+                                    y:{{fcr_overall_details.1.fcr_percentage}},
+                                   }
+                                                                                  
+                                ]
+                            }],
+                            exporting: { enabled: false }
+                    });
+                });
+              </script> 
+
+            </div>
+        </div>
+        <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    </div>
+    <div class="col-sm-6 col-lg-6">
+
+        <!--New Order-->
+        <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <div class="panel">
+
+
+            <div class="panel-heading">
+              <h5 style="font-size:17px" class="panel-tiltle">
+              <i class="fa fa-bar-chart-o fa-fw"></i>
+              First Call Resolution - Number of Tickets
+              </h5>
+            </div>
+
+
+            <div class="panel-body">
+
+              <div id="ticket_fcr_l1_per"></div>
+              <script type="text/javascript">
+               $(function () {
+                    $('#ticket_fcr_l1_per').highcharts({
+                        chart: {
+                            type: 'column'                                      
+                        },
+                        title: {
+                            text: ''
+                        },                                
+                        xAxis: {
+                          type: 'category',
+                           title: {
+                                text: ''
+                            },                                              
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            min: 0,    
+                            title: {
+                                text: 'No.of Tickets'
+                            },
+                            labels: {
+                                formatter: function() {
+                                  return this.value;
+                                }
+                              }
+                        },
+
+                        tooltip: {
+                          formatter: function() {
+                              return ''+
+                              this.point.name + ': '+ this.y 
+                            }
+                        },                                 
+                        
+                        plotOptions: {
+                            column: {
+                                minPointLength: 2,
+                                dataLabels: {
+                                    enabled: true,
+                                    crop: false,
+                                    overflow: 'none',
+                                }
+                            },
+                            // series: {
+                            //                 cursor: 'pointer',
+                            //                   point: {
+                            //                       events: {
+                            //                           click: function (event) {
+                            //                             var str_name = this.series.name;
+                            //                             str_name = str_name.replace(" ","-");
+                            //                             str_name = str_name.replace(/ /g,"-");
+                            //                             var tick_status = "closed";
+                            //                             console.log(str_name)
+                            //                             console.log(this.y)
+                                                        
+                            //                             var str_category = this.category;
+                            //                           //   str_category = str_category.replace(/ /g,"_");
+
+                            //                             console.log(str_category)
+
+                            //                           {% if on_date %} 
+                            //                           window.open("/analytics/report/analytic_fcr_individual/?stringname="+str_name+"&category="+str_category+"&on_date={{on_date}}"+"&tick_status="+tick_status);
+                            //                           {% endif %}
+                            //                           {% if from_date %} 
+                            //                           window.open("/analytics/report/analytic_fcr_individual/?stringname="+str_name+"&category="+str_category+"&from_date={{from_date}}"+"&to_date={{to_date}}"+"&tick_status="+tick_status);
+                            //                           {% endif %}
+                            //                           }
+                            //                       }
+                            //                   }
+                            //                 }
+
+                        },
+
+                       series: [{
+                                type: 'column',
+                                showInLegend: false,
+                                name: 'FCR Status',
+                                data: [
+                                    {  
+                                    name:'FCR', 
+                                    color:'#4875ab',
+                                    y:{{fcr_overall_details.0.fcr_overall_count}},
+                                   },
+                                   {  
+                                    name:'Closed Tickets', 
+                                    color:'#C0504D',
+                                    y:{{fcr_overall_details.2.total_resolved_tickets}},
+                                   }
+                                                                                  
+                                ]
+                            }],
+                            exporting: { enabled: false }
+                    });
+                });
+              </script> 
+
+
+
+
+
+
+
+
+            
+        </div>
+        <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <!--End row -->                          
+
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>        
+      {% include "components/dashboard_footer.html" %}
+      {% include "reports/reports_js.html" %}
+      {% include "components/service_request.html" %}
+    </body>
+    <script type="text/javascript">
+      
+      $("#from_date").datepicker();
+      $("#to_date").datepicker();
+      $("#on_date").datepicker();
+
+      $("#from_date").change(function(){
+        $("#to_date").datepicker('option', 'minDate', $('#from_date').val());
+      });
+
+      $("#to_date").change(function(){
+        $("#from_date").datepicker('option', 'maxDate', $('#to_date').val());
+      });
+
+      // $("#from_date").datepicker({
+      //   format: 'yyyy/mm/dd'
+      // }).on('changeDate', function(e){
+      // $(this).datepicker('hide');
+      // });
+      // $("#to_date").datepicker({
+      //   format: 'yyyy/mm/dd'
+      // }).on('changeDate', function(e){
+      //   $(this).datepicker('hide');
+      // });
+      // $("#on_date").datepicker({
+      //   format: 'yyyy/mm/dd'
+      // }).on('changeDate', function(e){
+      // $(this).datepicker('hide');
+      // });
+      $("#period").change(function(){
+        if(this.value==1){
+          $("#on_date").prop('required',true)
+          $("#from_date").prop('required',false)
+          $("#to_date").prop('required',false)
+          $("#on_div").show()
+          $("#from_div").hide()
+          $("#to_div").hide()
+        }
+        else{
+         $("#on_date").prop('required',false)
+         $("#from_date").prop('required',true)
+         $("#to_date").prop('required',true)
+         $("#on_div").hide()
+         $("#from_div").show()
+         $("#to_div").show()
+        }
+      });
+      $(document).ready(function(){
+        // alert($("#period").val());
+        if ($("#period").val() == '1'){
+          $("#on_date").prop('required',true)
+          $("#from_date").prop('required',false)
+          $("#to_date").prop('required',false)
+          $("#on_div").show()
+          $("#from_div").hide()
+          $("#to_div").hide() 
+        }
+        else if($("#period").val() == '2'){
+          $("#on_date").prop('required',false)
+          $("#from_date").prop('required',true)
+          $("#to_date").prop('required',true)
+          $("#on_div").hide()
+          $("#from_div").show()
+          $("#to_div").show()
+        }
+      }); 
+      $("#analytic_report").addClass("active");  
+    </script>
+</html>

@@ -1,0 +1,166 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+        <link rel="stylesheet" type="text/css" href="/static/fonts/font-mfizz.css">
+        <link rel="stylesheet" type="text/css" href="/static/gridster/css/jquery.gridster.css">
+        <link rel="stylesheet" type="text/css" href="/static/gridster/css/styles.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .media-left{
+                float: left;
+            }
+            ul{
+                list-style: none outside none;
+                padding-left: 0;
+                margin: 0;
+            }
+            .content-slider li{
+                /*background-color: #ed3020;*/
+                text-align: center;
+                color: #FFF;
+            }
+            .content-slider h3 {
+                margin: 0;
+                padding: 70px 0;
+            }
+            .demo {
+                margin: 3em 0;
+                padding: 0px; 
+                background: transparent; 
+            }
+            .box_rotate {
+                -webkit-transform: rotate(360.5deg);  /* Chrome, Safari 3.1+ */
+                -moz-transform: rotate(360.5deg);  /* Firefox 3.5-15 */
+                -ms-transform: rotate(360.5deg);  /* IE 9 */
+                -o-transform: rotate(360.0deg);  /* Opera 10.50-12.00 */
+                transform: rotate(360.0deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .box_transition {
+                -webkit-transition: all 15.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+                -moz-transition: all 15.3s ease-out;  /* Firefox 4-15 */
+                -o-transition: all 15.3s ease-out;  /* Opera 10.50–12.00 */
+                transition: all 15.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .gridster {
+                opacity: 1;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/fusioncharts/fusioncharts.js"></script>
+    </head>
+    <body class="fixed" style="font-size:13px" id="customer_dashboard">
+        {% include "components/cust_header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/customer.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin"><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-purple" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-4" id="closed_tickets"></div>
+                        <div class="col-sm-4" id="active_tickets"></div>
+                        <div class="col-sm-4" id="waiting_cust_tickets"></div>
+                        <div class="col-sm-4" id="sla_breached_tickets"></div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.wrapper -->
+        {% include "components/sr_cust.html"%}
+        {% include "components/customer_footer.html" %}
+        {% include "reports/reports_js.html" %}  
+        <script src="/static/lightslider/lightslider.js"></script>
+        <script src="/static/chartjs/Chart.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#content-slider").lightSlider({
+                    loop:false,
+                    keyPress:true
+                });
+            });
+        </script>  
+        <script>
+            $("#dash").addClass("active")
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#table_id').DataTable({
+                    aaSorting: [[3, 'desc']]
+                })
+            });
+        </script>
+        <script type="text/javascript" src="/static/gridster/jquery.gridster.js" charster="utf-8"></script>
+        <script>
+            var thenga_kola = $(".gridster ul").gridster({
+                widget_margins: [10, 10], 
+                widget_base_dimensions: [140, 140],
+                serialize_params: function($w, wgd) {
+                    return {
+                        x: wgd.col,
+                        y: wgd.row,
+                        width: wgd.size_x,
+                        height: wgd.size_y,
+                        id: $($w).attr('id'),
+                        class: $($w).attr('class'),
+                    }
+                }
+            }).data('gridster').disable();
+        </script>
+        <!-- draggable -->
+        <script>
+            $(document).ready(function() {
+                $.ajax({
+                    url:"/dashboard/results/",
+                    type: "POST",
+                    dataType:"json",
+                    data: {
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data){
+                      console.log(data);
+                      $('#tcount').append(data.cust_tickets);
+                      $('#host_count').append(data.hosies);
+
+                      $('#dc_count').append(data.dc);
+                      $('#yt_count').append(data.my_count);
+                      $('#app_count').append(data.apps_count);
+                      $('#cies').append(data.cies);
+                      $('#work_hours').append(data.work_hours);
+                      $('#security_count').append(data.security_count);
+                      $('#event_count').append(data.event_count);
+                      $('#block_count').append(data.block_count);
+                    },
+                });
+            });
+        </script>
+    </body>
+</html>

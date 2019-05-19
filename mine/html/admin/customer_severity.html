@@ -1,0 +1,280 @@
+{% load humanize %}
+{% load zone %}
+{% load pagination %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            table.dataTable.no-footer {
+                border-bottom-color: #ddd;
+            }
+            table.dataTable thead th, table.dataTable thead td {
+                border-bottom-color: #ddd;
+            }
+            .dataTables_wrapper.no-footer .dataTables_scrollBody {
+                border-bottom-color: #ddd;
+            }   
+      </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin"> SD Settings | <small>Severity Management</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Severity Management</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title"> Severity List </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-4">
+                                        <select id="severity_customer" class="form-control">
+                                            <option value="">--Choose Customer--</option>
+                                            {% for cust in customers %}
+                                                <option value="{{cust.id}}">{{cust.customername}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="#" data-toggle="modal" data-target="#add_severity" class="btn btn-success pull-right">Add Severity</a>
+                                    </div>
+                                    <table class="table table-striped table-bordered dataTable dtr-inline pad-top" id="severity_table" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th>Priority</th>
+                                                <th>Customer</th>
+                                                <th>Severity</th>
+                                                <th>Created Date</th>
+                                                <th>Created By</th>
+                                                <th style="display:none">ID</th>
+                                                <th>Edit</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        {% include "components/confirmation_box.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $("#kbs_table").dataTable({
+                "bPaginate": false,
+                "bInfo": false,
+                "bFilter": false,
+                "scrollX": true
+            })
+        </script>
+        <div class="modal fade" id="add_severity" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel"> Add Severity </h4>
+                    </div>
+                    <form  method="POST" action="/severity_management/">{% csrf_token %}
+                        <div class="modal-body">
+                            <div class="col-sm-6">
+                                <label>Customer :</label>
+                                <select name="customer" required class="form-control" id="cust_data">
+                                    <option value="">--Select--</option>
+                                    {% for cust in customers %}
+                                        <option value="{{cust.id}}">{{cust.customername}}</option>
+                                    {% endfor %}
+                                </select><br/>
+                                <label>Severity :</label>
+                                <input type="text" name="severity" id="cust_severity" class="form-control" required><br/>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Priority :</label>
+                                <select name="priority" required class="form-control" id="cust_priority">
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                            </div><br/><br/>
+                        </div>
+                        <div class="modal-footer pad-top" style="border:0px">
+                            <button type="button" class="btn btn-success" style="float:right" onclick="create_severity()">Create</button>
+                            <img src="/static/gif/wait.gif" style="display:none" id="severity_image_id">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            $("#tkt_sd_sett").addClass("active");
+            $("#sub_add_temp").css({'display' : 'block'});
+            $("#custm_severity").addClass("active");
+            $('#tkt_sd_sett').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+        <script type="text/javascript">
+            function customer_wise_severity_data() {
+                $.ajax({
+                    url:"/severity_management/?customer="+$('#severity_customer').val(),
+                    type:"GET",
+                    dataType:"json",
+                    success : function(data){
+                        $('#severity_table').show();
+                        $('#severity_table').dataTable({
+                            'destroy': true,
+                            'aaData': data,
+                            "columns": [
+                                { "": "priority" },
+                                { "": "customer" },
+                                { "": "severity" },
+                                { "": "created_date" },
+                                { "": "created_by" },
+                                { "": "id", sClass: "hidden" },
+                                { "": "edit" },
+                                { "": "delete" },
+                            ],
+                            "columnDefs": [ {
+                                "targets": 6,
+                                "data": null,
+                                "defaultContent": "<button class='btn btn-success' >Edit</button>"
+                            },{
+                                "targets": 7,
+                                "data": null,
+                                "defaultContent": "<button class='btn btn-danger' >Delete</button>"
+                            }]
+                        });
+                    }
+                });
+            }
+            $('#severity_customer').on('change', function() {
+                customer_wise_severity_data();
+            });
+            $('#severity_table').on('click', 'td', function(){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == "Edit") {
+                    var row = $(this).prev().html();
+                    var url = "/severity_management/"+row+"/edit/";
+                    window.open(url, '_blank');
+                } else if (th.html() == "Delete") {
+                    var row = $(this).prev().prev().html();
+                    $('#delete_id').val(row);
+                    $('#confirm_msg').html('<strong> Are you sure you want to delete this severity? </strong>');
+                    $('#confirm_type').val('severity')
+                    $('#confirm_box').modal('toggle');
+                }
+            })
+            // SeverityDelete
+            function submit_ok() {
+                var delete_id = $('#delete_id').val();
+                $('#image_id').show();
+                $.ajax({
+                    url:"/severity_delete/"+delete_id+"/",
+                    type:"GET",
+                    dataType:"json",
+                    success : function(data){
+                        $('#image_id').hide();
+                        $('#confirm_box').modal('hide');
+                        show_severity_message(data);
+                    }
+                })
+            }
+            function remove_div(){
+                $( ".alert-wrap" ).remove();
+            }
+            $('#cust_data').on('change', function() {
+                $("#cust_priority option:gt(0)").remove().end();
+                $.ajax({
+                    url:"/priority_management/list/?customer="+$('#cust_data').val(),
+                    type:"GET",
+                    dataType:"json",
+                    success: function(data) {
+                        for (var i in data){
+                            $("#cust_priority").append($('<option>', {value:data[i]['id'],text:data[i]['priority']}))
+                        }
+                    }
+                });
+            })
+            function create_severity() {
+                $('#severity_image_id').show();
+                $.ajax({
+                    url:"/severity_management/",
+                    type:"POST",
+                    data: {
+                        "csrfmiddlewaretoken": "{{csrf_token}}",
+                        "customer": $('#cust_data').val(),
+                        "priority": $('#cust_priority').val(),
+                        "severity": $('#cust_severity').val(),
+                    },
+                    dataType:"json",
+                    success: function(data) {
+                        $('#severity_image_id').hide();
+                        $('#add_severity').modal('hide')
+                        show_severity_message(data);
+                    }
+                });
+            }
+            function show_severity_message(data) {
+                $('#alert_block').show();
+                $('#floating-top-right').append(
+                    "<div class='alert-wrap in animated jellyIn'>"+
+                        "<div class='alert alert-success' role='alert' id='alert_class'>"+
+                            "<button class='close' type='button'>"+
+                                "<i class='fa fa-times-circle'></i>"+
+                            "</button>"+
+                            "<div class='media'>"+
+                                "<div class='media-body'>"+
+                                    "<h4 class='alert-title'></h4>"+
+                                    "<p class='alert-message'><strong id='alert_msg'></strong></p>"+
+                                "</div>"+
+                            "</div>"+
+                        "</div>"+
+                    "</div>"
+                )
+                $('#alert_msg').text(data['message']);
+                if (data['status'] == "success") {
+                    $('#alert_class').addClass('alert-success');
+                    customer_wise_severity_data();
+                } else {
+                    $('#alert_class').addClass('alert-danger');
+                }
+            }
+        </script>
+
+    </body>
+</html>

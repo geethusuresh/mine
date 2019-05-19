@@ -1,0 +1,21 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+<script type="text/javascript">
+        var cloud_account_id = {{ cloud_account_id }}
+</script>
+ <section class="content-header">
+        <h1>
+            AWS Dashboard
+            <small>System Information</small>
+        </h1>
+        <ol class="breadcrumb">
+            <a href="{% url 'aws_accounts_view' %}">Home</a>
+            <span> > </span>
+            <li>Dashboard</li>
+        </ol>
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+{% endblock %}

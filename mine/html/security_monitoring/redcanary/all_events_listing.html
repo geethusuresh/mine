@@ -1,0 +1,184 @@
+{% load humanize %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Events</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.js">
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+      .label-as-badge {
+          border-radius: 1em;
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+    
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+        {% include "components/cust_header.html"%}
+    {% else %}
+        {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Threat Management | <small>All Events</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class=""><a href="/niksun/security/dashboard/">Threat Management</a></li>
+                    <li class=""><a href="/redcanary/dashboard/">Events</a></li>
+                    <li class="active">All</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <div class="row">
+                  <div class="col-sm-12">
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              <!-- <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                  <a class="btn btn-info pull-right" href="/security/dashboard">Dashboard</a>
+                </div>
+              </div> -->                      
+
+                  <!-- All events tab -->                          
+                  <div class="row">
+                      <div class="col-sm-12">
+                        <div class="panel">
+                          <!-- <div class="panel-title" style="text-align:center">Attacking Data Analysis</div> -->
+                          <div class="panel-body">
+                            <!-- <span class="col-md-12 text-center"><h4>One Month</h4></span> -->
+                            <div class="row">
+                              <div class="col-sm-12">
+                                <table class="table table-striped" id="table_id" class="display">
+                                      <thead>
+                                        <tr>
+                                          <th>Target IP</th>
+                                          <th>Event Data</th>
+                                          <th>Event Record Time</th>
+                                          <th>Source IP</th>
+                                          <th>Severity</th>
+                                          <th>Ticket</th> 
+                                        </tr>
+                                      </thead>   
+                                      <tbody>                                
+                                      </tbody>
+                                    </table>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+                         
+                <!--End All events tab -->
+                    
+               
+
+                <!-- <div class="col-sm-2" style="margin-top:0px">  
+                    <div >
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="/create/api" ><i  ></i><span class="text" > Create API key </span></a>
+                    </div>
+                    
+              </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %} 
+    </body>
+</html>
+
+<script type="text/javascript">
+  // $('#table_id').dataTable({
+  //   'bLengthChange' : false
+  // });
+  var data_table;
+  var eventlist_checked = [];
+  var source_ip_selected = "";
+  var ticket_details = [];
+  var level_high = ['10','11','12']
+  var level_severe = ['13','14','15']
+  var level_medium = ['6','7','8','9']
+  var level_low = ['1','2','3','4','5']
+  // time = 1000*60*60*60
+  setInterval(function() {
+            window.location.reload();
+          }, 300000);
+  function reloadWindow(){
+    window.location.reload();
+  }
+  // setInter(window.location.reload(),300000);
+  $(document).ready(function(){      
+        data_table = $('#table_id').DataTable({
+              "bLengthChange": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+              "processing": false,
+              // "searching": true,
+              "destroy": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/redcanary/security/alleventsreal",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "aoColumns": [ null,null,null ,null ,null
+                ],
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                       { "": "fields.3" },
+                       { "": "fields.4" },
+                       { "": "fields.5" }                                           
+                   ],
+
+            "columnDefs": [
+              {
+                "targets": 5,
+                "visible": true,
+                "searchable": true
+              }              
+              ]                              
+      }); 
+       
+  });
+
+  $("#red_event").addClass("active");
+  $("#sec_open").css('display', 'block');
+  $("#security").addClass("active");
+</script>

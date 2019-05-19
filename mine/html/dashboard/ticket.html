@@ -1,0 +1,1096 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oneconsole | Dashboard | Tickets</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+     <script src="/static/js/jquery-1.10.2.js"></script>
+    
+        <script>
+    $(document).ready(function(){
+        $("#owns").addClass("active");
+        $("#open").addClass("open");
+    });
+    </script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+          $("#workgroup").on('change',function(){
+            $('#subgroup option:gt(0)').remove().end();
+            if($("#workgroup :selected").text()!='-Group-'){
+              $.ajax({
+                url:"/ticket/owned/",
+                type:"POST",
+                dataType:"json",
+                data:{
+                  workgroupid : this.value,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success : function(data) {
+                  data = JSON.parse(data);
+                  for (var i in data){
+                    $("#subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                  }
+                },
+                error : function(xhr,errmsg,err) {
+                  alert(err);
+                }
+              });
+              return false;
+            }
+            });
+      });
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 logo">
+            <h1 class="sr-only">OneConsole</h1>
+          </div>
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- <div id="tour-searchbox" class="input-group searchbox">
+                  <input type="search" class="form-control" placeholder="enter keyword here...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                  </span>
+                </div> -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+
+                  <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+                  <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+            <!-- main-nav -->
+            <nav class="main-nav">              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html"%}
+              </ul>
+                </li>  
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Service Request</h2>
+                <em>Status : {{ticket.status}} </em>
+              </div>
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+
+              <div class="col-sm-8">
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Service Request
+                   {% if attachments %}
+                  <a href="" class="label label-info"  data-toggle="modal" data-target="#attachments">Attachments</a>
+                  {% endif %}
+                  <a href="" class="label label-success"  data-toggle="modal" data-target="#history">View Ticket History</a>
+                  </h3>
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div class="row">
+                        <div class="col-md-10">
+                          <label><strong>Summary:</strong> </label>
+                          {{ ticket.summary }}<br>                        
+                        </div>
+                        <div class="col-md-2" style="border-left:1px solid black" >
+
+                          <h4>{{ ticket.cls }}000{{ticket.id}}</h4>
+                          <label class="label label-success" style="font-size:14px" >{{ticket.status}}</label>
+                                                
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br>
+                        <label><strong>Description:</strong>  </label>
+                          <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ ticket.description }}" rows="12" cols="20" readonly></textarea> </div>
+                      </div>
+                      <hr>
+                      <div class="row">
+                        <div class="col-md-6"> 
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">Affected By</span>
+                              <span class="data-value">  <a href="" data-toggle="modal" data-target="#user">{{ ticket.affectedperson }}</a></span>
+                            </p>
+                           
+                            <p class="data-row">
+                              <span class="data-name">Phone No :</span>
+                              <span class="data-value"> {{ ticket.affectedphone }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">AffectedEmail</span>
+                              <span class="data-value">{{ ticket.affectedemail }}</span>
+                            </p>
+                             <p class="data-row">
+                              <span class="data-name">Reported By</span>
+                              <span class="data-value">{{ ticket.reportedby }}</span>
+                            </p>
+                          </div><hr>
+                        </div>
+
+                        <div class="col-sm-6">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">Category</span>
+                              <span class="data-value">  {{ ticket.category }}</span>
+                            </p>
+                             <p class="data-row">
+                              <span class="data-name">Ownergroup</span>
+                              <span class="data-value">{{ticket.subgroup}}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Source</span>
+                              <span class="data-value">  {{ ticket.source }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Urgency</span>
+                              <span class="data-value">  {{ ticket.urgency }}</span>
+                            </p>
+                          </div>
+                          <hr>
+                        </div>
+                      </div>
+                      <div class="row">                
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">Created Date</span>
+                              <span class="data-value">  {{ ticket.creationdate }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Reported Date</span>
+                            
+                              <span class="data-value">{{ ticket.reportdate}}</span>
+                              
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Affected Date</span>
+                              <span class="data-value">{{ ticket.affecteddate}}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Last Change</span>
+                              <span class="data-value">{{ ticket.changedate}}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">Target Start</span>
+                              <span class="data-value">  {{ ticket.targetstart|naturaltime }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Actual Start</span>
+                              <span class="data-value">{{ ticket.actualstart|naturaltime }}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">Target Finish</span>
+                              <span class="data-value">  {{ ticket.targetfinish|naturaltime }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Actual Finish</span>                     
+                              <span class="data-value">{{ ticket.accumulatedholdtime}}</span>                        
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+
+
+                      <div class="row">                
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">SLA</span>
+                              <span class="data-value"> {{ticket.sla}} </span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Resolution</span>
+                            
+                              <span class="data-value">N/B</span>
+                              
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Response</span>
+                              <span class="data-value">  N/B </span>
+                            </p>
+
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">SLA Breach</span>
+                              <span class="data-value"> N/B </span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Resolution</span>
+                              <span class="data-value"> N/B </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name">OLA</span>
+                              <span class="data-value"> N/B  </span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Estimated</span>                     
+                              <span class="data-value">N/B</span>                        
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <hr>
+                      <div>
+                         {% if resolved %}
+                        {% for resolve in resolved %}
+                          <p class="data-row">
+                              <span class="data-name">Symptom</span>
+                              <span class="data-value">  {{ resolve.symptom }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Cause</span>
+                              <span class="data-value">{{ resolve.cause }}</span>
+                            </p>
+                            <p class="data-row">
+                              <span class="data-name">Resolution</span>
+                              <span class="data-value"> {{ resolve.resolution }}</span>
+                            </p>
+
+                        {% endfor %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+
+
+
+          <div class="widget">
+            <div class="widget-header"><h3><i class="fa fa-magic"></i> Recent Activities</h3>
+              <div class="btn-group widget-header-toolbar">
+                <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+              </div>
+            </div>
+            <div class="widget-content">
+              <div class="wizard-wrapper">
+        {% if activity %}
+          {% for act in activity %}
+                <span class="label label-success" >{{ act.owner }}</span> {{act.note}} and change log to 
+                <span class="label label-info" >{{ act.activity }}</span>
+                {% if act.attachment %}
+                <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                {% endif %}
+                <div style="float:right">{{ act.time|naturaltime  }}</div>
+                <p style="margin-top:5px;max-height: 100px;overflow: auto;">{% if act.remark %}{{ act.remark|safe }}{% endif %}</p><hr>
+              
+
+              
+          {% endfor %}
+        {% else %}
+              No feeds. Please Sent Back a Remark to HelpDesk for more.
+        {% endif %}
+        </div> 
+            </div>
+          </div>
+               
+
+
+
+              </div>
+
+
+
+
+
+              <div class="col-sm-4">
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Work On the Ticket</h3>
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+
+
+                        {% if ticket.ended_at %}
+                        <h4><label class="label label-success" >Ticket already Canced/Closed</label>  </h4>
+                        {% else %}
+                        <!-- <div class="row"> -->
+                        {% if ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+
+                        <div class="col-lg-6" >
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reassign"><i class="glyphicon glyphicon-plus" ></i><span class="text" > Reassign </span></a>
+                          
+                          </div>
+                          {% endif %}
+
+                          <div class="col-lg-6" >
+                          <a class="btn btn-warning" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#cancel"><i class="glyphicon glyphicon-plus" ></i><span class="text" > Cancel </span></a>
+                          </div>
+                          
+                        <!-- <div class="row"> -->
+                        {% if ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+                          <div class="col-lg-6" >
+
+                            <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#resolve"><i class="glyphicon glyphicon-plus" ></i><span class="text" > Resolve </span></a>
+                          </div>
+                          {% endif %}
+
+                        {% if ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+                          <div class="col-lg-6" >
+
+                            <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#global"><span class="text" > Make Global </span></a>
+                          </div>
+                          {% endif %}
+
+
+
+                        {% if ticket.status == "RESOLVED" and ticket.cls != "PB" %}
+                          <div class="col-lg-6" >
+                            <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#close"><i class="glyphicon glyphicon-plus" ></i><span class="text" > Close Ticket </span></a>
+
+                          </div>
+                        {% endif %}
+                        <!-- </div> -->
+                        {% if ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+                        <div class="col-sm-6">
+                        <a class="btn btn-info" style="margin-top:3px;width:100%"  href="" data-toggle="modal" data-target="#inprog" ><i class="glyphicon glyphicon-plus" ></i><span class="text" > In Progress</span></a>
+                        </div>
+                        {% endif %}
+                        {% if ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+                        <div class="col-sm-6">
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#sla"><span class="text" > Awaiting Customer Action</span></a>
+                        </div>
+                        <div class="col-sm-6">
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#slav" deactivate><span class="text" > Awaiting Vender Action </span></a>
+                        </div>
+                        
+                        {% endif %}
+
+                    {%  endif %}
+                      </div>
+                      
+                    </div>
+                  </div>
+                  </div>
+                <!-- </div> -->
+
+     {% if ticket.ended_at %}
+                      
+                        {% else %}
+
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Work Log</h3>
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                         
+                          <form action="/ticket/stat/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <select class="form-control" style="margin-bottom:5px" name = "status">
+                              
+                              <option value="{{ticket.status}}">{{ticket.status}}</option>
+                              
+                            </select>
+
+                            
+                            <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>
+                            
+                          <input id="image" type="file" class="" name="image" > <br>
+                          <button class="btn btn-success" style="width:100%;margin-top:5px;" type="submit">Add Work Log</button> 
+                          </form>
+                          <hr>
+                            <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#email"><i class="glyphicon glyphicon-plus" ></i><span class="text" > Send email </span></a>
+
+                          </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {%  endif %}
+              </div>
+
+
+        <div class="modal fade" id="reassign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Reassign Your Task</h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/groupchange/{{ticket.id}}" method="POST">
+                  <div class="row">
+                    <div class="col-sm-6" >
+                      <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="group" required>
+                        <option value="">-Group-</option>
+                        {% for group in groups %}
+                        <option value="{{group.id}}"> {{group.workgroup}}</option>
+                        {% endfor %}
+                        
+                      </select>
+                    </div>
+                 
+                    <div class="col-sm-6" >
+                      <select class="form-control" style="margin-bottom:5px" name = "subgroup" id="subgroup" required>
+                          <option value=""> -SubGroup-</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row" >
+                    <div class="col-sm-4" >
+                  <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="impact">
+                    <option value=""> -Impact-</option>
+                    <option value="3"> High</option>
+                    <option value="2"> Medium </option>
+                    <option value="1"> Low </option>
+                    
+                  </select>
+                  </div>
+                  <div class="col-sm-4">
+
+                  <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="urgency">
+                    <option value=""> -Urgency-{{ticket.urgency}}</option>
+                    <option value="3"> High</option>
+                    <option value="2"> Medium </option>
+                    <option value="1"> Low </option>
+                    
+                  </select>
+                  </div>
+                  <div class="col-sm-4" >
+
+                  <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="internal">
+                    <option value=""> -Internal Priority-</option>
+                    <!-- <option value="High"> High</option>
+                    <option value="Medium"> Medium </option>
+                    <option value="Low"> Low </option> -->
+                     {% if ticket.cls == 'SR' %}
+                        <option value="Urgent">Urgent</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Purchase">Purchase</option>
+                      {% elif ticket.cls == 'IN' or  elif ticket.cls == 'INC' or elif ticket.cls == 'PB' or elif ticket.cls == 'PBM' %}
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      {% elif cls == 'CH' %}
+                        <option value="Change">Change</option>
+                      {% endif %}
+                    
+                  </select>
+                  </div>
+                  </div>
+                  
+                  <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                  <br>
+                  <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              * are mandatory
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="attachments" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Attachments</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                  <thead>
+                          <tr role="row">
+                          <th >Uploaded by</th>
+                          <th> File name</th>
+                          <th >Download</th>
+                          <th >Time</th>
+                         
+
+                          </tr>
+                        </thead>
+                        
+                        <tbody >
+                        {% for act in attachments %}
+                          <tr class="odd">
+                          <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                          <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                          <td class="grey"> <a href="/media/{{act.attachment}}"   download="{{attachments.docfile}}" class="label label-success">Download</a></td>
+                          <td class="grey"><a  style="color:#555">{{act.time|naturaltime}}</a></td>
+                             
+                       
+                        {% endfor %}         
+                        </tbody>
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="modal fade" id="history" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Ticket History</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                  <thead>
+                    <tr role="row">
+                    <th >User</th>
+                    <th >Status</th>
+                    <th >ChangeTime</th>
+
+                    </tr>
+                  </thead>
+                  
+                  <tbody >
+                  {% for act in history %}
+                    <tr>
+                    <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                    <td class="grey"><a  style="color:#555">{{act.status}}</a></td>
+                    <td class="grey"><a  style="color:#555">{{act.time}}</a></td>   
+                 
+                  {% endfor %}         
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+        <div class="modal fade" id="close" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Close ticket</h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/close/{{ticket.id}}" method="POST">
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-danger" style="float:right;width:50%" type="submit">Close Ticket</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+        <div class="modal fade" id="resolve" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Resolve ticket<a class="btn btn-xs btn-info pull-right"  href="" style="" data-toggle="modal" data-target="#kb_modal"><i class="glyphicon glyphicon-search" ></i><span class="text" > Find from Knowledge Base</span></a></h4>
+              </div>
+
+              <div class="modal-body">
+                <form action="/ticket/knowledgebase/{{ticket.id}}" method="POST">
+                  <textarea type="text" id = "autofill_symptom" name="symptom" style="max-width:100%" class="form-control" placeholder="symptom" rows="4" cols="20" required></textarea><br>
+
+                   <textarea type="text" id = "autofill_cause" name="cause" style="max-width:100%" class="form-control" placeholder="Cause " rows="4" cols="20" required></textarea><br>
+
+                    <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control" placeholder="Resolution " rows="4" cols="20" required></textarea><br>
+
+                   <input type="checkbox" name="add_to_kb" >Add To Knowledge Base<br>
+                  <button class="btn btn-info" style="float:right;width:50%" type="submit">Resolve</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- knowledge base popup -->
+
+        <div class="modal fade" id="kb_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Knowledge Base</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-hover borderless fixed selectable" id="kb_table">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Symptom</th>
+                        <th>Cause</th>
+                        <th>Resolution</th>
+                      </tr> 
+                    </thead>
+                    <tbody>
+                    {% for kb in kb_list %}
+                    <tr>
+                      <th scope="col">                          
+                        <input name="UserSelected" id="userSelected_2" type="radio" >  
+                      </th>
+                        <td>{{ kb.symptom }}</a></td>
+                        <td>{{ kb.cause }}</td>
+                        <td>{{ kb.resolution }}</td>
+                    </tr>  
+                    {% endfor %}
+                  </tbody>
+                </table>
+                  
+                  
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- knowledge base popup -->
+
+
+
+        <div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/cancel/{{ticket.id}}" method="POST">
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="modal fade" id="sla" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Awaiting Customer Response</h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/sla/{{ticket.id}}" method="POST">
+                <!--   <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="sla">
+                    <option value=""> -SLA type-</option>
+                    <option value="3"> High</option>
+                    <option value="2"> Medium </option>
+                    <option value="1"> Low </option>
+                    
+                  </select> -->
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="global" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Make Tickets Global</h4>
+              </div>
+              <div class="modal-body">
+                Feature Is on Pipeline
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+  <div class="modal fade" id="inprog" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Status to In Progress</h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/sla/stop/{{ticket.id}}" method="POST">
+                <!--   <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="sla">
+                    <option value=""> -SLA type-</option>
+                    <option value="3"> High</option>
+                    <option value="2"> Medium </option>
+                    <option value="1"> Low </option>
+                    
+                  </select> -->
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="slav" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Awaiting Vender Response</h4>
+              </div>
+              <div class="modal-body">
+                <form action="/ticket/slav/{{ticket.id}}" method="POST">
+                  
+                  <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+
+                  <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Compose email</h4>
+              </div>
+              <div class="modal-body">
+              <button class="btn btn-sm btn-warning"> <font size="3"> Select persons to send mail </font></button><br>
+                <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Affected Person
+                <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}">Reported person
+                <input type="checkbox" name="email_fill" value="{{ticket.owner.user.email}}">Owner
+                <input type="checkbox" name="email_fill" value="{{ticket.supervisor.email}}">Reporting Manager<br><br>
+                <form action="/ticket/email/{{ticket.id}}" method="POST">
+                  {% csrf_token %}
+                  
+                  <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                  <input type="button" id="append_to" class="btn-primary btn btn-sm pull-right" style="margin-top:-33px;" value="Add selected persons email"> <br>
+                  <input type="email" multiple id="cc_list" style="width:70%;" name="cc_list" class="form-control" placeholder="Cc" >
+                  <input type="button" id="append_cc" class="btn-primary btn btn-sm pull-right" style="margin-top:-33px;" value="Add selected persons email"> <br><br>
+                  <input type="text" id="subject" name="subject" class="form-control" placeholder="Subject" required><br>
+                  <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control" placeholder="Body " rows="10" cols="20" required></textarea><br>
+
+
+                  <button class="btn btn-success" style="float:right;width:30%" type="submit">Send Email</button>
+                </form>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="user" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Affected Person : {{profile.personid}}</h4>
+              </div>
+              <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="active"><a href="#basic" role="tab" data-toggle="tab">Peronal details</a></li>
+                  <li><a href="#att" role="tab" data-toggle="tab">Recent Tickets</a></li>
+                  
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div class="tab-pane active" id="basic">
+                    <div class="user-info-right">
+                      <div class="basic-info">
+                        <h4><i class="fa fa-square"></i> Basic Information</h4>
+                        <p class="data-row">
+                          <span class="data-name">Username</span>
+                          <span class="data-value"> {{profile.user}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Empid</span>
+                          <span class="data-value"> {{profile.employeetype}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Status</span>
+                          <span class="data-value">{{profile.status}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Location</span>
+                          <span class="data-value">{{profile.location}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Country</span>
+                          <span class="data-value">{{profile.country}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Date Joined</span>
+                          <span class="data-value">{{profile.hiredate}}</span>
+                        </p>
+                      </div>
+                      <div class="contact_info">
+                        <h4><i class="fa fa-square"></i> Contact Information</h4>
+                        <p class="data-row">
+                          <span class="data-name">Email</span>
+                          <span class="data-value">{{profile.email}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Phone</span>
+                          <span class="data-value">{{profile.phone}}</span>
+                        </p>
+                        <p class="data-row">
+                          <span class="data-name">Address</span>
+                          <span class="data-value">{{profile.addressline1}}<br>{{profile.addressline2}}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div class="tab-pane " id="att">
+                    <br>
+                    <table id="visit-stat-table" class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                      <thead>
+                        <tr role="row">
+                        <th >Ticket</th>
+                        <th >Status</th>
+                        <th >Date</th></tr>
+                      </thead>
+                        {% for activity in tickets_his %}
+                      <tbody>
+                        <tr >
+                          <td class="grey">{{activity.summary}}</td>
+                          <td class="grey">{{activity.status}}</td>
+                          <td class="grey">{{activity.reportdate}}</td></tr>
+                      </tbody>
+                      {% endfor %}
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div><!-- /.modal-content -->
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+               <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+
+  </body>
+{% include "components/service_request.html" %}
+  <script type="text/javascript">
+  $('table[id=kb_table] tr').click(function(){
+    symptom = this.cells[1].innerHTML;
+    cause = this.cells[2].innerHTML;
+    resolution = this.cells[3].innerHTML;
+    $("#autofill_symptom").val(symptom);
+    $("#autofill_cause").val(cause);
+    $("#autofill_resolution").val(resolution);
+
+    // console.log(symptom);
+    // console.log(cause);
+    // $('#kb_modal').modal('hide');
+  });
+  // $('#kb_table tr').click(function() {
+  //   console.log($(this).find('th input:radio').prop('checked', true));
+//})
+  $("#append_to").click(function(){
+    mails = ''
+    $('input[name="email_fill"]:checked').each(function(){
+      mails += this.value;
+      mails+=','
+    });
+    mails = mails.substring(0, mails.length - 1);
+    $("#to").val(mails);
+  });
+  $("#append_cc").click(function(){
+    mails = ''
+    $('input[name="email_fill"]:checked').each(function(){
+      mails += this.value;
+      mails+=','
+    });
+    mails = mails.substring(0, mails.length - 1);
+    $("#cc_list").val(mails);
+  });
+
+</script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

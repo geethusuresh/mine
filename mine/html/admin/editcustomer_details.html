@@ -1,0 +1,192 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Customer</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="/static/customer/css/fullcalendar/fullcalendar.css" />
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Edit Customer <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Edit Customer</li>
+                </ol>
+            </div>
+            <div class="content">
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="box">
+                    <div class="box-title">
+                      <h3>Basic Details</h3>
+                    </div>
+                    <div class="box-body">
+                      <form  id="get_customer_details" name ="get_customer_details" method='post' action=''>
+                       {% csrf_token %}  
+                   
+                      <div class="row" >
+                        <div class="col-sm-6">
+                          <label style = "font-weight: bold" for = "customerID">Customer ID </label>
+                          <input type="text" class="form-control" id="customer_id" name="customer_id" value = "{{ details.customerid }}" readonly required><br>
+
+                          <label style = "font-weight: bold" for ="description">Description</label>
+                          <textarea type ="text" class="form-control" id = "description"  name="description" required>{{ details.description }}</textarea><br>
+                        
+                          <label style = "font-weight: bold" for ="enterdate">Enter Date</label>
+                          <input type="date" class="form-control" id="enter_date" name="enter_date" value = "{{ details.enterdate | date:"Y-m-d" }}"  pattern ='^(19|20)\d\d[\-\/.](0[1-9]|1[012])[\-\/.](0[1-9]|[12][0-9]|3[01])$' title = 'Date Format YYYY-MM-DD'required><br>
+
+
+                          <label style = "font-weight: bold" for ="languagecode">Language Code</label>
+                          <input type="text" class="form-control" id="language_code" name="language_code" value = "{{ details.langcode}}"><br>
+                        </div>
+
+                        <div class="col-sm-6">
+                          <label style = "font-weight: bold" for ="customername">Customer Name</label>
+                          <input type="text" class="form-control" id="customer_name" name="customer_name" value = "{{ details.customername }}" required><br>
+                          <label style = "font-weight: bold" for ="currency">Currency</label>
+                          <input type="text" class="form-control" id="currency" name="currency" value = "{{ details.currency }}" required><br>
+
+                          <label style = "font-weight: bold" for ="clearingact">Clearing Act</label>
+                          <input style="margin-top:8px" type="text" class="form-control" id="clearing_act" name="clearing_act" value = "{{ details.clearingact }}"><br>
+
+                          <label style = "font-weight: bold" for ="rowstamp">Rowstamp</label>
+                          <input class="form-control" type="text" id="rowstamp" name="rowstamp" value = "{{ details.rowstamp}}" ><br>
+                        </div>
+                          <br>
+                        <input type="submit" class="btn btn-success" value = "Update">
+                      </div>        
+                      </form>
+                    </div>
+                    
+                  </div>
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Add Holiday</h3>
+                      </div>
+                      <div class="box-body">
+                        <form action="/customer/holiday/add/{{details.id}}" method="POST">{% csrf_token %}
+                          <div class="row">
+                            <div class="col-sm-5">
+                              <input class="form-control" type="text" name="name" placeholder="Day Importance">
+                            </div>
+                            <div class="col-sm-5">
+                              <input class="form-control" type="date" name="date" placeholder="Enter Date">
+                            </div>
+                            <div class="col-sm-2">
+                              <button class="btn btn-info"><i class="fa fa-plus">Add</i></button>
+                            </div>
+                          </div>
+                          
+                          
+                          
+                        </form>
+                      </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="box">
+                    <div class="box-body">
+                      <div id="calendar">
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+          </div>
+          </div>
+    {% include "components/footer.html"%}
+    <script src="/static/customer/js/plugins/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
+    </body>
+    <script>
+    $(function(){
+      $( "#enter_date" ).datepicker({ dateFormat: "yy-mm-dd" });     
+    });
+    </script>
+    <script>
+                var date = new Date();
+                var d = date.getDate(),
+                        m = date.getMonth(),
+                        y = date.getFullYear();
+                $('#calendar').fullCalendar({
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+                    buttonText: {
+                        prev: "<span class='fa fa-caret-left'></span>",
+                        next: "<span class='fa fa-caret-right'></span>",
+                        today: 'today',
+                        month: 'month',
+                        week: 'week',
+                        day: 'day'
+                    },
+                    //Random events
+                    
+                    events: [
+                    {% for ev in holidays %}
+                        {
+                            title: '{{ev.name}}',
+                            start: new Date({{ev.day|dates}})
+                        },
+                    {% endfor %}
+                    ],
+                    editable: true,
+                    droppable: true, // this allows things to be dropped onto the calendar !!!
+                    drop: function(date, allDay) { // this function is called when something is dropped
+
+                        // retrieve the dropped element's stored Event Object
+                        var originalEventObject = $(this).data('eventObject');
+
+                        // we need to copy it, so that multiple events don't have a reference to the same object
+                        var copiedEventObject = $.extend({}, originalEventObject);
+
+                        // assign it the date that was reported
+                        copiedEventObject.start = date;
+                        copiedEventObject.allDay = allDay;
+                        copiedEventObject.backgroundColor = $(this).css("background-color");
+                        copiedEventObject.borderColor = $(this).css("border-color");
+
+                        // render the event on the calendar
+                        // the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
+                        $('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
+
+                        // is the "remove after drop" checkbox checked?
+                        if ($('#drop-remove').is(':checked')) {
+                            // if so, remove the element from the "Draggable Events" list
+                            $(this).remove();
+                        }
+
+                    }
+                });
+    </script>
+  </html>
+
+       
+                    
+

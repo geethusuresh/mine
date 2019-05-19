@@ -1,0 +1,988 @@
+{% load humanize %}
+{% load zone %}
+<!-- Reassign ticket -->
+<div class="modal fade" id="reassign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Reassign Your Task</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/groupchange/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <div class="row">
+                        <div class="col-sm-6" >
+                            <label>Class:</label>
+                            <select class="form-control" style="margin-bottom:5px" id = "workgroup" name="group" required>
+                                <option value="">-Select--</option>
+                                {% for group in groups %}
+                                    <option value="{{group.id}}"> {{group.workgroup}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-sm-6" >
+                            <label>Domain:</label>
+                            <select class="form-control" style="margin-bottom:5px" name = "subgroup" id="subgroup" required>
+                                <option value=""> --Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                    <div class="row pad-top">
+                        <div class="col-sm-3">
+                            <label>Add Work Hours (in minitues)</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="number"  name="rtime" class="form-control" required min="0">
+                      </div>
+                    </div>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Close Ticket - need to test style -->
+<div class="modal fade" id="close" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Close ticket</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/close/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                    <button class="btn btn-danger" style="float:right;width:50%" type="submit">Close Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Attachments modal -->
+<div class="modal fade" id="attachments" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Attachments</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                    <thead>
+                        <tr role="row">
+                            <th >Uploaded by</th>
+                            <th> File name</th>
+                            <th >Download</th>
+                            <th >Time</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        {% for act in attachments %}
+                            <tr class="odd">
+                                <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                <td class="grey"> <a href="/media/{{act.attachment}}"   download="{{attachments.docfile}}" class="label label-success">Download</a></td>
+                                <td class="grey"><a  style="color:#555">{{act.time|naturaltime}}</a></td>
+                            </tr>
+                        {% endfor %}         
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Ticket history -->
+<div class="modal fade" id="history" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Ticket History</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                    <thead>
+                        <tr role="row">
+                            <th >User</th>
+                            <th >Status</th>
+                            <th >ChangeTime</th>
+                        </tr>
+                    </thead>
+                    <tbody >
+                        {% for act in history %}
+                            <tr>
+                                <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                                <td class="grey"><a  style="color:#555">{{act.status}}</a></td>
+                                <td class="grey"><a  style="color:#555">{{act.time}}</a></td>   
+                            </tr>
+                        {% endfor %}         
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Ticket -->
+<div class="modal fade" id="resolve" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Resolve ticket
+                    {% if ticket.cls == "IN" %}
+                        <a class="btn btn-xs btn-info pull-right"  href="" data-toggle="modal" data-target="#kb_modal" id="from_kb" style="margin-right:10px;"><i class="glyphicon glyphicon-search" ></i><span class="text" > Find from Knowledge Base</span></a>
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/knowledgebase/{{ticket.id}}" method="POST">
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    {% if ticket.cls == 'SR' or ticket.cls == 'CH'%}
+                        <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control" placeholder="Resolution " rows="4" cols="20" required></textarea><br>
+                    {% elif ticket.cls == 'IN' or ticket.cls == 'PB'%}
+                        <textarea type="text" id = "autofill_symptom" name="symptom" style="max-width:100%" class="form-control" placeholder="symptom" rows="4" cols="20" required></textarea><br>
+                        <textarea type="text" id = "autofill_cause" name="cause" style="max-width:100%" class="form-control" placeholder="Cause " rows="4" cols="20" required></textarea><br>
+                        <input type="hidden" id="is_kb_used" name="is_kb_used">
+                        <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control" placeholder="Resolution " rows="4" cols="20" required></textarea><br>
+                        {% if ticket.cls == 'IN' %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select class="form-control" style="margin-bottom:5px" name="resolution_code" required id="resolutin_code_fetch">
+                                            <option value="">Select Resolution Code</option>
+                                    </select>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <input type="checkbox" name="add_to_kb" >Add To Knowledge Base<br>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label>Add Work Hours (in minitues)</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="number"  name="rtime" class="form-control" required>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="btn btn-info" style="float:right;width:50%" type="submit"> Resolve</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- KB popup -->
+<div class="modal fade" id="kb_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Knowledge Base</h4>
+            </div>
+            <div class="modal-body">
+                {% if kb_list|length > 0 %}
+                    <table class="table table-hover borderless fixed selectable" id="kb_table">
+                        <thead>
+                            <tr>
+                                <th style="display:none"></th>
+                                <th>Symptom</th>
+                                <th>Cause</th>
+                                <th>Resolution</th>
+                                <th></th>
+                            </tr> 
+                        </thead>
+                        <tbody>
+                            {% for kb in kb_list %}
+                                <tr>
+                                    <td style="display:none">{{ kb.id }}</td>
+                                    <td>{{ kb.symptom }}</td>
+                                    <td>{{ kb.cause }}</td>
+                                    <td>{{ kb.resolution }}</td>
+                                    <td><button class="btn btn-info btn-xs">Use</button></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    No data found
+                {% endif %}
+                <button class="btn btn-success pull-right" data-dismiss="modal" aria-hidden="true" >Close</button>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Change Priority -->
+
+<div class="modal fade" id="priority" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Priority</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/change/priority/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <input class="hidden" value="{{ticket.cls}}" id="ticket_class">
+                            <input class="hidden" value="{{ticket.internalpriority}}" id="ticket_priority">
+                            <label>Current Priority is <b>{{ticket.internalpriority}}</b> Change it to ?</label>
+                            <select class="form-control" name="priority" required id="priority_data">
+                                <option value="">-select-</option>
+                                {% if ticket.cls == 'SR'%}
+                                    <option value="Urgent">Urgent</option>
+                                    <option value="Normal">Normal</option>
+                                    <option value="Purchase">Purchase</option>
+                                {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                {% elif ticket.cls == 'CH' %}
+                                    <option value="Change">Change</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            {% if ticket.cls == 'IN' and ticket.internalpriority == 'Critical' %}
+                                <label id="severity_data_txt">Current Severity is <b>
+                                {% if ticket.severity%}
+                                    {{ticket.severity.severity}}
+                                {% else %}
+                                    {{ticket.impact | impact}}
+                                {% endif %}
+                                </b> Change it to ?</label>
+                                <select class="form-control" name="impact" id="severity_data">
+                                    <option value="">-select-</option>
+                                    <option value="3">S1</option>
+                                    <option value="2">S2</option>
+                                    <option value="1">S3</option>
+                                </select>
+                            {% else %}
+                                <label id="severity_data_txt">Current Severity is <b>{% if ticket.severity%}
+                                    {{ticket.severity.severity}}
+                                {% else %}
+                                    {{ticket.impact | impact}}
+                                {% endif %}</b> Change it to ?</label>
+                                <select class="form-control" name="impact" id="severity_data">
+                                    <option value="">-select-</option>
+                                </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <br>
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-warning" style="float:right;width:50%" type="submit">Change Ticket Priority</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Summary -->
+<div class="modal fade" id="edit_title" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Edit Summary</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'ticket_summary_edit' ticket.id %}" method="POST">{% csrf_token %}
+                    <div class="row pad-all">
+                        <div class="form-group">
+                            <label class="control-label">Ticket Summary :</label>
+                            <textarea type="text" name="summary" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required>{{ticket.summary}}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" style="float:right;width:25%" type="submit">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Worklog Edit Content -->
+<div id="largeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Edit Worklog</h4>
+            </div>
+            <div class="modal-body">
+                <form method="POST" id="work_log_edit_form">{% csrf_token %}
+                    <div class="col-xs-12">
+                        <textarea class="form-control "id="work_log_content_editor" name="work_log_description" rows="50"></textarea>
+                    </div>
+                    <input type="hidden" value="" name='source_page' id="source_page">
+                    <div class="col-xs-12 pad-all">
+                        <button class="btn btn-success pull-right" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Customer Ticket -->
+
+<div class="modal fade" id="add_customer_ticket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Add Customer Ticket Number</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'add_customer_ticket' ticket.id %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                    <input type="hidden" name="flag" value="internal_log">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>Customer Ticket Number</label>
+                            <input type="text" name="customer_ticket" class="form-control" required>
+                        </div>
+                        <div class="col-sm-6 pad-top">
+                            <button class="btn btn-success pull-left" style="float:right;width:50%" type="submit">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Send email related to this ticket -->
+<div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Send email related to this ticket</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3">
+                        <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Impacted User
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}"> Reported User
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                    </div>
+                </div>
+                <form action="/ticket/email/{{ticket.id}}" class="form-horizontal" method="POST" enctype="multipart/form-data" id="send_email_form">
+                    {% csrf_token %}
+                    <br>
+                    <div class="col-sm-12" style="margin-bottom:5px;padding:5px"><p id="checked_error" class="alert-danger" style="display:none; margin-bottom:5px;padding:5px"></p></div>
+                    {% if ticket.customer.is_notify_settings %}
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <input type="checkbox" name="is_group_notify" class="from-control control-label" id="is_group_notify" >  Send Group Notification 
+                            </div>
+                            <div class="col-sm-8"></div>
+                        </div>
+                        <div class="form-group hide_notify_group" style="display:none">
+                            <div class="col-sm-3">
+                                <label>Notification Groups :</label>
+                            </div>
+                            <div class="col-sm-7">
+                                <select name="notify_group" id="notify_group" class="form-control">
+                                    <option value="">--Select--</option>
+                                </select>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">To:</label>
+                        <div class="col-sm-10">
+                            <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required onchange="remove_trailing_char()">
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="button" id="append_to" class="btn-info btn btn-sm pull-right" value="Add" style="display:none">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                        <div class="col-sm-10">
+                            <input type="email" multiple id="cc_list" value="" name="cc_list" class="form-control" placeholder="Cc" onchange="remove_trailing_char()">
+                            <input type="hidden" multiple id="cclist_data" value="" name="cclist_data" class="form-control" placeholder="Cc" >
+                        </div>
+                        <div class="col-sm-1">
+                            <!-- <input type="button" id="append_cc" class="btn-info btn btn-sm pull-right" value="Add" style="display:none"> -->
+                            {% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                <input type="button" id="append_to_cc" class="btn-info btn btn-sm pull-right" value="Add" style="display:none">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                        <div class="col-sm-11">
+                            <input  type="text" id="subject" name="subject" class="form-control" placeholder="Subject" required>
+                        </div>
+                    </div>
+                    <label>Body:</label>
+                    <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control" placeholder="Mail body.." rows="10" cols="20">{% if profile.signature %}{{profile.signature}}{% endif %}</textarea><br>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <label>Attach Here</label>
+                            <input type="file" name="attachment_file" id="attachment_file" class="send_mail_image" />
+                            <span class="error_msg_send_mail" style="color:red;"></span>
+                        </div>
+                        <div class="col-sm-4">
+                            <select class="form-control" name="visibility" required>
+                                <option value="TRUE">Internal Visbility</option>
+                                <option value="FALSE">Enduser Visibility</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-success" style="width:100%" type="submit" onclick="remove_trailing_char()">Send Email</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- assign to subgroup member -->
+<div class="modal fade" id="assign_subgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Assign To Subgroup Member</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/assign_subgroup_member/{{ticket.id}}/" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <label>Assign To</label>
+                    <select class="form-control" required name="subgroup_member">
+                        <option value="">Select Subgroup Member</option>
+                        {% for membr in subgroup_members_list %}
+                            <option value="{{membr.id}}">{{membr.person.user.first_name}} {{membr.person.user.last_name}}</option>
+                        {% endfor %}
+                    </select><br>
+                    <textarea name="remarks" class="form-control"></textarea><br/>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- SLA Stop -->
+<div class="modal fade" id="sla" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change SLA Status</h4>
+            </div>
+            <div class="modal-body">
+                <p> Which status do you want to change?</p>
+                <form action="" name="sla_form" id="sla_form" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select class="form-control" id="sla_dropdown" name="sla_dropdown" onchange="change_formaction(this.form)" required>
+                                <option value="">-Select an Option-</option>
+                                <option value="slac">Awaiting Customer Action</option>
+                                {% if statuslabel %}
+                                    <option value="slav">{{ statuslabel }}</option>
+                                {% else %}
+                                    <option value="slav">Awaiting Vendor Action</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <br>
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:40%" type="submit">Change Status</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Resume SLA  -->
+<div class="modal fade" id="inprog" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Status to In Progress</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/sla/stop/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Cancel Ticket -->
+<div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/cancel/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Reply Worklog -->
+<div class="modal fade" id="worklog_reply" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Send email related to this worklog</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3">
+                        <input type="hidden" name="work_log_id" id="work_log_id" />
+                        {% if ticket.affectedperson.user.email %}
+                            <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.user.email}}" required>
+                        {% else %}
+                            <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedemail}}" required>
+                        {% endif %}
+                            Impacted User
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="checkbox" name="email_fill_worklog" value="{{ticket.reportedby.user.email}}" required> Reported User
+                    </div>
+                    <div class="col-sm-5" style="margin-bottom:5px">
+                        <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.supervisor.email}}" required>Reporting Manager
+                    </div>
+                    <div class="col-sm-11"><p id="checked_error_worklog" class="alert alert-danger" style="display:none; margin-bottom:5px"></p></div>
+                    <div class="col-sm-1"></div>
+                </div>
+                <form action="#" class="form-horizontal" method="POST" id="worklog_reply_form">
+                    {% csrf_token %}
+                    <br>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">To:</label>
+                        <div class="col-sm-10">
+                            <input type="email" multiple id="to_worklog" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="button" id="append_to_work_log" class="btn-info btn btn-sm pull-right" value="Add" style="display:none">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                        <div class="col-sm-11">
+                            <input type="email" multiple id="worklog_cc_list" value="{{ticket.owner}}" name="cc_list" class="form-control" placeholder="Cc" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                        <div class="col-sm-11">
+                            <input  type="text" id="worklog_subject" name="subject" class="form-control" placeholder="Subject" value="{{ticket.summary}}" required>
+                        </div>
+                    </div>
+                    <label>Body:</label>
+                    <textarea  type="text" id="worklog_body" name="body" style="max-width:100%" class="form-control" placeholder="" rows="10" cols="20" required ></textarea><br>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <input type="file" name="attachment" id="worklog_attachment" class="reply_worklog_image" />
+                            <span class="reply_worklog_error_msg" style="color:red;"></span>
+                        </div>
+                        <div class="col-sm-4">
+                            <select class="form-control" name="visibility" required id="worklog_visibility">
+                                <option value="TRUE">Internal Visbility</option>
+                                <option value="FALSE">Enduser Visibility</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-success" style="width:100%" type="button" onclick="create_work_log_history({{ticket.id}})">Send Email</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- need to remove related tickets view -->
+ <div class="modal fade" id="related_tickets_view" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Ticket Details</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table" id="fielder">
+                    <thead>
+                        <th>Ticket Id</th>
+                        <th>Status</th>
+                        <th>Choose</th>
+                    </thead>
+                </table>
+                <div class="col-md-12 pad-top">
+                    <button type="button" class="btn btn-success pad-top" style="float:right" data-dismiss="modal" id="update_related_ticket">Update</button>
+                </div>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- kb modal -->
+<div class="modal fade" id="kb_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Knowledge Base</h4>
+            </div>
+            <div class="modal-body">
+                {% if kb_list|length > 0 %}
+                    <table class="table table-hover borderless fixed selectable" id="kb_table">
+                        <thead>
+                            <tr>
+                                <th style="display:none"></th>
+                                <th>Symptom</th>
+                                <th>Cause</th>
+                                <th>Resolution</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kb in kb_list %}
+                                <tr>
+                                    <td style="display:none">{{kb.id}}</td>
+                                    <td>{{ kb.symptom }}</td>
+                                    <td>{{ kb.cause }}</td>
+                                    <td>{{ kb.resolution }}</td>
+                                    <td><button class="btn btn-info btn-xs">Use</button></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                {% else %}
+                    No data found
+                {% endif %}
+                <button class="btn btn-success pull-right" data-dismiss="modal" aria-hidden="true" >Close</button>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Reopen Ticket -->
+<div class="modal fade" id="reopen" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Reopen Ticket</h4>
+            </div>
+            <div class="modal-body">
+                <p>Note : You are automatically assigned as the owner of this ticket while reopening</p>
+                <form action="/ticket/reopen/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Reopen Ticket {{ticket.ticketid}}</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Take ownership -->
+<div class="modal fade" id="ownership" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Status to In Progress</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/ownership/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    {% if ticket.internalpriority %}
+                    {% else %}
+                        <label>Ticket Don't Have an Internal Priority, Set internal priority</label>
+                        <select name="internal">
+                            <option value="High"> High</option>
+                            <option value="Medium"> Medium </option>
+                            <option value="Low"> Low </option>
+                        </select>
+                    {% endif %}
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Take ownership</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Change Category -->
+<div class="modal fade" id="change_category" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Change Category</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'ticket_change_category' ticket.id %}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6" >
+                            <label>Select Category</label>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <select class="form-control" style="margin-bottom:5px" id="tick_category" name="tick_category" required>
+                                <option value="">-Select-</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6" >
+                            <label>Select Sub-Category</label>
+                            <select class="form-control" style="margin-bottom:5px" name="ticket_sub_category" id="ticket_sub_category">
+                                <option value=""> -Select-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label>Remarks</label>
+                    <textarea type="text" name="remarks" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" ></textarea>
+                    <br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Category</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Change Airline -->
+<div class="modal fade" id="change_ia" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Impacted Airline</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/change_impacted_airline/{{ticket.id}}/" method="POST">{% csrf_token %}
+                    <div class="row pad-all">
+                        <div class="form-group">
+                            <label class="control-label">Impacted Airline :</label>
+                            <select class="form-control" id="ia_change" name="impacted_airline" required>
+                                <option value="">--Select Impacted Airline--</option>
+                                {% for ia in ias %}
+                                    <option value="{{ ia.id }}" {% if ticket.impacted_airline == ia %} selected {% endif %}>{{ ia.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Remarks :</label>
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-warning" style="float:right;width:25%" type="submit">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Attachment after close -->
+<div class="modal fade" id="add_attachment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Add Attachment</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'add_attachment_feature' ticket.id %}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                    <input type="hidden" name="flag" value="internal_log">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>Attachment</label>
+                            <input id="image" type="file" name="image" class="add_attachment_image" required>
+                            <span class="error_msg_add_attachment" style="color:red;"></span>
+                        </div>
+                    </div>
+                    <label>Remarks</label>
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                    <br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Add Attachment</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Edit Host -->
+<div id="edit_host" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Hostname</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/status/edit/{{ ticket.id}}" method="POST" enctype="multipart/form-data" >{% csrf_token %}
+                    {% if security_host == None %}
+                        <input type="text" class="form-control" id="security_host" name="security_host" style="width:100%;margin-top:5px;" placeholder="Enter the Hostname" required>
+                    {% else %}
+                        <input type="text" class="form-control" id="security_host" name="security_host" style="width:100%;margin-top:5px;" value="{{ security_host }}" required>
+                    {% endif %}
+                    <button class="btn btn-success" style="width:25%;margin-top:5px;" type="submit">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Edit Tool URL -->
+<div id="edit_toolurl" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Tool URL</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/status/edit/{{ ticket.id}}" method="POST" enctype="multipart/form-data" onsubmit="return validate_url();">{% csrf_token %}
+                    {% if tool_url == None %}
+                        <input type="text" class="form-control" id="tool_url" name="tool_url" style="width:100%;margin-top:5px;" placeholder="Enter your tool url (http://www.example.com)">
+                    {% else %}
+                        <input type="text" class="form-control" id="tool_url" name="tool_url" style="width:100%;margin-top:5px;" value="{{tool_url}}">
+                    {% endif %}
+                    <button class="btn btn-success" style="width:25%;margin-top:5px;" type="submit">Update</button><label style = "font-weight: bold;color:red;display:none;margin-left:27px;margin-top: 7px;" id="url_error_section"></label>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Edit IP -->
+<div id="edit_ip" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">IP Address</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/status/edit/{{ ticket.id}}" method="POST" enctype="multipart/form-data" onsubmit="return validate_ip();">{% csrf_token %}
+                    {% if security_ip == None %}
+                        <input type="text" class="form-control" id="security_ip" name="security_ip" style="width:100%;margin-top:5px;" placeholder="Enter the IP Address" >
+                    {% else %}
+                        <input type="text" class="form-control" id="security_ip" name="security_ip" style="width:100%;margin-top:5px;" value="{{ security_ip }}" >
+                    {% endif %}
+                    <button class="btn btn-success" style="width:25%;margin-top:5px;" type="submit">Update</button><label style = "font-weight: bold;color:red;display:none;margin-left:27px;margin-top: 7px;" id="ip_error_section"></label>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="zendesk" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content  bg-gray">
+            <div class="modal-header bg-gray">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Worklog from zendesk for the ticket #{{ zendesk.zendesk_id  }}</h4>
+            </div>
+            <form  action="{% url 'zendesk_log_merge' ticket.id zendesk.zendesk_id %}" method="POST">{% csrf_token %}
+                <div class="panel-body demo-nifty-label-badge">
+                    <!--Labels-->
+                    <span class="label label-info" style="display: none;" id="zendesk_ticket_type"></span>
+                    <span class="label label-info" style="display: none;" id="zendesk_ticket_priority"></span>
+                </div>
+                <h1 class="page-header text-overflow mar-rgt mar-top"><button class="btn btn-warning pull-right"  id="log_sync_btn" style="width: 25%" type="submit"><i class="spinner_sync fa fa-spinner fa-spin" style="display: none" aria-hidden="true"></i> Sync To Oneconsole</button></h1>
+                <div class="modal-body" id="modal_log">
+                    <!-- Timeline -->
+                    <!--===================================================-->
+
+                </div>
+            </form>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>
+<!-- Zendesk status -->
+<div class="modal fade" id="zendesk_status" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Zendesk ticket #{{ zendesk.zendesk_id }} status change</h4>
+            </div>
+            <div class="modal-body" id="modal_confirm"></div>
+            <div class="modal-footer" id="modal_confirm_footer" style="border:0px">
+                <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+                <button type="button" data-dismiss="modal" data-toggle="modal" data-target="#zendesk_status1"  class="btn btn-success">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="zendesk_status1" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Comment will be updated in zendesk ticket #{{ zendesk.zendesk_id }}</h4>
+            </div>
+            <div class="modal-body">
+                <form id="zendesk_comment_form" action="{% url 'zendesk_solve' zendesk.zendesk_id %}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="col-sm-6">
+                                    <label>Current Status is <b id="status_label"></b> Change it to ?</label>
+                                    <select class="form-control" name="zendesk_status" required id="status">
+                                        <option value="open">Open</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="solved">Solved</option>
+                                    </select>
+                                    <br>
+                                </div>
+                                <div class="col-sm-12">
+                                    <textarea class="form-control"  name="message" id="comment_solve" rows="6" placeholder="Comment"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="comment_solve_btn" class="btn btn-info pull-right">Change zendesk Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px"></div>
+        </div>
+    </div>
+</div>

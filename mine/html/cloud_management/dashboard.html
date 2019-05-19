@@ -1,0 +1,91 @@
+
+
+
+{% extends 'cloud_management/home.html'%}
+
+
+
+{% block section_header %}
+      <h1>
+          Cloud Management
+          <small>Select Your Account</small>
+      </h1>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+
+
+
+
+
+
+
+
+
+<section class="section" id="head">
+  <div class="container">
+     <p class="lead text-center">
+    Select your Cloud Service
+    </p>
+    <div class="row">
+      <div class="col-sm-4 col-sm-offset-2">
+        <div class="thumbnail">
+          <img src="{% static 'cloud-static-files/cloud_dashboard/screenshots/openstack_logo.jpg' %}" alt="">
+          <div class="caption">
+            <h3>OpenStack</h3>
+            <p>OpenStack software controls large pools of compute, storage, and networking resources throughout a datacenter, managed through a dashboard</p>
+            
+            <div class="row">
+              <div class="col-sm-2">
+              </div>
+              <div class="col-sm-4 col-sm-offset-2">
+                <p><a href="{% url 'openstack_accounts_view' %}" class="btn btn-success" role="button">Details ...</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="thumbnail">
+          <img src="{% static 'cloud-static-files/cloud_dashboard/screenshots/aws_logo.jpg' %}" alt="">
+          <div class="caption">
+            <h3>Amazon Web Services</h3>
+            <p>Amazon Web Services is a collection of remote computing services, also called web services, that make up a cloud computing platform offered by amazon.</p>
+            <div class="row">
+              <div class="col-sm-2">
+              </div>
+              <div class="col-sm-4 col-sm-offset-2">
+                <p><a href="{% url 'aws_accounts_view' %}" class="btn btn-success" role="button">Details...</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-2">
+      </div>
+      <div class="col-sm-4 col-sm-offset-2">
+        <div class="thumbnail">
+          <img src="http://labs.sogeti.com/wp-content/uploads/2015/01/MS-Azure.jpg" alt="">
+          <div class="caption">
+            <h3>Azure</h3>
+            <p>Azure provides cloud and virtualization software and services.</p>
+            
+            <div class="row">
+              <div class="col-sm-1">
+              </div>
+              <div class="col-sm-5 col-sm-offset-3">
+                <p><a href="/cloud_management/azure/" class="btn btn-success" role="button">Details...</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

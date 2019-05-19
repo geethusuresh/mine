@@ -1,0 +1,146 @@
+{% extends 'cloud_management/home.html'%}
+
+{% block section_header %}
+  <h1>
+      Access & Security
+      <small></small>
+  </h1>
+  <ol class="breadcrumb">
+    <li><a href="{% url 'dashboard' %}">Home</a></li>
+    <li><a href="{% url 'openstack_accounts_view' %}">Openstack accounts</a></li>
+    <li><a href="/cloud_management/openstack/{{cloud_account_id}}/dashboard">Dashboard</a></li>
+    <li>Keypair List</li>
+  </ol>
+{% endblock %}
+
+{% block content%}
+
+
+<div class="messages" id="response_messages">
+
+</div>
+
+
+    <section class="content">
+        <div class="row" style="margin-bottom:15px !important">
+              <div class="col-md-12">
+                  <div class="col-md-10">
+                  </div>
+                  <div class="col-md-2">
+                        <button class="btn btn-primary" id="create-key_pair" ng-click="create_keypair">Create KeyPair</button>
+                  </div>
+              </div>
+        </div>
+        <div class="row">
+          <div class="panel panel-mint">
+            <div class="panel-heading">
+            <div class="panel-control">
+              <div class="btn-group">
+                  <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#key_pair_list" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+              </div>
+            </div>
+            <h3 class="panel-title">Keypair List</h3>
+          </div>
+            <div class="panel-body" id="key_pair_list">
+                <div class="col-md-11">
+                      <table class="table table-bordered">
+                          <thead>
+                              <tr>
+                                  <th>Name</th>
+                                  <th>Finger Print</th>
+                                  <th>Delete</th>
+                              </tr>
+
+                          </thead>
+                          <tbody>
+                             {% for each_key in list_key_pairs %}
+                              <tr>
+                                  <td>{{each_key.name}}</td>
+                                  <td>{{each_key.fingerprint}}</td>
+                                  <td><a href="{% url 'delete_openstack_key_pair' cloud_account_id each_key.name %}"><i class='fa fa-trash'></i></a></td>
+                              </tr>
+                             {% endfor %}
+                          </tbody>
+                      </table>
+                </div>
+            </div><!--col-md-12 -->
+          </div>
+        </div>
+    </section>
+
+    <div id="create-keyPair-popup" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-key"></i> Create Key Pair</h4>
+                {% if error %}
+                <div id="key-error">
+                    <h5 style="color:RED">{{error}} </h5>
+                </div>
+                {% endif %}
+
+            </div>
+          <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'list_key_pair' cloud_account_id %}">{% csrf_token %}
+            <div class="modal-body">
+                  <div class="mailbox row">
+                    <div class="col-xs-12">
+                        <div class="box box-solid">
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                         <label class="control-label required" for="id_name">Key Pair Name</label><br></br>
+                                        <input type="text" name="name" maxlength="255" id="id_name" class="form-control">
+                                    </div>
+                                    <div class="col-lg-6">
+
+
+                                        <h3>Description:</h3>
+
+                                        <p>Key pairs are ssh credentials which are injected into images when they are launched. Creating a new key pair registers the public key and downloads the private key (a .pem file).<br><br>
+
+                                        Protect and use the key as you would any normal ssh private key.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+               <button class="btn btn-primary" type="submit" id="form-submit">Create</button>
+            </div>
+          </form>
+
+        </div>
+    </div>
+</div>
+
+{% if error %}
+
+<script type="text/javascript">
+        $("#create-keyPair-popup" ).modal('show');
+        $('#key-error').delay(5000).fadeOut('slow')
+</script>
+
+
+{% endif %}
+
+
+<script type="text/javascript">
+      $( "#create-key_pair").click(function() {
+        $("#create-keyPair-popup" ).modal('show');
+      });
+</script>
+{% load staticfiles %}
+
+ <script type="text/javascript">
+
+
+
+ </script>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Person Details</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Person Details <small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Administration</li>
+                        <li class="active">Person Details</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="box">
+                        <div class="box-title">
+                            <h3>{{profile_details.user_profile.user.username}}</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <label><strong>First Name</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.user.first_name}}</p><br/>
+                                    <label><strong>Last Name</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.user.last_name}}</p><br/>
+                                    <label><strong>Username</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.user.username}}</p><br/>
+                                    <label><strong>Email</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.user.email}}</p><br/>
+                                    <label><strong>Department</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.department}}</p><br/>
+                                    <label><strong>Title</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.title}}</p>
+                                    <label><strong>Employee type</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.employeetype}}</p><br/>
+                                    <label><strong>Supervisor</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.supervisor.username}}</p><br/>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label><strong>Address Line1</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.addressline1}}</p><br/>
+                                    <label><strong>Address Line2</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.addressline2}}</p><br/>
+                                    <label><strong>Location</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.city}}</p><br/>
+                                    <label><strong>District</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.regiondistrict}}</p><br/>
+                                    <label><strong>Country</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.country}}</p><br/>
+                                    <label><strong>Postal code</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.postalcode}}</p>
+                                    <label><strong>Customer</strong></label>
+                                    <p class="form-control">{{profile_details.user_profile.customer.customername}}</p><br/>
+                                </div>
+                            </div>
+                            <div class="row padding">
+                                <div class="col-sm-12">
+                                    <div class="box-title">
+                                        <h4>Existing Subgroups</h4>
+                                    </div>
+                                    {% if profile_details.sub_groups|length > 0 %}
+                                        <table class="table table-hover table-striped" id="group_id">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Workgroup</th>
+                                                </tr> 
+                                            </thead>
+                                            <tbody>
+                                                {% for member in profile_details.sub_groups %}
+                                                    <tr>
+                                                        <td> {{member.subgroup.subgroupname}} </td>
+                                                        <td>{{member.subgroup.description}}</td>
+                                                        <td>{{member.workgroup.workgroup}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <br/>
+                                        <span class="form-control">
+                                            No Subgroups
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/service_request.html"%}
+        {% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#group_id').DataTable({
+                    aaSorting: [[0, 'asc']],
+                });
+            });
+        </script>
+    </body>
+</html>

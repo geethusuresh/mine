@@ -1,0 +1,92 @@
+{% load zone %}
+<div class="row" id="task_data_block" style="padding:10px">
+    <form name="task_creation" method="post" action="/task/create/{{ticket.id}}">
+        <div class="col-sm-12">
+            <input type="text" class="form-control" name="task_name" placeholder="Task Name (Max 30 characters)" required /><br/>
+            <textarea name="task_desc" class="form-control" placeholder="Task Description" required></textarea>
+            <br/>
+        </div>
+        <div class="col-sm-6">
+           <select name="task_group" class="form-control" style="margin-bottom:5px" id="t_group" required>
+                <option value="">-Select Domain-</option>
+                {% for group in group_list %}
+                    <option value="{{group.id}}">{{group.workgroup}}</option>
+                {% endfor %}
+            </select>
+            <br/>
+            <select name="task_category" class="form-control" style="margin-bottom:5px" id="t_cat" required>
+                <option value="">-Select Category-</option>
+
+                {% for cat in category_list%}
+                    <option value="{{cat.id}}">{{cat.name}}</option>
+                {% endfor %}
+            </select>
+            <br/>
+            <select class="form-control" id="task_owner" style="margin-bottom:5px" name="owner_id" required>
+                <option value="">-Select Owner-</option>
+            </select>
+            <br/>
+        </div>
+        <div class="col-sm-6">
+            <select name="task_subgroup" id="tsub_group" class="form-control" style="margin-bottom:5px" required>
+                <option value="">-Select Subdomain-</option>
+            </select>
+            <br/>
+            <select name="task_sub_cat" class="form-control" style="margin-bottom:5px" id="t_sub_cat" required>
+                <option value="">-Select Subcategory-</option>
+            </select>
+            <br/>
+            <select class="form-control" style="margin-bottom:5px" name="priority" required>
+                <option value="">-Select Priority-</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+        <button class="btn btn-success" type="submit" style="float:right;margin-right:10px">Create</button>
+        <a class="btn btn-danger" type="button" style="float:right;margin-right:10px" onclick="exit_task_creation()">Cancel</a>
+    </form>
+    <br/>
+    <div class="col-sm-12">
+       <hr style="border-color:#d6d6d6;">
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;" id="task_table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>TaskId</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th>Created Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in ticket.task_set.all %}
+                    <tr>
+                        <td>
+                            <a data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success btn-sm" href="/task/details/{{task.id}}/" data-original-title="View/Edit">
+                               <i class="fa fa-edit "></i>
+                            </a>
+                        </td>
+                        <td>{{task.taskid}}</td>
+                        <td>{{task.task_name}}</td>
+                        <td>{{task.description}}</td>
+                        <td>{{task.status.status}}</td>
+                        {% if task.owner %}
+                            <td>{{task.owner.user.username}}</td>
+                        {% else %}
+                            <td>{{task.owner}}</td>
+                        {% endif %}
+                        <td>{% tzone task.created_date %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

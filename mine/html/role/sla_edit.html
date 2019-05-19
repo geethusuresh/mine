@@ -1,0 +1,118 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>{{sla_item.name}}  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+              {% for message in messages %}
+              <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+              {% endfor %}
+            {% endif %}
+              <div class="box">
+                <div class="box-title">
+                  <h3>SLA</h3>
+                </div>
+                <div class="box-body">
+                <form method="post">
+                <div class="row">
+                  <div class="col-md-4 col-md-offset-4">
+                  Name
+                  <input class="form-control" type="text" id="name" name="name" required value="{{sla_item.name}}"></p>
+                  <input class="form-control" type="hidden" id="sla_id" name="sla_id"  value="{{sla_item.id}}"></p>
+                  Customer
+                  <select class="form-control" id="customer" name="customer" required >
+                      {% for customer in customers %}
+                        {% if customer.id == sla_item.customer.id %}
+                          <option value="{{customer.id}}" selected>{{ customer.customername }}</option>
+                        {% else %}
+                          <option value="{{customer.id}}">{{ customer.customername }}</option>
+                        {% endif %}
+                      {% endfor %}
+                  </select></p>
+                  Description
+                  <textarea class="form-control" id="sla_description" name="sla_description" required style="height:100px;" placeholder="Description">{{sla_item.description}}</textarea></p>
+                  Table
+                  <select class="form-control" id="table" name="table" required >
+                    <option selected>Select Table</option>
+                    <option value="ticket" selected>Ticket</option>
+                  </select></p>
+                  Condition
+                  <textarea class="form-control" id="condition" name="condition" required >{{ sla_item.condition}}</textarea>
+                </div>
+                </div></div>
+              </div>
+              <div class="box">
+                <div class="box-title">
+                  <h3>Commitments</h3>
+                </div>
+                <div class="box-body">
+                  {% for sla_com in sla_item.sla_entries.all%}
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input type="number" id="commitment_ids" name="commitment_ids"  value="{{sla_com.id}}" style="display:none;">Type:
+                      <select class="form-control input-sm" id="sla_type" name="sla_type" required >
+                        {% if sla_com.slatype == "response_sla" %}
+                            <option value="response_sla" selected>Response SLA</option>
+                            <option value="resolution_sla">Resolution SLA</option>
+                        {% else %}
+                            <option value="response_sla" >Response SLA</option>
+                            <option value="resolution_sla" selected>Resolution SLA</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      Description:
+                      <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description" name="description" required value="">{{sla_com.description}}</textarea>
+                    </div>
+                    <div class="col-md-3">
+                      Time:
+                      <input class="form-control input-sm" type="number" min="1"id="time" name="time" required value="{{sla_com.time_value}}" >
+                    </div>
+                    <div class="col-md-3">
+                      Time Type:
+                      <select class="form-control input-sm" id="time_type" name="time_type" required >
+                            <option value="minute" selected>Minute</option>
+                      </select></p>
+                      
+                    </div>
+                  </div>
+                   {% endfor %}
+                   <div class="row">
+                  <button class="btn btn-success pull-right" type="submit">Update</button>     
+                  </div>
+                    </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+

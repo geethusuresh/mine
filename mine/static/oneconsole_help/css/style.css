@@ -1,0 +1,71 @@
+body.form_page, .help_btn {
+    float: right;
+    margin-bottom: 18px;
+}
+body.form_page, .help_add {
+    float: right;
+    margin-right: 65px;
+    margin-bottom: 18px;
+}
+.help_add, .help_add_btn {
+	// width: 100px;
+    // padding: 6px 3px;
+
+}
+body.form_page, .help_delete {
+    // margin-right: 20px;
+    float: left;
+    width: auto;
+}
+
+body.form_page .form_row {
+    width: 100%;
+    overflow: hidden;
+    min-height: 81px;
+}
+body.form_page .form_row, .float-left {
+    float: left;
+}
+body.form_page .form_row, .field { 
+    border-color:red;
+}                
+body.form_page .form_row, .half_width {
+    width: 420px;
+    float: left;
+    display: block;
+    position: relative;
+}
+body.form_page, .margin_right {
+    margin-right: 60px;
+}
+body.form_page, .form_row, label {
+    min-height: 20px;
+    padding_bottom:2px;
+    color:#333;
+    margin-bottom:5px;
+    display: inline-block;    
+}
+body.form_page, .form_row, #id_url, #id_name, #id_body{
+    width: 100%;
+    margin-bottom: 18px;
+    border: 1px solid #DCDEE3;
+    outline: none;
+    border-radius: 0;
+    display: inline-block;
+    padding:5px;
+    box-sizing: border-box;
+    color: #333;
+}
+.pagination {
+    float: right;
+}
+
+a.list-group-item{
+
+margin-bottom: 0px;
+}
+a.list-group-item:active, a.list-group-item:hover, a.list-group-item:focus {
+  // background-color: #EEF2F3;
+    // border-color: #54abd9;
+    color: #54abd9;
+}

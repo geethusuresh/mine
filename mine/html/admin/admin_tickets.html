@@ -1,0 +1,279 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+    tr {
+        cursor: pointer;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Ticket Details<small>| All Tickets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="box">
+                <div class="box-title">
+                  <h3>All Tickets</h3>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                  
+                  <table class="table table-striped" id="table_1" >
+                    <thead>
+                      <tr>
+                        <!-- <th>Count</th> -->
+                        <th></th>
+                        <th>Ticket Id</th>
+                        <th>Ticket Summary</th>
+                        <th>Reported Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Domain</th>
+                        <th>Sub Domain</th>
+                        {% if is_egate_included %}
+                            <th>Carrier</th>
+                        {% endif %}
+                        <th>Affected Person</th>
+                        <th>Customer</th>
+                        <th>Owner</th>
+                        <th>Expected Resolution</th>
+                        <th>Last Updated</th>
+                        <th>Work Hours (Min)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets %}
+                      <tr class="odd  ">
+                      <td>
+                          {% if ticket.priority_flag == True %}
+                              <a class="btn btn-danger btn-sm" href="/ticket/status/edit/{{ticket.id}}" data-toggle="tooltip" data-placement="bottom" title="Important"><i class="fa fa-search-plus "></i> 
+                          {% else %}
+                              <a class="btn btn-success btn-sm" href="/ticket/status/edit/{{ticket.id}}" data-toggle="tooltip" data-placement="bottom" title="View"><i class="fa fa-search-plus "></i>                                            
+                          {% endif %}
+                        </a></td>
+                        <td class="grey">{% if ticket.affectedperson__id in vips %}
+                            <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                        {% endif %}{{ticket.ticketid}}</td>
+                        <td class="grey">{{ticket.summary}}</td>  
+                        <td class="grey"><span style="display:none;">{{ticket.reportdate.year}}{% if ticket.reportdate.month >= 10 %}{{ticket.reportdate.month}}{% else %}0{{ticket.reportdate.month}}{%endif%}{% if ticket.reportdate.day >= 10 %}{{ticket.reportdate.day}}{% else %}0{{ticket.reportdate.day}}{%endif%}{{ticket.reportdate.time | time}}</span>
+                        {% tzone ticket.reportdate %}</td>
+                        <td class="grey" >{% if ticket.customer_priority__priority %} {{ticket.customer_priority__priority}} {% else %}{{ticket.internalpriority}} {% endif %}</td>
+                        <td class="grey">{{ticket.status | real:ticket.customer__id}}</td>
+                        <!-- <button class="btn btn-link" onclick="showUsers('{{ticket.group__workgroup}}');" style="background:none;text-decoration:None">{{ticket.group__workgroup}}</button> -->
+                        <td class="grey">{{ticket.group__workgroup}}</td>
+                        <td class="grey">{{ticket.subgroup__subgroupname}}</td>
+                        {% if is_egate_included %}
+                            <td class="grey">{{ ticket.impacted_airline__name}}</td>
+                        {% endif %}
+                        <td class="grey">{{ticket.affectedperson__user__username}}</td>
+                        <td class="grey">{{ticket.customer__customername}}</td>
+                        <td class="grey">{{ticket.owner__user__username}}</td>
+                        <td>
+                        
+                        {% if ticket.status == 'CLOSED' %}
+                          Closed
+                        {% elif ticket.status == 'RESOLVED' %}
+                          Resolved
+                        {% else %}
+                           <span style="display:none;">{{ticket.targetfinish.year}}{% if ticket.targetfinish.month >= 10 %}{{ticket.targetfinish.month}}{% else %}0{{ticket.targetfinish.month}}{%endif%}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                          {% tzone ticket.targetfinish %}
+                        {% endif %}
+                        </td>
+                        <td><span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                          {% tzone ticket.changedate %}</td>
+                          <td>{{ ticket.id | work_hour}}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>        
+
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="user1" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Workgroup Users</h4>
+              </div>
+              <div class="modal-body">
+             
+              
+                <table class="table" id="field1">
+                  <thead>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                  </thead>
+
+
+                </table>
+                <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Close</button>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              
+              </div>
+            </div>
+          </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+    <script>     
+     $("#tickets_main").addClass("active");
+     $("#tickets_nav").css({'display' : 'block'});
+     $("#tktall").addClass("active");      
+     function showUsers(ticketid){
+      $.ajax({
+            url:"/list/workgp/members/",
+            type:"POST",
+            dataType:"json",
+            async:true,
+            data:{
+              'ticketid':ticketid,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            type: "POST",
+            success : function(data){
+              $('#field1 tr').slice(1).remove();
+              console.log(data);
+              i=0;
+              for (var i in data){
+                $tr = $('<tr>');
+                $tr.append($('<td>').html(data[i].user__first_name)).
+                append($('<td>').html(data[i].user__last_name)).
+                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id));
+                // var e =$('<tr><td">'+data[i].user__first_name+'</td><td>'+data[i].user__last_name+'</td><td>'+data[i].user__email+'</td></tr>')
+                
+                $("#field1").append($tr);
+                // $tr.bind('click', manga_andi2);
+              }
+            },
+          });
+        $("#user1").modal('show');
+     }
+
+     </script>
+    <!--  <script type="text/javascript" language="javascript" class="init">
+       $(document).ready(function() {
+           $('#table1').dataTable( {                 
+               "bServerSide": true,
+               "sAjaxSource": $(this).data('/ticket/all'),
+               "bProcessing": true,
+           } );
+       } );
+      </script> -->
+      <script>
+  $(document).ready(function() {
+    $('#table_1').dataTable({"scrollX": true, aaSorting:[[3,'desc']],
+        "columnDefs": [
+            { "width": "10%", "targets": 1 },
+        ]
+    });
+ 
+           $('#table1').dataTable( {
+
+               "processing": true,
+               "scrollX": true,
+                "columnDefs": [
+                    { "width": "270px", "targets": 2 }
+                ],
+               "ajax": {
+                   "processing": true,
+                   "url": "/ticket/all",
+                   "dataSrc": ""
+               },
+               "columns": [
+                       { "": "fields.ticketid" },
+                       { "": "fields.customer__customername" },
+                       { "": "fields.customer__customername" },
+                       { "": "fields.affectedperson__user__username" },
+                       { "": "fields.summary" },
+                       { "": "fields.reportedpriority" },
+                       { "": "fields.status" },
+                       { "": "fields.group__workgroup" },
+                       { "": "fields.owner__user__username" },
+                       { "": "fields.reportdate" },
+                       { "": "","bSortable": false, }
+
+
+                   ],
+                "columnDefs": [ {
+            "targets": -1,
+            "data": null,
+            "defaultContent": "<button class='btn btn-success'><i class='fa fa-edit'></i></button>"
+        } ],
+        aaSorting:[[9,'desc']]
+           } );
+       } );
+      </script>
+      <script>
+      $(document).ready(function() {
+        //     $(".table tbody").on('click','tr',function(e){
+        //     e.preventDefault();
+        //     var id = $(this).find('td:eq(0)').text();
+        //     // alert(id);
+        //     location.href = '/ticket/status/edit/'+id;
+        // }); 
+        // $('#clicked tr').hide();
+          // location.href = 'url';
+      // });
+   });
+//     function addRowHandlers() {
+//     var table = document.getElementById("table1");
+//     var rows = table.getElementsByTagName("tr");
+//     for (i = 0; i < rows.length; i++) {
+//         var currentRow = table.rows[i];
+//         var createClickHandler = 
+//             function(row) 
+//             {
+//               alert("boomer");
+//               return function() { 
+//                                 var cell = row.getElementsByTagName("td")[0];
+//                                 var id = cell.innerHTML;
+//                                 alert("id:" + id);
+//                          };
+//       };
+
+//         currentRow.onclick = createClickHandler(currentRow);
+//     }
+// }
+// window.onload = addRowHandlers();
+      </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

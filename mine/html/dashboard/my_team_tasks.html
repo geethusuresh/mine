@@ -1,0 +1,64 @@
+{% extends "change_management/base.html" %}
+{% load zone %}
+{% block title_content %} My Team Tasks {% endblock title_content %}
+{% block page_head %} Servicedesk | <small> My Team Tasks</small>{% endblock page_head %}
+{% block bread_crumb %} <li class="active">My Team Tasks</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">My Team Tasks</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-stripped" id="task_table_id">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Task Id</th>
+                                <th>Summary</th>
+                                <th>Created Person</th>
+                                <th>Created Date</th>
+                                <th>Status</th>
+                                <th>Workgroup</th>
+                                <th>Subgroup</th>
+                                <th>Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                                <tr>
+                                    <td><a href="/task/details/{{ task.id }}/" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="View/Edit"><i class="fa fa-edit"></i></a></td>
+                                    <td>{{ task.taskid }}</td>
+                                    <td>{{ task.task_name }}</td>
+                                    <td>{{ task.created_person }}</td>
+                                    <td>
+                                        <span style="display:none;">{{task.created_date.year}}{% if task.created_date.month >= 10 %}{{task.created_date.month}}{% else %}0{{task.created_date.month}}{%endif%}{% if task.created_date.day >= 10 %}{{task.created_date.day}}{% else %}0{{task.created_date.day}}{%endif%} {{task.created_date.time | time}}</span>{% tzone task.created_date %}
+                                    </td>
+                                    <td>{{ task.status }}</td>
+                                    <td>{{ task.group.workgroup }}</td>
+                                    <td>{{ task.subgroup.subgroupname }}</td>
+                                    <td>{{ task.owner }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript">
+        $("#service").addClass("active");
+        $("#subc").css({'display' : 'block'});
+        $("#team_tasks").addClass("active");
+        $(document).ready(function() {
+            $('#task_table_id').DataTable({
+                aaSorting: [[4, 'desc']],
+                scrollX: true
+            });
+        });
+    </script>
+{% endblock footer_content %}
+

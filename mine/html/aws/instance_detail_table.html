@@ -1,0 +1,29 @@
+
+<div class="table">
+    <table class="table no-margin" id="node_table">
+        <thead>
+        </thead>
+        <tbody>
+            <tr ng-repeat = "(key, value) in aws_instance_variable_fro_details track by $index">
+              <td>
+                <div class="OK">
+                  <div style="float: left;width:200px;" class="AL">
+                      <span class="PK CL">{[{key}]}</span>
+                  </div>
+                  <div style="margin-left:200px;" class="DL">{[{value}]}</div>
+                </div>
+              </td>
+              <td>
+                  <div>
+                    <div class="OK">
+<!--                        <div style="float: left;width:200px;" class="AL">
+                            <span class="PK" data-tooltip="">Public IP</span>
+                       </div>
+                       <div style="margin-left:200px;" class="DL">52.7.118.105</div> -->
+                   </div>
+                 </div>
+              </td>
+            </tr>
+        </tbody>
+    </table>
+</div><!-- /.table-responsive -->

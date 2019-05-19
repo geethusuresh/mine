@@ -1,0 +1,242 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <!-- <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css"> -->
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Notification Group | <small>Home</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Notification Group</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">View Notification Group Members</h3>
+                                    <a href="#" class="btn btn-warning pull-right" data-target="#create_noti_group" data-toggle="modal" style="margin-right:5px;">Create Notification Group</a>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-6">
+                                        <dl class="dl-horizontal">
+                                            <dt>Customers :</dt>
+                                            <dd>
+                                                <select class="form-control" id="choos_custmr" required>
+                                                    <option value="">--Select Customer--</option>
+                                                    {% for cust in customers %}
+                                                        <option value="{{cust.id}}" {% if choosed_cust == cust.id %} selected="true" {% endif %}>{{cust.customername}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </dd><br/>
+                                        </dl>
+                                    </div>
+                                    <div class="col-sm-6"></div>
+                                    <div class="col-sm-12">
+                                        <table class="table table-stripped" id="members_tab">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none"></th>
+                                                    <th>Group</th>
+                                                    <th>Subgroups (#) </th>
+                                                    <th>Members (#)</th>
+                                                    <th>View </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for group in notify_customer_groups %}
+                                                    <tr>
+                                                        <td style="display:none">{{group.id}}</td>
+                                                        <td>{{group.workgroup}}</td>
+                                                        <td>{{group.subgroup_set.all|length}}</td>
+                                                        <td>{{group.subgroupmember_set.all|length}}</td>
+                                                        <td><a href="/notification_group/details/{{group.id}}/" class="btn btn-success">View Details</a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_noti_group" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Create Notification Group </h4>
+                    </div>
+                    <form method="post" action="{% url 'notification_group' %}">{% csrf_token %}
+                        <div class="modal-body" style="height:auto">
+                            <div class="col-sm-12">
+                                <dl class="dl-horizontal">
+                                    <dt>Customers :</dt>
+                                    <dd>
+                                        <select class="form-control" id="custmr" name="customer" required>
+                                            <option value="">--Select Customer--</option>
+                                            {% for cust in customers %}
+                                                <option value="{{cust.id}}">{{cust.customername}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </dd><br/>
+                                    <dt>Workgroup :</dt>
+                                    <dd>
+                                        <div class="col-sm-10">
+                                            <input type="text" name="workgroup_is_new" class="form-control" id="is_new_workgroup" style="display:none">
+                                            <select class="form-control" name="workgroup" id="cust_workgroup">
+                                                <option value="">--Select--</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <a href="#" class="btn btn-success" id="new_wg" onclick="workgroup_wanted('new')">New</a>
+                                            <a href="#" class="btn btn-success" id="old_wg"style="display:none" onclick="workgroup_wanted('exist')">Existing</a>
+                                        </div>
+                                    </dd><br/>
+                                    <dt class="neww_wg" style="display:none">Notification Type :</dt>
+                                    <dd class="neww_wg" style="display:none">
+                                        <div class="col-sm-6">
+                                            <label>Push Notification</label>
+                                            <input type="checkbox" name="noti_type" class="pull-right" value="push_noti">
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label>Email Notification</label>
+                                            <input type="checkbox" name="noti_type" class="pull-right" value="email_noti">
+                                        </div>
+                                    </dd><br class="neww_wg" style="display:none"/>
+                                    <dt>Subgroup :</dt>
+                                    <dd>
+                                        <input type="text" name="subgroup" required class="form-control">
+                                    </dd><br/>
+                                    <dt>Members :</dt>
+                                    <dd>
+                                        <select class="form-control" id="members" name="members" required multiple>
+                                            <option value="">-Select Members-</option>
+                                        </select>
+                                    </dd>
+                                    <dt>&nbsp;</dt>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border:0px">
+                            <button type="submit" class="btn btn-info" style="margin-right:5px;">Create Notification Group Members</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            function get_workgroup_list(cust_id) {
+                $.ajax({
+                    url:"/admin_settings/custpem_list/?email_noti=true&customer_id="+cust_id,
+                    type:"GET",
+                    dataype:"json",
+                    success:function(data){
+                        $("#cust_workgroup option:gt(0)").remove();
+                        workgroup_list = data;
+                        if (workgroup_list.length > 0) {
+                            for (var i in workgroup_list) {
+                                $("#cust_workgroup").append($('<option>', {value:workgroup_list[i][0], text:workgroup_list[i][1]}));
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            $('#custmr').on('change', function() {
+                if (this.value) {
+                    $.ajax({
+                        url :"/admin_settings/custpem_list/?customer_id="+this.value,
+                        type:"GET",
+                        dataype:"json",
+                        success:function(data){
+                            $("#members option:gt(0)").remove();
+                            access_list = data;
+                            if (access_list.length > 0) {
+                                for (var i in access_list) {
+                                    $("#members").append($('<option>', {value:access_list[i][0], text:access_list[i][1]}));
+                                }
+                            }
+                        }
+                    });
+                    get_workgroup_list(this.value);
+                }
+            });
+            $('#members_tab').dataTable();
+        </script>
+        <script type="text/javascript">
+            $('#choos_custmr').on('change', function() {
+                if (this.value) {
+                    document.location.href = "/notification_group/?customer="+this.value;
+                } else {
+                    document.location.href = "/notification_group/";
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            function workgroup_wanted(wanted_type) {
+                if (wanted_type == 'new') {
+                    $('#new_wg').hide();
+                    $('#old_wg').show();
+                    $('#cust_workgroup').hide();
+                    $('#is_new_workgroup').show();
+                    $('#cust_workgroup').prop('required', false);
+                    $('#is_new_workgroup').prop('required', true);
+                    $('.neww_wg').show();
+                } else {
+                    $('#new_wg').show();
+                    $('#old_wg').hide();
+                    $('#is_new_workgroup').hide();
+                    $('#is_new_workgroup').prop('required', false);
+                    $('#cust_workgroup').show();
+                    $('#cust_workgroup').prop('required', true);
+                    $('.neww_wg').hide();
+                    if ($('#custmr').val()) {
+                        var cust_id = $('#custmr').val();
+                        get_workgroup_list(cust_id);
+                    }
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            $("#notify_grop").addClass("active");
+        </script>
+        {% include "components/service_request.html" %}
+    </body>
+</html>

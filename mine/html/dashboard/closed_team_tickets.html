@@ -1,0 +1,124 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Closed Team Tickets</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            .notify_filter {
+                font-size: 16px;
+                font-weight: 500;
+                padding: 5px;
+            }
+            a:hover {
+                color: #2d2d2d !important;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px" id="view_sub_ticket">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Service Desk | <small>Closed Team Tickets</small></h1>
+                    <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Closed Team Tickets</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-thin text-center">Closed Team Tickets </h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-6">
+                                <a href="#" class="notify_filter"> Filter Tickets ( </a>
+                                <a href="?limit=48_hours" class="notify_filter">Last 48 Hours | </a><a href="?limit=last_week" class="notify_filter">Last Week | </a><a href="?limit=last_month" class="notify_filter">Last Month </a> <a href="#" class="notify_filter">)</a>
+                            </div>
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-12">
+                                <table class="table table-striped table-hover" id="table_id" cellspacing="0" width="100%" >
+                                    <thead>
+                                        <tr>
+                                            <th>View</th>
+                                            <th>Ticket Number</th>
+                                            <th>Ticket Summary</th>
+                                            <th>Reported Date</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Domain</th>
+                                            <th>Subdomain</th>
+                                            {% if is_egate_included %}
+                                                <th>Carrier</th>
+                                            {% endif %}
+                                            <th>Ticket Age</th>
+                                            <th>Affected Person</th>
+                                            <th>Customer</th>
+                                            <th>Owner</th>
+                                            <th>Expected Resolution</th>
+                                            <th>Work Hours( in minutes )</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in team_closed_tickets %}
+                                            <tr>
+                                                <td><a class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="View" href="/ticket/stat/{{ticket.id}}"> <i class="fa fa-edit"></i></a></td>
+                                                <td>{% if ticket.affectedperson.id in vips %}
+                                                    <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                                                {% endif %}{{ticket.ticketid}}</td>
+                                                <td>{{ticket.summary}}</td>
+                                                <td><span style="display:none;">{{ticket.reportdate.year}}{% if ticket.reportdate.month >= 10 %}{{ticket.reportdate.month}}{% else %}0{{ticket.reportdate.month}}{%endif%}{% if ticket.reportdate.day >= 10 %}{{ticket.reportdate.day}}{% else %}0{{ticket.reportdate.day}}{%endif%}{{ticket.reportdate.time | time}}</span>{% tzone ticket.reportdate %}</td>
+                                                <td>{% if ticket.customer_priority %} {{ ticket.customer_priority.priority }} {% else %}{{ticket.internalpriority}} {% endif %}</td>
+                                                <td>{{ticket.status | real:ticket.customer.id}}</td>
+                                                <td>{{ticket.group}}</td>
+                                                <td>{{ticket.subgroup}}</td>
+                                                {% if is_egate_included %}
+                                                    <td>{{ ticket.impacted_airline.name }}</td>
+                                                {% endif %}
+                                                <td>{{ ticket.id|ticket_age}}</td>
+                                                <td>{{ticket.affectedemail|lower}}</td>
+                                                <td>{{ticket.customer}}</td>
+                                                <td>{{ticket.owner}}</td>
+                                                <td>Closed</td>
+                                                <td>{{ ticket.id | work_hour}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script>
+            $("#service").addClass("active")
+            $("#subc").css({'display' : 'block'})
+            $("#clsed_team_tic").addClass("active")
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#table_id').DataTable({
+                aaSorting:[[3,'desc']],
+                "columnDefs": [
+                    { "width": "10%", "targets": 1 },
+                    { "width": "40%", "targets": 2 }
+                ],
+                "scrollX": true,
+                });
+            });
+        </script>
+    </body>
+</html>

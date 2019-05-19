@@ -1,0 +1,657 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Customer | <small>{{customer}}</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Role Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <p class="panel-title">Basic Details</p>                     
+                   </div>
+                   <div class="panel-body">
+                      <div class="row ">
+
+                        <div class="col-sm-3 text-center">
+                         <p class="h3 text-thin text-center">Customer Logo</p><br>
+                          <img src="/media/{{customer.logo}}" style="width:65%">
+                          <br>
+                          <form action="/customer/update/logo/{{customer.id}}" method="POST" enctype="multipart/form-data"> {% csrf_token %}
+                            <input type="file" name="logo" required style="margin-left:10%">
+                            <br>
+                            <button type="submit" class="btn btn-sm btn-info">Update company Logo</button>
+                          </form>
+                          <br/>
+                          {% if customer.is_notify_settings %}
+                              <a href="{% url 'change_custom_notify_status' customer.id %}?status=deactivate" class="btn btn-sm btn-danger">Deactivate Notification Settings </a>
+                          {% else %}
+                               <a href="{% url 'change_custom_notify_status' customer.id %}?status=activate" class="btn btn-sm btn-success">Activate Notification Settings</a>
+                          {% endif %}
+                        </div>
+                        <div class="col-sm-5">
+                            <p class="h3 text-thin text-center">Customer Status</p><br>
+                            <dl class="dl-horizontal">
+                              <dt>Customer Name :</dt>
+                              <dd>{{customer.customername}}</dd><br>
+                              <dt>Total Users :</dt>
+                              <dd>{{count_users}}</dd><br>
+                              <dt>Package :</dt>
+                              <dd> {% if customer.package %} <label class="label label-info"> {{customer.package}}</label> {% else %} <label class="label label-info"> Custom Package</label> {% endif %} </dd><br>
+                              <dt>Domains :</dt>
+                              <dd><a href="" data-target="#domains" data-toggle="modal" class="label label-success">{{count_domains}} domain</a></dd><br>
+                              <dt>Roles :</dt>
+                              <dd><a href="" data-target="#roles" data-toggle="modal" class="label label-warning">{{count_role}} Role</a></dd><br>
+                              <dt>Admin :</dt>
+                              <dd>
+                              {% for admin in admins %}{{admin}}{% if forloop.couter > 0 %}{% endif %} | {% endfor %}
+                               <a href="" class="label label-info" data-toggle="modal" data-target="#add_user">Add User</a>  
+                              </dd><br>
+                            </dl>
+                        </div>
+                        <div class="col-sm-4">
+                          <a data-target="#addtocust" data-toggle="modal" class="btn btn-info pull-right">Add Modules</a>
+                          <p class="h3 text-thin text-center">Customer Modules</p><br>
+                            {% for mod in modules %}
+                             <div class="col-sm-3">
+                               <!-- <div class="panel panel-{% cycle "primary" "purple" "mint" "info" "success" %} panel-colorful"> -->
+                                <div class="pad-all text-center  add-tooltip" data-placement="bottom" data-toggle="tooltip" data-original-title="{{mod.module.module_name}}">
+                                  <span class="text-3x text-thin {{mod.module.icon}}"></span>
+                                </div>
+                              <!-- </div> -->
+                            </div>
+                             {% endfor %}
+                        </div>
+                      </div>
+                   </div>
+                 </div>
+               </div>
+                
+              </div>    
+              <div class="row">
+                <div class="col-sm-9">
+                  <div class="tab-base">
+          
+                    <!--Nav Tabs-->
+                    <ul class="nav nav-tabs">
+                     <li class="active">
+                        <a data-toggle="tab" href="#demo-lft-tab-3" aria-expanded="false">Admin Details</a>
+                      </li>
+                     <li >
+                        <a data-toggle="tab" href="#contact" aria-expanded="true">Contact Details</a>
+                      </li>
+                      <li class="">
+                        <a data-toggle="tab" href="#demo-lft-tab-1" aria-expanded="true">Package Details</a>
+                      </li>
+                      {% if activies %}
+                      <li class="">
+                        <a data-toggle="tab" href="#update" aria-expanded="true">Package Updates</a>
+                      </li>
+                      {% endif %}
+                      <li class="">
+                        <a data-toggle="tab" href="#demo-lft-tab-2" aria-expanded="false">Package usage history</a>
+                      </li>
+                     
+                    </ul>
+              
+                    <!--Tabs Content-->
+                    <div class="tab-content">
+                     <div id="demo-lft-tab-3" class="tab-pane fade active in">
+                      <a href="" data-target="#add_user" data-toggle="modal" class="pull-right btn btn-success">Add User</a>
+                        <h4 class="text-thin">User List</h4>
+
+
+                        <table class="table table-responsive" id="table_id">
+                          <thead>
+                            <th>User Name</th>
+                            <th>Role</th>
+                          </thead>
+                          <tbody>
+                          {% for user in userse %}
+                            <tr>
+                              <td>{{user}}</td>
+                              <td> {% if user.is_admin %} <label class="label label-info">Admin</label> {% else %}  <label class="label label-mint">User</label> {% endif %}  </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div id="contact" class="tab-pane fade in">
+                      <a data-toggle="modal" data-target="#update_info" class="pull-right btn btn-info">Update Information</a>
+                        <h4 class="text-thin">Contact Details</h4>
+                        
+                        <ul class="list-group">
+                          <dl class="dl-horizontal">
+                            <dt>Contact Phone :</dt>
+                            <dd>{% if contacts.primary_phone %}{{contacts.primary_phone}}{% else %}-{% endif %}</dd><br>
+                            <dt>Project Type :</dt>
+                            <dd>{% if contacts.project_type %}{{contacts.project_type}}{% else %}-{% endif %}</dd><br>
+                            <dt>Email :</dt>
+                            <dd>{% if contacts.email %}{{contacts.email}}{% else %}-{% endif %}</dd><br>
+                            <dt>Account Manager :</dt>
+                            <dd>{% if contacts.account_manager %}{{contacts.account_manager}}{% else %}-{% endif %}</dd><br>
+                        </ul> 
+                      </div>
+                      <div id="demo-lft-tab-1" class="tab-pane">
+                        <h4 class="text-thin">Package Details</h4>
+                        <ul class="list-group">
+                          <dl class="dl-horizontal">
+                            <dt>Package Name :</dt>
+                            <dd>{{customer.package}}</dd><br>
+                            <dt>Left Hours :</dt>
+                            <dd>{{customer.package.hours}}</dd><br>
+                             {% if "security" in modes %}
+                            <dt>security  :</dt>
+                            <dd>{{customer.security_limit}}</dd><br>
+                            {% endif %}
+                            {% if "infrastructure" in modes %}
+                            <dt>hosts :</dt>
+                            <dd>{{customer.host_limit}}</dd><br>
+                            {% endif %}
+                            {% if "monitor" in modes %}
+                            <dt>monitor :</dt>
+                            <dd>{{customer.monitoring_limit}}</dd><br>
+                            {% endif %}
+                        </ul> 
+                      </div>
+                      <div id="update" class="tab-pane fade">
+                        <h4 class="text-thin">Package Updation</h4>
+                        <form method="POST" action="/customer/package/update/{{customer.id}}">{% csrf_token %}
+                        <p style="color:red;">Note : Change in below values will modify the plans as 'Custom' plan</p>
+                           <div class="row ">
+                            {% if "helpdesk" in activies %}
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label text-bold">Workhour Limit</label>
+                              <div class="col-sm-6">
+                                <input type="text" name="workhour" value="{{customer.package.hour}}" class="form-control input-sm" >
+                              </div>
+                            </div>
+                            {% endif %}
+                            {% if "infrastructure" in activies %}
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label  text-bold">Host Limit</label>
+                              <div class="col-sm-6">
+                                <input type="text" name="host" value="{{customer.host_limit}}" class="form-control input-sm" >
+                              </div>
+                            </div>
+                            {% endif %}
+                            </div>
+                            <br>
+                            <div class="row">
+                           {% if "security" in activies %}
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label  text-bold">Security Limit</label>
+                              <div class="col-sm-6">
+                                <input type="text" name="security" value="{{customer.security_limit}}" class="form-control input-sm" >
+                              </div>
+                            </div>
+                            {% endif %}
+                            {% if "monitor" in activies %}
+                            <div class="form-group">
+                              <label class="col-sm-2 control-label  text-bold">Monitoring Limit</label>
+                              <div class="col-sm-6">
+                                <input type="text" name="monitor" value="{{customer.monitoring_limit}}" class="form-control input-sm" >
+                              </div>
+                            </div>
+                            {% endif %}
+                          </div>
+                         <button class="btn btn-success" style="margin-top:2%;margin-left:40%" type="sumbit">Update Package Settings</button>
+                        </form>
+
+                        
+                      </div>
+                      <div id="demo-lft-tab-2" class="tab-pane fade">
+                        <h4 class="text-thin">Package History</h4>
+                              {% if package_hist %}
+                              {% else %}
+                              <span class='label label-info'>no history</span>
+                              {% endif %}
+
+                          
+                      </div>
+                     
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <a href="/admin_settings/customers/{{customer.id}}/">
+                  <div class="panel panel-info panel-colorful">
+                    <div class="panel-body text-center">
+                      <p class="text-uppercase mar-btm text-md">Advance Settings</p>
+                      <i class="fa fa-gears fa-5x"></i>
+                      <hr>
+                      <p class="h2 text-thin">{{total_cost}}</p>
+                      <small><span class="text-semibold"></span>Total Workhour</small>
+                    </div>
+                  </div>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+  <div class="modal fade" id="domains" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Added Domains</h4>
+        </div>
+        
+        <div class="modal-body">
+          <ul class="list-group">
+            {% for domain in domains %}
+            <li class="list-group-item">{{domain.domain}}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-warning" style="float:right" class="close"  data-dismiss="modal"  type="button">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="update_info" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Contact Details</h4>
+        </div>
+        <form method="POST" class="" action="/customer/contacts/update/{{customer.id}}" >{% csrf_token %}
+        <div class="modal-body form-horizontal" style="margin-left:5%;margin-right:10%">
+          
+            <div class="form-group">
+              <label class="col-sm-3 control-label">Email</label>
+              <div class="col-sm-9">
+                <input type="email" name="email" {% if contacts.email %}value="{{contacts.email}}" {% else %} {% endif %} class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label">Project Type</label>
+              <div class="col-sm-9">
+                <input type="text" name="ptype" {% if contacts.project_type %} value="{{contacts.project_type}}" {% else %} {% endif %} class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" >Phone Number</label>
+              <div class="col-sm-9">
+                <input type="text" name="phone" {% if contacts.primary_phone %} value="{{contacts.primary_phone}}" {% else %} {% endif %}  class="form-control">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" >Account Manger</label>
+              <div class="col-sm-9">
+                <input type="text" name="manager" {% if contacts.account_manager %} value="{{contacts.account_manager}}" {% else %} {% endif %}  class="form-control">
+              </div>
+            </div>
+            
+        
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-info" style="float:right" type="submit">Update</button>
+        </div>
+          </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="roles" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Added Roles</h4>
+        </div>
+        
+        <div class="modal-body">
+          <ul class="list-group">
+            {% for role in roles %}
+            <li class="list-group-item">{{role}}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-warning" style="float:right" class="close"  data-dismiss="modal"  type="button">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="add_admin" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add Admin Privilage</h4>
+        </div>
+        
+        <div class="modal-body">
+          <ul class="list-group">
+            {% for user in users %}
+            <li class="list-group-item">{{user}}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-warning" style="float:right" class="close"  data-dismiss="modal"  type="button">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div class="modal fade" id="add_user" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add User</h4>
+        </div>
+        <form action="/customer/create/admin/{{customer.id}}" method="POST" id="add_user_form">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>First Name</label>
+              <input type="text" name="firstname" required class="form-control">
+            </div>
+            <div class="col-sm-6">
+              <label>Last Name</label>
+              <input type="text" name="lastname" required class="form-control">
+            </div>
+          </div>
+          <div class="row">
+            
+              <div class="col-sm-12">
+              <label>Email Address</label>
+              <input type="email" name="email" class="form-control" required></div>
+              <br>
+              <!-- <div class="col-sm-1 h3" style="margin-top:0px">@</div> -->
+              <!-- <div class="col-sm-5">
+                <select class="selectpicker" name="domain" required>
+                  {% for domain in cusdomain %}
+                  <option value="{{domain.id}}">{{domain.domain}}</option>
+                  {% endfor %}
+                </select>
+              </div> -->
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Password</label>
+              <input type="password" name="password1" id="password-1" minlength="6" onkeyup="checker()" required class="form-control" placeholder="Use at least 6 characters">
+            </div>
+            <div class="col-sm-6">
+              <label>Confirm Password</label>
+              <input type="password" name="password2" id="password-2" minlength="6" onkeyup="checker()" required class="form-control" placeholder="Use at least 6 characters">
+              <small id="passu" style="color:red">Password didnt match</small>
+            </div>
+            <div class="col-sm-12">
+                <small id="pass_error" style="color:red; display:none;">Password should have a minimum length of 6 characters</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <label class="form-checkbox form-normal form-primary form-text active">
+        <input type="checkbox" name="is_admin"> Add As Admin User
+      </label>
+        <button class="btn btn-success" style="float:right" id="buttondis" type="submit">Save</button>
+        
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<!-- 
+  <div class="modal fade" id="addtocustw" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add module to {{customer}}</h4>
+        </div>
+        
+        <div class="modal-body">
+          
+            <div class="col-sm-6">
+              <div id="security_up">
+                <label>Security Hosts limit</label>
+                <input type="text" class="form-control" name="security" >
+              </div>
+              <div id="workhour_up">
+                <label>Workhour limit</label>
+                <input type="text" class="form-control" name="workhour" >
+              </div>
+              <div id="hosts_up">
+                <label>Hosts limit</label>
+                <input type="text" class="form-control" name="hosts">
+              </div>
+              <div id="monitor_up">
+                <label>Monitoring Hosts limit</label>
+                <input type="text" class="form-control" name="monitor">
+              </div>
+            </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+ -->
+
+
+
+
+
+  <div class="modal fade" id="addtocust" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add module to {{customer}}</h4>
+        </div>
+        
+        <div class="modal-body">
+          {% if left_overs %}
+            <form action="/customer/module/add/{{customer.id}}" method="POST">{% csrf_token %}
+            <div class="col-sm-6">
+              <label>module name </label>
+              <select name="module" class="form-control" id="selections" required>
+                <option selected disabled value="">-select module-</option>
+                {% for module in left_overs %}
+                <option value="{{module.id}}" alt="{{module.permission}}">{{module}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if packing %}
+            {% else %}
+            <div class="col-sm-6">
+              <div id="security_up">
+                <label>Security Hosts limit</label>
+                <input type="text" class="form-control" name="security" >
+              </div>
+              <div id="workhour_up">
+                <label>Workhour limit</label>
+                <input type="text" class="form-control" name="workhour" >
+              </div>
+              <div id="hosts_up">
+                <label>Hosts limit</label>
+                <input type="text" class="form-control" name="hosts">
+              </div>
+              <div id="monitor_up">
+                <label>Monitoring Hosts limit</label>
+                <input type="text" class="form-control" name="monitor">
+              </div>
+            </div>
+            {% endif %}
+           </div>
+           <div class="modal-footer">
+              <button class="btn btn-success" style="float:right" type="submit">Add module</button>
+           </div>
+          
+           </form>
+          {% else %}
+          <p>All of our current modules are active with {{customer}} at the moment, Nothing left to add</p>
+          {% endif %}
+        
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+      {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+    }); 
+    </script>
+    <script>
+    $("#table_id").DataTable();
+    $("#controlpanel").addClass("active");
+    $("#security_up").hide();
+    $("#hosts_up").hide();
+    $("#monitor_up").hide();
+    $("#workhour_up").hide();
+    $("#selections").change(function(){
+      var get_type = $('option:selected', this).attr("alt");  
+    if (get_type == "security"){
+      $('#security_up').show('fadeIn');
+      $("#hosts_up").hide();
+      $("#monitor_up").hide();
+      $("#workhour_up").hide();
+    }else if (get_type == "helpdesk") {
+      $("#workhour_up").show('fadein');
+      $("#security_up").hide();
+      $("#hosts_up").hide();
+      $("#monitor_up").hide();
+      // $("#workhour_up").hide();
+    }else if (get_type == "infrastructure") {
+      $("#hosts_up").show('fadein');
+      $("#security_up").hide();
+      $("#workhour_up").hide();
+      $("#monitor_up").hide();
+    }else {
+      $("#security_up").hide();
+      $("#hosts_up").hide();
+      $("#monitor_up").hide();
+      $("#workhour_up").hide();
+    }
+    
+  })
+    $("#controlpanel").addClass("active");
+    $("#controlpanel_block").css('display','block');
+    $("#dashctrl").addClass("active");
+    </script>
+
+<script>
+      $("#passu").hide()
+        function checker(){
+             if($('#password-2').val() != $("#password-1").val()){
+
+                $("#passu").show()
+                $("#buttondis").prop('disabled', true)
+
+             }else{
+                $("#passu").hide()
+                $("#buttondis").prop('disabled', false)
+             }
+        }
+
+    </script>
+
+        <script>
+            $('#add_user_form').submit(function(event) {
+                var password = $('#password-1').val();
+                $('#pass_error').hide();
+                if (password.length < 6 ){
+                    $('#pass_error').show();
+                    event.preventDefault();
+                } else {
+                   return
+                }
+            })
+        </script>
+    </body>
+</html>

@@ -1,0 +1,42 @@
+ <script type="text/javascript">
+  var shadow = $('<div id="shadowElem"></div>');
+  var speed = 1000;
+  $(document).ready(function() {
+    $('image_crop_area').prepend(shadow);
+  });
+  $(window).load( function() {
+    screenHeight = $(window).height();
+    screenWidth = $(window).width();
+    elemWidth = $('#dropElem').outerWidth(true);
+    elemHeight = $('#dropElem').outerHeight(true)
+    
+    leftPosition = (screenWidth / 2) - (elemWidth / 2)-300;
+    topPosition = (screenHeight / 2) - (elemHeight / 2)-650;
+    
+    $('#dropElem').css({
+      'left' : leftPosition + 'px',
+      'top' : -elemHeight + 'px'
+    });
+    $('#dropElem').show().animate({
+      'top' : topPosition
+    }, speed);
+    
+    shadow.animate({
+      'opacity' : 0.7
+    }, speed);
+    
+    $('#dropClose').click( function() {
+      shadow.animate({
+        'opacity' : 0
+      }, speed);
+      $('#dropElem').animate({
+      'top' : -elemHeight + 'px'
+    }, speed, function() {
+        shadow.remove();
+        $(this).remove();
+      });
+      
+    });
+  });
+     
+</script>

@@ -1,0 +1,68 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Group Members</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Sub Group Members <small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Administration</li>
+                        <li class="active">Sub Group Members</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="box">
+                        <div class="box-body no-padding">
+                            <div class="tab-content">
+                                <table class="table table-hover table-striped" id="group_id">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Customer</th>
+                                            <th>Status</th>
+                                        </tr> 
+                                    </thead>
+                                    <tbody>
+                                        {% for person in person_list %}
+                                            <tr>
+                                                <td> <a href="{% url 'person_details' profile_id=person.id %}">{{person.user.username }}</a> </td>
+                                                <td>{{person.department}}</td>
+                                                <td>{{person.customer}}</td>
+                                                <td>
+                                                    <input type="checkbox" disabled {% if person.active %} checked {%endif %}/>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/service_request.html"%}
+        {% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#group_id').DataTable({
+                    aaSorting: [[0, 'asc']],
+                });
+            });
+        </script>
+    </body>
+</html>

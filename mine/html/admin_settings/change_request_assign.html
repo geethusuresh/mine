@@ -1,0 +1,146 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li><a href="/admin_settings/users/all/">Users</a></li>
+                        <li><a href="/admin_settings/users/{{ person.id }}/">User Details</a></li>
+                        <li><a href="/admin_settings/users/{{ person.id }}/deactivate/">User Deactivation</a></li>
+                        <li class="active">Change Request Assignment</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">User Deactivation</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-8">
+                                        <table class="table table-stripped" id="changes_assign_tab">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none">ID</th>
+                                                    <th>Change Request</th>
+                                                    <th>Customer</th>
+                                                    <th>Group</th>
+                                                    <th>Subgroup</th>
+                                                    <th>Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for change in changes %}
+                                                    <tr>
+                                                        <td style="display:none">{{ change.id }}</td>
+                                                        <td><a href="/rfc/details/{{ change.id }}/" class="btn btn-warning">{{ change.change_id }}</a></td>
+                                                        <td>{{ change.customer.customername }}</td>
+                                                        <td>{{ change.group.workgroup }}</td>
+                                                        <td>{{ change.subgroup.subgroupname }}</td>
+                                                        <td>{{ change.status }}</td>
+                                                        <td><a href="#" data-toggle="modal" data-target="#assign_change_req" class="btn btn-success">Assign</a> <input type="hidden" value="{{ change.subgroup.id }}"></td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="assign_change_req" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Assign Change Request </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/admin_settings/user/changes/{{person.id}}/" >{% csrf_token %}
+                            <div class="form-group">
+                                <label><strong>New Owner</strong></label>
+                                <select class="form-control" name="new_owner" id="new_owner" required>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                                <input type="hidden" id="change_id" name="change_id">
+                                <button type="submit" class="btn btn-success" style="float:right">Assign</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#changes_assign_tab').on('click', 'td', function(e) {
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == ""){
+                    var subgroup_id = $(this).find('input')[0].value;
+                    var change_id = $(this).prev().prev().prev().prev().prev().prev().html();
+                    $('#change_id').val(change_id);
+                    $('#new_owner option:gt(0)').remove();
+                    if (subgroup_id) {
+                        $.ajax({
+                            url :"/subgroup/members/",
+                            type:"POST",
+                            dataype:"json",
+                            data:{"subgroup_id": subgroup_id,
+                                csrfmiddlewaretoken:'{{csrf_token}}'},
+                            success:function(data){
+                                member_list = data;
+                                for (var i in member_list){
+                                    $("#new_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                                } 
+                            },
+                            error: function(xhr,errmsg,err){
+                                console.log(xhr);
+                            }      
+                        });
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,102 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "change_management/change_css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small>Change Workflow</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Approval Details</li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-success" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading panel-purple panel-colorful">
+                                    <h2 class="panel-title"><i class="fa fa-plus"> </i>  Change Workflow</h2>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-6">
+                                        <form method="post" action="/rfc/workflow/">{% csrf_token %}
+                                            <label><strong>Status :</strong></label>
+                                            <input type="text" name="stat" class="form-control" required /> <br/>
+                                            <label><strong>Message :</strong></label>
+                                            <textarea name="msg" class="form-control" required></textarea><br/>
+                                            <input type="submit" value="Create" class="btn btn-success" />
+                                        </form>
+                                    </div>
+                                    <div class="col-sm-6" style="border-left:1px solid #A7A7A7">
+                                        <table class="table table-stripped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Message</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for change_wrkflow in change_workflows %}
+                                                    <tr>
+                                                        <td>{{change_wrkflow.status}}</td>
+                                                        <td>{{change_wrkflow.status_description}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+    </body>
+</html>

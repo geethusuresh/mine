@@ -1,0 +1,228 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Person Group</title>
+        <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html" %} 
+                <!-- <li  ><a href="/" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-list-alt"></i><span class="text">List</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu  ">
+                    <li  ><a href="/persongroupadmin/list/workgroup"><span class="text">Workgroup</span></a></li>
+                    <li><a href="/persongroupadmin/list/subgroup"><span class="text">Subgroup</span></a></li>
+                    <li  ><a href="/list/role"><span class="text">Role</span></a></li>
+                    <li  ><a href="/list/privilege"><span class="text">Privilege</span></a></li>
+                  </ul>
+                </li> -->
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              <div class="panel panel-default">
+                <div class="panel-heading"><h5><i class="fa fa-lightbulb-o"></i> Tips</h5></div>
+                <div class="panel-body">
+                  <p>You can do live search to the widget at search box located at top bar. It's very useful if your dashboard is full of widget.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            
+            
+            <!-- main -->
+            <div class="content">
+
+              <div class="main-header">
+                <h2>Add Privilege</h2>
+                
+              </div>
+{% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="main-content">
+                <div class="row">
+                  <div class="col-sm-10">
+                    <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Add Privilege</h3>
+                    <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-success btn-xs"  style=" float:right;margin-right:10px;margin-top:5px">Add New </a>
+                    <a href="" data-toggle="modal" data-target="#register" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Register New </a> -->
+                  </div>
+                  <div class="widget-content">
+                          <div class="wizard-wrapper">
+                            <div id="" class="wizard">
+                            <form  id="frm_person_group" name ="frm_person_group" method='post' action=''>
+                              <fieldset>
+                                <div class="controls" style="width:400px;margin-left:20%">   
+                                  <input class="form-control" type="text" id="privname2" name="privname2" placeholder="Privilege Name" required><br />                                  
+                                  <input class="form-control" type="text" id="privdisc" name="privdisc" placeholder="Description" required><br />
+
+                                  <select class="form-control" id="func_name" name="func_name" required>
+                                    <option value="">Select any functionality</option>
+                                    {% for item_functions in functions_list %}
+                                     <option value="{{item_functions.id}}">{{item_functions.func_name}}</option>
+                                    {% endfor %}
+                                  </select> <br />
+
+                                   <button type="submit" class="btn btn-success">Add Privilege</button>
+                                </div>
+                              </fieldset>
+                              
+                            </div>
+                          </div>
+                      </div>
+                      </form>
+                    </div>
+
+
+                    <div class="widget">
+                      <div class="widget-header"><h3><i class="fa fa-magic"></i>Active Privileges</h3>
+                    
+                      </div>
+                      <div class="widget-content">
+                          <table class="table borderless fixed" id="example">
+                              <thead>
+                              <tr>
+                                <tr>
+                                  <th>No</th>
+                                  <th>Privilege</th>
+                                  <th>Functionality Name</th>
+                              </tr> 
+                              </thead>
+                              <tbody>
+                              {% for priv in privilege_list %}
+                              <tr>
+                                <td>{{ forloop.counter}}</td>
+                                <td>{{ priv.privname }}</td>
+                                <td>{{ priv.func_admin}}</td>
+                                <!-- <td><a href="/personadmin/update/{{person.id}}"><input type="button" value="update" class="btn btn-success btn-sm" ></a></td> -->
+                                <!-- <td><a href="/personadmin/deactivate/{{person.id}}" ><input type="button" value="delete" class="btn btn-success btn-sm"></a></td> -->
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                            </table>
+                      </div> 
+                    </div>
+
+                    <!--Start Pagination -->
+                    <div class="row">
+                      <div class="col-md-6">
+                      </div>
+                      <div class="col-md-6">
+                        <div class="dataTables_paginate paging_bootstrap">
+                          <ul class="pagination">                      
+                            <li class="prev">
+                            {% if privilege_list.has_previous %}
+                              <a href="?page={{ privilege_list.previous_page_number }}">←</a>
+                              {% endif %}
+                            </li>
+                            <li class="active">
+                              <a href="">{{ privilege_list.number }}</a>
+                            </li>
+                            <li class="next">
+                            {% if privilege_list.has_next %}
+                            <a href="?page={{ privilege_list.next_page_number }}">→</a>
+                            {% endif %}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      </div>
+                      <!--End Pagination -->
+
+                  </div>
+                  <div class="col-sm-2">
+                    <div class="widget">
+                      <div class="widget-header"><h3></h3>
+                          
+                      </div>
+                      <div class="widget-content">
+                          <!-- <a href="" data-toggle="modal" data-target="#member" class="btn btn-link btn-block"  >Add New Person</a><p><p>
+                          <a href="" data-toggle="modal" data-target="#register" class="btn btn-link btn-block"  >Register New Person</a> -->
+                          <ul class="main-menu">
+                              <li><a href="/privilege/add"></i><span class="text">Add New Privilege</span></a></li><p>
+                              <li  ><a href="/privilege/manage" ></i><span class="text ">Assign Privilege</span></a>
+                              </li><p>
+                              <li  ><a href="/privilege/remove" ></i><span class="text ">RolePriv</span></a>
+                              </li>
+                              
+                          </ul>
+                      </div>
+ 
+                    </div>
+                  </div>
+                </div>
+                  </div>
+                </div>
+             
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+      
+  </body>
+
+</html>

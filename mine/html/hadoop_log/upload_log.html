@@ -1,0 +1,10 @@
+{% extends "hadoop_log/base.html" %}
+
+{% block content %}
+<form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p><label for="id_log_file">Select a Log File:</label>
+    <input id="id_log_file" name="log_file" type="file" /></p>
+    <input type="submit" value="submit" />
+</form>
+{% endblock %}

@@ -1,0 +1,688 @@
+{% load zone %}
+<!-- take ownership -->
+<div class="modal fade" id="ownership" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+             <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Status to In Progress</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/ownership/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    {% if ticket.internalpriority %}
+                    {% else %}
+                        <label>Ticket Don't Have an Internal Priority, Set internal priority</label>
+                        <select name="internal">
+                            <option value="High"> High</option>
+                            <option value="Medium"> Medium </option>
+                            <option value="Low"> Low </option>
+                        </select>
+                    {% endif %}
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Take ownership</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Assign to subgroup member -->
+<div class="modal fade" id="assign_subgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Assign To Subgroup Member</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/assign_subgroup_member/{{ticket.id}}/" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <label>Assign To</label>
+                    <select class="form-control" required name="subgroup_member">
+                        <option value="">Select Subgroup Member</option>
+                        {% for membr in subgorup_membrs %}
+                            <option value="{{membr.id}}">{{membr.person.user.first_name}} {{membr.person.user.last_name}}</option>
+                        {% endfor %}
+                    </select><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="assign_ticket" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Assign Ticket</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1">
+                    </div>
+                    <div class="col-sm-10">
+                        <form action="/ticket/assign/{{ticket.id}}" method="POST" >
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <input type="hidden" name="ticket_cust" id="ticket_cust" value="{{ticket.customer.customerid}}"/>
+                            <!-- <div class="row"> -->
+                                <dl class="dl-horizontal">
+                                    {% if ticket.cls == "REQ" %}
+                                        <dt >Customer:</dt>
+                                        <!-- <br/> -->
+                                        <dd >
+                                            <select style="padding:2px;width:100%;margin-top:5px" name = "ticket_customer" requried id="ticket_customer">
+                                                <option value="">-Select Customer-</option>
+                                                {% for customer in customers %}
+                                                    <option value="{{customer.id}}" {% if ticket.customer == customer %} selected {% endif %}> {{customer.customername}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </dd>
+                                        <dt >Class :</dt>
+                                        <dd >
+                                            <select  style="padding:2px;width:100%;margin-top:5px" name = "cls" requried id="ticket_typee">
+                                                <option value="" >-Select Class-</option>
+                                                <option value="SR" >Service Request</option>
+                                                <option value="IN" >Incident</option>
+                                                <option value="PB" >Problem</option>
+                                                <option value="CH" >Change</option>
+                                            </select>
+                                        </dd>
+                                        <dt style="width:100px" class="approval_required">Approval Required</dt>
+                                        <dd style="margin-left:110px" class="approval_required">
+                                            <input type="checkbox" name="approval_required" onchange="checking_approval()" id="is_approval_req" value="true"/> 
+                                        </dd>
+                                    {% else %}
+                                        <input class="hidden" value="{{ticket.cls}}" id="ticketclass">
+                                    {% endif %}
+                                    <dt class="sr_approval_required" >Domain :</dt>
+                                    <dd class="sr_approval_required" >
+                                        <select  style="padding:2px;width:100%;margin-top:5px" id = "workgroup" name="group" requried>
+                                            {% if ticket.group %}
+                                                <option value="{{ticket.group.id}}">Group - {{ticket.group}}</option>
+                                            {% else %}
+                                                <option value="" >-Select Group-</option>
+                                            {% endif %}
+                                            {% for group in groups %}
+                                                <option value="{{group.id}}"> {{group.workgroup}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </dd>
+                                    <dt class="sr_approval_required" >Sub Domain :</dt>
+                                    <dd class="sr_approval_required" >
+                                        <select  style="padding:2px;width:100%;margin-top:5px" name = "subgroup" id="subgroup" requried>
+                                            {% if ticket.subgroup %}
+                                                <option vlaue="{{ticket.subgroup.id }}">Subgroup - {{ticket.subgroup}}</option>  
+                                            {% else %}
+                                                <option value="">-Select Subgroup-</option>  
+                                            {% endif %}
+                                        </select>
+                                    </dd>
+              <!-- </dd> -->
+                                    <dt class="sr_approval_required" >Priority :</dt>
+                                    <dd class="sr_approval_required" >
+                                        <select  style="padding:2px;width:100%;margin-top:5px" id = "internal_priority" name="internal" requried>
+                                            {% if ticket.internalpriority %}
+                                                <option value="{{ticket.internalpriority}}">Internal Priority {{ticket.internalpriority}}</option>
+                                            {% else %}
+                                                <option value="">-Select-</option>
+                                                {% if ticket.cls == 'SR'%}
+                                                    <option value="Urgent">Urgent</option>
+                                                    <option value="Normal">Normal</option>
+                                                    <option value="Purchase">Purchase</option>
+                                                {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                                    <option value="Critical">Critical</option>
+                                                    <option value="High">High</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="Low">Low</option>
+                                                {% elif ticket.cls == 'CH' %}
+                                                    <option value="Change">Change</option>
+                                                {% endif %}
+                                            {% endif %}
+                                        </select>
+                                    </dd>
+                                    <dt id="severity_dt" >Severity :</dt>
+                                    <dd >
+                                        <select  style="padding:2px;width:100%;margin-top:5px" id="severity" name="impact" >
+                                            {% if ticket.impact %}
+                                                <option value="{{ticket.impact}}">{{ticket.impact}}</option>
+                                            {% else %}
+                                                <option value="">-Choose Severity-</option>
+                                            {% endif %}
+                                        </select>
+                                    </dd>
+                                    <dt class="sr_approval_required" >Category :</dt>
+                                    <dd class="sr_approval_required" >
+                                        <select style="padding:2px;width:100%;margin-top:5px" id="cat_name" name="category_id" required onchange="load_subcategory_list()">
+                                            <option value="">-Choose Category-</option>
+                                            {% for category in category_list %}
+                                                <option value="{{category.id}}" {% if ticket.category.id == category.id %} "selected" {% endif %} > {{category.name}}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </dd>
+                                    <dt class="sr_approval_required" >Subcategory :</dt>
+                                    <dd class="sr_approval_required" >
+                                        <select style="padding:2px;width:100%;margin-top:5px" id="sub_cat_name" name="sub_cat_id" required>
+                                            <option value="">-Choose Subcategory-</option>
+                                            {% if ticket.subcategory %}
+                                                <option value="{{ticket.subcategory.name}}">{{ticket.subcategory.name}}</option>
+                                            {% endif %}
+                                        </select>
+                                    </dd>
+                                </dl>
+                            <!-- </div> -->
+                            <textarea style="margn-top:5px" type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Add remark" rows="4" cols="10" ></textarea>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            {% if ticket.approve == "FALSE" %}
+                            {% else %}
+                                <button class="btn btn-success btn-md" style="margin-top:5px;width:50%" type="submit">Assign</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="col-sm-1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Awaiting Customer Action -->
+<div class="modal fade" id="sla" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Awaiting Customer response</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/sla/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden"  value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Awaiting Vendor Action -->
+<div class="modal fade" id="slav" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Awaiting Vendor response</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/slav/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Change Priority -->
+<div class="modal fade" id="priority" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Priority</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/change/priority/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <input class="hidden" value="{{ticket.cls}}" id="ticket_class">
+                            <input class="hidden" value="{{ticket.internalpriority}}" id="ticket_priority">
+                            <label>Current Priority is <b>{{ticket.internalpriority}}</b> Change it to ?</label>
+                            <select class="form-control" name="priority" required id="priority_data">
+                                <option value="">-select-</option>
+                                {% if ticket.cls == 'SR'%}
+                                    <option value="Urgent">Urgent</option>
+                                    <option value="Normal">Normal</option>
+                                    <option value="Purchase">Purchase</option>
+                                {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                {% elif ticket.cls == 'CH' %}
+                                    <option value="Change">Change</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            {% if ticket.cls == 'IN' and ticket.internalpriority == 'Critical' %}
+                                <label id="severity_data_txt">Current Severity is <b>{{ticket.impact | impact}}</b> Change it to ?</label>
+                                <select class="form-control" name="impact" id="severity_data">
+                                    <option value="">-select-</option>
+                                    <option value="3">High</option>
+                                    <option value="2">Medium</option>
+                                    <option value="1">Low</option>
+                                </select>
+                            {% else %}
+                                <label id="severity_data_txt">Current Severity is <b>{{ticket.impact | impact}}</b> Change it to ?</label>
+                                <select class="form-control" name="impact" id="severity_data">
+                                  <option value="">-select-</option>
+                                </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <br>
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-warning" style="float:right;width:50%" type="submit">Change Ticket Priority</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Send email related to this ticket</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3">
+                       <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Impacted User
+                    </div>
+                    <div class="col-sm-3">
+                       <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}"> Reported User 
+                    </div>
+                    <div class="col-sm-5">
+                       <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                    </div>
+                </div>
+                <form action="/ticket/email/{{ticket.id}}" class="form-horizontal" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <br>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">To:</label>
+                        <div class="col-sm-10">
+                            <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="button" id="append_to" class="btn-info btn btn-sm pull-right" value="Add">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                        <div class="col-sm-10">
+                            <input type="email" multiple id="cc_list" value="" name="cc_list" class="form-control" placeholder="Cc" >
+                            <input type="hidden" multiple id="cclist_data" value="" name="cclist_data" class="form-control" placeholder="Cc" >
+                        </div>
+                        <div class="col-sm-1">
+                            <input type="button" id="append_to_cc" class="btn-info btn btn-sm pull-right" value="Add">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                        <div class="col-sm-11">
+                            <input  type="text" id="subject" name="subject" class="form-control" placeholder="Subject" value="{{ticket.summary}}" required>
+                        </div>
+                    </div>
+                    <label>Body:</label>
+                    <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control textarea" placeholder="" rows="10" cols="20" required>{% if profile.signature %}{{profile.signature}}{% endif %}</textarea><br>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <label>Attach Here</label>
+                            <input type="file" name="attachment_file" id="attachment_file" class="send_mail_image" />
+                            <span class="send_mail_error_msg" style="color:red;"></span>
+                        </div>
+                        <div class="col-sm-4">
+                            <select class="form-control" name="visibility" required>
+                                <option value="TRUE">Internal Visbility</option>
+                                <option value="FALSE">Enduser Visibility</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-success" style="width:100%" type="submit">Send Email</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="worklog_reply" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Send email related to this worklog</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                        <div class="col-sm-3">
+                            <input type="hidden" name="work_log_id" id="work_log_id" />
+                            {% if ticket.affectedperson.user.email %}
+                                <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.user.email}}">
+                            {% else %}
+                                <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedemail}}">
+                            {% endif %}
+                            Impacted User
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="checkbox" name="email_fill_worklog" value="{{ticket.reportedby.user.email}}"> Reported User 
+                        </div>
+                        <div class="col-sm-5">
+                            <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                        </div>
+                    </div>
+                    <form action="#" class="form-horizontal" method="POST" id="worklog_reply_form">
+                        {% csrf_token %}
+                        <br>
+                        <div class="form-group">
+                            <label for="input-text" class="col-sm-1 control-label">To:</label>
+                            <div class="col-sm-10">
+                                <input type="email" multiple id="to_worklog" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                            </div>
+                            <div class="col-sm-1">
+                                <input type="button" id="append_to_work_log" class="btn-info btn btn-sm pull-right" value="Add">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                            <div class="col-sm-11">
+                            <input type="email" multiple id="worklog_cc_list" value="{{ticket.owner}}" name="cc_list" class="form-control" placeholder="Cc" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                        <div class="col-sm-11">
+                            <input  type="text" id="worklog_subject" name="subject" class="form-control" placeholder="Subject" value="{{ticket.summary}}" required>
+                        </div>
+                    </div>
+                    <label>Body:</label>
+                    <textarea  type="text" id="worklog_body" name="body" style="max-width:100%" class="form-control" placeholder="" rows="10" cols="20" required id="worklog_body"></textarea><br>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <input type="file" name="attachment" id="worklog_attachment" class="worklog_reply_image" />
+                            <span class="worklog_reply_error_msg" style="color:red;"></span>
+                        </div>
+                        <div class="col-sm-4">
+                            <select class="form-control" name="visibility" required id="worklog_visibility">
+                                <option value="TRUE">Internal Visbility</option>
+                                <option value="FALSE">Enduser Visibility</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-success" style="width:100%" type="button" onclick="create_work_log_history({{ticket.id}})">Send Email</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="reassign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Reassign Your Task</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/groupchange/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-6" >
+                            <label>Select Domain</label>
+                            <select class="form-control" style="margin-bottom:5px" id="re_workgroup" name="group" required>
+                                <option value="">--Select--</option>
+                                {% for group in groups %}
+                                    <option value="{{group.id}}"> {{group.workgroup}}</option>
+                                {% endfor %}
+                                <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            </select>
+                        </div>
+                        <div class="col-sm-6" >
+                            <label>Select Sub-Domain</label>
+                            <select class="form-control" style="margin-bottom:5px" name = "subgroup" id="re_subgroup" required>
+                                <option value=""> --Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <label>Details</label>
+                    <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label>Add Work Hours (in minitues)</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="number" id="req1"  name="rtime" class="form-control" >
+                        </div>
+                    </div>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="resolve" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Resolve ticket</h4>
+            </div>
+
+            <div class="modal-body">
+                <form action="/ticket/knowledgebase/{{ticket.id}}" method="POST">
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    {% if ticket.cls == 'SR' or ticket.cls == 'CH'%}
+                        <label>Resolution</label>
+                        <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                        <br> 
+                    {% elif ticket.cls == 'IN' or ticket.cls == 'PB' %}
+                        <span class="text"><i  style=" font-size: 10pt;">Symptom</i></span>
+                        <textarea type="text" id = "autofill_symptom" name="symptom" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                        <span class="text"><i  style=" font-size: 10pt;">Cause</i></span>
+                        <textarea type="text" id = "autofill_cause" name="cause" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                        <span class="text"><i  style=" font-size: 10pt;">Resolution</i></span>
+                        <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                        <br>  
+                        {% if ticket.cls == 'IN' %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select class="form-control" style="margin-bottom:5px" name="resolution_code" required>
+                                        <option value="">Select Resolution Code</option>
+                                        <option value="FixCode">FixCode</option>
+                                        <option value="Network">Network</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Undetermined">Undetermined</option>
+                                        <option value="Closed up">Closed up</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        {% endif %}   
+                        <br/>               
+                        <input type="checkbox" name="add_to_kb" ><i  style=" font-size: 10pt;">Mark as KB candidate for review</i><br>
+                    {% endif %}
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label>Add Work Hours (in minitues)</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="number" id="req2"  name="rtime" class="form-control" required>
+                            </div>
+                        </div>
+                        <button class="btn btn-info" style="float:right;width:50%" type="submit">Resolve</button>
+                    </form>
+                </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="kb_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Knowledge Base</h4>
+            </div>
+            <div class="modal-body">
+                <div class="box">
+                    <div class="box-body">
+                        <table class="table table-hover table-striped borderless fixed selectable" id="kb_table">
+                            <thead>
+                                <tr>
+                                    <th>Symptom</th>
+                                    <th>Cause</th>
+                                    <th>Resolution</th>
+                                    <th></th>
+                                </tr> 
+                            </thead>
+                            <tbody>
+                                {% for kb in kb_list %}
+                                    <tr>
+                                        <td>{{ kb.symptom }}</td>
+                                        <td>{{ kb.cause }}</td>
+                                        <td>{{ kb.resolution }}</td>
+                                        <td><label class="label label-info">Use</label></td>
+                                    </tr>  
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-success pull-right" data-dismiss="modal" aria-hidden="true" >Close</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="close" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Close ticket</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/close/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-danger" style="float:right;width:50%" type="submit">Close Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="reopen" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Reopen Ticket</h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/reopen/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <button class="btn btn-success" style="float:right;width:50%" type="submit">Reopen Ticket {{ticket.ticketid}}</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+            </div>
+            <div class="modal-body">
+                <form action="/ticket/cancel/{{ticket.id}}" method="POST">{% csrf_token %}
+                    <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                    <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="user1" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Ticket Details</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table" id="fielder">
+                    <thead>
+                        <th></th>
+                        <th>Ticket Id</th>
+                        <th>Status</th>
+                        <th></th>
+                        <th></th>
+                    </thead>
+                </table>
+                <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+            </div>
+            <div class="modal-footer" style="border:0px"> </div>
+        </div>
+    </div>
+</div>
+<!-- Edit Summary -->
+<div class="modal fade" id="edit_title" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Edit Summary</h4>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'ticket_summary_edit' ticket.id %}" method="POST">{% csrf_token %}
+                    <div class="row pad-all">
+                        <div class="form-group">
+                            <label class="control-label">Ticket Summary :</label>
+                            <textarea type="text" name="summary" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required>{{ticket.summary}}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" style="float:right;width:25%" type="submit">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>

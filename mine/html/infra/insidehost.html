@@ -1,0 +1,635 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+    .clb {
+      width: 50%;
+    }
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/cust_header.html"%}
+    {% else %}
+    {% include "components/asset_header.html"%}
+    {% endif %}
+    
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">{{host.name}} | <small> Details </small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/management/infrastructure/">Datacenter</a></li>
+                    <li><a href="/management/infra/{{host.datacenter.id}}">Hosts</a></li>
+                    <li class="active">Details</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <!-- <a href="" class="btn btn-danger pull-right" data-target="#delete_host" data-toggle="modal" onclick="delete_me({{host.id}})" id="deleting" vale="{{host.id}}">Delete Host</a> -->
+              </div><br>
+
+              <div class="col-sm-12">
+                <div class="panel">
+                  <div class="panel-heading">
+                    <div class="panel-control">
+                      <ul class="nav nav-tabs">
+                        <li class="active"><a href="#demo-tabs-box-1" data-toggle="tab" aria-expanded="true">Configuration Items</a></li>
+                        <li class=""><a href="#demo-tabs-box-2" data-toggle="tab" aria-expanded="false">Host Map</a></li>
+                      </ul>
+                    </div>
+                    <h3 class="panel-title" style="min-height:100%"></h3>
+                  </div>
+            
+                  <div class="panel-body">
+                    <div class="col-sm-4">
+                      <div style="margin-top:10%">
+                        <div class="text-center" >
+                          <span class="icon-wrap icon-wrap-lg icon-circle bg-trans-dark">
+                            <i class="fa fa-server fa-4x" style="color:grey"></i>
+                          </span>
+                        </div>
+                        
+                        
+                        <ul  class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;color:grey;margin-top:5%;">
+                          <li style="padding: 10px;">
+                              <span class="fa fa-database"></span>
+                              <label class="clb">Host </label>
+                              {{host}}
+                          </li>
+                           <li style="padding: 10px;">
+                              <span class="fa fa-dashboard"></span>
+                              <label class="clb">Datacenter</label>
+                              {{host.datacenter}}
+                          </li>
+                          <li style="padding: 10px;">
+                              <span class="fa fa-file"></span>
+                              <label class="clb">Host Name</label>
+                              {{host.name}}
+                          </li>
+                          <li style="padding: 10px;">
+                              <span class="fa fa-info"></span>
+                              <label class="clb">Status</label>
+                              {% if host.status == 0 %}<label class="label label-success">Online</label>
+                              {% else %}<label class="label label-danger">Offline</label>
+                              {% endif %}
+                          </li>
+                          <li style="padding: 10px;">
+                              <span class="fa fa-globe"></span>
+                              <label class="clb"> Classification Type</label>
+                              {{host.classification}}
+                          </li>
+                        </ul>
+                        <div class="btn-group btn-group-md">
+                          <a href="/management/host/monitoring/{{host.id}}" class="btn btn-mint btn-active-dark" style="margin-right:7px;"><l class="fa fa-dashboard"></l> Monitoring</a>
+                          <a href="/dashboard/index/host/{{host.id}}" class="btn btn-success btn-active-dark"><l class="fa fa-shield"></l> Security Analysis</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-8">
+                      <div class="tab-content">
+                        <div class="tab-pane fade active in" id="demo-tabs-box-1">
+                          <h4 class="text-thin">List of configuration items</h4>
+                          <div class=" table-toolbar-right">
+                            <a href="" data-toggle="modal" data-target="#cies"  class="btn btn-purple btn-labeled fa fa-plus">Add</a>
+                            <a href="" data-toggle="modal" data-target="#relate"  class="btn btn-purple btn-labeled fa fa-plus">relate</a>
+                            <div class="btn-group btn-group">
+                            </div>
+                          </div>
+                          <table class="table table-striped table-hover">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Version</th>
+                                <th class="text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% if cies %}
+                                {% for ci in cies %}
+                                <tr>
+                                  <td>{{ci.name}}</td>
+                                  <td class="text-center">{{ ci.ci_type }}</td>
+                                  <td class="text-center"> v1.2 </td>
+                                  <td class="text-right"><a href="/dashboard/index/{{ci.id}}" class="label label-table label-info">Dependency</span></td>
+                               </tr>
+                                {% endfor %}
+                              {% else %}
+                                <tr>
+                                  <td colspan="4" class="text-center"><h5 class="text-thin">No data found.</h5></td>
+                                </tr>
+                              {% endif %}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="tab-pane fade" id="demo-tabs-box-2">
+                          <h4 class="text-thin">Host Map</h4>
+                          {% if relations  %}                          
+                            <canvas id="springydemo" width="800" height="480" />
+                          {% else %}
+                            <div class="text-center" style="margin-top:10%">
+                              <alert class="alert alert-info"><l class="fa fa-info"></l> No configuration items are related, <a href="" data-toggle="modal" data-target="#relate">click here</a> to start relating items</alert>
+                            </div>
+                          {% endif %}
+
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+
+
+
+<!--               {% if relation_list %}
+              <div class="row">
+                <div class="col-sm-10">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="panel-title">Host Map</p>
+                    </div>
+                    <div class="panel-body text-center">
+                      <canvas id="springydemo" width="940" height="480" />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <a href="/management/host/monitoring/{{host.id}}">
+                  <div class="panel panel-warning panel-colorful text-center">
+                    <div class="panel-body">
+                      <l class="fa fa-dashboard fa-4x"></l>
+                      <h4 class="mar-no text-thin">Monitoring</h4>
+                    </div>
+                  </div>
+                  </a>
+
+                  <a href="/dashboard/index/host/{{host.id}}">
+                  <div class="panel panel-mint panel-colorful text-center">
+                    <div class="panel-body">
+          
+                     <l class="fa fa-shield fa-4x"></l>
+                      <h4 class="mar-no text-thin">Security Analysis</h4>
+                    </div>
+                  </div>
+                  </a>
+
+                  <div class="panel panel-success panel-colorful text-center">
+                    <div class="panel-body">
+          
+                     <l class="fa fa-globe fa-4x"></l>
+                      <h4 class="mar-no text-thin"> Analysis</h4>
+                    </div>
+                  </div>
+
+                   <div class="panel panel-purple panel-colorful text-center">
+                    <div class="panel-body">
+          
+                     <l class="fa fa-plus fa-4x"></l>
+                    <h4 class="mar-no text-thin"> Analysis</h4>
+                    </div>
+                   
+                  </div>
+
+                </div>
+              </div>
+              {% endif %} -->
+
+              <div class="row">
+              <!--   <div class="col-sm-9">
+                  <div class="panel">
+                <div class="panel-heading">
+                  <div class="panel-control">
+                  </div>
+                  <h3 class="panel-title">List of configuration items</h3>
+                </div>
+          
+                <div class="panel-body">
+                  <div class="pad-btm form-inline">
+                    <div class="row">
+                      <div class="col-sm-6 table-toolbar-left">
+                        
+                      </div>
+                      <div class="col-sm-6 table-toolbar-right">
+                        <a href="" data-toggle="modal" data-target="#cies"  class="btn btn-purple btn-labeled fa fa-plus">Add</a>
+                        <a href="" data-toggle="modal" data-target="#relate"  class="btn btn-purple btn-labeled fa fa-plus">relate</a>
+                        <div class="btn-group btn-group">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th class="text-center">Type</th>
+                          <th class="text-center">Version</th>
+                          <th class="text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ci in cies %}
+                        <tr>
+                          <td>{{ci.name}}</td>
+                          <td class="text-center">{{ ci.ci_type }}</td>
+                          <td class="text-center"> v1.2 </td>
+                          <td class="text-right"><a href="/dashboard/index/{{ci.id}}" class="label label-table label-info">Dependency</span></td>
+                       </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+
+                </div> -->
+<!--                 <div class="col-sm-3">
+                <div class="col-sm-6 col-lg-6">
+                  <div class="panel panel-warning panel-colorful text-center">
+                    <div class="panel-body">
+                      <l class="fa fa-dashboard fa-4x"></l>
+          
+                    </div>
+                    <div class="bg-light pad-ver">
+                      <a href="/management/host/monitoring/{{host.id}}">
+                      <h4 class="mar-no text-thin">Monitoring</h4>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+
+              <div class="col-sm-6 col-lg-6">
+          
+                  <div class="panel panel-mint panel-colorful text-center">
+                    <div class="panel-body">
+          
+                     <l class="fa fa-shield fa-4x"></l>
+          
+                    </div>
+                    <div class="bg-light pad-ver">
+                      <a href="/dashboard/index/host/{{host.id}}">
+                      <h4 class="mar-no text-thin">Security Analysis</h4>
+                      </a>
+                    
+                    </div>
+                  </div>
+                </div>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+<div class="modal fade" id="cies" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Configuration Item</h4>
+      </div>
+       <form action="/management/host/{{host.id}}" method="POST">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <label>Name</label>
+            <input type="text" name="ci_name" class="form-control" required>
+          </div>
+          <div class="col-sm-6">
+            <label>Type</label>
+            <select class="form-control" name="ci_type">
+               {% for tip in tips %}
+              <option value="{{tip.id}}" >{{tip.name}}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+        <label>Description</label>
+        <textarea class="form-control" name="desc" rows="4"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" type="submit">Create</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="add_host" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Host</h4>
+      </div>
+      <form id="ipForm" method="POST" action="/application/addhost/{{app.id}}">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <label>Add New Host</label>
+            <input type="ip" name="ip" required class="form-control">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-info pull-right" type="submit">Add Host</button>
+      </div>
+       </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<div class="modal fade" id="relate" tabindex="-1" role="dialog" aria-labelledby="Larges" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">relate</h4>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="/management/relate/host/{{host.id}}">{% csrf_token %}
+          <div class="row">
+            <div class="col-sm-3">
+              <label>Source</label>
+              <select class="form-control" name="obj1">
+                 {% for ci in cies %}
+                <option value="{{ci.id}}">{{ci.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-sm-3">
+              <label>Type of relation</label>
+              <select class="form-control" name="relation">
+                 {% for ci in all_relations %}
+                <option value="{{ci.id}}">{{ci.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-sm-3">
+              <label>Destination</label>
+              <select class="form-control" name="obj2">
+                 {% for ci in cies %}
+                <option value="{{ci.id}}">{{ci.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-sm-2" style="margin-top:2%">
+              <button class="btn btn-info pull-right" type="submit">Relate</button>
+            </div>
+            <br>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="delete_host" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Deleting Host</h4>
+      </div>
+      <form id="ipForm" method="POST" action="/host/delete/data/all/{{app.id}}">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="col-sm-4">
+              <p  class="text-center h4 text-thin">Affected apps</p>
+              <div id="affected_apps"></div>
+            </div>
+            <div class="col-sm-4">
+              <p class="text-center h4  text-thin">Affected CIs</p>
+              <div id="affected_cis"></div>
+            </div>
+            <div class="col-sm-4">
+              <p  class="text-center h4  text-thin">Affected apps</p>
+              <div id="affected_ci_rel"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger pull-right" type="submit">Delete Host Host</button>
+      </div>
+       </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/plain_chart/springy.js"></script>
+    <script src="/static/plain_chart/springyui.js"></script>
+    <script>
+     $("#table_id").DataTable();
+
+    $("#asset").addClass("active");
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+var graph = new Springy.Graph();
+
+
+{% for app in relation_list %}
+var {{app.global_name}} = graph.newNode  ({
+  label: '{{app.names}}', color:'{{app.color}}',
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.global_name}}, {{app.obj2.global_name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+
+jQuery(function(){
+  var springy = window.springy = jQuery('#springydemo').springy({
+    graph: graph,
+    nodeSelected: function(node){
+      console.log('Node selected: ' + JSON.stringify(node.data));
+    }
+  });
+});
+</script>
+
+<script>
+  function delete_me(vales){
+    var vale = {{host.id}}
+    console.log(vale);
+  $.ajax({
+    url:"/host/delete/"+vale,
+    type:"POST",
+    dataType:"json",
+    data:{
+      csrfmiddlewaretoken: '{{ csrf_token }}'
+    },
+    type: "POST",
+    success : function(data){
+      console.log(data);
+      var app_data = data.apps;
+      var ci_data = data.cis;
+      var rel = data.ci_rel_list;
+      if (app_data){
+        for (var i in app_data){
+          console.log(app_data[i].pku);
+          $("#affected_apps").append("<span>"+ app_data[i].pku  +"</span><br>").addClass("text-center");
+        }
+      }
+      if (ci_data){
+        for (var i in ci_data){
+          console.log(app_data[i].pku);
+          $("#affected_cis").append("<span>"+ ci_data[i].pku  +"</span><br>").addClass("text-center");
+        }
+      }
+      if (rel){
+        for (var i in rel){
+          console.log(app_data[i].pku);
+          $("#affected_ci_rel").append("<span>"+ rel[i].pku  +"</span><br>").addClass("text-center");
+        }
+      }
+    }
+  });
+}
+$("#infra").addClass("active");
+$("#infraopen").css('display','block');
+$("#dcview").addClass("active");
+</script>
+
+
+    </body>
+</html>

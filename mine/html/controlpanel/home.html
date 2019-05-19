@@ -1,0 +1,352 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+  {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+  {% else %}
+      {% include "components/header.html"%}
+  {% endif %}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Control Panel<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Control panel</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <a href="" data-toggle="modal" data-target="#addmodule" class="btn btn-primary pull-right" style="padding:1%">Add Module</a>
+                      <p class="panel-title">Module Summary</p>  
+
+                   </div>
+                   <div class="panel-body">
+                     {% for mod in modules %}
+                     <div class="col-sm-3">
+                       <div class="panel panel-{% cycle "primary" "purple" "mint" "info" "success" %} panel-colorful">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin {{mod.icon}}"></span>
+                          <p>{{mod.module_name}}</p>
+                          <i class="fa fa-plus-circle"></i>
+                        </div>
+                      </div>
+                    </div>
+                     {% endfor %}
+                   </div>
+                 </div>
+               </div>
+                
+              </div>    
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="h3 panel-title text-thin text-center">List Of Customers</p>
+                      <a href="" class="btn btn-info pull-right" data-toggle="modal" data-target="#add_customer"><l class="fa fa-user"></l> New Customer</a>
+                    </div>
+                    <div class="panel-body">
+                      <table class="table table-striped" id="table_1">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Customer </th>
+                            <th>Package</th>
+                            <th>Authentication</th>
+                          </tr>
+                        </thead>   
+                        <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                          <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/customers/controlpanel/{{customer.id}}">
+                            <i class="fa fa-edit "></i>                   
+                          </a></td>
+                          <td class="grey">{{customer.customername}}</td>
+                          <td class="grey">{{customer.package}}</td>
+                          <td class="grey" >{{customer.ldapauthentication}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                      </table>            
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="h3 panel-title text-thin text-center">List Of Packages</p>
+                      <a href="" class="btn btn-info pull-right" data-toggle="modal" data-target="#add_package"><l class="fa fa-suitcase"></l> Add Packages</a>
+                    </div>
+                    <div class="panel-body">
+                      <table class="table table-striped" id="table_1">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Plan Name </th>
+                            <th>Hours</th>
+                            <th>validity</th>
+                          </tr>
+                        </thead>   
+                        <tbody>
+                        {% for plan in plans %}
+                        <tr>
+                          <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="#">
+                            <i class="fa fa-edit "></i>                   
+                          </a></td>
+                          <td class="grey">{{plan.package_name}}</td>
+                          <td class="grey">{{plan.hours}}</td>
+                          <td class="grey" >{{plan.validity}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                      </table>            
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="addmodule" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New Role</h4>
+        </div>
+        <form action="/customers/controlpanel/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Module Name</label>
+              <div class="col-sm-9">
+                <input type="text" placeholder="max 20 letter" class="form-control input-sm" name="module" required>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Permission</label>
+              <div class="col-sm-9">
+                <input type="text" placeholder="used in privilages" class="form-control input-sm" name="permission" required>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Prefered Icon</label>
+              <div class="col-sm-9">
+                <input type="text" placeholder="in 50 letters" class="form-control input-sm" value="fa fa-user" name="icon" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Add Module</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="add_package" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add Package</h4>
+        </div>
+        <form action="/customer/package/create/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Package ID</label>
+              <input type="text" name="packid" class="form-control" required>
+            </div>
+            <div class="col-sm-6">
+              <label>Package Name</label>
+              <input type="text" name="packname" class="form-control" required>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea class="form-control" name="description" rows="5" required></textarea>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <label>WorkHour</label>
+              <input type="number" name="work_limit" class="form-control" required>
+            </div>
+            <div class="col-sm-6">
+              <label>Security Hosts</label>
+              <input type="number" name="sec_limit" class="form-control" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Hosts</label>
+              <input type="number" name="host_limit" class="form-control" required>
+            </div>
+            <div class="col-sm-6">
+              <label>Monitoring Host</label>
+              <input type="number" name="monitor_limit" class="form-control" required>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-sm-8"></div>
+            <div class="col-sm-4">
+              
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <label class="form-checkbox form-normal form-primary form-text">
+          <input type="checkbox"> Featured
+        </label>
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="add_customer" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">New Customer</h4>
+        </div>
+        <form action="/customer/create/new/" method="POST">{% csrf_token %}
+            
+        <div class="modal-body">
+          
+          
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Customer ID</label>
+              <input type="text" name="custid" class="form-control" maxlength="3" required>
+            </div>
+            <div class="col-sm-6">
+              <label>Customer Name</label>
+              <input type="text" name="custname" class="form-control" required>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea class="form-control" name="description" rows="5" required></textarea>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Currency</label>
+              <select name="currency" class="form-control" required>
+                <option value="USD">US Dollar</option>
+                <option value="INR">Indian Rupee</option>
+                
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label>Package</label>
+               <select name="package" class="form-control" required>
+                <option selected value="" disabled>-select package-</option>
+                {% for package in plans %}
+                <option value="{{package.id}}">{{package}}</option>
+                {% endfor %}
+                <option value="None">Custom</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Add Customer</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+    {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+    $("#table_1").DataTable();
+          $("#controlpanel").addClass("active");
+          $("#controlpanel_block").css('display','block');
+          $("#dashctrl").addClass("active");
+    </script>
+
+
+    </body>
+</html>

@@ -1,0 +1,50 @@
+{% extends 'oneconsole_help/base.html' %}
+{% load humanize %}
+{% load zone %}
+
+{% block content %}
+
+<div id="home">
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title" style="text-align:center">Help Admin <l class="fa fa-ticket"></l></h3>
+                    </div>
+                    <div class="help_add"><a class="help_add_btn btn btn-success" title="Add" href="{% url 'help:help_add' %}">Add Help Details</a></div>
+                    <div class="panel-body table-responsive no-padding" style="margin-top:2%">
+                        <table class="table table-striped text-center" id="help_table" class="display">
+                            <thead>
+                                <tr>
+                                    <th class="text-center"></th>
+                                    <th class="text-center">Tittle</th>
+                                    <th class="text-center">Url</th>
+                                    <th class="text-center">Created Date</th>
+                                    <th class="text-center">Modified Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for help in object_list %}
+                                <tr>
+                                    <td>
+                                        <a  data-placement="bottom" title="Edit" class="btn btn-success btn-sm" href="{% url 'help:help_update' help.id %}">
+                                            <i class="fa fa-edit "></i>
+                                        </a>
+                                    </td>
+                                    <td class="grey">{{ help.name }}</td>
+                                    <td class="grey">{{ help.url }}</td>
+                                    <td class="grey">{% tzone help.created_on %}</td>
+                                    <td class="grey">{% tzone help.modified_on %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

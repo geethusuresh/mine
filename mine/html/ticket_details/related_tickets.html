@@ -1,0 +1,60 @@
+    <!-- <form action="/ticket/relate/{{ticket.id}}" method="POST" >{% csrf_token %}
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <input class="form-control"  type="text" name="ticketid" class="" placeholder="Ticketid to relate" >
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success" >Relate</button>
+            </div>
+        </div>
+    </form> -->
+<div class="row">
+    {% if ticket.status == "QUEUED" or ticket.status == "INPROG" %}
+        <form action="/ticket/relate/{{ticket.id}}" method="POST" >{% csrf_token %}
+            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-1">
+                  <label id="validate_ticket_id" style="display:none;"><h6 class="text-danger">Please enter ticket id</h6></label>
+                </div>
+                <div class="col-sm-1">
+                </div>
+                <div class="col-sm-8">
+                    <input class="form-control"  id="relate" type="text" name="ticketid" class="" placeholder="Ticket id to relate" required>
+                </div>
+                <div class="col-sm-3">
+                    <a onclick="is_ticket_id(); return false;" class="btn btn-info fa fa-search" id="search"></a>
+                    <button type="submit" class="btn btn-success" id="relate_ticket" disabled>Relate</button>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+    {% if relations|length > 0 %}
+        <div class="col-md-12 pad-top">
+            <table class="table table-bordered table-striped pad-top">
+                <thead>
+                    <th>Ticket Id </th>
+                    <th>Relation</th>
+                    <th>Ticket Id</th>
+                    <th>Date</th>
+                </thead>
+                <tbody>
+                    {% for relation in relations %}
+                        <tr>
+                            <td><label class="label label-success">{{ relation.ticketone.ticketid }}</label></td>
+                            <td> {{relation.relation}} </td>
+                            <td> <a href="{% url 'ticket_details_page' relation.tickettwo.id %}" class="label label-success">{{ relation.tickettwo.ticketid }}</a></td>
+                            <td>{{relation.date}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="row pad-top">
+            <div class="col-md-12 alert alert-danger">
+                <p class="text-center">No details found</p>
+            </div>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,74 @@
+
+
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+
+    <h1>
+        Application Group Dashboard
+        <small>Application Overview</small>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+        </li>
+    <!--     <li>
+           <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+        <li class="active">
+            <strong>Application Group List Dashboard</strong>
+        </li>
+    </ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-error alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+<div class="row">
+  <div class="col-md-12">
+     </div>
+      <a href="{% url 'create_stack_aws_opswork' cloud_account_id %}" class="btn btn-success pull-right" style="margin:.5%">Create Application Group</a>
+</div>
+
+<div class="row">
+{% for stack in stack_details %}
+<div class="col-md-3">
+  <div class="panel ">
+    <div class="panel-body bg-purple text-center">
+        <img alt="Avatar" class="img-md img-circle img-border mar-btm" src="http://previewcf.turbosquid.com/Preview/2014/07/06__21_31_46/stack1.jpg4a6cfc02-82c9-46b8-b70d-d1a0d0244befLarge.jpg">
+      <h4 class="mar-no">{{stack.Name}}</h4>
+    </div>
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="#"><span class="text-info">Applications<span class="pull-right text-bold">{{stack.layers}}</span></span></a></li>
+      <li><a href="#"><span class="text-success">Instances <span class="pull-right text-bold">{{stack.online_instance}}/{{stack.instance}}</span></span></a></li>
+      <li><a href="#"><span class="text-warning">Estimated Price(per hour) <span class="pull-right text-bold">{{stack.estimated_price}}</span></span></a></li>
+    </ul>
+    <div class="pad-ver">
+        <a href="{% url 'aws_opswork_instance_list' cloud_account_id stack.StackId %}" class="btn btn-block btn-mint"> Details</a>
+    </div>
+  </div>
+</div>
+{% endfor %}
+</div>
+
+{% endblock %}

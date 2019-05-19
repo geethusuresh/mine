@@ -1,0 +1,198 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    @page {
+        size: letter landscape;        
+        margin: 0cm;               
+    }
+
+    @font-face {
+        font-family: "Lato";
+        src: url("{{static_dir}}fonts/lato-reg-webfont.ttf");
+    }
+
+    div { font-family: Lato; }
+    table { font-family: Lato; }
+
+    .report_heading{
+    	text-align:center;
+    	font-size:24px;
+    	margin:20px 0px 0px 0px;
+    }
+
+    .summary{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bold;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:18px;
+    }
+
+    .summary_tbl_contents{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:18px;
+    	background-color:#e7eefa;
+    	border:1px solid #FFF;
+    }
+
+    .ticket_details_head{
+    	text-align:center;
+    	background-color:#00b0f0;
+    	font-weight:bolder;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:16px;
+    	border:1px solid #000000;
+    	color:#000000;
+    }
+
+    .ticket_details_cnt{
+    	text-align:left;
+    	padding:2px 0px 2px 5px;
+    	font-size:14px;
+    	background-color:#FFF;
+    	border:1px solid #000000;
+        color:#000000;
+    }
+
+    .ticket_details_subhead{
+        text-align:center;
+        background-color:#002060;
+        font-weight:bolder;
+        padding:5px 0px 5px 5px;
+        vertical-align:middle;
+        font-size:16px;
+        border:1px solid #000000;
+        color:#FFF;
+        font-style:italic;
+    }
+
+    .ticket_details_minorhead{
+        text-align:left;
+        background-color:#558ed5;
+        font-weight:bolder;
+        padding:5px 0px 5px 5px;
+        vertical-align:middle;
+        font-size:16px;
+        border:1px solid #000000;
+        color:#050731;
+        font-style:italic;
+    }      
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+  	<div class="content">
+        <div>
+            <div style="text-align:right;padding-top:10px;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <br />
+        <div>
+            <div style="text-align:center;color:#595959;font-size:35px;">
+                Marlabs OneConsole
+            </div>
+
+            {% if customer_logo %}            
+            <div style="text-align:center;">
+                <img src="{{media_root}}/{{customer_logo}}" style="text-align:center;height:90px;" /> 
+            </div>            
+            {% endif %}
+
+            <div style="text-align:center;color:#000000;font-size:24px;">
+                <h1>{{customer.customername}} </h1>
+            </div>
+            <div style="text-align:center;color:#002060;font-size:24px;">
+                Last 24 Hour Down Time Report
+            </div>            
+        </div>         
+              
+    	<div style="{% if customer_logo %}padding-top:175px;{% else %}padding-top:235px;{% endif %}">
+    		<div>
+                <span>
+                    <img src="{{static_dir}}img/background-layer.jpeg" style="width:1050px; height:250px;" />
+                </span>
+    		</div>    		
+    	</div>
+
+        <pdf:nextpage />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        <br />
+        <br />
+
+    	<div>
+    		<table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+    			<tr>
+                    <th class="ticket_details_head">HOST</th>
+                    <th class="ticket_details_head">UP%</th>
+                    <th class="ticket_details_head">DOWN%</th>
+                    <th class="ticket_details_head">DOWN Duration</th>
+                </tr>
+                {% for category_monitoring_item in category_monitoring_report %}
+                    <tr>
+                        <td colspan="4" class="ticket_details_subhead">{{category_monitoring_item.category_name}}</td>
+                    </tr>
+                    {% for hostgroup_details in category_monitoring_item.hostgroup_report %}
+                        {% if hostgroup_details.host_details %}
+                        <tr>
+                            <td colspan="4" class="ticket_details_minorhead">{{hostgroup_details.hostgroup_name}}</td>
+                        </tr>
+
+                        {% for hostinfo in hostgroup_details.host_details  %}
+
+                            <tr>
+                                <td class="ticket_details_cnt" {% if hostinfo.downtime_perc > 0 %} style="background-color:#ff3838;" {% endif %}>{{hostinfo.hostname}}</td>
+                                <td class="ticket_details_cnt" {% if hostinfo.downtime_perc > 0 %} style="background-color:#ff3838;" {% endif %}>{{hostinfo.uptime_perc}}%</td>
+                                <td class="ticket_details_cnt" {% if hostinfo.downtime_perc > 0 %} style="background-color:#ff3838;" {% endif %}>{{hostinfo.downtime_perc}}%</td>
+                                <td class="ticket_details_cnt" {% if hostinfo.downtime_perc > 0 %} style="background-color:#ff3838;" {% endif %}>{{hostinfo.downtime_minutes}} Minutes</td>
+                            </tr>
+
+                        {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}  			
+    		</table>
+    	</div>
+
+        <pdf:nextpage />
+
+        <br />
+        <br />      
+
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>
+         <br />
+        <br />
+
+        <div>
+            <div style="text-align:center;">
+            <img src="{{static_dir}}img/thankyou.jpg" style="text-align:right;width:800px;height:500px;" />
+            </div>
+        </div>
+
+        <div style="padding-top:170px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+    </div>
+  </body>
+  </html>
+

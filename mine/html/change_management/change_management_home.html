@@ -1,0 +1,99 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "change_management/change_css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Change Management<small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Change Management Dashboard</li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-success" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <table class="table table-stripped">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Summary</th>
+                                    <th>Description</th>
+                                    <th>Created Date</th>
+                                    <th>Group</th>
+                                    <th>Subgroup</th>
+                                    <th>Category</th>
+                                    <th>Subcategory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in reqs %}
+                                    <tr>
+                                        <td>{{req.change_id}}</td>
+                                        <td>{{req.summary}}</td>
+                                        <td>{{req.description}}</td>
+                                        <td>{{req.created_date|date:'m/d/Y'}}</td>
+                                        <td>{{req.group}}</td>
+                                        <td>{{req.subgroup}}</td>
+                                        <td>{{req.category}}</td>
+                                        <td>{{req.subcategory}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+    </body>
+</html>

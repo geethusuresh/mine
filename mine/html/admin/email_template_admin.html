@@ -1,0 +1,132 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Configure Email Templates<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Email Templates</li>
+                </ol>
+            </div>
+            <div class="content">
+                {% if message %}
+                <div class="row">
+                  <div class="alert alert-success" role="alert">
+                  {{message}}
+                  Please <a href="/view_email_template/">click here</a> to see the template details
+                  </div>
+                </div>
+                {% endif %}
+
+              {% if error %}
+                <div class="row">
+                  <div class="alert alert-danger" role="alert">
+                    {{error}}                
+                </div>
+                </div>
+              {% endif %}
+
+              <div class="box">
+                <form  id="frm_email_template" name ="frm_email_template" method='post' action='/email_template_admin/'>{% csrf_token %} 
+                        
+                          <div class="controls" style="padding: 17px 0 21px 41px;width:90%;">
+                             <div class="form-group">
+                              <label for="customer">Customer</label>                             
+                                 <select class="form-control" required id="customer" name="customer" {% if action == "update"%} disabled="disabled" {% endif %}>
+                                    <option value="">Select any customer</option>
+                                    {% for customer_item in customer_details %}
+                                    {% if customer_item.id == customer_obj.id %}
+                                    <option value="{{customer_item.id}}" selected="selected">{{customer_item.customername}}</option>
+                                    {% else %}
+                                    <option value="{{customer_item.id}}">{{customer_item.customername}}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>     
+                              </div>
+                               <div class="form-group">
+                                 <label for="email_template_name">Template Name</label>
+                                 <input type="text" class="form-control"  id="email_template_name" name="email_template_name" {% if action == "update"%} disabled="disabled" {% endif %} required value="{{template_name}}">
+                              </div>
+
+                               <div class="form-group">
+                                 <label for="email_template_name">Template Subject</label>
+                                 <input type="text" class="form-control"  id="email_template_subject" name="email_template_subject" {% if action == "update"%} disabled="disabled" {% endif %} required value="{{template_name}}">
+                              </div>
+                              <div id="dialog" title="Template Setting Rules" style="width:300px;">
+                                <p>Please use below variables to generate email templates,</p>
+                                <p>#TICKETNUMBER# - Ticket Number</p>
+                                <p>#TICKETDESCRIPTION# - Ticket  Description</p>
+                                <p>#TICKETSTATUS# - Ticket Status</p>
+                                <p>#TICKETPRIORITY# - Ticket Priority</p>
+                                <p>#TICKETCREATIONDATE# - Ticket Creation Date</p>
+                                <p>#TICKETUSERFIRSTNAME# - Ticket Created User First Name</p>
+                                <p>#TICKETUSERLASTNAME# - Ticket Created User Last Name</p>
+                                <p>#TICKETWORKGROUP# - Ticket Assigned Workgroup</p>
+                                <p>#TICKETSUBGROUP# - Ticket Assigned Subgroup </p>
+                                <p>#TICKETOWNER# - Ticket Owner</p>
+                                <p>#TICKETCURROWNER# - Ticket Previous Owner</p>
+                                <p>#NEWUSER# - New User</p>
+                                <p>#TICKETTITLE# - Ticket Title</p>
+                                <p>#TICKETCATEGORY# - Customer Name</p>
+                                <p>#TICKETCUSTOMERNAME# - Category Name</p>
+                                <p>#TICKETCUSTOMERID# - Customer ID</p>
+                                <p>#RECEIVER# - Reporting Manager</p>
+                              </div>  
+                              <div class="form-group">
+                                 <span><label for="template_body">Template Body</label></span>
+                                 <span style="float:right;"><a id="dialog_btn" style="cursor:pointer;">Template Rules</a></span>
+                                  <textarea class="form-control" rows="20"  id="template_body" name="template_body" required>{{template_body}}</textarea>
+                              </div>
+                              {% if selected_template.id > 0 %}                              
+                               <button type="submit" class="btn btn-success">Update</button>
+                               <input type="hidden" name="action" value="update" />
+                               <input type="hidden" name="action_id" value="{{selected_template.id}}" />        
+                              {% else %}
+                               <button type="submit" class="btn btn-success">Submit</button>
+                               <input type="hidden" name="action" value="add" />
+                               <input type="hidden" name="action_id" value="" />
+                              {% endif %}
+                            </div>                                                  
+                      </form>
+                  </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <script type="text/javascript">
+     $(function() {
+          $( "#dialog" ).dialog({
+          autoOpen: false,
+          show: {
+          effect: "blind",
+          duration: 1000
+          },
+          hide: {
+          effect: "explode",
+          duration: 1000
+          },
+          width:"450px"
+          });
+          $( "#dialog_btn" ).click(function() {
+            $( "#dialog" ).dialog( "open" );
+          });
+    });
+    </script>    
+    </body>
+</html>

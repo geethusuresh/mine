@@ -1,0 +1,148 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%} 
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="it_manager_dashboard">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+{% if messages %}
+              <ul >
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            <div class="content">
+
+                <div style="padding:30px;margin-top:10px">
+
+                  <div class="row">
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-alizarin"><a href="/ticket/all" style="color:#fff">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{count_new}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>New tickets</p>
+                              <i class="fa fa-ticket"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-nephritis" ><a href="/monitor_dashboard/" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Monitoring Dashboard</p>
+                            <i class="fa fa-dashboard"></i></a>
+                          </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-peter-river"><a href="/tickets/owned/" style="color:#fff">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{subc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Subgroup Tickets</p>
+                              <i class="fa fa-bar-chart-o"></i></a>
+
+                          </div>
+                      </div><!-- ./col -->
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-wet-asphalt">
+                              <h3 class="timer"  data-start="0" data-from="0" data-to="{{ownc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Owned Tickets</p>
+                              <i class="fa fa-tasks"></i>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+
+
+<!-- 
+               <div class="box">
+                <div class="box-title">
+                  <h3>New Tickets</h3>
+                </div>
+                <div class="box-body no-padding">
+                                      {% if tickets %}
+                        
+                      <table class="table table-striped">
+                        <thead>
+                        <th></th>
+                        <th>Ticket Id</th>
+                        <th>Summary</th>
+                        <th>Customer</th>
+                        <th>Owner</th>
+                        <th>Status</th>
+                        <th>Group</th>
+                        <th>Subgroup</th>
+                          <th>Priority</th>
+                          <th>Loged</th>
+                        </thead>
+
+                        {% for details in tickets %}
+                        <tbody>
+                          <td><a class="btn btn-success btn-sm" href="/ticket/status/edit/{{details.id}}"><i class="fa fa-search-plus "></i></a></td>
+                          <td>{{details.ticketid }}</td>
+                          <td>{{ details.summary }}</td>
+                          <td>{{ details.customer }}</td>
+                          <td>{{ details.reportedby }}</td>
+                          <td>{{ details.status }}</td>
+                          <td>{{ details.group }}</td>
+                          <td> {{details.subgroup}} </td>
+                          <td>{{ details.reportedpriority }}</td>
+                          <td>{% tzone details.reportdate %}</td>
+                          
+                        </tbody>{% endfor %}
+                        
+                      </table>
+
+                        {% else %}
+                          no new tickets
+                        {% endif %}
+                </div>
+              </div> 
+ -->
+             
+
+            </div>
+          </div>
+        </div>      
+          {% include "components/footer.html"%}
+          {% include "components/service_request.html" %}
+          <script type="text/javascript">
+            $(document).ready(function() {
+              $('#table_id').DataTable({
+                aaSorting:[[8,'desc']]
+              });
+            });
+          </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+

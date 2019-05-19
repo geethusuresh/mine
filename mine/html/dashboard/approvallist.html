@@ -1,0 +1,119 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="approval_page">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Approval Detail | <small>Pending Approvals</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Approvals</li>
+                </ol>
+            </div>
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="content">
+              <div class="box">
+                <div class="box-title">
+                  <h3>Tickets For Approval</h3>
+                </div>
+                <div class="box-body no-padding">
+                <table class="table table-striped" id="table_id">
+                <thead>
+                  <tr role="row">
+                  <th></th>
+                  <th>Ticket Id</th>
+                  <th >Ticket Summary</th>
+                  <th>Created Date</th>
+                  <th>Priority </th>
+                  <th>Status</th>
+                  <th>Reported Person</th>
+                  <th>Customer</th>                  
+                  <!-- <th>Source</th> -->
+                  
+                  
+                  </tr>
+                </thead>
+            
+            
+                <tbody>
+                {% for ticket in approvers %}
+                  <tr class="odd  ">
+                  <td><a data-toggle="tooltip" data-placement="bottom" title="View/Edit"class="btn btn-success btn-sm" href="/ticket/approval/{{ticket.id}}">
+                    <i class="fa fa-edit "></i>
+                                  
+                  </a></td>
+                  <td class="grey">{{ticket.ticket.ticketid}}</td>
+                    <td class="grey">{{ticket.ticket.summary}}</td>
+                    
+                    <!-- <td class="grey">{{ticket.ticket.source}}</td> -->
+                    <td class="grey">
+                    <span style="display:none;">{{ticket.ticket.creationdate.year}}{% if ticket.ticket.creationdate.month >= 10 %}{{ticket.ticket.creationdate.month}}{% else %}0{{ticket.ticket.creationdate.month}}{%endif%}{% if ticket.ticket.creationdate.day >= 10 %}{{ticket.ticket.creationdate.day}}{% else %}0{{ticket.ticket.creationdate.day}}{%endif%}{{ticket.ticket.creationdate.time | time}}</span>
+                    {% tzone ticket.ticket.creationdate %}</td>
+                    <td class="grey">{{ticket.ticket.internalpriority}}</td>
+                    <td class="grey">{{ticket.ticket.status|real:ticket.ticket.customer.id}}</td>
+                    <td class="grey">{{ticket.ticket.affectedperson}}</td>
+                    <td class="grey">{{ticket.ticket.customer}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            
+              </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    <script type="text/javascript">
+        $("#approval").addClass("active");
+
+    </script>
+    <script type="text/javascript">
+        $('#approvals').addClass("active");
+        $('#main_approval_dash').addClass("active");
+        $('#approvals_sub_nav').css("display", "block");
+        $('#approval').addClass("active");
+        $('#approvals').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#table_id').DataTable({
+          aaSorting:[[3,'desc']]
+        });
+      });
+
+    </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+

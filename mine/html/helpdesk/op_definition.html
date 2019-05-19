@@ -1,0 +1,270 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Operational Definition</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Marlabs Operational Definitions<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Operational Definitions</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <!--Incident section -->
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="panel">
+                    <div class="panel-heading" style="position:relative;">
+                    <h3 class="panel-title">
+                      <i class="fa fa-list fa-fw"></i>&nbsp;Incidents</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table">
+                         <thead>
+                              <th style="width:15%;">Case Type</th>
+                              <th>Priority Description</th>
+                              <th colspan="2" style="width:20%;">Response SLA or Resolution SLA</th>
+                              <th></th>                                               
+                          </thead>                        
+                          <tbody>
+                            <tr>                           
+                              <td rowspan="2">
+                                Incident Tickets (Critical)
+                              </td>
+                              <td rowspan="2">
+                                Incidents having major impact on the production environment and/or impacting mission critical business functions.Complete interruption of service, system, network, application or configuration item leading complete business loss. There is no possible alternative
+                              </td>
+                              <td>
+                                  Response SLA                                 
+                              </td>
+                              <td>
+                                <= 15 Min
+                              </td>
+                              <td rowspan="4">
+                                <ul>
+                                  <li>
+                                      Updates - Flash Report Frequency : Every 1 Hours until closure
+                                  </li>
+                                  <li>
+                                      Internal Escalation - RIMS Leadership Team
+                                  </li>
+                                  <li>
+                                    External Escalation - Customer Authorized contact, Customer Team, Customer Service Account Manager
+                                  </li>
+                                </ul>                                
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><= 4 Hours</td>
+                            </tr>
+
+                            <tr>                           
+                              <td rowspan="2">
+                                Incident Tickets (High)
+                              </td>
+                              <td rowspan="2">
+                                Incidents having severe impact on business and /or production environment. A Large Group of end-users are being impacted and/or business functions with limited functionality. No acceptable alternative is possible.
+                              </td>
+                              <td>
+                                  Response SLA                                 
+                              </td>
+                              <td>
+                                <= 30 Min
+                              </td>                              
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><= 6 Hours</td>
+                            </tr>
+
+                            <tr>
+                                <td rowspan="2">Incident Tickets (Medium)</td>
+                                <td rowspan="2">Incidents having minor impact on production environment and/or business. Allowing standard day to day business operations. A workaround is available.</td>
+                                <td>
+                                    Response SLA
+                                </td>
+                                <td colspan="2"><= 60 Min</td>
+                            </tr>
+                            <tr>
+                              <td>
+                                   Resolution SLA
+                                </td>
+                                <td colspan="2"><= 24 Hours</td>
+                            </tr>
+
+                            <tr>
+                                <td rowspan="2">Incident Ticket (Low)</td>
+                                <td rowspan="2">Incidents having no impact on production and/or business. An event which is an inconvenience for the user, for which there is an alternative or a possible remedy but does not prevent the user from working.</td>
+                                <td>
+                                    Response SLA
+                                </td>
+                                <td colspan="2"><= 120 Min</td>
+                            </tr>
+                            <tr>
+                              <td>
+                                  Resolution SLA
+                                </td>
+                                <td colspan="2"><= 48 Hours</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <!--End Incident ticket -->
+
+            <!--Change tickets -->
+            <div class="row">
+                <div class="col-lg-12">
+                  <div class="panel">
+                    <div class="panel-heading" style="position:relative;">
+                    <h3 class="panel-title">
+                      <i class="fa fa-list fa-fw"></i>&nbsp;Change Tickets</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table">
+                         <thead>
+                              <th style="width:15%;">Case Type</th>
+                              <th style="width:44%;">Priority Description</th>
+                              <th colspan="2">Response SLA or Resolution SLA</th>     
+                          </thead>                        
+                          <tbody>
+                            <tr>                           
+                              <td rowspan="2">
+                               Change tickets (Change) 
+                              </td>
+                              <td rowspan="2">
+                                MACD = Modify / Add / Change / Delete Request which requires downtime and Service disruptive planned event, Downtime notification, CAB Approvals
+                              </td>
+                              <td>
+                                  Response SLA                                 
+                              </td>
+                              <td>
+                                <=8 Hrs
+                              </td>                              
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><=10days</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <!--End Change tickets -->
+
+            <!--Service Requests -->           
+            <div class="row">
+                <div class="col-lg-12">
+                  <div class="panel">
+                    <div class="panel-heading" style="position:relative;">
+                    <h3 class="panel-title">
+                      <i class="fa fa-list fa-fw"></i>&nbsp;Service Requests</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table">
+                         <thead>
+                              <th style="width:15%;">Case Type</th>
+                              <th style="width:44%;">Priority Description</th>
+                              <th colspan="2">Response SLA or Resolution SLA</th>     
+                          </thead>                        
+                          <tbody>
+                            <tr>                           
+                              <td rowspan="2">
+                               Service Request (Purchase) 
+                              </td>
+                              <td rowspan="2">
+                               Request from users which involves Procurement of hardware or software
+                              </td>
+                              <td>
+                                Response SLA                                  
+                              </td>
+                              <td>
+                                <=30 min
+                              </td>                              
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><=10days</td>
+                            </tr>
+
+                            <tr>                           
+                              <td rowspan="2">
+                               Service Request (Urgent)
+                              </td>
+                              <td rowspan="2">
+                               Requests from users which needs to be fulfilled on priority
+                              </td>
+                              <td>
+                                Response SLA                                   
+                              </td>
+                              <td>
+                                <=30 min
+                              </td>                              
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><=3 days</td>
+                            </tr>
+
+                            <tr>                           
+                              <td rowspan="2">
+                               Service Request (Normal)
+                              </td>
+                              <td rowspan="2">
+                               Any kind of requests from users
+                              </td>
+                              <td>
+                                Response SLA                                    
+                              </td>
+                              <td>
+                                <=30 min
+                              </td>                              
+                            </tr>
+                            <tr>
+                              <td>Resolution SLA</td>
+                              <td><=5 days</td>
+                            </tr>
+                          </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <!--End Service Requests -->
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+    <script type="text/javascript">     
+     $("#op_def").addClass("active");
+    </script>     
+    </body>
+</html>
+
+
+
+
+
+

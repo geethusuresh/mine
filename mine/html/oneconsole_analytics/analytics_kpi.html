@@ -1,0 +1,239 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Sigma Dashboard</title>
+    {% include "components/css.html"%}
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+      <!-- Charts -->
+
+      <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+    
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->  
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="customer_dashboard">
+
+    
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+
+
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Oneconsole Analytics<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">KPI Dashboard</li>
+                </ol>
+            </div>
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+            <div class="content">
+              <div style="padding:30px;margin-top:10px">
+                  <div class="row">
+                      <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <a href="{% url 'analytics_kpiresponse'  %}" style="color:#FFF">
+                            <div class="custom-box palette-turquoise">
+                                <h3 class="fa fa-dashboard"></h3>
+                                <p style="font-weight:bold;">Oneconsole KPI Response</p>
+                              <i class="fa fa fa-bar-chart-o"></i>                           
+                            </div></a>
+                      </div>
+                      <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <a href="{% url 'analytics_kpiresolution'  %}" style="color:#FFF">
+                            <div class="custom-box palette-peter-river">
+                                <h3 class="fa fa-dashboard"></h3>
+                                <p style="font-weight:bold;">Oneconsole KPI Resolution</p>
+                              <i class="fa fa fa-bar-chart-o"></i>                           
+                            </div></a>
+                      </div>
+                      <!-- <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <a href="{% url 'analytics_kpi'  %}" style="color:#FFF">
+                          <div class="custom-box palette-green-sea">
+                              <h3 class="fa fa-dashboard"></h3>
+                              <p style="font-weight:bold;">KPI Dashboard</p>
+                            <i class="fa fa fa-bar-chart-o"></i>                           
+                          </div></a>
+                      </div> -->
+                    
+                    </div>
+                    <div class="row">
+                   
+                    
+                    <!-- <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <a href="/analytics/ticket/performance/" style="color:#FFF">
+                          <div class="custom-box palette-nephritis">
+                              <h3 class="fa fa-dashboard"></h3>
+                              <p style="font-weight:bold;">OverView</p>
+                            <i class="fa fa fa-bar-chart-o"></i>                           
+                          </div></a>
+                    </div> -->
+                    
+                      
+                    <!--<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                          <a href="/dailyreport_yesterday24hours/" style="color:#FFF">
+                          <div class="custom-box palette-green-sea">
+                              <h3 class="fa fa-dashboard"></h3>
+                              <p style="font-weight:bold;">Daily Report - Yesterday 24 Hours</p>
+                              <i class="fa fa fa-bar-chart-o"></i>                           
+                          </div></a>
+                    </div>-->
+                  </div>
+                  
+              </div>
+                
+        </div>
+      </div>
+    </div><!-- /.wrapper -->
+    
+   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Monthly Customer Satisfaction Report </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'customer_satisfaction'  %}" >{% csrf_token %}
+                    
+                    <div class="col-md-12" style="background:white;">
+                    <div class="row">
+                      <div class="col-md-3" id="on_div">
+                     <select name="mth" id="mth" size="1">
+                        <option value="january"> Jan </option>
+                        <option value="february"> Feb </option>
+                        <option value="march"> Mar </option>
+                        <option value="april"> Apr </option>
+                        <option value="may"> May </option>
+                        <option value="june"> June </option>
+                        <option value="july"> July </option>
+                        <option value="august"> Aug </option>
+                        <option value="september"> Sep </option>
+                        <option value="october"> Oct</option>
+                        <option value="november"> Nov </option>
+                        <option value="december"> Dec </option>
+                      </select>
+                      
+                        
+                         
+                      </div>
+                      <div class="col-md-6" style="background:white;">
+                      <select class="2015-2050" name="year" id="year"></select>
+
+
+                      </div>
+
+                     
+                      
+                     
+                    </div>
+
+                   
+                  </div>
+                  <label><strong>Satisfaction</strong></label>
+                    <textarea name="satisfaction" class="form-control" id="satisfaction" onkeypress="return isNumberKey(event)" required></textarea><br/>
+                
+
+   
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="/static/customer/js/custom.js" type="text/javascript"></script>   
+    
+
+    <script>
+     $("#analytic_report").addClass("active");  
+     </script> 
+     <script type="text/javascript">
+$(document).ready(function () {
+// Attach Button click event listener 
+    $("#customer").click(function(){
+
+
+         // show Modal
+        // $('#myModal').modal('show');
+
+   
+      
+    });
+});
+
+
+
+ </script> 
+  <script type="text/javascript">
+ $(function(){
+    var $select = $(".2015-2050");
+    for (i=2015;i<=2050;i++){
+        $select.append($('<option></option>').val(i).html(i))
+    }
+});
+ </script>
+ <SCRIPT language=Javascript>
+       <!--
+       function isNumberKey(evt)
+       {
+          var charCode = (evt.which) ? evt.which : evt.keyCode;
+          if (charCode != 46 && charCode > 31 
+            && (charCode < 48 || charCode > 57))
+             return false;
+
+          return true;
+       }
+       //-->
+    </SCRIPT>
+ {% include "components/dashboard_footer.html" %}
+    {% include "components/sr_cust.html"%}
+     
+    {% include "reports/reports_js.html" %}
+    {% include "components/service_request.html" %}
+
+ 
+    </body>
+</html>

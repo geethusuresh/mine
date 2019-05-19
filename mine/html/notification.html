@@ -1,0 +1,111 @@
+{% load humanize %} {% load zone %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+        .timeline-centered:before {
+            left: 25%;
+        }
+        .timeline-time {
+            background: none;
+            color: black;
+            max-width: 100%;
+            left: -175px !important;
+        }
+        .timeline-centered .timeline-entry {
+            width: 75%;
+        }
+        .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label h2 {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .notify_filter {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 5px;
+        }
+        a:hover {
+            color: #515151 !important;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+</head>
+
+<body class="fixed" style="font-size:13px">
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} 
+        {% include "components/cust_header.html"%}
+    {% else %} 
+        {% include "components/header.html"%}
+    {% endif %}
+    <div class="wrapper">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %} {% include "side_bar/customer.html"%} {% else %} {% include "side_bar/sidebar.html"%} {% endif %}
+        <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Notification Center | <small>All notifications {% if noti_filter %} - {{noti_filter}} {% endif %}</small></h1>
+                <ol class="breadcrumb">
+                    <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Notification Center</li>
+                </ol>
+            </div>
+            <div class="content">
+                 <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <a href="#" class="notify_filter"> Filter Notifications ( </a>
+                        <a href="?limit=48_hours" class="notify_filter">Last 48 Hours | </a><a href="?limit=one_week" class="notify_filter">Last Week | </a><a href="?limit=one_month" class="notify_filter">Last Month </a> <a href="#" class="notify_filter">)</a>
+                    </div>
+                    <div class="col-sm-3"></div>
+                </div>
+                <br/><br/>
+                <div class="row">
+                    <div class="col-sm-11">
+                        <div class="timeline-centered">
+                            {% if activitys %}
+                                {% for act in activitys %}
+                                    <article class="timeline-entry">
+                                        <div class="timeline-entry-inner">
+                                            <time class="timeline-time"><span>{% tzone act.time %}</span> <span>{{ act.time|naturaltime}}</span></time>
+                                            <div class="timeline-icon palette-peter-river">
+                                                <i class="fa fa-comment"></i>
+                                            </div>
+                                            <div class="timeline-label">
+                                                <h2><a>{{ act.user }}</a> <span>{{act.notify}}</span> 
+                                                {% comment %}- {{act.ticket}}</h2> {% if act.remark %} with remark <pre style="  max-height: 200px;">{{ act.remark|safe }}</pre>{% endif %} {% endcomment %}
+                                            </div>
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                                <article class="timeline-entry begin">
+                                    <div class="timeline-entry-inner">
+                                        <div class="timeline-icon palette-concrete">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% else %}
+                                <p class="alert alert-danger"> No Notifications</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} 
+        {% include "components/customer_footer.html"%}
+    {% else %}
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+    {% endif %}
+    <script type="text/javascript">
+        $("#notis").addClass("active");
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,207 @@
+{% extends "change_management/change_base.html" %}
+{% load static %}
+{% block meta_tag %}
+    {% if rfc.status == "IMPL" %}
+        <meta http-equiv="refresh" content="300">
+    {% endif %}
+{% endblock meta_tag%}
+{% block extra_head %}
+    <style type="text/css">
+        .panel-default > .panel-heading {
+            background-color: #f5f5f5;
+        }
+    </style>
+    {% if rfc.status == "IMPL" %}
+        <script>
+            setInterval(function() {
+                window.location.reload();
+              }, 300000);
+        </script>
+    {% endif %}
+    <style type="text/css">
+        .no-js #loader { display: none;  }
+        .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+        .page-loader-js {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url(/static/img/ajax-loader.gif) center no-repeat #fff;
+            opacity: 0.8;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">
+{% endblock extra_head %}
+{% block title_content %} RFC Details {% endblock title_content %}
+{% block page_head %}
+    Change Management | <small>RFC Details</small>
+{% endblock page_head %}
+{% block bread_crumb %}
+    <li class="active">RFC Details</li>
+{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="col-md-12 change-manage-details">
+        <div class="col-sm-6">
+            <h3>Change - <span>{{ rfc.change_id}}</span>
+                {% if rfc.is_conflicted %}
+                    <label class="text-danger">Conflicted</label>
+                {% endif %}
+           </h3>
+
+        </div>
+        <div class="col-sm-6 topstatusarea">
+            <div class="btn-group pull-right">
+                <div class="btn type-area">Type : {{ rfc.change_type }}</div>
+            </div>
+        </div>
+        <div class="col-md-12"><br/>
+            <div class="col-md-12 statusimgarea text-center">
+                <div class="col-xs-2">
+                    <img src="{% static 'images/status-label.png' %}" alt="Status"/>
+                </div>
+                <div class="col-xs-10">
+                    <img src="/static/img/rfc_status/{{rfc.status}}.png" alt="" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel change-manage-details" >
+        <div class="panel-body">
+            <ul class="nav nav-tabs" id="tabs">
+                <li {% if rfc.status == 'REJECTED' or rfc.status == 'CANCELLED' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#basic_details">
+                        <i class="fa fa-lg"></i> Details
+                    </a>
+                </li>
+                <li {% if rfc.status == 'ACC_CAT' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#accept_and_categorize">
+                        <i class="fa fa-lg"></i> Accept & Categorize
+                        {% if request_approval_count and rfc.status == 'ACC_CAT' %}
+                            <span class="badge badge-danger badge-as-circle">{{request_approval_count}}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% if rfc.change_type == 'Normal'%}
+                    <li {% if rfc.status == 'ASSESS' %} class="active" {% endif %}>
+                        <a data-toggle="tab" href="#assessment_phase">
+                            <i class="fa fa-lg"></i> Assesment
+                            {% if assessment_count and rfc.status == 'ASSESS' %}
+                                <span class="badge badge-danger badge-as-circle">{{assessment_count}}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endif %}
+                <li {% if rfc.status == 'SCHED' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#scheduling_phase">
+                        <i class="fa fa-lg"></i>Scheduling
+                    </a>
+                </li>
+                <li {% if rfc.status == 'AUTH' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#authorizing_phase">
+                        <i class="fa fa-lg"></i>Authorizing
+                        {% if schedule_approval_count and rfc.status == 'AUTH' %}
+                            <span class="badge badge-danger badge-as-circle">{{schedule_approval_count}}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% if rfc.change_type == 'Normal'%}
+                    <li {% if rfc.status == 'CAB' %} class="active in" {% endif %}>
+                        <a data-toggle="tab" href="#approval_cab_phase">
+                            <i class="fa fa-lg"></i>CAB
+                        </a>
+                    </li>
+                {% endif %}
+                <li {% if rfc.status == 'IMPL' or rfc.status == 'INPROG' or rfc.status == 'COMP' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#implementation_phase">
+                        <i class="fa fa-lg"></i>Implementation
+                    </a>
+                </li>
+                <li {% if rfc.status == 'REVIEW' or rfc.status == 'CLOSED' %} class="active" {% endif %}>
+                    <a data-toggle="tab" href="#review_phase">
+                        <i class="fa fa-lg"></i>Review
+                    </a>
+                </li>
+            </ul>
+            <div class="row">
+                <div class="col-sm-12">
+                    <input type="hidden" name="userid" value="{{user.email}}" id="user_email_data"/>
+                    <!-- <div class="row" style="margin-bottom:10px">
+                        <div class="col-sm-12">
+                            <img src="/static/img/rfc_status/{{rfc.status}}.png" class="img-responsive"/>
+                            <div class="col-sm-12">
+                                <hr/>
+                            </div>
+                        </div>
+                    </div> -->
+                    {% comment %}
+                        {% if status_msg %}
+                            <!-- <div class="row">
+                                <div class="col-sm-12">
+                                   <ul id="light_slider" class="content-slider">
+                                        {% for stat_msg in status_msg %}
+                                            <div id="demo-weather-widget-md" class="panel panel-{% cycle "mint" "info" "primary" "pink" %} panel-colorful text-center">
+                                                <div class="panel-body">
+                                                    <div class="col-xs-1"></div>
+                                                        <div class="col-xs-9" style="float:left">
+                                                            <p class="h5">{{stat_msg}}</p>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-sm-12">
+                                    <hr/>
+                                </div>
+                            </div> -->
+                        {% endif %}
+                    {% endcomment %}
+                    <div class="tab-content pad-top">
+                        <div id="basic_details" class="tab-pane fade">
+                            {% include "change_management/request_details.html" %}
+                        </div>
+                        <!-- Tab - Request details - End -->
+                        <div class="tab-pane fade" id="accept_and_categorize">
+                            {% include "change_management/accept_categorize.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="assessment_phase">
+                            {% include "change_management/assess_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="scheduling_phase">
+                            {% include "change_management/schedule_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="authorizing_phase">
+                            {% include "change_management/auth_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="approval_cab_phase">
+                            {% include "change_management/cab_approval.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="implementation_phase">
+                            {% include "change_management/implementation_details.html" %}
+                        </div>
+                        <div class="tab-pane fade" id="review_phase">
+                            {% include "change_management/review_details.html" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block modal_content %}
+    {% include "change_management/rfc_modals.html" %}
+{% endblock modal_content %}
+{% block footer_content %}
+    <script src="/static/customer/moment.min.js"></script>]
+    <script src="/static/js/bootstrap-tabcollapse.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#tabs').tabCollapse();
+    });
+    </script>
+    {% include "change_management/rfc_details_script.html" %}
+{% endblock footer_content %}

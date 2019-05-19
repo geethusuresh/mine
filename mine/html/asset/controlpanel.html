@@ -1,0 +1,298 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Control panel<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Control panel</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <p class="panel-title">Cost Centers</p>                     
+                   </div>
+                   <div class="panel-body">
+                      {% for cost in costcenters %}
+                      <div class="col-sm-3">
+                        
+
+                      <div class="panel panel-{% cycle 'info' 'success' 'danger' 'warning' %} panel-colorful">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">{{cost.total_cost}} {{cost.currency}}</span>
+                          <p>{{cost.name}}</p>
+                          <i class="fa fa-shopping-cart"></i>
+                        </div>
+                      </div>
+                      </div>
+                      {% endfor %}
+                   </div>
+                 </div>
+               </div>
+                
+              </div>    
+              <div class="row">
+                <div class="col-sm-9">
+                  <div class="tab-base tab-stacked-left">
+              
+                    <!--Nav tabs-->
+                    <ul class="nav nav-tabs">
+                      <li class="active">
+                        <a data-toggle="tab" href="#tags">Tags</a>
+                      </li>
+                      <li>
+                        <a data-toggle="tab" href="#manus">Manufacturers</a>
+                      </li>
+                      <li>
+                        <a data-toggle="tab" href="#vendors">Vendors</a>
+                      </li>
+                    </ul>
+              
+                    <!--Tabs Content-->
+                    <div class="tab-content">
+                      <div id="tags" class="tab-pane fade active in">
+                        <h4 class="text-thin">Available Tags</h4>
+                        <div class="col-sm-8">
+                          <ul class="list-group">
+                            {% for tag in tags %}
+                          <li class="list-group-item">{{tag.item_type}}
+                              
+                              <a class="fa fa-trash  pull-right" style="color: #925e8b; font-size: 20px;" data-toggle="" data-target="" href="/asset/tag/delete/{{tag.id}}" title="Delete tag"></a>
+                              <a class="fa fa-pencil-square  pull-right edittag" style="color: #925e8b; font-size: 20px;" data-toggle="modal" data-target="#tagus" onclick="return editForm(id={{tag.id}}, name='{{tag.item_type}}', key='tag')"></a>
+                          </li>
+                            {% endfor %}
+                        </ul> 
+                        </div>
+                        <div class="col-sm-4">
+                          <a class="btn btn-purple btn-rounded btn-labeled fa fa-gift addtag" data-toggle="modal" data-target="#tagus">Add New Tag</a>
+                        </div>
+                        
+                      </div>
+                      <div id="manus" class="tab-pane fade">
+                        <h4 class="text-thin">Available Manufacturers</h4>
+                        <div class="col-sm-8">
+                          <ul class="list-group">
+                            {% for manufacturer in manufacturers %}
+                          <li class="list-group-item">{{manufacturer.manufacturer}}
+
+                            <a class="fa fa-trash  pull-right" style="color: #925e8b; font-size: 20px;" data-toggle="" data-target="" href="/asset/manu/delete/{{manufacturer.id}}" title="Delete tag"></a>
+                              <a class="fa fa-pencil-square  pull-right edittag" style="color: #925e8b; font-size: 20px;" data-toggle="modal" data-target="#manufact" onclick="return editForm(id={{manufacturer.id}}, name='{{manufacturer.manufacturer}}', key='manu')"></a>
+
+                          </li>
+                            {% endfor %}
+                        </ul> 
+                        </div>
+                        <div class="col-sm-4">
+                          <a class="btn btn-purple btn-rounded btn-labeled fa fa-gift addtag" data-toggle="modal" data-target="#manufact">Add New Manufacturer</a>
+                        </div>
+                      </div>
+                      <div id="vendors" class="tab-pane fade">
+                        <h4 class="text-thin">Available Vendors</h4>
+                        <div class="col-sm-8">
+                          <ul class="list-group">
+                            {% for vendor in vendors %}
+                          <li class="list-group-item">{{vendor.name}}
+                              <a class="fa fa-trash  pull-right" style="color: #925e8b; font-size: 20px;" data-toggle="" data-target="" href="/asset/vendor/delete/{{vendor.id}}" title="Delete tag"></a>
+                              <a class="fa fa-pencil-square  pull-right edittag" style="color: #925e8b; font-size: 20px;" data-toggle="modal" data-target="#vendoru" onclick="return editForm(id={{vendor.id}}, name='{{vendor.name}}', key='vendor')"></a>
+
+                          </li>
+                            {% endfor %}
+                        </ul> 
+                        </div>
+                        <div class="col-sm-4">
+                          <a class="btn btn-purple btn-rounded btn-labeled fa fa-gift addtag" data-toggle="modal" data-target="#vendoru">Add New Vendor</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="panel panel-info panel-colorful">
+                    <div class="panel-body text-center">
+                      <p class="text-uppercase mar-btm text-md">{{profile.customer}}</p>
+                      <i class="fa fa-inr fa-5x"></i>
+                      <hr>
+                      <p class="h2 text-thin">{{total_cost}}</p>
+                      <small><span class="text-semibold"></span> Total Expense</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="tagus" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form id="tagform" action="/asset/tag/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Tag name</label>
+          <input type="text" name="tags" required class="form-control">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="manufact" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form id="manuform" action="/asset/manu/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Manufacturers Name</label>
+          <input type="text" name="manu" required class="form-control">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="vendoru" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form id="vendorform" action="/asset/vendor/add/" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Vendor Name</label>
+          <input type="text" name="vendor" required class="form-control editname">
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Confirm</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+      {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script type="text/javascript">
+    $("#table_id").DataTable();
+    $("#controlpanel").addClass("active");
+
+
+      $(".addtag").click(function(){
+          $('input[name=tags]').removeClass('editname');
+          $('input[name=tags]').val('');
+          $('input[name=manu]').removeClass('editname');
+          $('input[name=manu]').val('');
+          $('input[name=vendor').removeClass('editname');
+          $('input[name=vendor]').val('');
+      });
+
+      function editForm(id, name, key){
+            tagid = id
+            tagname = name
+            
+            if (key == 'tag'){
+              $('input[name=tags]').addClass('editname');
+              $('.editname').val(tagname);
+              $('#tagform').attr('action', "/asset/tag/edit/"+tagid);
+            }
+            else if(key == 'manu'){
+              $('input[name=manu]').addClass('editname');
+              $('.editname').val(tagname);
+              $('#manuform').attr('action', '/asset/manu/edit/'+tagid);
+            }else if(key == 'vendor'){
+              $('input[name=vendor]').addClass('editname');
+            $('.editname').val(tagname);
+              $('input[name=vendor]').addClass('editname');
+              $('.editname').val(tagname);
+              $('#vendorform').attr('action', '/asset/vendor/edit/'+tagid);
+            }
+        }
+
+    </script>
+
+
+    </body>
+</html>

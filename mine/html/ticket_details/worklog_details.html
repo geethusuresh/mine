@@ -1,0 +1,117 @@
+{% load humanize %}
+{% load zone %}
+<div class="row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-9">
+        {% if not ticket.ended_at %}
+            <div class="box" style="margin-bottom: 30px">
+                <div class="box-body">
+                    <form action="/ticket/worklog/add/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                        <input class="hidden" name="status" value="{{ticket.status}}">
+                        <select id="log_type" class="form-control" style="margin-bottom:5px" name = "flag" required>
+                            <option value="internal_log">Internal Log</option>
+                            <option value="enduser_visibility">Enduser Visibility</option>
+                            {% if ticket.status != "NEW" and zendesk_customer and ticket.source == "zendesk" %}
+                                <option value="zendesk_log">Zendesk Log</option>
+                            {% endif %}
+                        </select>
+                        <select id="zendesk_log_type" class="form-control" style="display: none; margin-bottom:5px" name="zendesk_log_type">
+                            <option>Zendesk Public Log</option>
+                            <option>Zendesk Private Log</option>
+                        </select>
+                        <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>
+                        <input id="image" type="file" name="image" class="worklog_image">
+                        <span class="worklog_error_msg" style="color:red;"></span><br/>
+                        <button class="btn btn-success" style="width:100%;margin-top:5px;" type="submit">Add Work Log</button> 
+                    </form>
+                </div>
+            </div>
+        {% endif %}       
+    </div>
+</div>
+
+<div class="timeline-centered">
+    {% if worklogs_data|length > 0 %}
+        {% for act in worklogs_data %}
+            <article class="timeline-entry">
+                <div class="timeline-entry-inner">
+                    <h4><time class="timeline-time" datetime="2014-01-10T03:45"><span> {{ act.time|naturaltime}}</span> <span style="font-size:10px">{% tzone act.time %}</span></time></h4>
+                    <div class="timeline-icon palette-alizarin"><i class="fa fa-comment"></i></div>
+                    <div class="timeline-label">
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv %}
+                            {% if act.flag %}
+                                <span class="badge badge-primary pull-right">Internal Log</span>
+                            {% else %}
+                                <span class="badge badge-primary pull-right">External Log</span>
+                            {% endif %}
+                        {% endif %}
+                        <h2><a href="#">{{ act.owner }}</a>
+                            <span>{{act.note}}{% if act.fromgroup %}
+                                , changed group from {{act.fromgroup}} - {{act.fromsubgroup}}
+                                {% endif %}
+                                {% if act.group %}to {{act.group}} - {{act.subgroup}}{% endif %}
+                            </span>
+                        </h2>
+                        <div class="row pad-btm">
+                            {% if act.html_description %}
+                                <div class="col-sm-4">
+                                    <a class="btn btn-info" onclick="show_html_version({{act.id}}, 'worklog')">View Html Version</a>
+                                </div>
+                            {% endif %}
+                            {% if ticket.customer.ticket_content_editable == True and ticket.owner == profile or "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                                {% if act.remark %}
+                                    <div class="col-sm-4">
+                                        <button class="btn btn-success work_log_edit_button" value="{{act.id}}"><i class="fa fa-edit"></i> Edit Content</button>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            <div class="col-sm-4">
+                                {% if act.ticketattachments_set.all|length > 0 %}
+                                    <a class="btn btn-info pull-right" onclick="fetch_attachments({{act.id}})">View Attachments</a>
+                                {% elif act.attachment %}
+                                    <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if act.html_description and user_profile.is_html_version %}
+                            <iframe class="work_log_content_iframe" srcdoc="{{act.html_description}}" width="100%" height="400px" frameborder="0" scrolling="auto"></iframe>
+                        {% else %}
+                            {% if act.remark %}
+                                {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                        <pre>{{ act.remark|safe }}</pre>
+                                {% elif "Enduser_Dashboard" in request.session.logged_user_priv %}
+                                    {% if act.is_content_visible == True and act.ticket.affectedperson == profile %}
+                                        <pre>{{ act.remark|safe }}</pre>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        {% if ticket.owner == profile %}
+                            <div class="row">
+                                <div class="col-sm-5"></div>
+                                <div class="col-sm-5">
+                                    <form action="/ticket/merge/{{act.id}}" method="POST" >{% csrf_token %}
+                                        <div class="col-sm-6 pad-top">
+                                            <input name="tomerge" class="form-control" type="text" required>
+                                        </div>
+                                        <div class="col-sm-6 pad-top">
+                                            <button class="btn btn-info" type="submit">Merge</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                {% if ticket.status == "CANCELLED" or ticket.status == "CLOSED" %}
+                                {% else %}
+                                    <div class="col-sm-2 pad-top">
+                                        <button class="btn btn-info" type="submit" data-toggle="modal" data-target="#worklog_reply" onclick="fetch_worklog_history({{act.id}})">Reply</button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        No feeds. Please Sent Back a Remark to HelpDesk for more.
+    {% endif %}
+</div>

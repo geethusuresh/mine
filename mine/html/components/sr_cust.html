@@ -1,0 +1,131 @@
+
+<div class="modal fade" id="forcust" role="dialog" tabindex="-1" aria-labelledby="demo-default-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <!--Modal header-->
+        <div class="modal-header"  style="background: transparent;">
+          <button data-dismiss="modal" class="close" type="button">
+          <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title text-center">Create New Ticket</h4>
+        </div>
+        <form action="/customer/tickets/" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <!--Modal body-->
+        <div class="modal-body">
+        
+        <div class="laval" style=" border-top: 1px solid #8399b2">
+          <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-ticket"></l> Issue Details</p>
+          <div class="row" style="margin-left:10%;margin-right:10%">
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Summary</label>
+              <div class="col-sm-9">
+                <input type="text" placeholder="Max 50 characters" class="form-control input-sm" name="summ" required maxlength="50">
+              </div>
+            </div>
+
+            <br>
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Additional Details</label>
+              <div class="col-sm-9">
+                <textarea id="desc_incident" rows="4" name="dec" class="form-control" required></textarea>
+              </div>
+            </div>
+            <br>
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Impact of the issue</label>
+              <div class="col-sm-9" style="margin-top:1%">
+                 <select class="selectpicker" name="reportedpriority" required>
+                    <!-- <option value="">Select</option> -->
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+              </div>
+            </div>
+            {% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="demo-is-inputsmall">Impacted Airline</label>
+                    <div class="col-sm-9" style="margin-top:1%">
+                        <select name="impacted_airline" class="form-control" id="impacted_airline" required>
+                            <option value="">Select Impacted Airline</option>
+                        </select>
+                    </div>
+                </div>
+            {% endif %}
+          </div>
+          <br><br>
+          
+        </div>
+
+
+<div class="laval" style=" border-top: 1px solid #82A3A9">
+          <p class="text-thin h4" style="color: #82A3A9;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Attachments</p>
+          <div class="row" style="margin-left:10%;margin-right:10%">
+            <label>Attach a file </label>
+            <input type="file"  name="image" multiple class="screenshot_image_upload">
+            <br><br>
+          </div>
+          <span class="error_message_for_upload" style="color:red;"></span>
+          <!-- Important show file upload error -->
+          
+        </div>
+
+
+
+
+
+        <div class="laval" style=" border-top: 1px solid #a1a1a1">
+          <p class="text-thin h4" style="color: #a1a1a1;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-user"></l> Confirm Your Contact Details</p>
+          <div class="row" >
+           <div class="form-group col-sm-6" style="margin-bottom:1%" >
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Email</label>
+              <div class="col-sm-8">
+                <input type="email" name="email" class="form-control" id="ticket_email" value="{{profile.user.email}}" required >
+              </div>
+            </div>
+
+
+            <div class="form-group col-sm-6" style="margin-bottom:1%">
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Phone Number</label>
+              <div class="col-sm-8">
+                <input type='number' id="ticket_ph" name="phone" class="form-control" value="{{profile.phonenumber_set.all.0.primary}}" required>
+              </div>
+            </div>
+
+          </div>
+          
+          
+        </div>
+
+
+        </div>
+
+        <!--Modal footer-->
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+          <button class="btn btn-info btn-labeled fa fa-paper-plane fa-lg" type="submit">Create Ticket</button>
+        </div>
+         </form>
+      </div>
+    </div>
+  </div>
+
+
+<!--IMPORTANT >>> validating file type and size(size allowed only less than 10mb)-->
+<script src="/static/js/upload_file_validation.js"></script>
+<link href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.css" rel="stylesheet">
+<script src="/static/wysihtml5/lib/js/wysihtml5-0.3.0.js"></script>
+<script src="/static/wysihtml5/bootstrap-wysihtml5.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('#desc_incident').wysihtml5({
+        "color": true,
+        "link": false,
+        "image": false,
+        "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"]
+      });
+  });
+</script>

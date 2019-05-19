@@ -1,0 +1,231 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Category</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Category  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Category List</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+              <div class="row">
+                <div class="col-sm-3">
+                  <form  id="frm_person_group" name ="frm_person_group" method='post' action='/category/list'>{% csrf_token %}
+                                  
+                                      <div class="input-group">
+                                          <input type="text" class="form-control" name="category_search" placeholder="Search Category..."/>
+                                          <span class="input-group-btn">
+                                              <button type="submit" id="search-btn" class="btn"><i class="fa fa-search"></i></button>
+                                          </span>
+                                      </div>
+                                  </form>
+                </div>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <div class="col-sm-10">
+                  <div class="box">
+                    <div class="box-title">
+                      <h3>Category List</h3>
+                    </div>
+                    <div class="box-body">
+                      <table class="table table-striped " id="example">
+                                            <thead>
+                                            <tr>
+                                              <th>Name</th>
+                                              <th>Description</th>
+                                              <th>Customer</th>
+                                              <th>Parent</th>
+                                              <th>Visible</th>
+                                              <th>Approval</th>
+                                            </tr> 
+                                            </thead>
+                                            <tbody>
+                                            {% for category in category_list %}
+                                            <tr>
+                                                <td><a href="/category/edit/{{category.id}}" style="color:inherit;">{{ category.name }}</a></td>
+                                                <td>{{ category.description }}</td>
+                                                <td>{{ category.customer.customername }}</td>
+                                                {% if category.parent == 0 %}
+                                                  <td>root</td>
+                                                {% else %}
+                                                  {% for id,name in category_ids_names %}
+                                                    {% if id == category.parent %}
+                                                      <td>{{ name }}</td>  
+                                                    {% endif %}
+                                                  {% endfor %}
+                                                {% endif %}
+                                                {% if category.visibility %}
+                                                  <td>Yes</td>
+                                                {% else %}
+                                                  <td>No</td>
+                                                {% endif %}
+                                                {% if category.approval == True %}
+                                                  <td>Yes</td>
+                                                {% else %}
+                                                  <td>No</td>
+                                                {% endif %}
+                                            </tr>  
+                                            {% endfor %}
+                                          </tbody>
+                                        </table>
+                                        <div class="row">
+                      <div class="col-md-6">
+                      </div>
+                      <div class="col-md-6">
+                        <div class="dataTables_paginate paging_bootstrap">
+                          <ul class="pagination">                      
+                            <li class="prev">
+                            {% if category_list.has_previous %}
+                              <a href="?page={{ category_list.previous_page_number }}">←</a>
+                              {% endif %}
+                            </li>
+                            <li class="active">
+                              <a href="">{{ category_list.number }}</a>
+                            </li>
+                            <li class="next">
+                            {% if category_list.has_next %}
+                            <a href="?page={{ category_list.next_page_number }}">→</a>
+                            {% endif %}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_category"><i  ></i><span class="text" > Add New Category </span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+     <script type="text/javascript">
+    $(document).ready(function(){
+      $("#not_root").click(function(){
+        $('#parent').attr('required', true);
+      });
+      $("#root").click(function(){
+        $('#parent').attr('required', false);
+      });
+      $("input[name='root'] ").change(function(){
+          if(this.value == "child")
+          { 
+                $("#parent").show();
+          }          
+          else{
+                $("#parent").hide();
+              }
+          
+      });
+    });
+  </script>
+
+ <div class="modal fade" id="add_category" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Add New </h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/category/add">
+        {% csrf_token %}
+          <fieldset>
+            <!-- <div class="col-sm-6"> -->
+              <div class="controls" style="text-align: center;">          
+              
+                  <input class="form-control centered" type="text" id="category_name" name="category_name" placeholder="Category Name" required></p>
+                  <select class="form-control centered" id="customerid" name="customerid" required style="">
+                    <option value="">Select Customer</option>
+                    {% for customer in customers %}
+                      <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                    {% endfor %}
+                  </select></p>
+                  <textarea class="form-control centered" type="text" id="description" name="description" placeholder="Description" required></textarea>
+                  <!-- <input class="form-control centered" type="text" id="description" name="description" placeholder="Description" required> -->
+                  </p>
+                  
+              <!-- </div>
+            </div> -->
+            <!-- <div class="col-sm-6"> -->
+            <div class="row">
+              <div class="col-sm-6">
+                <span class="text">Type:</span><input  type="radio" class="" id="root" name="root"  value="root" required>Category
+                <input  type="radio" class="" id="not_root" name="root" value="child" >Subcategory
+                <select class="form-control centered" id="parent" name="parent"  style="display:none;">
+                  <option value="">Select Category</option>
+                  {% for parent in parents %}
+                    <option value="{{ parent.id }}">{{ parent.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label>Need Approval:</label>
+                <input  type="radio" id="root" name="approval"  value="yes" required>Yes
+                <input  type="radio" id="not_root" name="approval" value="no" >No
+              </div>
+                            
+            </div>
+            </div>
+        </fieldset>
+        <div class="row">
+                <div class="col-md-8">
+                </div>
+                <div>
+                <button class="btn btn-success " type="submit" style="margin-top:20px;">Add Category</button>
+                </div>
+              </div>
+      </form>
+      </div>
+      <div class="modal-footer" style="border:0px">
+      </div>
+    </div>
+  </div>
+</div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

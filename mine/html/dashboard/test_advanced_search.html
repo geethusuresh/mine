@@ -1,0 +1,788 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; } 
+      .bs{
+        background-color: transparent;
+      }
+      .select2{
+      }
+    </style>
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="/static/css/datepicker.css" />
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link href="/static/docker_management/plugins/select2/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/static/css/loader.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Advanced Search | <small>Search Tickets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Advanced Search</li>
+                </ol>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                  <form id="form_ticket_search">
+                  <div class="col-md-12">
+
+                  </div>
+                  <div class="col-md-12">
+                      <div class="box">
+                        <div class="box-body">
+                        <div class="row">
+                        <div class="col-md-3">
+                            <div class="input-field col s6">
+
+                              <input class="form-control " type="text" id="ticket_summ" name="ticket_summ">
+                              <label for="ticket_summ">Ticket Summary:</label>
+                            </div>
+                          </div>
+
+
+                          <div class="col-md-3">
+                            <div class="input-field col s6">
+                              
+                              <input class="form-control " type="text" id="ticketid" name="ticketid">
+                              <label for="ticketid">Ticket Id:</label>
+                            </div>
+                          </div>
+                          <div class="col-md-3">
+                                <div class="input-group">
+                                <div class="input-field col s6">
+                                  <input class="form-control " type="text" id="customer" name="customer">
+                                  <label for="customer">Customer</label>
+                                </div>
+                                 <div class="input-group-btn">
+                                    <button type="button" class="btn bs"onclick="assignElement('customer')" data-toggle="modal" data-target="#customer_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="input-field col s6">
+                              <label id="status-error" class="text-danger" style="display:none">Please select customer*  </label>
+                            </div>
+                            <div class="input-field col s6">
+
+                              <input class="form-control " type="text" id="ticket_des" name="ticket_des">
+                              <label for="ticket_des">Ticket Description:</label>
+                            </div>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="input-field col s6">
+                            <select class="form-control select2" id="status" name="status" multiple="multiple">
+                            </select>
+                            <label for="status">Status:</label>
+                            </div>
+                          </div>
+<<<<<<< HEAD
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col-md-3">
+                              
+=======
+
+                        </div>
+                        <br>
+                        <div class="row">
+                          <div class="col-md-3">
+
+>>>>>>> e5f848985643aca0b80f1dbd07bba6a7d1fcd61f
+                              <div class="input-group">
+                                <div class="input-field col s6">
+                                <input class="form-control " type="text" id="affectedperson" name="affectedperson" >
+                                <label for="affectedperson">Affected Person:</label>
+
+                              </div>
+                              <div class="input-group-btn">
+                                  <button type="button" class="btn bs" onclick="assignElement('affectedperson')"  data-toggle="modal" data-target="#person_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                                </div>
+                              </div>
+                          </div>
+                          <div class="col-md-3">                         
+                              <div class="input-group">
+                                <div class="input-field col s6">
+                                  <input  class="form-control " type="text" id="reportedperson" name="reportedperson">
+
+                                  <label for="reportedperson">Reported Person:</label>
+                                </div>
+                                                                  <div class="input-group-btn">
+                                    <button type="button" class="btn bs" onclick="assignElement('reportedperson')" data-toggle="modal" data-target="#person_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                                  </div>
+                              </div>
+
+                          </div>
+
+
+                          <!-- <div class="col-md-3">
+                                <div class="input-group">
+                                <div class="input-field col s6">
+                                  <input class="form-control " type="text" id="customer" name="customer">
+                                  <label for="customer">Customer</label>
+                                </div>
+                                 <div class="input-group-btn">
+                                    <button type="button" class="btn bs"onclick="assignElement('customer')" data-toggle="modal" data-target="#customer_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                                  </div>
+                              </div>
+                          </div> -->
+                          <div class="col-md-3">
+                            <div class="input-field col s6">
+                              <label id="group-error" class="text-danger" style="display:none">Please select customer*  </label>
+                            </div>
+                            <div class="input-field col s6">
+                              <select class="form-control select2" id="group" name="group" multiple="multiple">
+                                
+                              </select>
+                              <label for="group">Domain</label>
+                            </div>
+                          </div>
+
+                        </div>
+                        <br>
+                        <div class="row" style="margin-top:10px">
+                          <div class="col-md-3">
+                                <div class="input-field col s6">
+                                  <label id="subgroup-error" class="text-danger" style="display:none">Please select group*  </label>
+                                </div>
+                                <div class="input-field col s6">
+                                <select class="form-control" id="subgroup" name="subgroup" multiple="multiple">
+
+                                </select>
+
+                                <label for="subgroup">Sub Domain</label>
+                                </div>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="input-group">
+                              <div class="input-field col s6">
+                                <input class="form-control " type="text" id="createdby" name="createdby"  >
+                                
+                                <label for="createdby"> Created By:</label>
+                                </div>
+                                <div class="input-group-btn">
+                                  <button type="button" class="btn bs" onclick="assignElement('createdby')" data-toggle="modal" data-target="#person_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                        <div class="input-group">
+                          <div class="input-field col s6">
+                            <input class="form-control " type="text" id="owner" name="owner">
+                            
+                            <label for="owner"> Owner:</label>
+                          </div>
+                          <div class="input-group-btn">
+                              <button type="button" class="btn bs"onclick="assignElement('owner')" data-toggle="modal" data-target="#person_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                            </div>
+                        </div>
+                        </div>
+                          <div class="col-md-3">
+                            <div class="input-group date" id="datetimepicker3">
+                              <div class="input-field">
+                                <input type="text" class="form-control" id="from_report_date" name="from_report_date" readonly>
+                                </div>
+                            </div>
+                            <label for="from_report_date">From Reported Date</label>
+                          </div>
+
+                        </div>
+                        <br>
+                        <div class="row">
+                        <div class="col-md-3">
+                          <div class="input-group date" id="datetimepicker2">
+                            <div class="input-field">
+                                <input type="text" class="form-control" name="to_report_date" id="to_report_date" readonly>
+
+                            </div>
+                            </div>
+                            <label for="to_report_date"> To Reported Date</label>
+                          </div>
+                        <div class="col-md-3">
+                              <div class="input-group">
+                                <div class="input-field col s6">
+                                  <input class="form-control " type="text" id="category" name="category">
+                                  
+                                <label for="category">Category</label>
+                              </div>
+                        <div class="input-group-btn">
+                        <button type="button" class="btn bs" onclick="assignElement('category')" data-toggle="modal" data-target="#category_popup"><i class="glyphicon glyphicon-search" ></i></button>
+                        </div>
+                          </div>
+                          </div>
+
+                          <div class="col-md-3"></div>
+                          <div class="col-md-3">
+                            <button class="btn btn-info pull-right" id="find_ticket" type="submit">Find Tickets</button>
+                          </div>
+                        </div>
+                        
+                      </div>
+                      
+                  </div> 
+                  </form>
+                    <div id="fountainG" hidden>
+    <div id="fountainG_1" class="fountainG"></div>
+    <div id="fountainG_2" class="fountainG"></div>
+    <div id="fountainG_3" class="fountainG"></div>
+    <div id="fountainG_4" class="fountainG"></div>
+    <div id="fountainG_5" class="fountainG"></div>
+    <div id="fountainG_6" class="fountainG"></div>
+    <div id="fountainG_7" class="fountainG"></div>
+    <div id="fountainG_8" class="fountainG"></div>
+</div>
+                </div>
+                  <div class="row">
+                    <div class="col-md-2 col-md-offset-10 pad-btm">
+                      <div class="controls">
+                        <form action="/advanced_search_export_excel/" method="post" target="_blank" id="form_export_to_excel">
+                            {% csrf_token %}
+                            <input id="export_to_excel" name="export_to_excel" type="submit" class="btn btn-success" value="Export To Excel">
+                            <input type="hidden" name="export_to_excel_data" id="export_to_excel_data" value="">
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="col-md-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Tickets</h3>
+                      </div>
+                      <div class="box_body">
+                        <p style="color:red; padding:10px"> * Search result will display the latest 500 tickets</p>
+                        <table class="table table-hover borderless" id="ticket_table">
+                              <thead>
+                              <tr>
+                                <th></th>
+                                <th>Ticket Id</th>
+                                <th>Ticket Summary</th>
+                                <th>Reported Date</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Reported Person</th>
+                                <th>Created By</th>
+                                <th>Affected Person</th>
+                                <th>Customer</th>
+                                <th>Owner</th>
+                                <th>Category</th>
+                                <th>Domain</th>
+                                <th>Sub Domain</th>
+                                <th>Last Updated</th>
+                                <th>Description</th>
+                              </tr> 
+                              </thead>
+                              <!-- <tfoot>
+                                <tr>
+                                  <th></th>
+                                  <th>Ticket Id</th>
+                                  <th>Ticket Summary</th>
+                                  <th>Reported Date</th>
+                                  <th>Priority</th>
+                                  <th>Status</th>
+                                  <th>Reported Person</th>
+                                  <th>Created By</th>
+                                  <th>Affected Person</th>
+                                  <th>Customer</th>
+                                  <th>Owner</th>
+                                  <th>Category</th>
+                                  <th>Domain</th>
+                                  <th>Sub Domain</th>
+                                  <th>Last Updated</th>
+                                </tr> 
+                              </tfoot> -->
+                            </table>
+                            
+                      </div>
+                    </div>
+                  </div>   
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+    </body>
+
+<div class="modal fade" id="category_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" style="width:60%;">
+            <div class="modal-content">
+              <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Category</h4>
+              </div>
+              <div class="modal-body">
+                        <table class="table table-hover borderless fixed" id="category_table">
+                          <thead>
+                          <tr>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                          </tr> 
+                          </thead>
+                          <tbody>
+                          {% for category in categories %}
+                          <tr>
+                            <td><input type="radio" name="category_popup1" onclick="populateValue('cateogry','{{ category.name }}')"></td>
+                            <td>{{ category.name }}</td>
+                            <td>{{ category.description }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                        </table>
+                      
+              </div>
+            
+              <div class="modal-footer" style="border:0px">
+              <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+              <!-- </form> -->
+              
+              
+              
+                  </div>
+                </div>
+          </div><!-- /.modal-content -->
+</div>
+
+<!--Persons-->
+<div class="modal fade" id="person_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" style="width:60%;">
+            <div class="modal-content">
+              <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="person_heading" class="text-capitalize"></h4>
+              </div>
+              <div class="modal-body no-padding">
+                <table class="table table-hover borderless fixed" id="person_table">
+                  <thead>
+                  <tr>
+                    <th>Select</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Location</th>
+                    <th>Customer</th>
+                  </tr> 
+                  </thead>
+                  
+                </table>
+                      
+              </div>
+            
+              <div class="modal-footer" style="border:0px">
+              <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+              <!-- </form> -->
+
+              
+              
+                  </div>
+                </div>
+          </div><!-- /.modal-content -->
+</div>
+
+<!-- customer popup-->
+<div class="modal fade" id="customer_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" style="width:60%;">
+            <div class="modal-content">
+              <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Customers</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-hover borderless fixed" id="customer_table">
+                  <thead>
+                    <tr>
+                      <th>Select</th>
+                      <th>Name</th>
+                      <th>Description</th>
+                    </tr> 
+                  </thead>
+                  <tbody>
+                  {% for customer in customers %}
+                    <tr>
+                      <td><input type="radio" name="customer_popup" onclick="populateValue('customer','{{ customer.customername }}')"></td>
+                      <td>{{ customer.customername }}</td>
+                      <td>{{ customer.description }}</td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+                      
+              </div>
+            
+              <div class="modal-footer" style="border:0px">
+              <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+              <!-- </form> -->
+              
+              
+              
+                  </div>
+                </div>
+          </div><!-- /.modal-content -->
+</div>
+<script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="/static/docker_management/plugins/select2/select2.min.js"></script>
+<script type="text/javascript">
+
+  $('#form_ticket_search').submit(function(e) {
+    e.preventDefault();
+    document.getElementById("find_ticket").disabled = true;
+    $('#export_to_excel').hide();
+    $('#fountainG').show();
+
+      var formData = {};
+      $("#form_ticket_search").find("input[name]").each(function (index, node) {
+        formData[node.name] = node.value;
+      });
+
+      $("#form_ticket_search").find("select[name]").each(function (index, node) {
+        formData[node.name] = $('#'+node.id).val()
+      });
+
+    // Save data for export to excel
+    $('#export_to_excel_data').val(JSON.stringify(formData));
+
+    $('#ticket_table').DataTable( {
+        "processing": true,
+        "serverSide": false,
+        "iDisplayLength": 10,
+        "bAutoWidth": true,
+        "searching": true,
+        "bDestroy": true,
+        "pageLength": 10,
+        "pagingType": "simple_numbers",
+        "bScrollCollapse": true,
+        "scrollX": "200",
+        "language": {
+          "emptyTable": "No Tickets available"
+        },
+        "ajax": {
+            "url": "/advanced/search/ticket/list/",
+            "type": "GET",
+            "data": formData,
+            "dataType": 'json',
+            "dataSrc": function(data){
+                document.getElementById("find_ticket").disabled = false;
+                $('#fountainG').hide();
+                if(data.length > 0){
+                  $('#export_to_excel').show();
+                }
+                else{
+                  $('#export_to_excel').hide();
+                }
+              return data;
+            },
+        },
+        "columns": [
+          { "data": "ticket_edit_url",
+            "orderable": false,
+            "searchable": false
+          },
+          { "data": "ticketid" },
+          { "data": "summary" },
+          { "data": "reportdate" },
+          { "data": "internalpriority" },
+          { "data": "status" },
+          { "data": "reportedby" },
+          { "data": "createdby" },
+          { "data": "affectedperson" },
+          { "data": "customer" },
+          { "data": "owner" },
+          { "data": "category" },
+          { "data": "group" },
+          { "data": "subgroup" },
+          { "data": "changedate" },
+          { "data": "description" },
+        ]
+    } );
+
+    // Supress Data Table Warning messages    
+    $.fn.dataTable.ext.errMode = 'none';
+
+    $('#ticket_table').DataTable().draw();
+
+  });
+
+  $( document ).ready(function() {
+
+    $('#status').select2({
+      placeholder: "Select status"
+    });
+
+    $('#group').select2({
+      placeholder: "Select group"
+    });
+
+    $('#subgroup').select2({
+      placeholder: "Select subgroup"
+    });
+
+    $('#ticket_table').dataTable({
+      "bScrollCollapse": true,
+      "scrollX": "200",
+    });
+
+    $('#export_to_excel').hide();
+
+    // fetch_group_list();
+
+    $('#group').on('select2:open', function () {
+      if($('#customer').val() == ''){
+        $('#group-error').show();
+      }
+      else{
+        $('#group-error').hide(); 
+      }
+    });
+
+    // $('#subgroup').on('select2:open', function () {
+    //   if($('#group').val() == ''){
+    //     $('#subgroup-error').show();
+    //   }
+    //   else{
+    //     $('#subgroup-error').hide(); 
+    //   }
+    // });
+
+    $('#status').on('select2:open', function () {
+      if($('#customer').val() == ''){
+        $('#status-error').show();
+      }
+      else{
+        $('#status-error').hide();
+      }
+    });
+
+  });
+
+</script>
+  
+ <script type="text/javascript">
+
+  $("#from_report_date").datepicker({'autoclose': true}).on('changeDate', function(e){
+    $("#to_report_date").datepicker('setStartDate', $('#from_report_date').val());
+  });
+
+  $("#to_report_date").datepicker({'autoclose': true}).on('changeDate', function(e){
+    $("#from_report_date").datepicker('setEndDate', $('#to_report_date').val());
+  });
+
+    element_id='';
+
+    // $("#person_table").dataTable();
+    $("#person_table").on('click','tr',function(e){
+    var row = $(this).find('td:eq(1)').text();
+     $("#"+element_id).val(row);
+    });
+    $("#category_table").on('click','tr',function(e){
+    var row = $(this).find('td:eq(1)').text();
+     $("#"+element_id).val(row);
+    });
+    $("#customer_table").on('click','tr',function(e){
+    var row = $(this).find('td:eq(1)').text();
+     $("#"+element_id).val(row).change();
+    });
+
+    $('#group').change(function(){
+      $('#subgroup').empty().trigger('change');
+      selected_group_list = $('#group').val();
+      if(!jQuery.isEmptyObject(selected_group_list)){
+        $.ajax({
+          url: '/ad/subgroup',
+          type: 'get',
+          dataType: 'json',
+          data: {'group_list': selected_group_list},
+          success: function(data) {
+
+            if(data){
+              subgroup_list = []
+              $.each(data, function( index, value ) {
+                subgroup_list.push({'id': value.pk, 'text': value.fields.subgroupname});
+              });
+              $('#subgroup').select2({
+                'data': subgroup_list,
+                placeholder: "Select subgroup"
+              });
+            }
+
+          }
+        });
+      }
+    });
+
+    $('#customer').change(function(){
+      $('#group').select2("val", "");
+      $('#subgroup').select2("val", "");
+      $('#status').select2("val", "");
+      $('#status').empty();
+      $('#group').empty();
+      $('#subgroup').empty();
+      selected_customer = $('#customer').val();
+      if(selected_customer != ''){
+        fetch_group_list(selected_customer);
+        $.ajax({
+            url: "/reports/?data_list=true&status_customer_name="+selected_customer,
+            type: "GET",
+            success: function(data) {
+                var status_list = data['status_list'];
+                for (var i in status_list) {
+                    $('#status').append($('<option>', {
+                        value: status_list[i].status,
+                        text: status_list[i].display_status
+                    }));
+                }
+            }
+        });
+      }
+    });
+
+    function fetch_group_list(selected_customer){
+      $.ajax({
+        url: '/ad/group',
+        type: 'get',
+        dataType: 'json',
+        data: {'customer': selected_customer},
+        success: function(data) {
+
+          if(data){
+            group_list = []
+            $.each(data, function( index, value ) {
+              group_list.push({'id': value.pk, 'text': value.fields.workgroup});
+            });
+            $('#group').select2({
+              'data': group_list,
+              placeholder: "Select group"
+            });
+          }
+
+        }
+      });
+    }
+
+    function assignElement(el_id){
+      element_id = el_id;
+      if(element_id == 'owner' || element_id == 'createdby' || element_id == 'affectedperson' || element_id == 'reportedperson'){
+        user_name = $('#'+element_id).val();
+        if($("#person_table").hasClass('initialized')){
+          $('#person_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#person_table").addClass('initialized')
+        }
+        $('#person_heading').empty();
+        if(element_id == 'owner'){
+          heading = 'Owner'
+        }
+        else if(element_id == 'createdby'){
+          heading = 'Created By'
+        }
+        else if(element_id == 'affectedperson'){
+          heading = 'Affected Person'
+        }
+        else{
+          heading = 'Reported Person'
+        }
+        $('#person_heading').append(heading);
+        
+        $('#person_table').dataTable( {
+                 "processing": true,
+                 "ajax": {
+                     "processing": true,
+                     "url": "/ad/persons?name="+user_name,
+                     "dataSrc": ""
+                 },
+                 "columns": [
+                         { "": "","bSortable": false, },
+                         { "": "fields.user__username" },
+                         { "": "fields.department" },
+                         { "": "fields.location" },
+                         { "": "fields.customer__customername" },
+                     ],
+                  "columnDefs": [ {
+              "targets": 0,
+              "data": null,
+              "defaultContent": "<input type='radio' name='person1'>"
+          } ]
+        } );
+      }
+      else if(element_id == 'category'){
+        cat_name = $('#'+element_id).val();
+        if($("#category_table").hasClass('initialized')){
+          $('#category_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#category_table").addClass('initialized')
+        }
+        $('#category_table').dataTable( {
+                 "processing": true,
+                 "ajax": {
+                     "processing": true,
+                     "url": "/ad/category?name="+cat_name,
+                     "dataSrc": ""
+                 },
+                 "columns": [
+                         { "": "","bSortable": false, },
+                         { "": "fields.name" },
+                         { "": "fields.description" },
+                     ],
+                  "columnDefs": [ {
+              "targets": 0,
+              "data": null,
+              "defaultContent": "<input type='radio' name='category'>"
+          } ]
+        } );
+      }
+      if(element_id == 'customer'){
+        customer_name = $('#'+element_id).val();
+        if($("#customer_table").hasClass('initialized')){
+          $('#customer_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#customer_table").addClass('initialized')
+        }
+        $('#customer_table').dataTable( {
+                 "processing": true,
+                 "ajax": {
+                     "processing": true,
+                     "url": "/ad/customer?name="+customer_name,
+                     "dataSrc": ""
+                 },
+                 "columns": [
+                         { "": "","bSortable": false, },
+                         { "": "fields.customername" },
+                         { "": "fields.description" },
+                     ],
+                  "columnDefs": [ {
+              "targets": 0,
+              "data": null,
+              "defaultContent": "<input type='radio' name='customer'>"
+          } ]
+        } );
+      }
+
+      
+      //console.log(element_id);
+    }
+        // $(document).ready(function(){
+        function populateValue(str,row){
+          $("#"+element_id).val(row);
+        }
+  </script>
+</html>

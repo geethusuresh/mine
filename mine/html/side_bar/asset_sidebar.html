@@ -1,0 +1,62 @@
+ <div class="leftside">
+  <div class="sidebar">
+      <div class="" style="padding:10px;background-color:white">
+          <div>
+              <img style="width:100%" src="/media/{{profile.customer.logo}}" alt="" />
+          </div>
+      </div>
+    <ul class="sidebar-menu">
+      <li id="dash"><a href="/"><i class="fa fa-home"></i><span class="text">Main Dashboard</span></a></li>
+      {% if "asset" in request.session.logged_user_priv %}
+      <li id="asset"><a href="/asset/"><i class="fa fa-laptop"></i><span class="text">Asset Home</span></a></li>
+      <li id="instock"><a href="/asset/stock/"><i class="fa fa-check"></i><span class="text">InStock</span></a></li>
+      <li id="placed"><a href="/asset/placed/"><i class="fa fa-paper-plane"></i><span class="text">Placed Requests</span></a></li>
+      <li id="controlpanel"><a href="/asset/controlpanel/"><i class="fa fa-briefcase"></i><span class="text">Control Panel</span></a></li>
+      <li id="dashboard"><a href="/"><i class="fa fa-briefcase"></i><span class="text">Home</span></a></li>
+      {% endif %}
+
+      {% if "asset_management" in request.session.logged_user_priv %}
+      <li id="asset"><a href="/asset/"><i class="fa fa-laptop"></i><span class="text">Asset Home</span></a></li>
+      <li id="instock"><a href="/asset/stock/"><i class="fa fa-check"></i><span class="text">InStock</span></a></li>
+      <li id="placed"><a href="/asset/placed/"><i class="fa fa-paper-plane"></i><span class="text">Placed Requests</span></a></li>
+      <!-- <li id="controlpanel"><a href="/asset/controlpanel/"><i class="fa fa-briefcase"></i><span class="text">Control Panel</span></a></li> -->
+      <li id="requests"><a href="/asset/request/"><i class="fa  fa-square-o"></i><span class="text">Task Requests</span></a></li>
+      <li id="processing"><a href="/asset/order/"><i class="fa  fa-briefcase"></i><span class="text">Purchase Requests</span></a></li>
+      <li id="controlpanel"><a href="/asset/controlpanel/"><i class="fa fa-briefcase"></i><span class="text">Control Panel</span></a></li>
+
+      <!-- <li id="task"><a href="/task/"><i class="fa fa-car"></i><span class="text">task</span></a></li> -->
+
+      <li class="sub-nav" id="reports_main"><a href="#" id="main_report_dash"><i class="fa fa-book"></i><span>Inventory</span><i class="fa fa-angle-right pull-right"></i></a>
+        <ul class="sub-menu" id="report_sub_nav">
+          <li id="asset_menu"><a href="{% url 'hardwareasset' %}"><span>Individual Hardware Asset</span></a></li>
+          <li id="server_menu"><a href="{% url 'serverasset' %}"><span>Individual Server Asset</span></a></li>
+          <li id="network_menu"><a href="#"><span>Individual Network Asset</span></a></li>
+          <li id="itinfra_menu"><a href="#"><span>Individual IT Infra Asset</span></a></li>
+          <li id="voip_menu"><a href="#"><span>Individual VOIP Asset</span></a></li>
+          <li id="mobile_menu"><a href="#"><span>Individual Mobile Asset</span></a></li>
+          <li id="stock_menu"><a href="#"><span>Individual Stock Asset</span></a></li>
+          <li id="template_menu"><a href="#"><span>Individual Software Templates</span></a></li>
+          <li id="template_menu"><a href="#"><span>Individual Purchase Details</span></a></li>
+        </ul>
+      </li>
+
+      {% endif %}
+      <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+
+    </ul>
+
+
+  <div class="sidebar-widget online-users">
+    <div class="body online-list">              
+      <div class="footer">
+        <span class="btn btn-info" style="width:100%">
+          <l class="fa fa-envelope-o" style="font-size:12px">
+            {{profile.customer.help_text}}
+          </l>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>

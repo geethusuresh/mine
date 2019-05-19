@@ -1,0 +1,52 @@
+{% load zone %}
+<div class="row">
+    <div class="col-sm-12">
+        <p class="col-sm-6"><strong>Created Date : {% tzone ticket.creationdate %}</strong></p>
+        <p class="col-sm-6"><strong>Reported Date : {% tzone ticket.reportdate %}</strong></p>
+    </div>
+</div>
+<table class="table table-sorting table-striped table-hover" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+    <thead>
+        <tr role="row">
+            <th >User</th>
+            <th >Status</th>
+            <th >ChangeTime</th>
+        </tr>
+    </thead> 
+    <tbody >
+        {% if ticket.tickethistory_set.all|length > 0 %}
+            {% for history in ticket.tickethistory_set.all %}
+                <tr>
+                    <td class="grey"><a  style="color:#555">{{history.user}}</a></td>
+                    <td class="grey"><a  style="color:#555">{{history.status|real:history.ticket.customer.id}}</a></td>
+                    <td class="grey"><a  style="color:#555">{% tzone history.time %}</a></td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            No data found
+        {% endif %}
+    </tbody>
+</table>
+<div class="col-sm-12" style="margin-top:10px">
+    <h4 class="text-center">Email Notification History</h4>
+    <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;" >
+        <thead>
+            <tr role="row">
+                <th>To</th>
+                <th>CC</th>
+                <th>Sent Time</th>
+                <th>Sent Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notify in ticket.emaillog_set.all %}
+                <tr>
+                    <td class="grey" style="color:#555">{{ notify.to_addresses|split_email }}</td>
+                    <td class="grey" style="color:#555">{{ notify.cc_address|split_email }}</td>
+                    <td class="grey" style="color:#555">{% tzone notify.sent_time %}</td>
+                    <td class="grey" style="color:#555">{% if notify.status %}<strong style="color:green"> Success </strong>{% else %} <strong style="color:red"> Failed </strong>{% endif %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

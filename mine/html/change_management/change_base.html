@@ -1,0 +1,82 @@
+{% load humanize %}
+{% load static %}
+{% load zone %}
+{% load tag_conversion %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% block meta_tag %} {% endblock meta_tag %}
+        <title>Oneconsole | {% block title_content %} {% endblock title_content %}</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/change_static/css/custom.css">
+        {% block extra_head %} {% endblock extra_head %}
+    </head>
+    <body class="fixed" style="font-size:13px" >
+        <div class="page-loader-js"></div>
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">{% block page_head %} {% endblock page_head %}</h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        {% block bread_crumb %} {% endblock bread_crumb %}
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    {% block body_content %} {% endblock body_content %}
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        {% include "components/confirmation_box.html" %}
+        {% block modal_content %} {% endblock modal_content %}
+        <script src="{% static 'customer/css/date/bootstrap-datetimepicker.js' %}"></script>
+        <script src="{% static 'customer/moment.min.js' %}"></script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+        <script type="text/javascript">
+            var notAllowedFiles = ["exe", "rar", "dll"];
+            $('.file_data').bind('change', function() {
+                var validFileStatus = 0;
+                var ext = $('.file_data').val().split('.').pop().toLowerCase();
+                if(this.files[0].size>10000000){
+                    $(".file_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)');
+                    $('.file_data').val("")
+                    validFileStatus = 1;
+                }
+                if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".file_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed');
+                    $('.file_data').val("")
+                    validFileStatus = 1;
+                }
+                if(validFileStatus!=1){
+                    $(".file_error_msg").empty()
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $(window).load(function() {
+                $(".page-loader-js").fadeOut("slow");
+            });
+        </script>
+        {% block footer_content %}{% endblock footer_content %}
+    </body>
+</html>
+

@@ -1,0 +1,412 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+        <link rel="stylesheet" type="text/css" href="/static/fonts/font-mfizz.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .media-left{
+                float: left;
+            }
+            ul{
+                list-style: none outside none;
+                padding-left: 0;
+                margin: 0;
+            }
+            .content-slider li{
+                /*background-color: #ed3020;*/
+                text-align: center;
+                color: #FFF;
+            }
+            .content-slider h3 {
+                margin: 0;
+                padding: 70px 0;
+            }
+            .demo {
+                margin: 3em 0;
+                padding: 0px; 
+                background: transparent; 
+            }
+            .box_rotate {
+                -webkit-transform: rotate(360.5deg);  /* Chrome, Safari 3.1+ */
+                -moz-transform: rotate(360.5deg);  /* Firefox 3.5-15 */
+                -ms-transform: rotate(360.5deg);  /* IE 9 */
+                -o-transform: rotate(360.0deg);  /* Opera 10.50-12.00 */
+                transform: rotate(360.0deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .box_transition {
+                -webkit-transition: all 15.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+                -moz-transition: all 15.3s ease-out;  /* Firefox 4-15 */
+                -o-transition: all 15.3s ease-out;  /* Opera 10.50–12.00 */
+                transition: all 15.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .lSAction > a {
+                background-color: gray !important;
+                z-index: 0 !important;
+            }
+            .lSAction > a:hover {
+                z-index: 0 !important;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/justgauge/raphael-2.1.4.min.js"></script>
+        <script type="text/javascript" src="/static/js/justgauge/justgage-1.1.0.min.js"></script>
+    </head>
+    <body class="fixed" style="font-size:13px" id="customer_dashboard">
+        {% include "components/cust_header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/customer.html"%}
+            <div class="rightside">
+                {% if alert_message %}
+                    {% for alert in alert_message %}
+                      {% if profile.customer in alert.viewable_custs.all%}
+                          <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+                      {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <div class="page-head" style="margin-top:10px">
+                    <h1  class="pull-left text-thin">Dashboard<small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                    </ol>
+                    <br/>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-purple" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    {% if "Monitoring_view" in request.session.logged_user_priv or  "Report_Management" in request.session.logged_user_priv or "helpdesk" in request.session.logged_user_priv %}
+                        <div class="row" >
+                            {% if "Monitoring_view" in request.session.logged_user_priv  %}
+                                <a class="col-sm-6 col-lg-3" href="/monitor_dashboard/">
+                                    <div class="panel media pad-all">
+                                        <div class="media-left" style="padding-right: 10px;">
+                                            <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                                            <i class="fa fa-dashboard fa-2x"></i>
+                                            <!-- fa fa-line-chart -->
+                                            </span>
+                                        </div>
+                                        <div class="media-body">
+                                            <p class="text-2x mar-no text-thin"><i class="fa fa-cogs"></i></p>
+                                            <p class="text-muted mar-no">Monitoring Dashboard</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endif %}
+                            {% if "Report_Management" in request.session.logged_user_priv  %}
+                                <a class="col-sm-6 col-lg-3" href="/reports/">
+                                    <div class="panel media pad-all">
+                                        <div class="media-left" style="padding-right: 10px;">
+                                            <span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+                                            <i class="fa fa-users fa-2x"></i>
+                                            </span>
+                                        </div>
+                                        <div class="media-body">
+                                            <p class="text-2x mar-no text-thin"><i class="fa fa-bar-chart-o"></i></p>
+                                            <p class="text-muted mar-no">Reports</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endif %}
+                            {% if "helpdesk" in request.session.logged_user_priv %}
+                                <a class="col-sm-6 col-lg-3" href="/customer/tickets/raised/">
+                                    <div class="panel media pad-all">
+                                        <div class="media-left" style="padding-right: 10px;">
+                                            <span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+                                            <i class="fa fa-ticket fa-2x"></i>
+                                            </span>
+                                        </div>
+                                        <div class="media-body">
+                                            <p class="text-2x mar-no text-thin">{{my_tickets_count}}</p>
+                                            <p class="text-muted mar-no">My Tickets</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% if "Managed_Service_Enduser" not in request.session.roles %}
+                                    <a class="col-sm-6 col-lg-3" href="/customer/tickets/"/>
+                                        <div class="panel media pad-all">
+                                            <div class="media-left" style="padding-right: 10px;">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-danger">
+                                                <i class="fa fa-tasks fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{all_tickets}}</p>
+                                                <p class="text-muted mar-no">All Tickets</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if "helpdesk" in request.session.logged_user_priv %}
+                        {% if total_tickets > 0 %}
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-sm-3" id="closed_tickets_new" > </div>
+                                        <div class="col-sm-3" id="active_tickets_new" ></div>
+                                        <div class="col-sm-3" id="waiting_cust_tickets_new" ></div>
+                                        <div class="col-sm-3" id="sla_breached_tickets_new" ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    {% if "infrastructure" in request.session.logged_user_priv %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div  class="panel plain text-center">
+                                    <div class="panel-body">
+                                        <div class="row " >
+                                            <l class="fa fa-cube fa-3x"></l>
+                                            <h2 class="panel-title" style="color:#515151;font-size:25px" style="text-thin">Data Centers</h2>
+                                        </div>
+                                        <hr>  
+                                        <div class="demo">
+                                            <div class="item">
+                                                <ul id="content-slider" class="content-slider">
+                                                    {% for data in datacenters %}
+                                                        <li class="col-xs-2">
+                                                        <a href="/management/infra/{{data.id}}" style="color:#515151">
+                                                        <h4>{{data.dc_name}}</h4>
+                                                        <p class="text-sm mar-no">{{data.location}}</p>
+                                                        </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>  
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="col-sm-6">
+                                    <a href="/management/infrastructure/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-database fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{dc}}</p>
+                                                <p class="text-muted mar-no">Data Centers</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/infradashboard/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-building-o fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{cies}}</p>
+                                                <p class="text-muted mar-no">Configuration Item</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/application/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-connectdevelop fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{apps_count}}</p>
+                                                <p class="text-muted mar-no">Applications</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/infradashboard/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-server fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{hosies}}</p>
+                                                <p class="text-muted mar-no">Hosts</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">&nbsp;</div>
+                                <div class="col-sm-6">&nbsp;</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if "helpdesk" in request.session.logged_user_priv %}
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h3 class="panel-title text-center">My Tickets</h3>
+                            </div><!-- /.box-title -->
+                            <div class="panel-body no-padding">
+                                <table class="table table-striped" id="table_id">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>TicketID</th>
+                                            <th>Summary</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>ETR</th>  
+                                        </tr>
+                                    </thead>   
+                                    <tbody>
+                                        {% for ticket in my_tickets %}
+                                            <tr>
+                                                <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-default btn-sm" href="/customer/tickets/detail/{{ticket.id}}">
+                                                <i class="fa fa-edit "></i>                   
+                                                </a></td>
+                                                <td class="grey"><a href="/customer/tickets/detail/{{ticket.id}}" style="color:#555">{{ticket.ticketid}}</a></td>
+                                                <td class="grey">{{ticket.summary}}</td>
+                                                <td class="grey" >{{ticket.internalpriority}}</td>
+                                                <td class="grey">{{ticket.status | real:ticket.customer.id}}</td>
+                                                <td class="grey">
+                                                    {% if ticket.status == 'CLOSED' %}
+                                                        Closed
+                                                    {% elif ticket.status == 'RESOLVED' %}
+                                                        Resolved
+                                                    {% else %}
+                                                        <span style="display:none;">{{ticket.targetfinish.year}}{{ticket.targetfinish.month}}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                                                        {% tzone ticket.targetfinish %}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>            
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div><!-- /.wrapper -->
+        {% include "components/customer_footer.html" %}
+        {% include "reports/reports_js.html" %}  
+        <script src="/static/lightslider/lightslider.js"></script>
+        <script src="/static/chartjs/Chart.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#content-slider").lightSlider({
+                    loop: false,
+                    keyPress: true,
+                    item: 1,
+                });
+            });
+        </script>  
+        <script>
+            $("#dash").addClass("active")
+        </script>
+        <script type="text/javascript">
+            function load_gauge_graph(data) {
+                var closed_tickets = data.closed_tickets;
+                var total_tickets = data.total_tickets;
+                var sla_breched_count = data.sla_breached_tickets;
+                var cust_wait_count = data.cust_wait_tickets;
+                var active_count = data.active_tickets;
+                var closed_gauge = new JustGage({
+                    id: "closed_tickets_new",
+                    title: "Closed Tickets",
+                    value: closed_tickets,
+                    min: 0,
+                    max: total_tickets,
+                    decimals: 0,
+                    counter: true,
+                    gaugeWidthScale: 0.7,
+                });
+                var active_gauge = new JustGage({
+                    id: "active_tickets_new",
+                    title: "Active Tickets",
+                    value: active_count,
+                    min: 0,
+                    max: total_tickets,
+                    decimals: 0,
+                    counter: true,
+                    gaugeWidthScale: 0.7,
+                });
+                var cust_wait_gauge = new JustGage({
+                    id: "waiting_cust_tickets_new",
+                    title: "Customer Wait Tickets",
+                    value: cust_wait_count,
+                    min: 0,
+                    max: total_tickets,
+                    decimals: 0,
+                    counter: true,
+                    gaugeWidthScale: 0.7,
+                });
+                var sla_gauge = new JustGage({
+                    id: "sla_breached_tickets_new",
+                    title: "SLA Breached Tickets",
+                    value: sla_breched_count,
+                    min: 0,
+                    max: total_tickets,
+                    decimals: 0,
+                    counter: true,
+                    gaugeWidthScale: 0.7,
+                });
+            }
+        </script>
+        <script>
+            $(document).ready(function() {
+                $.ajax({
+                    url:"/dashboard/results/",
+                    type: "POST", 
+                    dataType:"json",
+                    data: {
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data){
+                        if (data.total_tickets > 0 ){
+                            load_gauge_graph(data);
+                        }
+                    },
+                });
+                
+            });
+        </script>
+        <script>
+            function animate_alert_msg() {
+                $('#alert_msg').css({right:'0%'});
+                $('#alert_msg').animate({right: '-100%'}, 20000, 'linear', function(){animate_alert_msg();});
+            }
+            $(document).ready(function(){
+                animate_alert_msg();
+            });
+        </script>
+    </body>
+</html>

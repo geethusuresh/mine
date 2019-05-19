@@ -1,0 +1,273 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Role Management | <small>{{role}}</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/controlpanel/">Control Panel</a></li>
+                    <li class="active">Role Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+               <div class="col-sm-12">
+                 <div class="panel">
+                   <div class="panel-heading">
+                      <p class="panel-title">Module Access For This Role</p>
+                   </div>
+                   <div class="panel-body">
+                      {% if role.access.all|length > 0 %}
+                        {% for mod in role.access.all %}
+                        <div class="col-sm-3">
+                           <div class="panel panel-{% cycle "primary" "purple" "mint" "info" "success" %} panel-colorful">
+                            <div class="pad-all text-center">
+                              <span class="text-5x text-thin {{mod.icon}}"></span>
+                              <p>{{mod.module_name}}</p>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      {% else %}
+                        <div class="col-sm-3 pad-all text-center">
+                          <p> No Modules </p>
+                        </div>
+                      {% endif %}
+                   </div>
+                 </div>
+               </div>
+                
+              </div>    
+              <div class="row">
+                <div class="col-sm-9">
+                <div class="panel">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Users Under This Role</h3>
+                    <a href="" data-target="#adduser" data-toggle="modal" class="pull-right btn btn-success">Add Users</a>
+                  </div>
+                  <div class="panel-body">
+                    <div class="col-sm-10">
+                      {% if role_users|length > 0 %}
+                          <ul class="list-group">
+                            {% for rol in role_users %}
+                                <li class="list-group-item add-tooltip" data-placement="right" data-toggle="tooltip" data-original-title="Remove User"><a href="/customer/{{profile.customer.id}}/role/{{role.id}}/user/{{rol.person.id}}/remove/" class="badge badge-danger pull-right"> <l class="fa fa-minus"></l> </a>{{rol.person}} </li>
+                            {% endfor %}
+                          </ul>
+                      {% else %}
+                        <div class="col-sm-4 pad-all text-center">
+                          <p> No Users </p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="panel panel-info panel-colorful">
+                    <div class="panel-body text-center">
+                      <p class="h4 text-thin">{{role}}</p>
+                      <hr>
+                      <a href="" class="btn btn-danger" data-toggle="modal" data-target="#delete_role">Delete Role</a>
+                      <a href="" class="btn btn-warning" data-toggle="modal" data-target="#update">Update Role</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="adduser" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add user to role {{role}}</h4>
+        </div>
+        {% if add_user %}
+        <form action="/controlpanel/user/add/{{role.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          
+          <div class="col-sm-2">
+            <label>User :</label>
+          </div>
+          <div class="col-sm-10">
+            <select name="user" class="form-control">
+            {% for user in add_user %}
+           <option value="{{user.id}}">{{user}}</option>
+           <a href="" class="btn btn-danger"><l class="fa fa-flag"></l></a>
+            {% endfor %}
+         </select>
+          </div>
+         
+        </div>
+
+        
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" style="float:right" type="submit">Add User</button>
+        </div>
+        </form>
+         {% else %}
+          <p class="h4 text-thin text-center">All Users are assigned in this group.</p><br>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-center" id="myModalLabel">Update role details</h4>
+        </div>
+        <form method="POST" action="/customer/role/{{role.id}}/update/" >{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-3">
+              <label style="margin-top:7px; float:right">Role Name: </label>
+            </div>
+            <div class="col-sm-9">
+              <input class="form-control" name="role" value="{{role.rolename}}" required>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-sm-3">
+              <label style="margin-top:7px; float:right">Modules Accessed: </label>
+            </div>
+            <div class="col-sm-9">
+              {% for access in accesses %}
+              <div class="col-sm-6" style="margin-top:5px">
+                <input checked type="checkbox" value="{{access.id}}" name="access">{{access}}
+              </div>
+              
+              {% endfor %}
+              {% for left in leftover %}
+              <div class="col-sm-6" style="margin-top:5px">
+                <input type="checkbox"  value="{{left.id}}" name="access">{{left}}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success pull-right" type="submit">Update</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="modal fade" id="delete_role" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-center" id="myModalLabel">Confirmation</h4>
+        </div>
+        <div class="modal-body">
+          <p class="h4 text-center text-thin">Are you sure to delete this role?</p>
+          {% if role_users %}
+          <p class="h5 text-center text-thin">The following users will also lose permission as well</p>
+          <div class="text-center">
+           {% for user in role_users %} <label class="label label-info">{{user.person}}</label>  {% endfor %}
+           </div>
+           {% else %}
+            <p class="h5 text-center text-thin">No user will be affected.</p>
+           {% endif %}
+        </div>
+        <hr>
+        <div class="model-footer" style="margin-bottom:2%">
+          <a href="/customer/{{profile.customer.id}}/role/{{role.id}}/delete/" class="btn btn-danger btn-md" style="float:right; width:30%">Confirm</a>
+          <button class="btn btn-warning btn-md" data-dismiss="modal" style="width:30%">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+      {% include "asset/addtostock.html" %}
+
+    {% include "components/customer_footer.html"%}
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+    $("#table_id").DataTable();
+    $("#controlpanel").addClass("active");
+    </script>
+
+
+    </body>
+</html>

@@ -1,0 +1,528 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+
+<script type="text/javascript">
+  var cloud_account_id = {{ cloud_account_id }}
+  var stack_id = {{stack_id|safe}}
+</script>
+
+
+    <h1>
+        Applications in {{stack_name}}
+    </h1>
+
+
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+        </li>
+        <li>
+            <a href="{% url 'get_aws_opswork_list' cloud_account_id %}">Application Group Dashboard </a>
+        </li>
+        
+
+
+    <!--     <li>
+           <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+        <li class="active">
+            <strong>Applications List in Application Group  {{stack_name}}</strong>
+        </li>
+    </ol>
+
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-error alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+
+<div class="panel">
+  <div class="panel-body">
+      <div class="row">
+        <div class="col-md-8">
+           <strong>Spin Instance With New Applications</strong>
+           </div>
+        <div class="col-md-3">
+              <a href="{% url 'create_myinstance_aws_opswork' cloud_account_id stacks_id %}" class="btn btn-block btn-success">
+             Create New Application
+              </a>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+  <div ng-controller="LayerInstanceListController">
+  <div class="col-md-8">
+    <!-- TABLE: LATEST ORDERS -->
+    <div class="panel" ng-repeat="layer in layer_list">
+      <div class="panel-heading">
+        <h3 class="panel-title"><a href="" class="btn-link" ng-click="get_layer_recipe_details(layer.layer_id)">{[{ layer.name }]} </a>
+         <img ng-show="loading_layer_id==layer.layer_id" src="/static/cloud-static-files/img/throbber.svg" alt="Product Image"></h3>
+
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-4">
+              <button ng-show="layer.instance_list.length!=0"class="btn btn-danger btn-xs" ng-click="show_confirmation_modal(layer.layer_id, 'stop_all_instances')"> <i class="fa fa-ban"></i> Stop Instances</button>
+              <button ng-show="layer.instance_list.length!=0" class="btn btn-success btn-xs" ng-click="show_confirmation_modal(layer.layer_id, 'start_all_instances')"> <i class="fa fa-bolt"></i> Start Instances</button>
+              <div class="col-md-1 pull-right">
+               <a title="Delete Layer" class="btn btn-default btn-xs pull-right padd-all" ng-click="show_confirmation_modal(layer.layer_id, 'delete_layer')"><i class="fa fa-trash"></i></a>
+               </div>
+            </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table no-margin" id= "instance_table">
+            <thead bgcolor='#E6E6E6'>
+              <tr>
+                <th>Host Name</th>
+                <th>Status</th>
+                <th>Instance Type</th>
+                <th>Availability Zone</th>
+                <th>Public Ip</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody bgcolor='EAF3FE'>
+              <tr ng-repeat-start= 'instance in layer.instance_list'>
+                <td>{[{instance.Hostname}]}</td>
+                <td ng-style="instance.Status =='setup_failed' && {'color': '#c00'}">
+                  <span  ng-if="instance.Status!='online' && instance.Status!='stopped' && instance.Status!='new' && instance.Status!='setup_failed' ">
+                    <img id="loading_gif" src="/static/cloud-static-files/img/server_load.gif" alt="Product Image" ></span>
+                  {[{instance.Status}]}
+                </td>
+                <td>{[{instance.InstanceType}]}</td>
+                <td>{[{instance.AvailabilityZone}]}</td>
+                <td>{[{instance.PublicIp}]}</td>
+                <td>
+                  <a ng-if="instance.Status=='stopped'" href="#" ng-click="perform_node_operation(instance.InstanceId, 'start_instance')"><i class="fa fa-play"> Start</i></a>
+                  <a ng-if="instance.Status=='stopped'" href="#" ng-click="perform_node_operation(instance.InstanceId, 'delete_instance')"><i class="fa fa-trash"> Delete</i></a>
+                  <a ng-if="instance.Status!='stopped'" href="#" ng-click="perform_node_operation(instance.InstanceId, 'stop_instance')"><i class="fa fa-stop"> Stop</i></a>
+                </td>
+              </tr>
+              <tr ng-repeat-end ng-if="instance.Status =='setup_failed'">  
+                  <td colspan="6" data-region="Dialog" style="width:100%">
+                    <div class="alert alert-dismissable" style="border: 1px solid #fcc;">
+                      <h4 style="color:#c00"><i class="icon fa fa-ban"></i> Error on the setup of the instance {[{instance.Hostname}]}</h4>
+                      <p>The setup of the instance failed. In order to determine issues causing the failure, just check the failure log. For more help diagnosing the problem, see our debugging and troubleshooting guide.</p>
+                        <p style="border-top: 1px solid #fcc; padding-top: 1%;">
+                          <button class="btn btn-danger"  style="margin-left: 90%;" type="button" ng-click="perform_node_operation(instance.InstanceId, 'stop_instance')">Stop</button>
+                        </p>
+                    </div>
+                  </td>
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
+      </div>
+      <div class="panel-footer">
+          <div class="row">
+            <div class="col-xs-8">
+            </div>
+            <div class="col-xs-3">
+              <button class="btn btn-sm btn-info btn-flat pull-right" ng-click="spin_my_instance(layer.layer_id)">Add Instance</button>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+
+    <div class="modal fade bs-example-modal-lg" id="submil_instance_Modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Create Your Instance</h4>
+        </div>
+        <div class="modal-body">
+          <form method="post" class="form-horizontal style-form" id="aws-form" action='/cloud_management/aws/{{cloud_account_id}}/opsworks/stack/{{stacks_id|safe}}/instance/list'>{% csrf_token %}
+              <div class="form-group">
+                  <input type="hidden" name="layer_id" id="layer_id" class="form-control" value="{[{ layer_id }]}">
+                  <label class="col-sm-4 col-sm-4 control-label">Host Name :</label>
+                  <div class="col-sm-5">
+                      <input type="text" name="name" id="instance_name" class="form-control" placeholder="Add Name for Your Instance">
+                  </div>
+                      <p id = "instnce-name-sucess"> Enter the label that identifies your instance on the network.</p>
+                      <p id = "instnce-name-error" style="color:red; display:none"> Hostname must consist of lowercase letters.</p>
+              </div>
+              <div class="form-group">
+                  <label class="col-sm-4 col-sm-4 control-label">Instance Type :</label>
+                  <div class="col-sm-5">
+                      <select class="form-control" id="id_size" name="size" placeholder="select your instance type" style="width:100%">
+                          <option value="2">Medium Instance</option>
+                          {% for type in instance_type %}
+                              <option value="{{ type.0 }}">{{ type.1 }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                      <button class="btn btn-primary" type="submit" id="form-submit" disabled="disabled">Create Instance</button>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+          </form>
+         </div>
+        <div class="modal-footer">
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /.col -->
+
+<div id="confirm_modal" class="modal fade bs-example-modal-lg" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button aria-hidden="true" data-dismiss="modal" class="bootbox-close-button close" type="button" style="margin-top: -10px;">
+        </button>
+        <div class="bootbox-body">
+          <div class="alert alert-warning fade in">
+            <strong>Warning!</strong>
+            {[{confirm_message}]}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">No</button>
+        <button class="btn btn-primary" type="button" data-bb-handler="confirm" ng-click="perform_layer_operation(layer_id, operation)">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <div id="layer-details-modal" class="modal fade bs-example-modal-lg" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{[{layer_recipe_details.name}]} Details</h4>
+        </div><!-- MODAL HEADER-->
+        <div class="modal-body">
+
+          <div class="panel panel-mint" style="background-color: rgb(234, 247, 247);">
+
+            <div class="panel-heading">
+              <h3 class="panel-title">Included Applications in Application Group</h3>
+            </div>
+            <div class="panel-body">
+              <!--Weather widget footer-->
+              <ul class="list-unstyled text-center" ng-repeat='layer_recipe in layer_recipe_details.custom_app'>
+                <li class="col-xs-3">
+                    <i class=" {[{layer_recipe.icon}]}" style="font-size: 50px"></i>
+                    <p class="text-sm mar-no">{[{layer_recipe.name}]}</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div><!-- MODAL body-->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.MODAL CONTENT -->
+    </div>
+  </div><!-- /.MODAL -->
+
+
+
+
+
+
+  </div>
+
+  <div class="col-md-4">
+
+    <div ng-controller="StackDetailsController">
+
+
+
+      <div class="panel panel-mint">
+        <div class="panel-heading">
+          <h3 class="panel-title">Overall Instance Details</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+              <div class="col-md-6">
+                <div class="chart-responsive">
+                  <div class="w-14">
+                      <div class="instances-watcher svg" data-binding="instances-watcher">
+                          <div data-binding="total" class="total" data-counter="{[{instance_total}]}">
+                              <span>Instances</span>
+                              <ul id="instance-chart">
+                              </ul>
+                          </div>
+                    </div><!-- ./chart-responsive -->
+                  </div><!-- /.col -->
+                </div>
+              </div>
+              <div class="col-md-1">
+              </div>
+              <div class="col-md-5">
+                <ul class="">
+                 <span class="badge badge-success" >Online</span>
+                  <span class="badge badge-info" style="margin-top:5px">Setting Up</span>
+                  <span class="badge badge-purple" style="margin-top:5px">Shutting Down</span>
+                  <span class="badge badge-warning" style="margin-top:5px" >Stopped</span>
+                  <span class="badge badge-danger" style="margin-top:5px">Error</span>
+                </ul>
+              </div><!-- /.col -->
+          </div><!-- /.row -->
+        </div>
+        <div class="box-footer no-padding">
+          <!--<ul class="nav nav-pills nav-stacked">
+              <li>
+                <a href="#"><span class="label label-table label-success">Online</span><span class="pull-right text-green">{[{instance_running}]}</span></a>
+              </li>
+              <li>
+                <a href="#"><span class="label label-table label-info">Setting Up</span><span class="pull-right text-aqua">{[{instance_setup}]}</span></a>
+              </li>
+              <li>
+                <a href="#"><span class="label label-table label-purple">Shutting Down</span><span class="pull-right text-light-blue">{[{instance_shuting_down}]}</span>
+              </a></li>
+              <li>
+                <a href="#"><span class="label label-table label-warning">Stoped</span><span class="pull-right text-gray">{[{instance_stopped}]}</span></a>
+              </li>
+              <li>
+                <a href="#"><span class="label label-table label-danger">Error</span><span class="pull-right text-red">{[{instance_error}]}</span></a>
+              </li>
+          </ul> -->
+        </div><!-- /.footer -->
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+<script type="text/javascript">
+
+
+$(document).ready(
+    // Handler for document ready event
+    function () {
+        $('#instance_name').keyup(
+            // Handler for changes detected on yourNumberTextField
+            function () {
+                var regExp = /^[a-z]+$/;
+                mykey = $(this).val()
+                if(mykey.match(regExp)){
+                    $('#instnce-name-error').hide()
+                    $('#instnce-name-sucess').show()
+                    $('#form-submit').attr('disabled',false);
+
+                }
+                else{
+
+                    $('#instnce-name-error').show()
+                    $('#instnce-name-sucess').hide()
+                    $('#form-submit').attr('disabled',true);
+                }
+            } // end function()
+        ); // end $('#yourNumberTextField').change
+    } // end function
+
+); // end function $(document).ready
+
+</script>
+
+
+
+<style type="text/css">
+
+
+
+.opaque {
+    opacity: 1;
+}
+
+
+.error-row td {
+    background-color: #fff;
+    padding: 0;
+    position: relative;
+    top: -1px;
+}
+
+
+.alert.error {
+    background-color: #fef9f9;
+    border: 1px solid #fcc;
+}
+
+.alert {
+    border-radius: 5px;
+    box-sizing: border-box;
+    display: block;
+    font-size: 15px;
+    margin-bottom: 18px;
+    margin-left: 0;
+    margin-top: 0;
+    padding: 8px 14px;
+    text-align: left;
+}
+
+.alert h4 {
+    font-weight: 700;
+    line-height: 24px;
+    margin-bottom: 0;
+}
+
+.alert.error h4, #c .alert.error .close {
+    color: #c00;
+}
+
+
+.alert p {
+    line-height: 24px;
+    padding: 0;
+}
+
+.alert.error .dialog-actions {
+    border-top: 1px solid #fcc;
+}
+
+.alert.error .dialog-actions {
+    border-top: 1px solid #fcc;
+}
+
+.alert .dialog-actions {
+    margin-top: 5px;
+    overflow: hidden;
+    padding-top: 8px;
+    width: 100%;
+}
+
+
+.alert p {
+    line-height: 17px;
+    font-size: small;
+    padding: 0;
+}
+
+
+
+
+
+
+
+      .w-14 {
+          float: left;
+          margin-right: 16px;
+          width: 656px;
+      }
+
+      .instances-watcher {
+          font-size: 0;
+          margin: 0 8px 8px;
+          padding-top: 50px;
+      }
+      .instances-watcher div::after {
+          content: attr(data-counter);
+          display: block;
+          font-size: 36px;
+          line-height: 36px;
+          padding-bottom: 20px;
+          position: relative;
+          top: -76px;
+      }
+
+      .instances-watcher div.setting_up {
+          border-top-color: #38d;
+          color: #38d;
+      }
+
+      .instances-watcher div {
+          display: inline-block;
+          height: 40px;
+          margin-right: 16px;
+          margin-top: 28px;
+          text-align: center;
+          vertical-align: top;
+          width: 76px;
+      }
+
+      .instances-watcher div span {
+          border-top: 1px solid;
+          display: block;
+          font-size: 15px;
+          height: 28px;
+          line-height: 16px;
+          padding-top: 13px;
+          width: 100%;
+      }
+
+      .instances-watcher div.online {
+          border-top-color: #759c3e;
+          color: #759c3e;
+      }
+
+      .instances-watcher div.shutting_down {
+          border-top-color: #986291;
+          color: #986291;
+      }
+
+
+
+      .instances-watcher div.stopped {
+          border-top-color: #5F5555;
+          color: #5F5555;
+      }
+
+      .instances-watcher div.error {
+          border-top-color: #e05243;
+          color: #e05243;
+      }
+
+
+    .instances-watcher div.total {
+        border-top-color: #fff !important;
+        color: #444;
+        height: 80px;
+        position: relative;
+        width: 160px;
+    }
+
+ .instances-watcher div.total canvas {
+    display: block;
+    left: 6px;
+    position: absolute;
+    top: -86px;
+}
+
+
+ .instances-watcher div.total span {
+    border-top: 0 none;
+    line-height: 1px;
+}
+
+
+
+.instances-watcher div.total::after {
+    font-size: 48px;
+}
+</style>
+
+{% endblock%}

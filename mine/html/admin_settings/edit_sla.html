@@ -1,0 +1,196 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li><a href="/admin_settings/sla_management/">SLA Management</a></li>
+                        <li class="active">SLA Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Update SLA</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form action="/admin_settings/sla/edit/{{sla.id}}/" method="post">{% csrf_token %}
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-3">SLA Name : </label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" value="{{sla.name}}" name="name" class="form-control" required><br/>
+                                                </div>
+                                                <label class="col-sm-3">Customer : </label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" name="customer">
+                                                        <option value="">--Select--</option>
+                                                        {% for cust in customers %}
+                                                            <option value="{{ cust.id }}" {% if cust == sla.customer %} selected {% endif %}>{{ cust.customername }}</option>
+                                                        {% endfor %}
+                                                    </select><br/>
+                                                </div>
+                                                <label class="col-sm-3">Time shift : </label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" name="timeshift">
+                                                        <option value="">--Select--</option>
+                                                        {% for tm_shift  in time_shifts %}
+                                                            <option value="{{ tm_shift.id }}" {% if tm_shift == sla.time_shift %} selected {% endif %}>{{ tm_shift.name }}</option>
+                                                        {% endfor %}
+                                                    </select><br/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Table {{sla.table}} : </label>
+                                                <div class="col-sm-9">
+                                                    <select name="table" class="form-control" required>
+                                                        <option value="">--Select Table--</option>
+                                                        <option value="ticket" {% if sla.table == "ticket" %} selected {% endif %}>Ticket</option>
+                                                        <option value="task" {% if sla.table == "task" %} selected {% endif %}>Task</option>
+                                                    </select><br/>
+                                                </div>
+                                                <label class="col-sm-3">Status : </label>
+                                                <div class="col-sm-9">
+                                                    <select name="status" class="form-control" required>
+                                                        <option value="">--Select Status--</option>
+                                                        <option value="True" {% if sla.enable %} selected {% endif %}>Active</option>
+                                                        <option value="False" {% if sla.enable == False %} selected {% endif %}>Inactive</option>
+                                                    </select><br/>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Condition : </label>
+                                                <textarea name="condition" class="form-control" required>{{sla.condition}}</textarea><br/>
+                                                <label>Description : </label>
+                                                <textarea name="description" class="form-control" required>{{sla.description}}</textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-success btn-labeled fa fa-times">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Commitments</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form action="/admin_settings/sla/commitments/{{sla.id}}/" method="post">{% csrf_token %}
+                                        <div class="col-sm-12">
+                                            <h4 class="text-bold">Response SLA</h4>
+                                            <hr/>
+                                            {% for response in response_sla %}
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Type</label><br/>
+                                                        <select class="form-control col-sm-6" name="resp_sla_type" required>
+                                                            <option value="response_sla" {% if response.slatype == "response_sla" %} selected {% endif %}>Response SLA</option>
+                                                        </select><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Description</label><br/>
+                                                        <textarea name="resp_desc" class="form-control" required> {{ response.description }} </textarea><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Time</label><br/>
+                                                        <input type="number" name="resp_time" class="form-control" required value="{{ response.time_value }}" ><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                       <label class="col-sm-5">Time Type</label><br/>
+                                                        <select class="form-control" name="resp_time_type" required>
+                                                            <option value="minute" selected>Minute</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <h4 class="text-bold">Resolution SLA</h4>
+                                            <hr/>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            {% for resolution in resolution_sla %}
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Type</label><br/>
+                                                        <select class="form-control col-sm-6" name="reso_sla_type" required>
+                                                            <option value="resolution_sla" {% if resolution.slatype == "resolution_sla" %} selected {% endif %}>Resolution SLA</option>
+                                                        </select><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Description</label><br/>
+                                                        <textarea name="reso_desc" class="form-control" required > {{ resolution.description }} </textarea><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label class="col-sm-3">Time</label><br/>
+                                                        <input type="number" name="reso_time" class="form-control" required value="{{ resolution.time_value }}"><br/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                       <label class="col-sm-5">Time Type</label><br/>
+                                                        <select class="form-control" name="reso_time_type" required>
+                                                            <option value="minute" selected >Minute</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <button class="btn btn-mint btn-labeled fa fa-times" type="submit">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        {% include "components/footer.html" %}
+    </body>
+</html>

@@ -1,0 +1,676 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "change_management/change_css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Change Management | <small>Create Change Request</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Create RFC</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Create Change Request</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="/rfc/create/" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="laval" style=" border-top: 1px solid #aa77ff">
+                                            <p class="text-thin h4" style="color: #aa77ff;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-ticket"></l> Change Details</p>
+                                            <div class="row" >
+                                                <div class="form-group">
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Summary:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                           <input type="text" name="summary" class="form-control input-sm" required placeholder="Max 50 characters" maxlength="50" /><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Description:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea id="description" rows="4" name="description" class="form-control" required></textarea><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Risk Details:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea id="description" rows="4" name="risk" class="form-control" required></textarea><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall"> Pre Test Details:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea id="pre_test_details" rows="4" name="pre_test_details" class="form-control" required></textarea><br/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Change Type:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                           <select class="form-control" name="change_type" required>
+                                                                <option value="">--Select--</option>
+                                                                <option value="Normal">Normal</option>
+                                                                <option value="Standard">Standard</option>
+                                                                <option value="Emergency">Emergency</option>
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Reason for Change:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea class="form-control" name="reason" rows="4" required></textarea><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Effect if not implemented:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea class="form-control" name="effect" rows="4" required></textarea><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Post Implementation Details:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <textarea class="form-control" name="post_implementation_details" rows="4" required></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br><br>
+                                        </div>
+                                        <div class="laval" style=" border-top: 1px solid #7777ff">
+                                            <p class="text-thin h4" style="color: #7777ff;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Category and Ownership</p>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Customer:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_cust" name="customer" class="form-control" required>
+                                                                <option value="">--Select--</option>
+                                                                {% for cust in customers %}
+                                                                    <option value="{{cust.id}}">{{cust.customername}}</option>
+                                                                {% endfor %}
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Category:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_cat" name="category" class="form-control" required>
+                                                                <option value="">--Select--</option>
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Subcategory:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_sub_cat" name="subcategory" class="form-control" required>
+                                                                <option value="">--Select--</option>
+                                                            </select> <br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall"> Change Requester:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" name="change_requester" id="change_requester" class="form-control" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Group:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_group" name="group" class="form-control" required>
+                                                                <option value="">--Select--</option>
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Subgroup:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_subgroup" name="subgroup" class="form-control" required>
+                                                                <option value="">--Select--</option>
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Owner:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <select id="c_owner" name="owner" class="form-control" required>
+                                                                <option value=""> --Select Owner-- </option>
+                                                            </select><br/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <br/><br/>
+                                        </div>
+                                        <div class="laval" style=" border-top: 1px solid #a594b2">
+                                            <p class="text-thin h4" style="color: #a594b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-ticket"></l> Impact Details </p>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Impact:</label>
+                                                        <div class="col-sm-9">
+                                                           <select class="form-control" name="impact">
+                                                                <option value="">--Select--</option>
+                                                                {% for impact_val in impact_values %}
+                                                                    <option value="{{impact_val.field_value}}">{{impact_val.display_value}}</option>
+                                                                {% endfor %}
+                                                            </select> <br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Priority:</label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control" name="priority">
+                                                                <option value="">--Select--</option>
+                                                                {% for priority_val in priority_values %}
+                                                                    <option value="{{priority_val.field_value}}">{{priority_val.display_value}}</option>
+                                                                {% endfor %}
+                                                            </select><br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Urgency:</label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control" name="urgency">
+                                                                <option value="">--Select--</option>
+                                                                {% for urgency_val in urgency_values %}
+                                                                    <option value="{{urgency_val.field_value}}">{{urgency_val.display_value}}</option>
+                                                                {% endfor %}
+                                                            </select><br/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Failure Probability:</label>
+                                                        <div class="col-sm-9">
+                                                            <select class="form-control" name="failure_probability">
+                                                                <option value="">--Select--</option>
+                                                                {% for failure_prob_val in failure_prob_values %}
+                                                                    <option value="{{failure_prob_val.field_value}}">{{failure_prob_val.display_value}}</option>
+                                                                {% endfor %}
+                                                            </select> <br/>
+                                                        </div>
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Source:</label>
+                                                        <div class="col-sm-9">
+                                                            <select name="source" class="form-control">
+                                                                <option value="">--Select--</option>
+                                                                <option value="Email">Email</option>
+                                                                <option value="Phone">Phone</option>
+                                                            </select><br/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div> <br/><br/>
+                                        </div>
+                                         <div class="laval" style=" border-top: 1px solid #82A3A9">
+                                            <p class="text-thin h4" style="color: #82A3A9;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Asset or CI Details: </p>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-sm-12">
+                                                        <label class="col-sm-4 control-label">Please choose the primary asset or primary ci :<label style="color:red">*</label></label>
+                                                        <label class="col-sm-1 control-label">Asset<input type="radio" name="asset_ci_type" value="asset" required style="margin-left:8px" onclick="get_list_data('asset')"></label>
+                                                        <label class="col-sm-1 control-label">CI<input type="radio" name="asset_ci_type" value="ci" required style="margin-left:10px" onclick="get_list_data('ci')"></label><br/>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <div class="col-sm-6">
+                                                            <label class="col-sm-3 control-label" for="demo-is-inputsmall">Primary Asset:</label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control" id="asset_data" name="c_asset" disabled>
+                                                                    <option value="">--Select--</option>
+                                                                </select><br/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <label class="col-sm-3 control-label" for="demo-is-inputsmall"> Primary CI:</label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control" id="ci_data" name="c_ci" disabled>
+                                                                    <option value="">--Select--</option>
+                                                                </select><br/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <div class="col-sm-6">
+                                                            <label class="col-sm-3 control-label" for="demo-is-inputsmall">Additional Assets:</label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control" id="add_asset" name="add_asset_dat" multiple>
+                                                                    <option value="">--Select--</option>
+                                                                </select><br/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <label class="col-sm-3 control-label" for="demo-is-inputsmall">Additional CIs:</label>
+                                                            <div class="col-sm-9">
+                                                                <select class="form-control" id="add_ci" name="add_ci_dat" multiple>
+                                                                    <option value="">--Select--</option>
+                                                                </select><br/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="laval" style=" border-top: 1px solid #82A3A9">
+                                            <p class="text-thin h4" style="color: #82A3A9;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Schedule Details: </p>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Start Date:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                           <div class='input-group date' id='datetimepicker1'  >
+                                                                <input type='text' class="form-control" required id="sched_start_dat" readonly />
+                                                                <span class="input-group-addon">
+                                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                                </span>
+                                                            </div>
+                                                            <input type="hidden" id="utc_date1" name="sched_start" />
+                                                            <br/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Finish Date:<label style="color:red">*</label></label>
+                                                        <div class="col-sm-9">
+                                                            <div class='input-group date' id='datetimepicker2'>
+                                                                <input type='text' class="form-control"  required id="sched_start_dat2" readonly />
+                                                                <span class="input-group-addon">
+                                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                                </span>
+                                                            </div>
+                                                            <input type="hidden" name="sched_finish" id="utc_date2" />
+                                                            <br/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <label id="re_sched_date_conflict" class="label label-danger" style="margin-bottom:10px; display:none;">Finish date should be greater than Start date</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="laval" style=" border-top: 1px solid #82A3A9">
+                                            <p class="text-thin h4" style="color: #82A3A9;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Attachment Details: </p>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="col-sm-6">
+                                                        <label class="col-sm-3 control-label" for="demo-is-inputsmall">Attachment:</label>
+                                                        <div class="col-sm-9">
+                                                            <input type="file" name="attachment" />
+                                                            <br/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-8 pad-all">
+                                            <button class="btn btn-success" type="submit" id="re_submit">Create</button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label class="pull-right" style="color:gray"><label style="color:red">*</label> mandatory</label>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="users_data_section" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Search Users</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table" id="fields">
+                            <thead>
+                                <th></th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th></th>
+                                <th></th>
+                            </thead>
+                        </table>
+                        <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+        <script src="/static/customer/moment.min.js"></script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+        <script>
+            $("#c_cust").on('change',function(){
+                $("#c_cat option:gt(0)").remove().end();
+                $("#c_group option:gt(0)").remove().end();
+                $('#c_sub_cat option:gt(0)').remove().end();
+                $('#c_subgroup option:gt(0)').remove().end();
+                $("#c_owner option:gt(0)").remove().end();
+                $('#ci_data option:gt(0)').remove().end();
+                $('#asset_data option:gt(0)').remove().end();
+                if($("#c_cust :selected").text()!='--Select--'){
+                    $.ajax({
+                        url:"/ticket/incident/customer",
+                        type:"POST",
+                        dataType:"json",
+                          data:{
+                            groupid : this.value,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                          },
+                          success : function(data) {
+                            data = JSON.parse(data['group_list']);
+                            for (var i in data){
+                              $("#c_group").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}))
+                            }
+                          },
+                          error : function(xhr,errmsg,err) {
+                            console.log(err);
+                        }
+                    });
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        data:{custid: this.value,
+                              csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                           cat_list = JSON.parse(data);
+                          for (var i in cat_list){
+                            
+                            $("#c_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+                          } 
+                         },
+                         error: function(xhr,errmsg,err){
+                          console.log(xhr);
+                         }       
+                    });
+                    $.ajax({
+                        url: "/rfc/ci_list/",
+                        type:"POST",
+                        data:{
+                            customer_id:$('#c_cust').val(),
+                            csrfmiddlewaretoken:'{{csrf_token}}',
+                            type_val: 'ci',
+                        },
+                        success:function(data){
+                            list_data = JSON.parse(data);
+                            for (var i in list_data){
+                                $("#add_ci").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                            }
+                        },
+                        error: function(xhr, errmsg, err){
+                            console.log("error");
+                        }
+                    });
+                    $.ajax({
+                        url: "/rfc/ci_list/",
+                        type:"POST",
+                        data:{
+                            customer_id:$('#c_cust').val(),
+                            csrfmiddlewaretoken:'{{csrf_token}}',
+                            type_val: 'asset',
+                        },
+                        success:function(data){
+                            list_data = JSON.parse(data);
+                            for (var i in list_data){
+                                $("#add_asset").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                            }
+                        },
+                        error: function(xhr, errmsg, err){
+                            console.log("error");
+                        }
+                    });
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            function get_list_data(type_name) {
+                $('#ci_data option:gt(0)').remove().end();
+                $('#asset_data option:gt(0)').remove().end();
+                if (type_name == 'ci') {
+                    $('#ci_data').attr('disabled', false);
+                    $('#asset_data').attr('disabled', true);
+                    $('#ci_data').attr('required', true);
+                    $('#asset_data').attr('required', false);
+                } else if (type_name == 'asset') {
+                    $('#asset_data').attr('disabled', false);
+                    $('#ci_data').attr('disabled', true);
+                    $('#ci_data').attr('required', false);
+                    $('#asset_data').attr('required', true);
+                }
+                if ($('#c_cust').val() && (type_name == 'ci' || type_name == 'asset')) {
+                    $.ajax({
+                        url: "/rfc/ci_list/",
+                        type:"POST",
+                        data:{
+                            customer_id:$('#c_cust').val(),
+                            csrfmiddlewaretoken:'{{csrf_token}}',
+                            type_val: type_name,
+                        },
+                        success:function(data){
+                            list_data = JSON.parse(data);
+                            for (var i in list_data){
+                                if ( type_name == "ci")
+                                    $("#ci_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                                else if (type_name == "asset")
+                                    $("#asset_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                            }
+                        },
+                        error: function(xhr, errmsg, err){
+                            console.log("error");
+                        }
+                    });
+                }
+            }
+        </script>
+        <script>
+            $("#c_group").on('change',function(){
+                $("#c_subgroup option:gt(0)").remove().end();
+                $("#c_owner option:gt(0)").remove().end();
+                if($("#c_group :selected").text()!='-Select Group-'){
+                  $.ajax({
+                    url:"/ticket/incident/create",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                      workgroupid : this.value,
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                      data = JSON.parse(data);
+                        for (var i in data){
+                            $("#c_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                        }
+                    },
+                    error : function(xhr,errmsg,err) {
+                      console.log(err);
+                    }
+                  });
+                  return false;
+                }
+            });
+        </script>
+        <script>
+            $('#c_cat').on('change', function(){
+                var catid = $('#c_cat').val();
+                $("#c_sub_cat option:gt(0)").remove().end();
+                if (catid){
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        data:{catty: catid,
+                        csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#c_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            } 
+                        },
+                        error: function(xhr,errmsg,err){
+                            console.log(xhr);
+                        }       
+                    });
+                }
+            });
+        </script>
+        <script>
+            $('#c_subgroup').on('change', function(){
+                $("#c_owner option:gt(0)").remove().end();
+                var subgroup_id = $('#c_subgroup').val();
+                if($("#c_subgroup").text()!='-Select Owner-'){
+                    $.ajax({
+                      url :"/subgroup/members/",
+                      type:"POST",
+                      data:{"subgroup_id": subgroup_id,
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                      success:function(data){
+                          $("#c_owner option:gt(0)").remove();
+                          member_list = data;
+                        for (var i in member_list){
+                          $("#c_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                        } 
+                       },
+                       error: function(xhr,errmsg,err){
+                        console.log(xhr);
+                       }       
+                    });
+                }
+            });
+        </script>
+        <script>
+            function add_user_info(){
+                var x = ($(this).find('td:eq(1)').text());
+                var y = ($(this).find('td:eq(2)').text());
+                var z = ($(this).find('td:eq(3)').text());
+                var i = ($(this).find('td:eq(4)').text());
+                var j = ($(this).find('td:eq(5)').text());
+                $('#affected_person_id').val(i);
+                $('#user_data').val(z);
+            } 
+        </script>
+        <script>
+            $('#user_selection_box').click(function(){
+                if ($('#user_data').val()) {
+                    $.ajax({
+                        url:"/search/user/",
+                        type:"POST",
+                        dataType:"json",
+                        data:{
+                          'user' : $("#user_data").val(),
+                          'customerid':$("#c_cust").val(),
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        type: "POST",
+                        success : function(data){
+                            i=0;
+                            $('#fields tr').slice(1).remove();
+                            for (var i in data){
+                                $tr = $('<tr>');
+                                $tr.append($('<td><input type="radio" name="user_selct">')).append($('<td>').html(data[i].user__first_name)).
+                                append($('<td>').html(data[i].user__last_name)).
+                                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id)).append($('<td class="hidden">').html(data[i].primary));
+                                $(".trhide").hide();
+                                $(".names").show();
+                                $("#fields").append($tr);
+                                $tr.bind('click', add_user_info);
+                            }
+                        },
+                    });
+                } else {
+                    console.log("innnn else");
+                    $('#users_data_section').hide();
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            function check_re_scheduled_dates(){
+                val_1 = new Date($('#utc_date1').val());
+                val_2 = new Date($('#utc_date2').val());
+                if (val_1 && val_2) {
+                    if (val_2 <= val_1){
+                        $("#re_sched_date_conflict").show();
+                        $('#re_submit').attr('disabled', 'true');
+                    } else {
+                        $("#re_sched_date_conflict").hide();
+                        $('#re_submit').removeAttr('disabled');
+                    }
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#datetimepicker1').datetimepicker()
+                .on('change.dp', function (e) {
+                    $('#utc_date1').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+                })
+                .change(function (){
+                    $('#utc_date1').val(moment($('#sched_start_dat').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                    check_re_scheduled_dates();
+                })
+            });
+            
+            $(function () {
+                $('#datetimepicker2').datetimepicker()
+                .on('change.dp', function (e) {
+                    $('#utc_date2').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+                })
+                .change(function(){
+                    $('#utc_date2').val(moment($('#sched_start_dat2').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                    check_re_scheduled_dates();
+                })
+            });
+            
+        </script>
+        <script type="text/javascript">
+            $('#change_request_main').addClass("active");
+            $('#main_change_dash').addClass("active");
+            $('#change_sub_nav').css("display", "block");
+            $('#create_rfc_req').addClass('active');
+            $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+        <script type="text/javascript">
+            $('#change_requester').autocomplete({
+                width: 300,
+                max: 10,
+                delay: 100,
+                minLength: 1,
+                autoFocus: true,
+                cacheLength: 1,
+                scroll: true,
+                highlight: false,
+                source: function(request, response) {
+                    var customer_id = $('#c_cust').val();
+                    var name = $('#change_requester').val();
+                    if (customer_id) {
+                        $.ajax({
+                            url: "/admin_settings/users/search/?customer_id="+customer_id+'&name='+name,
+                            dataType: "json",
+                            data: request,
+                            success: function( data, textStatus, jqXHR) {
+                                var items = data;
+                                response(items);
+                            },
+                            error: function(jqXHR, textStatus, errorThrown){
+                                 console.log( textStatus);
+                            }
+                        });
+                    } else  {
+                        console.log("Please choose the customer")
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

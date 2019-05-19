@@ -1,0 +1,112 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Messages  <small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        {% if alert_msg %}
+                            <li class="active">Edit Message</li>
+                        {% else %}
+                            <li class="active">Add Message</li>
+                        {% endif %}
+                    </ol>
+                </div>
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="box">
+                                <div class="box-title">
+                                    {% if filter_obj %}
+                                        <h3>Edit Message</h3>
+                                        <a href="/dashboard_filters/add/" class="btn btn-success" style="float:right;"> Add Filter </a>
+                                    {% else %}
+                                        <h3>Add Filter</h3>
+                                    {% endif %}
+                                </div>
+                                <div class="box-body">
+                                    <form {% if filter_obj.id %} action="/dashboard_filters/edit/{{filter_obj.id}}/" {% else %} action="/dashboard_filters/add/" {% endif %} method="post" enctype="multipart/form-data">    {% csrf_token %}
+                                        <input type="text" name="filter_name" class="form-control" placeholder="Filter Name (Max 30 charecters)"  required maxlength="50" value="{{filter_obj.filter_name}}"><br>
+
+                                        <textarea type="text" name="filter_condition" style="max-width:100%" class="form-control" placeholder="Filter Condition " rows="4" cols="20" required>{{filter_obj.filter_condition}}</textarea><br>
+                                        <select class="form-control" name="enable" required value="{{filter_obj.enable}}">
+                                            <option value="">Enabling Status</option>
+                                            <option value="True" {% if filter_obj.enable == True %} selected {% endif %}>Yes</option>
+                                            <option value="False" {% if filter_obj.enable == False %} selected {% endif %}>No</option>
+                                        </select><br>
+                                        <select name="table_name" class="form-control" required value="{{filter_obj.table_name}}">
+                                            <option value="">Select Table Name</option>
+                                            <option value="Ticket" {% if filter_obj.table_name == 'Ticket' %} selected {% endif %}>Ticket</option>
+                                            <option value="UserProfile" {% if filter_obj.table_name == 'UserProfile' %} selected {% endif %}>UserProfile</option>
+                                            <option value="task" {% if filter_obj.table_name == 'task' %} selected {% endif %}>Task</option>
+                                        </select><br/>
+                                        <select name="customer" class="form-control" required>
+                                            <option value="">Select Customer</option>
+                                            {% for customr in customers %}
+                                                <option value="{{customr.id}}" {% if filter_obj.customer.id == customr.id %} selected {% endif %}>{{customr.customername}}</option>
+                                            {% endfor %}
+                                        </select><br/>
+
+                                        
+                                        <button type="submit" class="btn btn-success btn-huge">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="box">
+                                <div class="box-title">
+                                    <h3>Currently Available Filters</h3>
+                                </div>
+                                <div class="box-body">
+                                    <table class="table">
+                                        <thead>
+                                            <th>View</th>
+                                            <th>Name</th>
+                                            <th>Condition</th>
+                                            <th>Table</th>
+                                            <th>Enable Status</th>
+                                        </thead>
+                                        {% for details in avail_filters %}
+                                            <tbody>
+                                                <td><a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="View" href="/dashboard_filters/edit/{{details.id}}/"><i class="fa fa-edit "> </i></a></td>
+                                                <td>{{ details.filter_name }}</td>
+                                                <td>{{ details.filter_condition }}</td>
+                                                <td>{{ details.table_name }}</td>
+                                                <td>{% if details.enable == True %} Yes {% else %} No {% endif %}</td>
+                                            </tbody>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+    </body>
+</html>

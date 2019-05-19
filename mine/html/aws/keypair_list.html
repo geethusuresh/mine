@@ -1,0 +1,98 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}            
+    <h1>
+        AWS Key Pair List
+        <small>Key pair Overview</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li>
+          <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+      </li>
+  <!--     <li>
+         <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+      </li> -->
+      <li class="active">
+          <strong>AWS Key List</strong>
+      </li>
+    </ol>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+<div ng-controller='awsKeyPairList'>
+<div class="row">
+  <div class="col-md-11">
+    <div class="pull-right">
+        <!-- <button class="btn btn-success" ng-click = create_new_EC2_keypair()>Create key Pair</button> -->
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-11">
+    <!-- TABLE: LATEST ORDERS -->
+    <div class="panel panel-mint">
+      <div class="panel-heading">
+        <div class="panel-control">
+          <div class="btn-group">
+              <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#key_pair_list_container" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+          </div>
+        </div>
+        <h3 class="panel-title">Key Pair List</h3>
+      </div><!-- /.box-header -->
+      <div class="panel-body" id="key_pair_list_container">
+        <div class="table-responsive">
+          <table class="table" id= "image_table">
+            <thead bgcolor='#E6E6E6'>
+              <tr>
+                <th>Name</th>
+                <th>Region</th>
+                <th>Finger Print</th>
+              </tr>
+            </thead>
+            <tbody bgcolor='EAF3FE'>
+              {% for keys in keypair_list %}
+              <tr>
+                <td>{{keys.name}}</td>
+                <td>{{keys.region}}</td>
+                <td>{{keys.fingerprint}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
+      </div><!-- /.box-body -->
+    </div><!-- /.box -->
+  </div><!-- /.col -->
+  <div class="col-md-1">
+  </div><!-- /.col -->
+</div>
+
+
+<div id="aws_keypair_creation" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create New key Pair</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" class="form-horizontal style-form" id="aws-form" action="{%url 'awsEc2_keypair_creation' cloud_account_id %}">{% csrf_token %}
+          <label for="id_name">Name:</label>
+          <input class="form-control" id="id_name" maxlength="100" name="name" type="text">
+         <div class="modal-footer">
+           <button class="btn btn-primary" type="submit" id="form-submit">Sumbit</button>
+           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- /.controller -->
+{% endblock%}

@@ -1,0 +1,20 @@
+{% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+{% endif %}
+<script type="text/javascript">
+    function fetch_impacted_airlines(customer_id) {
+        $.ajax({
+            url:"/impacted_airlines/?customer="+customer_id,
+            type:"GET",
+            dataType:"json",
+            success : function(data) {
+                for (var i in data){
+                    $("#impacted_airline").append($('<option>', {value:data[i][0],text:data[i][1]}))
+                }
+            },
+            error : function(xhr,errmsg,err) {
+                console.log(err);
+            }
+        });
+    }
+</script>
+<link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">

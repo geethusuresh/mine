@@ -1,0 +1,375 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="col-sm-10">
+                <div class="box">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab"> 
+                      <li class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">Group <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a  href="/personadmin/listview">Person</a></li>
+                          <!-- <li><a  href="#dropdown2">Dropdown2</a></li> -->
+                        </ul>
+                      </li>
+                      <li class="{% if workgroups_div  %} active {% endif %}"><a data-toggle="tab" href="#workgroups">Workgroups</a></li>
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+                      <div id="workgroups" class="tab-pane fade in {% if workgroups_div  %} active {% endif %}">
+                          <table class="table table-hover" id="workgroup_table">
+                            <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>Workgroup</th>
+                              <th>Description</th>
+                              <th>Customer</th>
+                              <th>Subgroup Count</th>
+                              <th></th>
+                            </tr> 
+                            </thead>
+                            <tbody>
+                              {% for workgroup in workgroup_list %}
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="/workgroup/edit/{{workgroup.id}}" style="color:inherit;">{{ workgroup.workgroup }}</td></a>
+                                <td>{{ workgroup.description}}</td>
+                                <td>{{ workgroup.customer }}</td>
+                                {% for id,count in subgroup_count %}
+                                {% if workgroup.id == id %}
+                                <td><label class="btn btn-info" ><i  style=" font-size: 10pt;">{{count}}</i></label></td>
+                                {% endif %}
+                                {% endfor %}
+                                {% if workgroup.active %}
+                                <td><a href="/workgroup/deactivate/{{workgroup.id}}" class="btn btn-warning btn-sm"><span class="text" > Deactivate </span></a></td>
+                                {% else %}
+                                <td><a href="/workgroup/activate/{{workgroup.id}}" class="btn btn-warning btn-sm"><span class="text" > Activate </span></a></td>
+                                {% endif %}
+                                <!-- <td><a href="/personadmin/update/{{person.id}}"><input type="button" value="update" class="btn btn-success btn-sm" ></a></td> -->
+                                <!-- <td><a href="/personadmin/deactivate/{{person.id}}" ><input type="button" value="delete" class="btn btn-success btn-sm"></a></td> -->
+                              </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2" style="margin-top:0px">
+                <div >
+                  <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_workgroup"><i  ></i><span class="text" > Add New Workgroup </span></a>
+                </div>
+              <div >
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <div class="modal fade" id="add_workgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Add New </h4>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="/persongroupadmin/add/workgroup">
+            {% csrf_token %}
+              <fieldset>
+              <div class="controls" style="text-align: center;">      
+                <select class="form-control " id="customerid" name="customerid" required style="width:300px;display: block;margin: 0 auto;">
+                  <option value="">Select Customer</option>
+                  {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                  {% endfor %}
+                </select></p>
+                <input class="form-control " type="text" id="workgroup2" name="workgroup2" placeholder="enter workgroup name" required></p>
+                <textarea class="form-control" placeholder="Description" id="description2" name="description2" style="height:100px;"></textarea>
+                </p>
+                <button class="btn btn-success" type="submit">Add Workgroup</button>
+              </div>
+              </fieldset>
+            </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+    <script type="text/javascript">
+    $(document).ready(function(){ 
+      $("#workgroup_table").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $("#subgroup_table").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $("#submemberTable").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $("#subticketTable").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $('input:checkbox').on('ifToggled', function() {
+        if($('input[type=checkbox]:checked').length) {
+          $("#deactivate_button").prop('disabled',false);
+          var mycookie = $.cookie($(this).attr('name'));
+          if (mycookie && mycookie == "true") {
+              $(this).prop('checked', mycookie);
+          }
+         }
+         else{
+          $.cookie(checkboxCookieName, +this.checked);
+          $("#deactivate_button").prop('disabled',true);
+         }
+      });
+    
+      
+    });
+  </script>
+  <script type="text/javascript">
+    var list = [];
+    var p_dict = [];
+    $("#customer2").on('change',function(){
+      $('#workgroup2 option:gt(0)').remove().end();
+      if($("#customer2 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgroup2").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+    //when customer changes
+    $("#cus").on('change',function(){
+      $('#workgp option:gt(0)').remove().end();
+      $('#subgp option:gt(0)').remove().end();
+      if($("#cust :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgp").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgp").on('change',function(){
+        $('#subgp option:gt(0)').remove().end();
+        if($("#workgp :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgp").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  </script>
+  <script type="text/javascript">
+    $("#cus2").on('change',function(){
+      $('#workgp2 option:gt(0)').remove().end();
+      $('#subgp2 option:gt(0)').remove().end();
+      if($("#cust2 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgp2").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgp2").on('change',function(){
+        $('#subgp2 option:gt(0)').remove().end();
+        if($("#workgp2 :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgp2").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  </script>
+  <script type="text/javascript">
+    $("#customer3").on('change',function(){
+      $('#workgroup3 option:gt(0)').remove().end();
+      $('#subgroup3 option:gt(0)').remove().end();
+      if($("#customer3 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgroup3").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgroup3").on('change',function(){
+        $('#subgroup3 option:gt(0)').remove().end();
+        if($("#workgroup3 :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgroup3").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  </script>
+</html>
+

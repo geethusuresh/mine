@@ -1,0 +1,234 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">List Of Appllications  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Asset Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row" style="margin-left:5%">
+              {% for app in apps %}
+                <a href="/management/application/{{app.id}}">
+                <div class="col-md-6 col-lg-{% cycle "4" '3' %}">
+                  <div class="panel panel-{% cycle "success" "info" "primary" "warning" %} panel-colorful">
+                    <div class="pad-all media">
+                      <div class="media-left">
+                        <span class="icon-wrap icon-wrap-xs">
+                          <i class="fa fa-users fa-2x"></i>
+                        </span>
+                      </div>
+                      <div class="media-body">
+                        <p class="h3 text-thin media-heading">314,675</p>
+                        <small class="text-uppercase">{{app.app_name}}</small>
+                      </div>
+                    </div>
+                    <div class="progress progress-xs progress-dark-base mar-no">
+                      <div style="width: 30%" class="progress-bar progress-bar-light" aria-valuemax="100" aria-valuemin="0" aria-valuenow="30" role="progressbar"></div>
+                    </div>
+                    <div class="pad-all text-right">
+                      <small><span class="text-semibold"></span>{{app.host}}</small>
+                    </div>
+                  </div>
+                </div>
+                </a>
+                {% endfor %}
+                <div class="col-md-6 col-lg-3">
+                  <a href="" data-toggle="modal" data-target="#app_add">
+                  <div class="panel panel-purple panel-colorful">
+                    <div class="panel-body text-center">
+                      <p class="text-uppercase mar-btm text-sm">Add New</p>
+                      <i class="fa fa-plus fa-5x"></i>
+                      <p>Application</p>
+                    </div>
+                  </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+<div class="modal fade" id="app_add" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Create Infrastructure Application</h4>
+      </div>
+      <form action="/dashboard/index/application/add_app/{{host.id}}" method="post" enctype="multipart/form-data" id="incident_form">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <label>App name</label>
+              <input type="text" name="appname" class="form-control" required>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" >
+      <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Create</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+
+
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/plain_chart/springy.js"></script>
+    <script src="/static/plain_chart/springyui.js"></script>
+    <script>
+     $("#table_id").DataTable();
+
+    $("#asset").addClass("active");
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    </script>
+    <script>
+var graph = new Springy.Graph();
+
+
+{% for app in relation_list %}
+var {{app.names}} = graph.newNode  ({
+  label: '{{app.names}}',
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.name}}, {{app.obj2.name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+
+jQuery(function(){
+  var springy = window.springy = jQuery('#springydemo').springy({
+    graph: graph,
+    nodeSelected: function(node){
+      console.log('Node selected: ' + JSON.stringify(node.data));
+    }
+  });
+});
+</script>
+    </body>
+</html>

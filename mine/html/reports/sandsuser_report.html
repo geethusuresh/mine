@@ -1,0 +1,1335 @@
+{% load humanize %}
+{% load zone %}
+{% load set_var %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+        <link rel="stylesheet" type="text/css" href="/static/fonts/font-mfizz.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .media-left{
+                float: left;
+            }
+            ul{
+                list-style: none outside none;
+                padding-left: 0;
+                margin: 0;
+            }
+            .content-slider li{
+                /*background-color: #ed3020;*/
+                text-align: center;
+                color: #FFF;
+            }
+            .content-slider h3 {
+                margin: 0;
+                padding: 70px 0;
+            }
+            .demo {
+                margin: 3em 0;
+                padding: 0px;
+                background: transparent;
+            }
+            .box_rotate {
+                -webkit-transform: rotate(360.5deg);  /* Chrome, Safari 3.1+ */
+                -moz-transform: rotate(360.5deg);  /* Firefox 3.5-15 */
+                -ms-transform: rotate(360.5deg);  /* IE 9 */
+                -o-transform: rotate(360.0deg);  /* Opera 10.50-12.00 */
+                transform: rotate(360.0deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .box_transition {
+                -webkit-transition: all 15.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+                -moz-transition: all 15.3s ease-out;  /* Firefox 4-15 */
+                -o-transition: all 15.3s ease-out;  /* Opera 10.50–12.00 */
+                transition: all 15.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .lSAction > a {
+                background-color: gray !important;
+                z-index: 0 !important;
+            }
+            .lSAction > a:hover {
+                z-index: 0 !important;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/justgauge/raphael-2.1.4.min.js"></script>
+        <script type="text/javascript" src="/static/js/justgauge/justgage-1.1.0.min.js"></script>
+    </head>
+    <body class="fixed" style="font-size:13px" id="customer_dashboard">
+        {% include "components/cust_header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/customer.html"%}
+            <div class="rightside">
+                {% if alert_message %}
+                    {% for alert in alert_message %}
+                      {% if profile.customer in alert.viewable_custs.all%}
+                          <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+                      {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <div class="page-head" style="margin-top:10px">
+                    <h1  class="pull-left text-thin">Predefined Reports</h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Reports</li>
+                    </ol>
+                    <br/>
+                </div>
+
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-purple" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form target="_blank" method="post" action="/sands_user_reports/" id="frm_pdf">
+                              {% csrf_token %}                             
+                              <img src="/static/img/export-to-pdf.png" title="Export to PDF" style="cursor:pointer;float:right;margin:0 7px 10px 0; width:140px;" onclick="$('#frm_pdf').submit();" />
+                              <input type="hidden" name="canned_ticket_action" value="{{ticket_action}}">
+                              <input type="hidden" name="canned_option" value="{{event_type}}">
+                              <input type="hidden" name="duration" value="{{duration}}">
+                              <input type="hidden" name="start_date" value="{{start_date_post}}">
+                              <input type="hidden" name="end_date" value="{{end_date_post}}">
+                              <input type="hidden" name="report_op" value="pdf_export">
+                            </form>
+                        </div>
+                        
+                        {% if event_type == "severity" %}
+                            <div class="col-md-12">
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <div  id="pie_chart_severity"> </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if event_type == "source" %}
+                            <div class="col-md-12">
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <div  id="pie_chart_events" ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if event_type == "category" %}
+                            <div class="col-md-12">
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <div  id="pie_chart_category"> </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% if event_type == "escalated" %}
+                            <div class="col-md-12">
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <div  id="pie_chart_events_es" ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if "infrastructure" in request.session.logged_user_priv %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div  class="panel plain text-center">
+                                    <div class="panel-body">
+                                        <div class="row " >
+                                            <l class="fa fa-cube fa-3x"></l>
+                                            <h2 class="panel-title" style="color:#515151;font-size:25px" style="text-thin">Data Centers</h2>
+                                        </div>
+                                        <hr>
+                                        <div class="demo">
+                                            <div class="item">
+                                                <ul id="content-slider" class="content-slider">
+                                                    {% for data in datacenters %}
+                                                        <li class="col-xs-2">
+                                                        <a href="/management/infra/{{data.id}}" style="color:#515151">
+                                                        <h4>{{data.dc_name}}</h4>
+                                                        <p class="text-sm mar-no">{{data.location}}</p>
+                                                        </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="col-sm-6">
+                                    <a href="/management/infrastructure/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-database fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{dc}}</p>
+                                                <p class="text-muted mar-no">Data Centers</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/infradashboard/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-building-o fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{cies}}</p>
+                                                <p class="text-muted mar-no">Configuration Item</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/application/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-connectdevelop fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{apps_count}}</p>
+                                                <p class="text-muted mar-no">Applications</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">
+                                    <a href="/management/infradashboard/">
+                                        <div class="panel media pad-all">
+                                            <div class="media-left pull-left" style="color:#515151">
+                                                <span class="icon-wrap icon-wrap-sm icon-circle bg-default">
+                                                <i class="fa fa-server fa-2x"></i>
+                                                </span>
+                                            </div>
+                                            <div class="media-body">
+                                                <p class="text-2x mar-no text-thin">{{hosies}}</p>
+                                                <p class="text-muted mar-no">Hosts</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-sm-6">&nbsp;</div>
+                                <div class="col-sm-6">&nbsp;</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if "helpdesk" in request.session.logged_user_priv %}
+                        <div class="panel">
+                            <div class="panel-heading">
+                            {% if event_type == "severity" %}
+                                <h3 class="panel-title text-center">All Events by Severity</h3>
+                            {% endif %}
+                            {% if event_type == "source" %}
+                                <h3 class="panel-title text-center">All Events by Source</h3>
+                            {% endif %}
+                            {% if event_type == "category" %}
+                                <h3 class="panel-title text-center">All Events by Category</h3>
+                            {% endif %}
+                            {% if event_type == "escalated" %}
+                                <h3 class="panel-title text-center">All Escalated Events</h3>
+                            {% endif %}
+                            </div><!-- /.box-title -->
+                            <div class="panel-body no-padding">
+                                <table class="table table-striped" id="table_id">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Ticket ID</th>
+                                            <th>Created Date</th>
+                                            <th>Ticket Summary</th>
+                                            <th>Severity</th>
+                                            <th>Status</th>
+                                            <th style="width:100px;">Escalated Date</th>
+                                            <th>Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticket in my_tickets %}
+                                            <tr>
+                                                <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-default btn-sm" href="/customer/tickets/detail/{{ticket.id}}">
+                                                <i class="fa fa-edit "></i>
+                                                </a></td>
+                                                <td class="grey"><a href="/customer/tickets/detail/{{ticket.id}}" style="color:#555">{{ticket.ticketid}}</a></td>
+                                                <td class="grey">{% tzone ticket.creationdate %}</td>
+                                                <td class="grey">{{ticket.summary}}</td>
+                                                <td class="grey" >{{ticket.internalpriority}}</td>
+                                                <td class="grey">{{ticket.status | real:ticket.customer.id}}</td>
+                                                <td class="grey">
+                                                {% if ticket.id in worklogs.keys %}
+                                                    {{ worklogs|access:ticket.id  }}
+                                                {% else %}
+                                                    None
+                                                 {% endif %}
+                                                </td>
+                                                <td class="grey">{{ticket.source}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div><!-- /.wrapper -->
+        <div class="modal fade" id="cahrt_popup" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" style="width:80%;">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: white!important;">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h4>Events&nbsp <span id="date_span">({{ title_label }})</span> </h4>
+                            </div>
+                            <!-- <div class="col-md-2"> -->
+                            <!-- <div class="btn-group col-md-2" style="margin-left: -61px;">
+                                <a href="#" id="drop_thought" role="button" class="dropdown-toggle btn btn-info white-text" data-toggle="dropdown"><i class="fa fa-calendar"></i> </a>
+                                <ul class="dropdown-menu white-text" id="tools_drop" role="menu" aria- labelledby="drop_thought">
+                                    <li id="l_week0"><a class="btn  white-text">Today</a></li>
+                                    <li id="l_week"><a class="btn  white-text">Last Day</a></li> -->
+                                    <!-- <li class="divider"></li> -->
+                                    <!-- <li id="t_month"><a class="btn">Last Week</a></li> -->
+                                    <!-- <li class="divider"></li> -->
+                                    <!-- <li id="l_month"><a class="btn">Last Month</a></li> -->
+                                    <!-- <li><a class="btn btn-primary">Permanent</a></li> -->
+                                <!-- </ul>
+                            </div> -->
+                            <!-- </div> -->
+                            <!-- </button> -->
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row" id="chart_change_div">
+                            <div class="col-md-2 vcenter">
+                                <div class="vertical">
+                                    <div class="boxTile btn btn-info rcorners2" style="width:62%;background-color: ;" id="bar" onclick="changeChart('bar')">
+                                        <div class="square">
+                                            <i class="fa fa-area-chart"></i>
+                                            <div>
+                                                <span class="text">Bar Chart</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="chart_div" class="col-md-8"></div>
+                            <div id="modal_events_div" class="col-md-9" style="display:none;">
+                                <div class="box">
+                                    <table class="table table-hover table-striped" style="table-layout: fixed;    word-wrap: break-word;" id="modal_events_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Server</th>
+                                                <th>Event Record Time</th>
+                                                <th>Event Data</th>
+                                                <!-- <th>Insert time</th> -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <!-- <button class="btn btn-info" style="float:right;display:none;" id="host_submit" onclick="fetch_data()" type="submit">Fetch Events</button> -->
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        {% include "components/customer_footer.html" %}
+        {% include "reports/reports_js.html" %}
+        {% include "security_monitoring/redcanary/tickets_pie.html" %}
+        <script src="/static/lightslider/lightslider.js"></script>
+        <script src="/static/chartjs/Chart.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#content-slider").lightSlider({
+                    loop: false,
+                    keyPress: true,
+                    item: 1,
+                });
+            });
+        </script>
+        <script>
+            $("#dash").addClass("active")
+        </script>
+
+        <script>
+            function animate_alert_msg() {
+                $('#alert_msg').css({right:'0%'});
+                $('#alert_msg').animate({right: '-100%'}, 20000, 'linear', function(){animate_alert_msg();});
+            }
+            $(document).ready(function(){
+                animate_alert_msg();
+            });
+        </script>
+
+
+        <script src="/static/js/highcharts/highcharts.js"></script>
+        <script src="/static/js/highcharts/no-data-to-display.js"></script>
+        <script src="/static/js/highcharts/highcharts-more.js"></script>
+        <script src="/static/js/highcharts/exporting.js"></script>
+        <script src="/static/js/chart.min.js"></script>
+        <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-chart.js"></script>
+        <script type="text/javascript" src="/static/angular/app.js"></script>
+        <script type="text/javascript" src="/static/angular/controllers.js"></script>
+        <script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.js">
+        <!-- // <script src="/static/daterangepicker/daterangepicker.js" type="text/javascript"></script> -->
+
+        <script type="text/javascript">
+        // $(document).ready(function() {
+        //     $.ajax({
+        //         url: "/niksun/draw/events/chart",
+        //         type: "POST",
+        //         dataType: "json",
+        //         data: {
+        //             csrfmiddlewaretoken: '{{ csrf_token }}'
+        //         },
+        //         success: function(data1) {
+        //             labels = data1[1]
+        //             values = data1[0]
+        //                 // for (var key in data1){
+        //                 //   labels.push(key);
+        //                 //   values.push(data1[key]);
+        //                 // }
+        //             var data = {
+        //                 labels: labels,
+        //                 datasets: [{
+        //                     label: "My Second dataset",
+        //                     fillColor: "rgba(151,187,205,0.2)",
+        //                     strokeColor: "rgba(151,187,205,1)",
+        //                     pointColor: "rgba(151,187,205,1)",
+        //                     pointStrokeColor: "#fff",
+        //                     pointHighlightFill: "#fff",
+        //                     pointHighlightStroke: "rgba(151,187,205,1)",
+        //                     data: values
+        //                 }]
+        //             };
+        //             var event_chart = document.getElementById('buyers').getContext('2d');
+        //             new Chart(event_chart).Line(data);
+        //         },
+        //     });
+        //     return false;
+        // });
+
+        function pieChart1() {
+            $('#pie_chart_severity').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Severity ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                colors: ["#FF0000", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    // data: data_list,
+                    data: [
+                        {% for item in severities %}
+                            {
+                                name: '{{item.internalpriority}}',
+                                y: {{item.count}},
+                                {% if item.internalpriority == "Critical" %}
+                                    color: "#BC0707" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "High" %}
+                                    color: "red" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "Medium" %}
+                                    color: "#2A82D7" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "Low" %}
+                                    color: "#008000" // Joe's color
+                                {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                // debugger;
+                                // pieData(this.name, 'category')
+                                view_tickets_only(this.name, 'severity')
+                                // console.log(this.name, 'Severity');
+                                // if (this.name == "Severity 1")
+                                // {
+                                //     view_map(1, 'Severity');
+                                // }
+                                // else if(this.name == "Severity 2")
+                                // {
+                                //     view_map(2, 'Severity');
+                                // }
+                                // else{
+                                //     view_map(3, 'Severity');
+                                // }
+                                // view_map("niksun", 'category')
+
+                            }
+                        }
+                    }
+
+                }]
+            });
+            $("#date_filter1").show();
+            $("#date_filter2").show();
+        }
+
+        function pieChart2(data_list, title) {
+            $('#pie_chart2').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+                    },
+                    text: 'Classification of alerts (' + title + ')'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                exporting: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    data: data_list,
+                    point: {
+                        events: {
+                            click: function() {
+                                view_map(this.name, 'classification')
+                            }
+                        }
+                    }
+                }]
+            });
+        }
+        // if('{{ event_type }}' == "severity"){
+        //     $.ajax({
+        //         url: "/niksun/pie/data",
+        //         type: "POST",
+        //         dataType: "json",
+        //         data: {
+        //             start_date: '{{ start_date }}',
+        //             end_date: '{{ end_date }}',
+        //             duration: '{{ duration }}',
+        //             csrfmiddlewaretoken: '{{ csrf_token }}'
+        //         },
+        //         success: function(data) {
+        //             console.log('jjjjjjj********'+data)
+        //             susp_list = JSON.parse(data['suspicious']);
+        //             host_list = JSON.parse(data['host']);
+        //             pieChart1(host_list, 'Last 24 Hours');
+        //             // pieChart2(susp_list, 'Last 24 Hours');
+
+        //         },
+        //     });
+        // }
+        if('{{ event_type }}' == "severity"){
+            pieChart1();
+        }
+
+    function PieChartEvents() {
+            $('#pie_chart_events').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Source ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in alerts %}
+                            {
+                            name: '{{item.0}}',
+                            y: {{item.1}},
+                            {% if item.0 == "Niksun" %}
+                                color: "#FFCC33" 
+                            {% endif %}
+                            {% if item.0 == "Redcanary" %}
+                                color: "#CE232E" 
+                            {% endif %}
+                            {% if item.0 == "LEM" %}
+                                color: "#C14000" 
+                            {% endif %}
+                            {% if item.0 == "Varonis" %}
+                                color: "#E7111A" 
+                            {% endif %}
+                            {% if item.0 == "Zixcorp" %}
+                                color: "#1637A7" 
+                            {% endif %}
+                            {% if item.0 == "Isensor" %}
+                                color: "#CECECF" 
+                            {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name);
+                                // view_tickets(this.name, 'tickets')
+                                view_tickets_only(this.name, 'tickets');
+                            }
+                        }
+                    }
+
+                }]
+            });
+        }
+         function PieChartCategory() {
+            $('#pie_chart_category').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Category ({{title_label}})'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                exporting: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                width: '130px',
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in tickets %}
+                            {
+                            name: '{{item.0}}',
+                            y: {{item.1}},
+                            // color: "#DF5353" // Joe's color
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name, 'incident');
+                                // view_tickets(this.name, 'Category')
+                                view_tickets_only(this.name, 'Category');
+                            }
+                        }
+                    }
+                }]
+            });
+        }
+        function PieChartES() {
+            $('#pie_chart_events_es').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Escalated Events ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                colors: ["#f45b5b", "#8085e9", "#8d4654", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in internalpriority %}
+                            {
+                            name: '{{item.internalpriority}}',
+                            y: {{item.count}},
+                            {% if item.internalpriority == "Critical" %}
+                                color: "#BC0707" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "High" %}
+                                color: "red" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "Medium" %}
+                                color: "#2A82D7" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "Low" %}
+                                color: "#008000" // Joe's color
+                            {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name, 'incident');
+                                // view_tickets(this.name, 'incident');
+                                view_tickets_only(this.name, 'Escalated');
+
+                                // view_section_tickets(this.name, 'incident')
+
+                            }
+                        }
+                    }
+
+                }]
+            });
+        }
+
+        if('{{ event_type }}' == "source"){
+            PieChartEvents();
+        }
+        if('{{ event_type }}' == "category"){
+            PieChartCategory();
+        }
+        if('{{ event_type }}' == "escalated"){
+            PieChartES();
+        }
+        </script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+            // $('#name_table21').dataTable({
+            // "bPaginate": false,
+            // "bLengthChange": false,
+            // "bFilter": false,
+            // "bInfo": false,
+            // "bAutoWidth": false,
+            // "order": [[ 1, "desc" ]]
+            // });
+            $('#table_index').DataTable();
+            $('#agents_table').DataTable({
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "aaSorting": []
+            });
+            
+        });
+        
+        </script>
+
+    <script type="text/javascript">
+        var name_ajax = '';
+        var type_ajax = '';
+        var agent_ajax = '';
+        var host_ajax = '';
+        var source_ajax = '';
+        var date = 0;
+        var piedate = 0;
+        var piedate2 = 0;
+        var cat = '';
+        var classi = '';
+
+
+        function view_map(name, type, from_call) {
+            console.log('view map'+name)
+            
+            l1_ajax = name;
+            name_ajax = name;
+            type_ajax = type;
+            source_ajax = '';
+            agent_ajax = '';
+            host_ajax = '';
+
+            $.ajax({
+                url: "/redcanary/security/viewmap",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    filter_value: name_ajax,
+                    chart_type: type_ajax,
+                    start_date: '{{ start_date }}',
+                    end_date: '{{ end_date }}',
+                    duration: '{{ duration }}',
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    // var obj = $.parseJSON(data);
+                    // draw_map(obj);
+                    var key = [];
+                    var value = [];
+                    for (var prop in data) {
+                        // alert(prop + " is " + data[prop]);
+                        key.push(data[prop][1]);
+                        value.push(data[prop][0]);
+                    }
+                    draw_map(key, value)
+                    $("#cahrt_popup").modal('show');
+                    $("#chart_div").show();
+                    $("#modal_events_div").hide();
+
+                },
+                error: function(xhr, errmsg, err) {
+                    // alert(err);
+                }
+            });
+            return false;
+        }
+
+        function modalEventsTable(temp) {
+            console.log('ssss'+temp)
+            
+
+            if ($("#modal_events_table").hasClass('initialized')) {
+                $('#modal_events_table').dataTable().fnDestroy();
+            } else {
+                $("#modal_events_table").addClass('initialized')
+            }
+            $('#modal_events_table').dataTable({
+                "bLengthChange": false,
+                // "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/redcanary/popup/events",
+                    "dataType": "json",
+                    "type": "POST",
+                    "data": {
+                        filter_type: type_ajax,
+                        filter_value: name_ajax,
+                        date: temp,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    "dataSrc": ""
+                },
+                "columns": [{
+                    "": "fields.0"
+                }, {
+                    "": "fields.1"
+                }, {
+                    "": "fields.2"
+                }],
+            });
+            $("#chart_div").hide();
+            $("#modal_events_div").show();
+        }
+
+        function fetch_data() {
+            if ($("input[name=person1]:checked")) {
+                var temp = $("input[name=person1]:checked");
+                var $td = $(temp).closest('td').next('td');
+                var $th = $td.closest('table').find('th').eq($td.index());
+                var f_type = $th.html();
+                var f_value = $td.html().replace(/\&gt;/g, ">");
+                if (f_type == 'Source IP') {
+                    source_ajax = f_value;
+                    agent_ajax = '';
+                    host_ajax = '';
+                } else if (f_type == 'Agent') {
+                    agent_ajax = f_value;
+                    source_ajax = '';
+                    host_ajax = '';
+                } else if (f_type == 'Host') {
+                    host_ajax = f_value;
+                    agent_ajax = '';
+                    source_ajax = '';
+                }
+                ext_list = []
+                if (cat != '') {
+                    ext_list.push('category')
+                    ext_list.push(cat)
+                } else if (classi != '') {
+                    ext_list.push('classification')
+                    ext_list.push(classi)
+                }
+                // if (f_type == 'Agent'){
+                //   a_value = f_value.replace(/\&gt;/g,">")
+                // }
+                $.ajax({
+                    url: "/security/dashboard/filter",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        filter_value: f_value,
+                        filter_type: f_type,
+                        date: date,
+                        temp_list: ext_list,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        // var obj = $.parseJSON(data);
+                        // draw_map(obj);
+                        var key = [];
+                        var value = [];
+                        for (var prop in data) {
+                            //   // alert(prop + " is " + data[prop]);
+                            key.push(data[prop][1]);
+                            value.push(data[prop][0]);
+                        }
+                        draw_map(key, value);
+                        $("#chart_div").show();
+                    },
+                    error: function(xhr, errmsg, err) {
+                        // alert(err);
+                    }
+                });
+                return false;
+                // alert($("input[name=person1]:checked").val());
+            }
+        }
+
+        function tempf(dat) {
+            $("#chart_div").hide();
+            $("#modal_events_div").show();
+        }
+        var chart;
+
+        function draw_map(key, value) {
+            chart = new Highcharts.Chart({
+                chart: {
+                    type: 'column',
+                    renderTo: 'chart_div',
+                },
+                title: {
+                    text: ''
+                },
+                exporting: {
+                    enabled: false
+                },                
+                xAxis: {
+                    min: 0,
+                    max: 5,
+                    categories: key,
+                    labels: {
+                        rotation: -45
+                    },
+                },
+                scrollbar: {
+                    enabled: false,
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Count'
+                    }
+                },
+
+                tooltip: {
+                    formatter: function() {
+                        return '' +
+                            this.series.name + ': ' + this.y;
+                    }
+                },
+
+                plotOptions: {
+                    column: {
+                        minPointLength: 4
+                    },
+                    series: {
+                        borderWidth: 0,
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.y}'
+                        }
+                    }
+                },
+
+                series: [{
+                    allowPointSelect: true,
+                    type: 'column',
+                    color: '#FF0000',
+                    name: 'Events',
+                    data: value,
+                    point: {
+                        events: {
+                            click: function() {
+                                modalEventsTable(this.category);
+                            }
+                        }
+                    }
+                }]
+            });
+        }
+        $("#fetch").click(function() {
+            if ($("#from_date").val() && $("#to_date").val()) {
+                $.ajax({
+                    url: "/security/modal/viewmap",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        filter_value: name_ajax,
+                        chart_type: type_ajax,
+                        from_date: $("#from_date").val(),
+                        to_date: $("#to_date").val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        // var obj = $.parseJSON(data);
+                        // draw_map(obj);
+                        // var key=[];
+                        // var value=[];
+                        // for (var prop in data) {
+                        //   // alert(prop + " is " + data[prop]);
+                        //   key.push(prop);
+                        //   value.push(data[prop]);
+                        // }
+                        // draw_map(key,value)
+
+
+                    },
+                    error: function(xhr, errmsg, err) {
+                        // alert(err);
+                    }
+                });
+                return false;
+            }
+        });
+
+        function modalHostTable() {
+            if ($("#modal_host_table").hasClass('initialized')) {
+                $('#modal_host_table').dataTable().fnDestroy();
+            } else {
+                $("#modal_host_table").addClass('initialized')
+            }
+            $('#modal_host_table').dataTable({
+                "bLengthChange": false,
+                "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/popup/hosts",
+                    "dataType": "json",
+                    "type": "POST",
+                    "data": {
+                        // filter_type2:type_ajax,
+                        // filter_value2:name,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    "dataSrc": ""
+                },
+                "columns": [
+                    // { "": "fields.id",sClass: "hidden" },
+                    {
+                        "": "",
+                        "bSortable": false,
+                    }, {
+                        "": "fields.server_name"
+                    },
+                    // { "": "fields.event_data" },
+                    // { "": "fields.event_record_time" },
+                ],
+                "columnDefs": [{
+                    "targets": 0,
+                    "data": "fields.id",
+                    "defaultContent": "<input type='radio' name='person1' value=" + "data" + ">"
+                }]
+            });
+            $("#chart_div").hide();
+            $("#modal_events_div").hide();
+        }
+
+        function modalAgentTable() {
+            if ($("#modal_agent_table").hasClass('initialized')) {
+                $('#modal_agent_table').dataTable().fnDestroy();
+            } else {
+                $("#modal_agent_table").addClass('initialized')
+            }
+            $('#modal_agent_table').dataTable({
+                "bLengthChange": false,
+                "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/popup/agents",
+                    "dataType": "json",
+                    "type": "POST",
+                    "data": {
+                        // filter_type2:type_ajax,
+                        // filter_value2:name,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    "dataSrc": ""
+                },
+                "columns": [
+                    // { "": "fields.id",sClass: "hidden" },
+                    {
+                        "": "",
+                        "bSortable": false,
+                    }, {
+                        "": "fields.agent_name"
+                    },
+                    // { "": "fields.event_data" },
+                    // { "": "fields.event_record_time" },
+                ],
+                "columnDefs": [{
+                    "targets": 0,
+                    "data": "fields.id",
+                    "defaultContent": "<input type='radio' name='person1' value=" + "data" + ">"
+                }]
+            });
+            $("#chart_div").hide();
+            $("#modal_events_div").hide();
+        }
+
+        function modalSourceTable() {
+            if ($("#modal_source_table").hasClass('initialized')) {
+                $('#modal_source_table').dataTable().fnDestroy();
+            } else {
+                $("#modal_source_table").addClass('initialized')
+            }
+            $('#modal_source_table').dataTable({
+                "bLengthChange": false,
+                "bFilter": false,
+                "bInfo": false,
+                "bAutoWidth": false,
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/popup/source",
+                    "dataType": "json",
+                    "type": "POST",
+                    "data": {
+                        // filter_type2:type_ajax,
+                        // filter_value2:name,
+                        date: date,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    "dataSrc": ""
+                },
+                "columns": [
+                    // { "": "fields.id",sClass: "hidden" },
+                    {
+                        "": "",
+                        "bSortable": false,
+                    }, {
+                        "": "fields.ip"
+                    },
+                    // { "": "fields.event_data" },
+                    // { "": "fields.event_record_time" },
+                ],
+                "columnDefs": [{
+                    "targets": 0,
+                    "data": "fields.id",
+                    "defaultContent": "<input type='radio' name='person1' value=" + "data" + ">"
+                }]
+            });
+            $("#chart_div").hide();
+            $("#modal_events_div").hide();
+        }
+
+        function filterBy(val) {
+            if (val == 'hosts') {
+                modalHostTable();
+            } else if (val == 'agents') {
+                modalAgentTable();
+            } else if (val == 'source') {
+                modalSourceTable();
+            }
+        }
+
+        function changeChart(dat) {
+            if (dat == 'bar') {
+                chart.series[0].update({
+                    type: "bar"
+                });
+                $("#chart_div").show();
+                $("#modal_events_div").hide();
+            } else if (dat == 'line') {
+                chart.series[0].update({
+                    type: "line"
+                });
+                $("#chart_div").show();
+                $("#modal_events_div").hide();
+            } else if (dat == 'area') {
+                chart.series[0].update({
+                    type: "area"
+                });
+                $("#chart_div").show();
+                $("#modal_events_div").hide();
+            } else if (dat == 'events') {
+                $("#chart_div").hide();
+                $("#modal_events_div").show();
+            }
+        }
+        $("#l_week0").click(function() {
+            date = 0;
+            piedate = 0;
+            piedate2 = 0;
+            $("#date_span").html('(Last 24 Hrs)')
+            view_map(name_ajax, type_ajax);
+            $("#chart_div").show();
+            $("#modal_events_div").hide();
+        });
+        $("#l_week").click(function() {
+            date = 1;
+            piedate = 1;
+            piedate2 = 1;
+            $("#date_span").html('(Last 48 Hrs)')
+            view_map(name_ajax, type_ajax);
+            $("#chart_div").show();
+            $("#modal_events_div").hide();
+        });
+        $("#t_month").click(function() {
+            date = 2;
+            piedate = 2;
+            piedate2 = 2;
+            $("#date_span").html('(Last Week)')
+            view_map(name_ajax, type_ajax);
+            $("#chart_div").show();
+            $("#modal_events_div").hide();
+        });
+        $("#l_month").click(function() {
+            date = 3;
+            piedate = 3;
+            piedate2 = 3;
+            $("#date_span").html('(Last Month)')
+            view_map(name_ajax, type_ajax);
+            $("#chart_div").show();
+            $("#modal_events_div").hide();
+        });
+        //   $('#cahrt_popup').on('hidden.bs.modal', function () {
+        //     $("#date_span").html('(Last Week)')
+        //     // do something…
+        // })
+    </script>
+    </body>
+</html>

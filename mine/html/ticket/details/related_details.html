@@ -1,0 +1,43 @@
+{% load zone %}
+<form action="/ticket/relate/{{ticket.id}}" method="POST" >{% csrf_token %}
+    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+    <div class="row">
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-8">
+            <input class="form-control"  id="relate" type="text" name="ticketid" class="" placeholder="Ticketid to relate" >
+        </div>
+        <div class="col-sm-3">
+            <a href="" data-toggle="modal" data-target="#user1" class="btn btn-info fa fa-search" id="search"></a>
+            <button type="submit" class="btn btn-success" >Relate</button>
+        </div>
+    </div>
+</form>
+{% if relationtwo or relations %}
+    <table class="table">
+        <thead>
+            <th>Ticket Id </th>
+            <th></th>
+            <th>Ticket Id</th>
+            <th>Date</th>
+        </thead>
+        <tbody>
+            {% for relation1 in relationtwo %}
+                <tr>
+                    <td><label class="label label-success">{{ relation1.ticketone.ticketid }}</label></td>
+                    <td> {{relation1.relation}} </td>
+                    <td> <a href="/ticket/view_ticket/{{relation1.tickettwo.id}}/" class="label label-success">{{ relation1.tickettwo.ticketid }}</a></td>
+                    <td>{% tzone relation1.date %}</td>
+                </tr>
+            {% endfor %}
+            {% for relation in relations %}
+                <tr>
+                    <td><label class="label label-success">{{ relation.ticketone.ticketid }}</label></td>
+                    <td> {{relation.relation}} </td>
+                    <td> <a href="/ticket/view_ticket/{{relation.tickettwo.id}}/" class="label label-success">{{ relation.tickettwo.ticketid }}</a></td>
+                    <td>{% tzone relation.date %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

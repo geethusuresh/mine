@@ -1,0 +1,388 @@
+{% load zone %}
+<div class="modal fade" id="close_change" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Close Change </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'close_change' rfc.id %}" >{% csrf_token %}
+                    
+                    <label><strong>Comments</strong></label>
+                    <textarea name="comments" class="form-control"></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="review_change" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Review </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/rfc/review_change/{{rfc.id}}/" >{% csrf_token %}
+                    <label><strong>Implementation Review</strong></label>
+                    <select class="form-control" name="imple_review" required>
+                        <option value="">--Select--</option>
+                        <option value="Satisfied">Satisfied</option>
+                        <option value="Not Satisfied">Not Satisfied</option>
+                    </select><br/>
+                    <label><strong>Review Comments</strong></label>
+                    <textarea name="review_comments" class="form-control"></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="resubmit_change" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Change Resubmit </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/rfc/change_resubmit/{{rfc.id}}/" id="sched_appr_review_form">{% csrf_token %}
+                    <label><strong>Resubmit Status</strong></label>
+                    <select name="is_submitted" class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="True">Resubmit</option>
+                        <option value="False">No Resubmit</option>
+                    </select><br/>
+                    <label><strong>Comments</strong></label>
+                    <textarea name="comments" class="form-control" required></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="schedule_approval_window" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Approve/Reject </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="" id="sched_appr_form">{% csrf_token %}
+                    <label><strong>Status</strong></label>
+                    <select name="status" class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="Approve">Approve</option>
+                        <option value="Reject">Reject</option>
+                    </select><br/>
+                    <label><strong>Comments</strong></label>
+                    <textarea name="comments" class="form-control" required></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="approve_req" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Approve/Reject </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/rfc/approve/{{rfc.id}}/">{% csrf_token %}
+                    <label><strong>Status</strong></label>
+                    <select name="status" class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="Approve">Approve</option>
+                        <option value="Reject">Reject</option>
+                    </select><br/>
+                    <label><strong>Remarks</strong></label>
+                    <textarea name="remarks" class="form-control" required></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="add_approvers" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Add Approvers </h4>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="/rfc/add_approver/{{rfc.id}}/">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label><strong>Domain</strong></label>
+                            <select name="app_domain" id="app_dom" class="form-control" required>
+                                <option value="">--Select--</option>
+                                {% for group in group_list %}
+                                    <option value="{{group.id}}">{{group.workgroup}}</option>
+                                {% endfor %}
+                            </select><br/>
+                            <label><strong>Subdomain</strong></label>
+                            <select name="app_sub_domain" id="app_subdom" class="form-control" required>
+                                <option value="">--Select--</option>
+                            </select><br/>
+                            <label><strong>Approval Level</strong></label>
+                            <select name="approval_level" required class="form-control">
+                                <option value="">--Select--</option>
+                                <option value="L1">Level 1</option>
+                                <option value="L2">Level 2</option>
+                                <option value="L3">Level 3</option>
+                            </select><br/>
+                            <label><strong>Remarks</strong></label>
+                            <textarea name="remarks" class="form-control"></textarea><br/>
+                            <button class="btn btn-success" type="submit">Add Approver</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="resched" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true" style="height:700px">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Modify Change Schedule</h4>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="/rfc/re_schedule/{{rfc.id}}/">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label><strong>New Scheduled Start</strong></label>
+                            <div class='input-group date' id='re_dt_picker1'>
+                                <input type='text' class="form-control"  id="re_sched_start" required/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div><br/>
+                            <input type="hidden" name="scheduled_start" id="scheduled_start_dat"/>
+                            <label><strong>New Scheduled Finish</strong></label>
+                            <div class='input-group date' id='re_dt_picker3'>
+                                <input type='text' class="form-control" id="re_sched_finish" required/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div><br/>
+                            <label><strong>Old Scheduled Start </strong></label>
+                            <input type="text" class="form-control" value="{% tzone rfc.scheduled_start %}" readonly/><br/>
+                            <label><strong>Old Scheduled Finish</strong></label>
+                            <input type="text" class="form-control" value="{% tzone rfc.scheduled_finish %}" readonly /><br/>
+                            <label id="re_sched_date_conflict" class="label label-danger" style="margin-bottom:10px">Scheduled Finish should be greater than Scheduled Start</label>
+                            <input type="hidden" name="scheduled_finish" id="re_scheduled_fini_dat"/>
+                            <button class="btn btn-success pull-right" type="submit" id="re_submit">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="create_task" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Create Task </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/rfc/create_task/{{rfc.id}}/" id="create_task_form">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="col-sm-6">
+                                <label><strong>Task Title</strong></label>
+                                <input type="text" name="task_title"  class="form-control" required/>
+                                <label><strong>Category</strong></label>
+                                <select name="task_cat" id="task_cate" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                    {% for cat in categories %}
+                                        <option value="{{cat.id}}">{{cat.name}}</option>
+                                    {% endfor %}
+                                </select><br/>
+                                <label><strong>SubCategory</strong></label>
+                                <select name="task_subcat" id="task_sub_cat" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                                <label class="label label-success" ><strong>Change Start : </strong>{% tzone rfc.scheduled_start %}</label><br/>
+                                <label><strong>Scheduled Start</strong></label>
+                                <p id="sched_star" class="display-none">{{ rfc.scheduled_start|date:'m/d/Y H:i' }}</p>
+                                <div class='input-group date' id='datetimepicker12' >
+                                    <input type='text' class="form-control"  id="schedu_start_dat_val" name="schedu_start" required/>
+                                    <input type="hidden" id="utc_date1" name="sched_start"/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <div id="blink_start" class="label label-danger text-center"> Please check the SCHEDULED START</div>
+                                <div id="blink_date_conflict" class="label label-danger">Please check the choosed date</div><br/>
+                                <label><strong>Priority</strong></label>
+                                <select name="task_priority" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select><br/>
+                            </div>
+                            <div class="col-sm-6">
+                                <label><strong>Domain</strong></label>
+                                <select name="task_domain" id="task_doma" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                    {% for group in group_list %}
+                                        <option value="{{group.id}}">{{group.workgroup}}</option>
+                                    {% endfor %}
+                                </select>
+                                <label><strong>Subdomain</strong></label>
+                                <select name="task_sub_doma" id="task_sub_domain" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                                <label><strong>Implementer</strong></label>
+                                <select name="task_own" id="task_owner" class="form-control" required>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                                <label class="label label-success" ><strong>Change Finish : </strong>{% tzone rfc.scheduled_finish %}</label><br/>
+                                <label><strong>Scheduled Finish</strong></label>
+                                <p id="sched_fini" class="display-none">{{ rfc.scheduled_finish|date:'m/d/Y H:i' }}</p>
+                                <div class='input-group date' id='datetimepicker2'>
+                                    <input type='text' class="form-control"  id="schedu_finish_dat_val" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <div id="blink_finish" class="label label-danger"> Please check the SCHEDULED FINISH</div>
+                                <input type="hidden" id="utc_date2" name="sched_finish"/><br/>
+                                <label><strong>Target CI</strong></label>
+                                <select name="task_ci" class="form-control">
+                                    <option value="">--Select--</option>
+                                    {% for ci in ci_list %}
+                                        <option value="{{ci.id}}">{{ci.name}}</option>
+                                    {% endfor %}
+                                </select><br/>
+                            </div>
+                            <div class="col-sm-12">
+                                <label><strong>Description</strong></label>
+                                <textarea name="task_desc" class="form-control" required></textarea><br/>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="float:right" id="task_submit">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="create_ticket" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Create Ticket </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/rfc/create_related_ticket/{{rfc.id}}/">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <label>Ticket Summary: </label>
+                            <input type="text" name="tic_summ" class="form-control" required/><br/>
+                            <label>Description: </label>
+                            <textarea name="tic_desc" class="form-control" required></textarea><br/>
+                            <label>Email: </label>
+                            <input type="email" name="email" class="form-control" value="{{profile.user.email}}" required/><br/>
+                            <div class="col-sm-6">
+                                <label>Impact: </label>
+                                <select class="form-control" name="priority" required>
+                                    <option value="">-Select Impact-</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select><br/>
+                                <label>Worklocation: </label>
+                                <input type="text" name="work_loc" class="form-control" required/><br/>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Phone: </label>
+                                <input type="text" name="ph" class="form-control" value="{{profile.phonenumber_set.all.0.primary}}" required/><br/>
+                                <label>Workstation: </label>
+                                <input type="text" name="work_statn" class="form-control" required/><br/>
+                            </div>
+                            <br/>
+                            <input type="submit" value="Create Ticket" class="btn btn-success" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="activate_change" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Activate Change </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'manual_inprog' rfc.id %}" >{% csrf_token %}
+                    <label><strong>Comments</strong></label>
+                    <textarea name="comments" class="form-control" required></textarea><br/>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="add_attachment" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Add Attachment </h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_attachment' rfc.id %}" enctype="multipart/form-data">{% csrf_token %}
+                    <label class="col-sm-3 control-label" for="demo-is-inputsmall">Attachment:</label>
+                    <div class="col-sm-9">
+                        <input type="file" name="attachment" class="file_data" required/>
+                    </div>
+                    <span class="file_error_msg" style="color:red;"></span>
+                    <br/><br/>
+                    <label class="col-sm-3">Comments:</label>
+                    <div class="col-sm-9">
+                        <textarea name="comments" class="form-control" required></textarea><br/>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="float:right">Submit</button>
+                </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+        </div>
+    </div>
+</div>

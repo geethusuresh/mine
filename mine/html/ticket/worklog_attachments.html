@@ -1,0 +1,66 @@
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        {% include "components/css.html" %}
+        <style type="text/css">
+            html, body {
+                overflow: -moz-scrollbars-vertical;
+            }
+            body {
+                height: 700px;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed">
+        {% include "components/msg_div.html" %}       
+        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+            <thead>
+                <tr role="row">
+                    <th>Uploaded by</th>
+                    <th> File name</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attach in worklog.ticketattachments_set.all %}
+                    <tr>
+                        <td class="grey"><a  style="color:#555">{{attach.uploader}}</a></td>
+                        <td class="grey"><a  style="color:#555">{{attach.attachname}}</a></td>
+                        <td class="grey"><a  style="color:#555">{% tzone attach.time %}</a></td>
+                        <td>
+                            <a class="btn btn-info btn-sm" href="/media/{{attach.attachment}}" download="{{attach.docfile}}" title="Download" data-placement="bottom" data-toggle="tooltip">
+                                <i class="fa fa-download "></i>
+                            </a>
+                            <a class="btn btn-danger btn-sm" onclick="remove_attachments('{{attach.id}}')" title="Delete" data-placemet="bottom" data-toggle="tooltip">
+                                <i class="fa fa-trash-o "></i> 
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include "components/confirmation_box.html" %}
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            function remove_attachments(attachment_id){
+                $('#confirm_msg').html("<strong>Are you sure want to remove attachments?</strong>"  );
+                $('#confirm_type').val(attachment_id);
+                $('#confirm_box').modal('toggle');
+                return false;
+            }
+            function submit_ok() {
+                if ($('#confirm_type').val()) {
+                      document.location.href = "/attachment/delete/"+$('#confirm_type').val();
+                }
+            }
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap');
+            }); 
+        </script>
+    </body>
+</html>

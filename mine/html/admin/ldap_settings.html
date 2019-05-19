@@ -1,0 +1,74 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Add Customer Ldap Details <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Ldap Details</li>
+                </ol>
+            </div>
+            <div class="content">
+              <div class="row">
+                {% if status_text %}
+                  <div class="alert {{style_class}}" role="alert">{{ status_text }}</div>
+                {% endif %}
+              </div>
+              <div class="box">
+                <div class="controls" style="padding: 17px 0 21px 41px;width:90%;">
+                  <form  id="frm_ldap_settings" name ="frm_ldap_settings" method='post' action="/ldap_auth_setting/">{% csrf_token %}  
+                  <select class="form-control" name="customer" id="customer" name="customer" required>
+                      <option value="">Select any customer</option>
+                      {% for customer_info in customer_details %}
+                          {% if selected_ldap_setting.customer.id == customer_info.id %}
+                          <option selected="selected" value="{{customer_info.id}}">{{customer_info.customername}}</option>
+                          {% else %}
+                          <option value="{{customer_info.id}}">{{customer_info.customername}}</option>
+                          {% endif %}  
+                      {% endfor %}
+                    </select>
+                    <br>
+                   <input type="text" class="form-control" placeholder="Ldap server ip" name="ldap_server" id="ldap_server" required value="{{selected_ldap_setting.ldapserverip}}">
+                   <br>
+                   <input type="text" class="form-control" placeholder="Ldap Base Dn" name="ldap_base_dn" required value="{{selected_ldap_setting.ldapbasedn}}">
+                  <br>
+                 <input type="text" class="form-control" placeholder="LDAP username" name="ldap_username" required value="{{selected_ldap_setting.ldapusername}}">
+                  <br>
+                  <input type="password" class="form-control" placeholder="LDAP password" name="ldap_password" required value="{{selected_ldap_setting.ldappassword}}">
+                  <br>
+                  <textarea class="form-control" rows="3" name="ldap_search_filter" placeholder="LDAP Searchfilter" required>{{selected_ldap_setting.ldapsearchfilter}}</textarea>  
+                  <br>
+                  <textarea class="form-control" rows="3" name="ldap_search_attribute" placeholder="LDAP Search Attribute">{{selected_ldap_setting.ldapsearchattribute}}</textarea>
+                  <br>                           
+                  {% if selected_ldap_setting %}
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <input type="hidden" name="action_ldap" value="update" />
+                    <input type="hidden" name="action_id" value="{{selected_ldap_setting.id}}" />
+                    {% else %}                        
+                    <button type="submit" class="btn btn-success">Submit</button>
+                     <input type="hidden" name="action_ldap" value="submit" />
+                  {% endif %}
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}    
+    </body>
+</html>

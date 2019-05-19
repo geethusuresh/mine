@@ -1,0 +1,49 @@
+{% load zone %}
+<div class="row">
+    {% if rfc.cab_approval == None %}
+        {% if rfc.status == 'CAB' %}
+            {% if "CAB_Approval" in request.session.logged_user_priv %}
+                <form method="post" action="{% url 'change_cab_approval' rfc.id %}">{% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <label><strong>Approval:</strong></label>
+                            <select name="approval" class="form-control" required>
+                                <option value="">--Select--</option>
+                                <option value="approved">Approve</option>
+                                <option value="rejected">Reject</option>
+                            </select><br/>
+                            <label><strong>Remarks:</strong></label>
+                            <textarea name="remarks" class="form-control"></textarea>
+                        </div>
+                        <div class="col-sm-6"></div>
+                    </div>
+                    <div class="col-sm-12 pad-top">
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </div>
+                </form>
+            {% else %}
+                <p class="alert alert-success text-center text-bold">Waiting for CAB Approval</p>
+            {% endif %}
+        {% else %}
+            <p class="alert alert-success text-center text-bold">Change is not in CAB approval phase</p>
+        {% endif %}
+    {% else %}
+        <div class="col-sm-12">
+            <dl class="dl-horizontal">
+                <dt>Status : </dt>
+                <dd>
+                    {% if rfc.cab_approval == True %}
+                        <label class="label label-success" style="font-size:90%">Approved</label>
+                    {% else %}
+                        <label class="label label-danger" style="font-size:90%">Rejected</label>
+                    {% endif %}
+                </dd><br/>
+                <dt>Remarks : </dt>
+                <dd>{{rfc.cab_remarks|safe}}</dd><br/>
+                <dt>Date : </dt>
+                <dd>{% tzone rfc.cab_approved_date %}</dd>
+            </dl>
+        </div>
+    {% endif %}
+</div>
+

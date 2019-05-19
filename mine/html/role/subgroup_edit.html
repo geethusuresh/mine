@@ -1,0 +1,99 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Edit  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                  <ul >
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                      {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              <div class="col-md-12">
+              <div class="box">
+                <div class="box-title">
+                  <h3>{{ subgroup_item.workgroup }}</h3>
+                </div>
+                <div class="box-body">
+                  <form  method="post" action="#">{% csrf_token %}
+                    <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                      Subgroup Name
+                      <input class="form-control" type="text" id="name" name="name"  required value="{{subgroup_item.subgroupname}}">
+                      Description
+                      <textarea class="form-control" style="height:100px;" id="description" name="description">{{subgroup_item.description}}</textarea>
+                      Workgroup
+                      <select class="form-control" id="workgroup" name="workgroup" required >
+                        <option value="">Select Workgroup</option>
+                        {% for workgroup in workgroups %}
+                          {% if workgroup.id == subgroup_item.workgroup.id %}
+                            <option value="{{workgroup.id}}" selected>{{ workgroup.workgroup }}</option>
+                          {% else %}
+                            <option value="{{workgroup.id}}">{{ workgroup.workgroup }}</option>
+                          {% endif %}
+                        {% endfor %}
+                      </select>
+                      Team Lead
+                      <select class="form-control" name="lead" required>
+                        <option value="">Select Team Lead</option>
+                        {% for member in sub_members %}
+                          <option value="{{ member.user.email }}" {% if member == subgroup_item.group_leader %} selected {% endif %}> {{ member.user.email }}</option>
+                        {% endfor %}
+                      </select>
+                      {% if subgroup_item.active %}
+                        Active::&nbsp;&nbsp;<input class="" type="radio" id="active" name="active" value="yes" checked style="margin: 0 auto; ">Yes&nbsp;&nbsp;
+                        <input class="" type="radio" id="active" name="active" value="no" style="margin: 0 auto;">No
+                      {% else %} 
+                        Active::&nbsp;&nbsp;<input class="" type="radio" id="active" name="active" value="yes" >Yes
+                        &nbsp;&nbsp;
+                        <input class="" type="radio" id="active" name="active" value="no" checked>No
+                      {% endif %}
+                        <button class="btn btn-success pull-right"  type="submit">Update</button>
+                    </div>
+                    </div>
+                </form>
+                </div>
+              </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+
+ 
+
+

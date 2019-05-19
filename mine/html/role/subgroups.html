@@ -1,0 +1,715 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="col-sm-10">
+                <div class="box ">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab"> 
+                      <li class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">Group <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a  href="/personadmin/listview">Person</a></li>
+                          <!-- <li><a  href="#dropdown2">Dropdown2</a></li> -->
+                        </ul>
+                      </li>
+                      <li class="{% if workgroups_div  %} active {% endif %}"><a data-toggle="tab" href="#workgroups">Workgroups</a></li>
+                      <li class="{% if subgroups_div  %} active {% endif %}"><a data-toggle="tab" href="#subgroups">Subgroups</a></li>
+                     <!--  <li class="{% if members_div  %} active {% endif %}"><a data-toggle="tab" href="#members">Subgroup Members</a></li>
+                      <li class="{% if tickets_div  %} active {% endif %}" ><a data-toggle="tab" href="#tickets">Subgroup Tickets</a></li> -->
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+                      <div id="workgroups" class="tab-pane fade in {% if workgroups_div  %} active {% endif %}">
+                          <table class="table table-hover" id="workgroup_table">
+                            <thead>
+                            <tr>
+                              <th style="display:none;">No</th>
+                              <th>Workgroup</th>
+                              <th>Description</th>
+                              <th>Customer</th>
+                              <th></th>
+                            </tr> 
+                            </thead>
+                            <tbody>
+                              <!-- {% for workgroup in workgroup_list %}
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="/workgroup/edit/{{workgroup.id}}" style="color:inherit;">{{ workgroup.workgroup }}</td></a>
+                                <td>{{ workgroup.description}}</td>
+                                <td>{{ workgroup.customer__customername }}</td>
+                                {% for id,count in subgroup_count %}
+                                {% if workgroup.id == id %}
+                                <td><a href="/list/wsubgroups/{{workgroup.id}}"><label class="btn btn-info" ><i  style=" font-size: 10pt;">{{count}}</i></label></a></td>
+                                {% endif %}
+                                {% endfor %}
+                                {% if workgroup.active %} -->
+                                <!-- <td><a href="/workgroup/deactivate/{{workgroup.id}}" class="btn btn-link btn-sm" style="color:red;text-decoration:none"><span class="text" > Deactivate </span></a></td> -->
+                                <!-- <td width="15%"><input value="{{workgroup.id}}"  type="checkbox" name="my-checkbox" checked data-size="mini" data-on-text="Active" data-off-text="Inactive"/></td>
+                                {% else %}
+                                <td width="15%"><input value="{{workgroup.id}}" type="checkbox" class="switch" name="my-checkbox" data-size="mini" data-on-text="Active" data-off-text="Inactive"></td> -->
+                                <!-- <td><a href="/workgroup/activate/{{workgroup.id}}" class="btn btn-link btn-sm" style="color:green;text-decoration:none"><span class="text" > Activate </span></a></td> -->
+                                <!-- {% endif %} -->
+                                <!-- <td><a href="/personadmin/update/{{person.id}}"><input type="button" value="update" class="btn btn-success btn-sm" ></a></td> -->
+                                <!-- <td><a href="/personadmin/deactivate/{{person.id}}" ><input type="button" value="delete" class="btn btn-success btn-sm"></a></td> -->
+                              <!-- </tr>
+                              {% endfor %} -->
+                            </tbody>
+                          </table>
+                      </div>
+                      <div id="subgroups" class="tab-pane fade in {% if subgroups_div  %} active {% endif %} ">
+                          <table class="table table-hover table-striped fixed" id="subgroup_table">
+                            <thead>
+                              <tr>
+                                <th style="display:none;">No</th>
+                                <th>Subgroup</th>
+                                <th>Team Lead</th>
+                                <th>Description</th>
+                                <th>workgroup</th>
+                                <th>Members</th>
+                                <th>Tickets</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <!-- {% for subgroup in subgroup_list %}
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="/subgroup/edit/{{subgroup.id}}" style="color:inherit;">{{ subgroup.subgroupname }}</td>
+                                </a>
+                                <td>{{ subgroup.description}}</td>
+                                <td>{{ subgroup.workgroup__workgroup }}</td>
+                                {% for id,count in subgroup_member_count %}
+                                {% if subgroup.id == id %}
+                                <td><a href="/list/smembers/{{subgroup.id}}"><label class="btn btn-info" ><i  style=" font-size: 10pt;">{{count}}</i></label></td>
+                                {% endif %}
+                                {% endfor %}
+                                {% for id,count in ticket_count %}
+                                {% if subgroup.id == id %}
+                                <td><a href="/list/stickets/{{subgroup.id}}"><label class="btn btn-info" ><i  style=" font-size: 10pt;">{{count}}</i></label></td>
+                                {% endif %}
+                                {% endfor %}
+                                {% if subgroup.active %}
+                                <td width="15%"><input value="{{subgroup.id}}"  type="checkbox" name="my-checkbox2" checked data-size="mini" data-on-text="Active" data-off-text="Inactive"/></td> -->
+                                <!-- <td><a href="/subgroup/deactivate/{{subgroup.id}}" class="btn btn-link btn-sm"><span class="text" style="color:red;text-decoration:none"> Deactivate </span></a></td> -->
+                                <!-- {% else %}
+                                <td width="15%"><input value="{{subgroup.id}}" type="checkbox" class="switch" name="my-checkbox2" data-size="mini" data-on-text="Active" data-off-text="Inactive"></td> -->
+                                <!-- <td><a href="/subgroup/activate/{{subgroup.id}}" class="btn btn-link btn-sm" style="color:green;text-decoration:none"><span class="text" > Activate </span></a></td> -->
+                                <!-- {% endif %}
+                              </tr>
+                              {% endfor %} -->
+                            </tbody>
+                          </table>
+                      </div>
+                      <div id="members" class="tab-pane fade in  {% if members_div  %} active {% endif %} ">
+                        <div class="box">
+                          <div class="box-title">
+                            <form method="post" action="/persongroupadmin/list/subgroup">
+                              <div class="col-md-3">
+                                <select id="cus" name="cust" class="form-control" required style="width:200px;">
+                                  <option value="">Select Customer</option>
+                                  {% for customer in customers %}
+                                    <option value="{{customer.id}}">{{customer.customername}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <select id="workgp" class="form-control" name="workgp" required style="width:200px;">
+                                  <option value="">Select Workgroup</option>
+                                  {% for workgroup in workgroups %}
+                                    <option value="workgroup.id">{{workgroup.workgroup}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <select id="subgp" name="subgp" required class="form-control" style="width:200px;">
+                                  <option value="">Select Subgroup</option>
+                                  {% for subgroup in subgroup %}
+                                    <option value="subgroup.id">{{subgroup.subgroup}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <input type="submit" class="btn btn-success pull-right" value="Find Members">
+                              </div>
+                            </form>
+                          </div>
+                          <div class="box-body">
+                            {% if subgroup_members %}
+                              <table class="table table-striped table-hover" id="subticketTable">
+                                <thead>
+                                <tr>
+                                  <th>Name</th>
+                                  <th>Customer</th>
+                                  <th>Department</th>
+                                  <th>Supervisor</th>
+                                  <th></th>
+                                </tr> 
+                                </thead>
+                                <tbody>
+                                {% for submember in subgroup_members %}
+                                <tr>
+                                  <td>{{ submember.user.username }}</a></td>
+                                  <td>{{ submember.customer }}</td>
+                                  <td>{{ submember.department }}</td>
+                                  <td>{{ submember.supervisor }}</td>
+                                  <td><a href="/person/subgroup/remove/{{submember.id}}/{{subgroupid}}" class="btn btn-sm btn-danger"><i class="glyphicon glyphicon-trash"></i></a></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                              </table>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div><!--end sectionB-->
+                      <div id="tickets" class="tab-pane fade in  {% if tickets_div  %} active {% endif %}">
+                        <div class="box">
+                          <div class="box-title">
+                            <form method="post" action="/persongroupadmin/list/subgroup">
+                              <div class="col-md-3">
+                                <select id="cus2" name="cust2" required style="width:200px;" class="form-control">
+                                  <option value="">Select Customer</option>
+                                  {% for customer in customers %}
+                                    <option value="{{customer.id}}">{{customer.customername}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <select id="workgp2" name="workgp2" required style="width:200px;" class="form-control">
+                                  <option value="">Select Workgroup</option>
+                                  {% for workgroup in workgroups %}
+                                    <option value="workgroup.id">{{workgroup.workgroup}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <select id="subgp2" name="subgp2" required style="width:200px;" class="form-control">
+                                  <option value="">Select Subgroup</option>
+                                  {% for subgroup in subgroup %}
+                                    <option value="subgroup.id">{{subgroup.subgroup}}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="col-md-3">
+                                <input type="submit" class="btn btn-success pull-right" value="Find Tickets">
+                              </div>
+                            </form>
+                          </div>
+                          <div class="box-body">
+                            {% if subgroup_tickets %}
+                              <table class="table table-striped table-hover" id="subticketTable">
+                                <thead>
+                                <tr>
+                                  <th>ID</th>
+                                  <th>Description</th>
+                                  <th>Status</th>
+                                  <th>AffectedBy</th>
+                                  <th>ReportedBy</th>
+                                </tr> 
+                                </thead>
+                                <tbody>
+                                {% for ticket in subgroup_tickets %}
+                                <tr>
+                                  <td>{{ ticket.ticketid }}</a></td>
+                                  <td>{{ ticket.description }}</td>
+                                  <td>{{ ticket.status }}</td>
+                                  <td>{{ ticket.affectedperson }}</td>
+                                  <td>{{ ticket.reportedby }}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                              </table>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div><!--end sectionC-->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2" style="margin-top:0px">
+                <div >
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_subgroup"><i  ></i><span class="text" > Add New Subgroup </span></a>
+                  <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#add_workgroup"><i  ></i><span class="text" > Add New Workgroup </span></a>
+                </div>
+              <div >
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <div class="modal fade" id="add_workgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Add New </h4>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="/persongroupadmin/add/workgroup">
+            {% csrf_token %}
+              <fieldset>
+              <div class="controls" style="text-align: center;">      
+                <select class="form-control " id="customerid" name="customerid" required style="width:300px;display: block;margin: 0 auto;">
+                  <option value="">Select Customer</option>
+                  {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                  {% endfor %}
+                </select></p>
+                <input class="form-control " type="text" id="workgroup2" name="workgroup2" placeholder="enter workgroup name" required></p>
+                <textarea class="form-control" placeholder="Description" id="description2" name="description2" style="height:100px;"></textarea>
+                </p>
+                <button class="btn btn-success" type="submit">Add Workgroup</button>
+              </div>
+              </fieldset>
+            </form>
+            </div>
+            <div class="modal-footer" style="border:0px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="modal fade" id="add_subgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Add New </h4>
+          </div>
+          <div class="modal-body">
+            <form method="post" action="/persongroupadmin/add/subgroup">
+              {% csrf_token %}
+              <fieldset>
+                <div class="controls" style="text-align: center;">
+                  <select class="form-control" id="customer3" name="customer3" required style="width:300px;display: block;margin: 0 auto;">
+                    <option value="">Select Customer</option>
+                    {% for customer in customers %}
+                    <option value="{{ customer.id }}">{{ customer.customername }}</option>
+                    {% endfor %}
+                  </select>
+                  </p>
+                  <select class="form-control "  id="workgroup3" name="workgroup3" required style="width:300px;display: block;margin: 0 auto;">
+                    <option value="">Select Workgroup</option>
+                  </select>
+                  </p>
+                  <input class="form-control centered" type="text" id="subgroup3" name="subgroup3" placeholder="enter subgroup name">
+                  </p>
+                  <textarea class="form-control" style="height:100px;" placeholder="discription" id="sub_description" name="sub_description"></textarea>
+                  <div id="subgroupadd_div3" style="display:none">
+                  </div>
+                  </p>
+                  <button class="btn btn-success" type="submit">Add Subgroup</button> 
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="modal-footer" style="border:0px">
+          </div>
+        </div>
+      </div>
+    </div>
+    </body>
+    <script type="text/javascript">
+    var status=0;
+    var status2=0;
+    $("[name='my-checkbox']").bootstrapSwitch();
+    $('input[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function(event, state) {
+        // this.toggleRadioStateAllowUncheck = false;
+        // this.disabled = true;
+        // console.log(this.value); // DOM element
+        // console.log(event); // jQuery event
+        // console.log(state); // true | false
+        if(state==true && status==0){
+          window.location = '/workgroup/activate/'+this.value;
+          status= 1;
+        }
+        else if(state==false && status==0){
+          window.location = '/workgroup/deactivate/'+this.value;
+          status = 1;
+        }
+      });
+    $("[name='my-checkbox2']").bootstrapSwitch();
+    $('input[name="my-checkbox2"]').on('switchChange.bootstrapSwitch', function(event, state) {
+        // this.toggleRadioStateAllowUncheck = false;
+        // this.disabled = true;
+        // console.log(this.value); // DOM element
+        // console.log(event); // jQuery event
+        // console.log(state); // true | false
+        if(state==true && status2==0){
+          window.location = '/subgroup/activate/'+this.value;
+          status2= 1;
+        }
+        else if(state==false && status2==0){
+          window.location = '/subgroup/deactivate/'+this.value;
+          status2 = 1;
+        }
+      });
+    $(document).ready(function(){ 
+      // $("#workgroup_table").dataTable({
+      //   bLengthChange :false,
+      //   bInfo:false
+      // });
+      // $("#subgroup_table").dataTable({
+      //   bLengthChange :false,
+      //   bInfo:false
+      // });
+      $("#submemberTable").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $("#subticketTable").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $('input:checkbox').on('ifToggled', function() {
+        if($('input[type=checkbox]:checked').length) {
+          $("#deactivate_button").prop('disabled',false);
+          var mycookie = $.cookie($(this).attr('name'));
+          if (mycookie && mycookie == "true") {
+              $(this).prop('checked', mycookie);
+          }
+         }
+         else{
+          $.cookie(checkboxCookieName, +this.checked);
+          $("#deactivate_button").prop('disabled',true);
+         }
+      });
+    
+      
+    });
+  </script>
+  <script type="text/javascript">
+    var list = [];
+    var p_dict = [];
+    $("#customer2").on('change',function(){
+      $('#workgroup2 option:gt(0)').remove().end();
+      if($("#customer2 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgroup2").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+    //when customer changes
+    $("#cus").on('change',function(){
+      $('#workgp option:gt(0)').remove().end();
+      $('#subgp option:gt(0)').remove().end();
+      if($("#cust :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgp").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgp").on('change',function(){
+        $('#subgp option:gt(0)').remove().end();
+        if($("#workgp :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgp").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  </script>
+  <script type="text/javascript">
+    $("#cus2").on('change',function(){
+      $('#workgp2 option:gt(0)').remove().end();
+      $('#subgp2 option:gt(0)').remove().end();
+      if($("#cust2 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgp2").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgp2").on('change',function(){
+        $('#subgp2 option:gt(0)').remove().end();
+        if($("#workgp2 :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgp2").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  </script>
+  <script type="text/javascript">
+    $("#customer3").on('change',function(){
+      $('#workgroup3 option:gt(0)').remove().end();
+      $('#subgroup3 option:gt(0)').remove().end();
+      if($("#customer3 :selected").text()!="Select Customer"){
+        $.ajax({
+          url:"/../persongroupadmin/add/subgroup/",
+          type:"POST",
+          dataType:"json",
+          data:{
+            customerid : this.value,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data) {
+            data = JSON.parse(data)
+            console.log(data);
+            for (var i in data){
+              $("#workgroup3").append($('<option>', {text:data[i].fields.workgroup,value:data[i].pk}));
+            } 
+          },
+          error : function(xhr,errmsg,err) {
+            alert(err);
+          }
+        });
+        return false;
+      }
+    });
+      $("#workgroup3").on('change',function(){
+        $('#subgroup3 option:gt(0)').remove().end();
+        if($("#workgroup3 :selected").text()!="Select Workgroup"){
+          $.ajax({
+            url:"/persongroupadmin/home",
+            type:"POST",
+            dataType:"json",
+            data:{
+              workgroupname : this.value,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              console.log(data);
+              data = JSON.parse(data)
+              for (var i in data){  
+                $("#subgroup3").append($('<option>', {text:data[i].fields.subgroupname,value:data[i].pk}));
+              }
+              
+
+            },
+            error : function(xhr,errmsg,err) {
+              alert(err);
+            }
+          });
+          return false;
+        }
+      });
+  $('#workgroup_table').dataTable( {
+
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/workgroup/all",
+                   "dataSrc": ""
+               },
+               "columns": [
+                       { "": "fields.id",sClass: "hidden" },
+                       { "": "fields.workgroup" },
+                       { "": "fields.description" },
+                       { "": "fields.customer__customername" },
+                       // { "": "fields.group_leader__user__email" },
+                       { "": ""},
+                       
+
+                   ],
+                "columnDefs": [ {
+            "targets": 4,
+            "data": null,
+            "defaultContent": "<button  class='btn btn-link' style='color:green;font-size: 12px;'>View Subgroups</button>"},
+            // {
+            // "targets": 5,
+            // "data": "fields.id",
+            // "defaultContent": "<button  class='btn btn-link' style='color:green;font-size: 12px;'>View Subgroups</button>"
+            // } 
+            ]
+           } );
+  $('#subgroup_table').dataTable( {
+
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/all/subgroups",
+                   "dataSrc": ""
+               },
+               "columns": [
+                       { "": "fields.id",sClass: "hidden" },
+                       { "": "fields.subgroupname" },
+                       { "": "fields.group_lead" },
+                       { "": "fields.description" },
+                       { "": "fields.workgroup_workgroup" },
+                       
+                       
+
+                   ],
+                "columnDefs": [ {
+            "targets": 5,
+            "data": null,
+            "defaultContent": "<button  class='btn btn-link' style='color:green;font-size: 12px;'>View Subgroup Members</button>"},
+            {
+            "targets": 6,
+            "data": "fields.id",
+            "defaultContent": "<button  class='btn btn-link' style='color:green;font-size: 12px;'>View Subgroup Tickets</button>"
+            } 
+            ]
+           } );
+    $('#workgroup_table tbody').on( 'click', 'td', function () {
+        // console.log($(this).text());
+        var th = $(this).closest('table').find('th').eq( this.cellIndex );
+        //console.log(th.html());
+        if(th.html() == "Workgroup"){
+          id = $(this).prev().html();
+          console.log(id);
+          location.href="/workgroup/edit/"+id;
+        }
+        if ($(this).text()=="View Subgroups"){
+          id = $(this).prev().prev().prev().prev().html();
+          location.href="/list/wsubgroups/"+id;
+        }
+
+        // else if ($(this).text()=="View Subgroups"){
+        //   id = $(this).prev().prev().prev().prev().prev().html();
+        //   location.href="/person/subgroup/mapping/"+id;
+        // }
+    } );
+    $('#subgroup_table tbody').on( 'click', 'td', function () {
+        // console.log($(this).index());
+        // var $th = $(this).closest('subgroup_table').find('th').eq($(this).index());
+        // var $th = $(this).closest('tbody').prev('thead').find('> tr > th:eq(' + $(this).index() + ')');
+        var th = $(this).closest('table').find('th').eq( this.cellIndex );
+        //console.log(th.html());
+        if(th.html() == "Subgroup"){
+          id = $(this).prev().html();
+          location.href="/subgroup/edit/"+id;
+        }
+        else if ($(this).text()=="View Subgroup Members"){
+          id = $(this).prev().prev().prev().prev().prev().html();
+          location.href="/list/smembers/"+id;
+        }
+        else if ($(this).text()=="View Subgroup Tickets"){
+          id = $(this).prev().prev().prev().prev().prev().prev().html();
+          location.href="/list/stickets/"+id;
+        }
+    } );
+  </script>
+</html>
+

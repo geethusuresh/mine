@@ -1,0 +1,456 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/switcher/bootstrap-switch.min.css">
+    <script type="text/javascript" src="/static/switcher/bootstrap-switch.min.js"></script>
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+.red-tooltip + .tooltip > .tooltip-inner {background-color: #f00;}
+.green-tooltip + .tooltip > .tooltip-inner {background-color: #9cc96b;}
+.blue-tooltip + .tooltip > .tooltip-inner {background-color: #3498db;}
+/*.red-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#f00; }*/
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">{{dc.dc_name}} | <small>{{dc.location}}</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/management/infrastructure/">DataCenter</a> </li>
+                    <li class="active">Hosts</a></li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+            <div class="row">
+              <div class="col-sm-9">
+                <div class="panel">
+                  <div class="panel-heading">
+                    <!-- <a href="" class="btn btn-info pull-right" data-toggle="modal" data-target="#app_host"><l class="fa fa-plus"></l> Add Host</a> -->
+                    <h3 class="panel-title text-center">Hosts</h3>
+                  </div>
+                  
+                  <div class="panel-body">
+                    <div class="pull-right">
+                      
+                    </div>
+                    {% if hosts %}
+                    <div class="table-responsive">
+                      <table class="table " id="host_table">
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th> Name</th>
+                            <th >IP Address</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Monitoring</th>
+                            <th class="text-center">Security</th>
+                            <!-- <th class="pull-right">Monitoring /Security</th> -->
+                          </tr>
+                        </thead>                        
+                        <tbody>
+                        {% for host in hosts %}
+                          <tr>
+                            <td><a href="/management/host/{{host.id}}" class=""  data-toggle="tooltip" data-original-title="Host Map"><l style="color:#50c7a7" class="fa fa-plus-circle fa-2x"></l></a></td>
+                            <td>{{host.name}}</td>
+                            <td>{{host.host}}</td>
+                            <td  class="text-center">{% if host.status == 0 %}<span class="badge badge-success">o</span> Online {% else %}<span class="badge badge-danger">o</span> Offline {% endif %}</td>
+                            <td  class="text-center">{% if host.is_monitored == True %}<a href="/management/host/monitoring/{{host.id}}" class="green-tooltip"  data-placement="left"  data-toggle="tooltip" data-original-title="Activated"><l class="fa fa-check-circle fa-2x" style="color:#50c7a7"> </l> </a>{% elif host.is_monitored == False %}<a href="#"  data-placement="left"  class="red-tooltip"  data-toggle="tooltip" data-original-title="Not Activated" class=""><l class="fa fa-ban fa-2x"  data-placement="left"  style="color:#f76c51"></l> </a>{% else %}<a href="#" class="blue-tooltip"  data-toggle="tooltip" data-original-title="Config Pending"><l style="color:#ebaa4b" class="fa  fa-exclamation-triangle fa-2x"></l></a>{% endif %}</td>
+                            <td  class="text-center">
+                              {% if host.is_security == True %}<a href="/dashboard/index/host/{{host.id}}" class=" green-tooltip"  data-toggle="tooltip" data-original-title="Activated" data-placement="right"><l class="fa fa-check-circle fa-2x" style="color:#50c7a7"> </l> </a>{% elif host.is_security == False %}<a href="#" data-toggle="modal" onclick="appendsec({{host.id}})" data-target="#activate_security" class="red-tooltip" data-placement="right"  data-toggle="tooltip" data-original-title="Not Activated"><l class="fa fa-ban fa-2x"  style="color:#f76c51"></l></a>{% else %}<a href="#" class="blue-tooltip" data-placement="right"  data-toggle="tooltip" data-original-title="Config Pending"><l style="color:#ebaa4b" class="fa  fa-exclamation-triangle fa-2x"></l></a>{% endif %}
+                            </td>
+                            <!-- <td><span class="pull-right">
+                            {% if host.is_monitored == True %}<a href="/management/host/monitoring/{{host.id}}" class="btn btn-success green-tooltip"  data-placement="left"  data-toggle="tooltip" data-original-title="Activated"><l class="fa fa-check"> </l> Monitoring</a>{% elif host.is_monitored == False %}<a href="#"  data-placement="left"  class="btn btn-default red-tooltip"  data-toggle="tooltip" data-original-title="Not Activated" class=""><l class="fa fa-ban"  data-placement="left"  style="color:red"></l> Monitoring</a>{% else %}<a href="#" class="btn btn-primary blue-tooltip"  data-toggle="tooltip" data-original-title="Config Pending"><l class="fa fa-spinner"></l>Monitoring</a>{% endif %}{% if host.is_security == True %}<a href="/dashboard/index/host/{{host.id}}" class="btn btn-success green-tooltip"  data-toggle="tooltip" data-original-title="Activated" data-placement="right"><l class="fa fa-check"> </l> security</a>{% elif host.is_security == False %}<a href="#" data-toggle="modal" onclick="appendsec({{host.id}})" data-target="#activate_security" class="btn btn-default red-tooltip" data-placement="right"  data-toggle="tooltip" data-original-title="Not Activated"><l class="fa fa-ban" style="color:red"></l> security</a>{% else %}<a href="#" class="btn btn-info blue-tooltip" data-placement="right"  data-toggle="tooltip" data-original-title="Config Pending"><l class="fa fa-spinner"></l>security</a>{% endif %}</span>
+                            </td> -->
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% else %}
+                      <h4 class="text-thin"> <center>No Hosts found!</center></h4>
+                    {% endif %}
+                  
+
+
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+
+                  <div class="panel panel-primary panel-colorful" style="    cursor: pointer;"  data-toggle="modal" data-target="#app_host">
+                      <div class="pad-all text-center">
+                        <p class="h4 text-thin"><l class="fa fa-plus"></l> Add host</p>
+                        
+                      </div>
+                    </div>
+<!--                 <div class="panel">
+                  <div class="panel-heading">
+                    <h3 class="panel-title text-center"> Data Center Details </h3>
+                  </div>
+                  <div class="panel-body">
+ -->                    
+
+                  <!-- <div class="col-sm-6"> -->
+
+                    <p class="text-center text-thin h4">Statistics</p>
+
+
+                    <div class="panel panel-success panel-colorful" style="width:50%;float:left;margin-bottom: 0px;">
+                      <div class="pad-all text-center">
+                      <i class="fa fa-server fa-2x"></i>
+                        <span class="text-2x text-thin">{{host_count}}</span>
+                        <p class="h4 text-thin">Hosts</p>
+                        
+                      </div>
+                    </div>
+                  <!-- </div> -->
+                  
+                  <!-- <div class="col-sm-6"> -->
+                    <div class="panel panel-mint panel-colorful"  style="width:50%;float:left;margin-bottom: 0px;">
+                      <div class="pad-all text-center">
+                        <i class="fa fa-connectdevelop fa-2x"></i>
+                        <span class="text-2x text-thin">{{apps_count}}</span>
+                        <p class="h4 text-thin">Applications</p>
+                        
+                      </div>
+                    </div>
+                  <!-- </div> -->
+                      
+
+                  <!-- <div class="col-sm-6"> -->
+                    <div class="panel panel-info panel-colorful"  style="width:50%;float:left;margin-bottom: 0px;">
+                      <div class="pad-all text-center">
+                        <i class="fa fa-dashboard fa-2x"></i>
+                        <span class="text-2x text-thin">5/32</span>
+                        <p class="h4 text-thin">Current Events</p>
+                        
+                      </div>
+                    </div>
+                  <!-- </div> -->
+                  
+                  <!-- <div class="col-sm-6"> -->
+                    <div class="panel panel-primary panel-colorful" style="width:50%;float:left;margin-bottom: 0px;">
+                      <div class="pad-all text-center">
+                        <i class="fa fa-shield fa-2x"></i>
+                        <span class="text-2x text-thin">{{security_events}}</span>
+                        <p class="h4 text-thin">Security Events</p>
+                      </div>
+                    </div>
+                  <!-- </div> -->
+                      
+
+
+
+ <!-- 
+                </div>
+              </div> -->
+            </div>
+            </div>
+
+             
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+<div class="modal fade" id="activate_security" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Activate Security Service</h4>
+      </div>
+      
+      <div class="modal-body">
+        <div class="col-sm-4 text-center">
+            <i class="fa fa-shield fa-5x" style="color:#27ae60"></i>
+        </div>
+        <div class="col-sm-8">
+          <p class="text-thin h4">Security Services are not activated in this host are you sure you want to activate service?</p>
+        </div>
+         
+
+         
+      </div>
+      <div class="modal-footer">
+          <div id="hangbert">
+           
+         </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+
+
+
+<div class="modal fade" id="app_add" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Create Infrastructure Application</h4>
+      </div>
+      <form action="/dashboard/index/application/add/" method="post" enctype="multipart/form-data" id="incident_form">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>App name</label>
+              <input type="text" name="appname" class="form-control" required  maxlength="20">
+            </div>
+            <div class="col-sm-6">
+              <label>Type of Application</label>
+              <select class="form-control" name="classi" required>
+                <option value="" disabled selected>-select one-</option>
+                {% for class in classi %}
+                <option value="{{class.id}}">{{class.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" >
+      <p class="pull-left">*Appname contains maximum of 20 Charecter</p>
+      <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Create</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<div class="modal fade" id="app_host" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add host to the datacenter {{dc.dc_name}}</h4>
+      </div>
+      <form action="/datacenter/add/host/new/{{dc.id}}" method="post" enctype="multipart/form-data" id="incident_form" id="ipForm">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Host Name :</label>
+              <input type="text" name="name" class="form-control" required maxlength="60">
+            </div>
+            <div class="col-sm-6">
+              <label>IP Address :</label>
+              <input type="ip" name="ip" class="form-control" id="ipaddress" required pattern="((^|\.)((25[0-5])|(2[0-4]\d)|(1\d\d)|([1-9]?\d))){4}$">
+            </div>
+        </div>
+        <br>
+         <div class="row">
+            <div class="col-sm-6">
+              <div class="col-sm-6">
+                <label>Security Management</label>
+              </div>
+              <input type="checkbox" name="security" checked>
+            </div>
+            <div class="col-sm-6">
+              <div class="col-sm-6">
+                <label>Monitoring Services</label>
+              </div>
+              <input type="checkbox" name="monitor" checked>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" >
+      <button id="delay" type="submit" class="btn waves-effect waves-light btn-success btn-large" style="float:right;width:120px">Create</button>
+      <p class="pull-left">* please enter a valid ip</p>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/plain_chart/springy.js"></script>
+    <script src="/static/plain_chart/springyui.js"></script>
+    <script>
+     $("#host_table").DataTable();
+
+    $("#infra").addClass("active");
+    $("#infraopen").css('display','block');
+    $("#dcview").addClass("active");
+
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    $("[name='security']").bootstrapSwitch();
+    $("[name='monitor']").bootstrapSwitch();
+    function appendsec(x) {
+      $("#hangbert").empty();
+      console.log(x);
+      $("#hangbert").append('<a style="color:white" href="/datacenter/host/activation/request/'+x+'"> Activate Security</a>').addClass("btn btn-info pull-right");
+    }
+    </script>
+    <script>
+var graph = new Springy.Graph();
+
+
+{% for app in relation_list %}
+var {{app.names}} = graph.newNode  ({
+  label: '{{app.names}}',
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.name}}, {{app.obj2.name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+
+jQuery(function(){
+  var springy = window.springy = jQuery('#springydemo').springy({
+    graph: graph,
+    nodeSelected: function(node){
+      console.log('Node selected: ' + JSON.stringify(node.data));
+    }
+  });
+});
+
+
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#ipForm').formValidation({
+        framework: 'bootstrap',
+        icon: {
+            valid: 'glyphicon glyphicon-ok',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+            ip: {
+                validators: {
+                    ip: {
+                        message: 'Please enter a valid IP address'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+    </body>
+</html>

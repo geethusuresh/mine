@@ -1,0 +1,91 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+    <h1>
+        AWS Volume List
+        <small>Volume Overview</small>
+    </h1>
+
+
+<ol class="breadcrumb">
+    <li>
+        <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+    </li>
+<!--     <li>
+       <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+    </li> -->
+    <li class="active">
+        <strong>AWS Volume List</strong>
+    </li>
+</ol>
+
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+<div ng-controller = 'awsVolumeList'>
+<div class="row">
+  <div class="col-md-11">
+    <!-- TABLE: LATEST ORDERS -->
+    <div class="panel panel-mint">
+    <div class="panel-heading">
+            <div class="panel-control">
+              <div class="btn-group">
+                  <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#volume_list" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+              </div>
+            </div>
+            <h3 class="panel-title">Volume List</h3>
+        </div><!-- /.box-header -->
+      <div class="panel-body" id="volume_list">
+
+      {% if not volume_list %}
+          <div class="alert alert-warning fade in">
+              Volume not Found
+          </div>
+      {% else%}
+        <div class="table-responsive">
+          <table class="table" id= "image_table">
+            <thead>
+              <tr>
+                <th>Volume ID</th>
+                <th>Name</th>
+                <th>Size<small> (GB)</small></th>
+                <th>Volume Type</th>
+                <th>Instance Details</th>
+                <th>IOPS</th>
+                <th>Availability Zone</th>
+                <th>Status</th>
+                <th>Created at</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for volume_obj in volume_list %}
+              <tr>
+                <td>{{volume_obj.id}}</td>
+                <td>{{volume_obj.name}}</td>
+                <td>{{volume_obj.size}}</td>
+                <td>{{volume_obj.type}}</td>
+                <td>
+                   {% if volume_obj.instance_id != 'None' %}
+                    <a class="btn btn-success btn-sm" href="/cloud_management/aws/{{cloud_account_id}}/instance/{{volume_obj.instance_id}}/details/" style='color:white'>
+                      {{volume_obj.instance_id}}
+                    {% endif %}
+                    </a>
+                </td>
+                <td>{{volume_obj.iops}}</td>
+                <td>{{volume_obj.zone}}</td>
+                <td>{{volume_obj.status}}</td>
+                <td>{{volume_obj.CreatedAt}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
+      {% endif %}
+      </div><!-- /.box-body -->
+    </div><!-- /.box -->
+  </div><!-- /.col -->
+  <div class="col-md-1">
+  </div><!-- /.col -->
+</div>
+</div>
+{% endblock%}

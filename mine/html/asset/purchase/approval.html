@@ -1,0 +1,305 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+            {% include "asset/addtostock.html" %}
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Waiting for approval <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Purchase Request Summary</li>
+                </ol>
+            </div>
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-12">
+                    <div class="wz-heading">
+          
+                    <!--Progress bar-->
+                    <div class="progress progress-sm progress-light-base">
+                      <div class="progress-bar progress-bar-primary" style="width: 50%; margin: -1px 12.5%;"></div>
+                    </div>
+          
+                    <!--Nav-->
+                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+                    <ul class="wz-nav-off  wz-steps">
+                      <li class="col-xs-3">
+                        <a data-toggle="tab" href="#demo-cir-tab1" title="" class="add-tooltip" aria-expanded="false" data-original-title="Vendor Selction">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-mint">
+                            <i class="wz-icon fa fa-info fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3">
+                        <a data-toggle="tab" href="#demo-cir-tab2" title="" class="add-tooltip" data-original-title="Obtain Quotes" aria-expanded="false">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+                            <i class="wz-icon fa fa-user fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3 active">
+                        <a data-toggle="tab" href="#demo-cir-tab3" title="" class="add-tooltip" data-original-title="Place Order" aria-expanded="false">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+                            <i class="wz-icon fa fa-home fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3 ">
+                        <a data-toggle="tab" href="#demo-cir-tab4" title="" class="add-tooltip" data-original-title="Delivered" aria-expanded="true">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                            <i class="wz-icon fa  fa-car fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+
+
+                </div>
+
+              </div>  
+
+
+              <hr>
+
+              <div class="row"> 
+                <div class="col-sm-12">
+                    
+                    <div class="col-sm-12">
+                          <!-- <p class="panel-title text-center">Approval Sections</p> -->
+                        </div>
+                        <!-- <div class="panel-body"> -->
+                        <div class="row">
+                        <div class="col-sm-6">
+
+                            <p class="panel-title text-center">Functional Head Approval</p>
+                          <div class="panel text-center">
+                          {% if approval == True %}
+                            <div class="panel-body bg-purple">
+                              <span alt="Avatar" class="img-lg img-circle img-border mar-btm">
+                              <l class="fa fa-user-plus fa-5x"></l></span>
+                      
+                              <h4 class="mar-no">{{purchase.cost_center.manager}}</h4>
+                              <p>{{purchase.cost_center}}</p>
+                            </div>
+                      
+                              <div class="pad-all">
+                                {% if approvals %}
+
+
+
+
+
+                                  {% if approvals.approved_date %}
+                                  <p class="text-muted">
+                                     Finance Team have {% if approvals.is_approve == True %}<label class="label label-success">accepted</label>  {% else %}<label class="label label-danger">rejected</label>
+                                       {% endif %} your request for purchase 
+                                    </p>
+                                
+                                    <div class="pad-ver">
+                                      <label>Remark</label>
+                                      <textarea class="form-control" rows="5"  disabled>{{approvals.remark}}</textarea>
+                                      <br>
+                                      {% if approvals.attachment %}
+                                      <a class="btn btn-success" href ="/media/{{approvals.attachment}}" download> <l class="fa fa-download"></l> Attachments</a>
+                                      {% endif %}
+                                    </div>
+
+                                {% else %}
+
+                                <p class="text-muted">
+                                <l class="fa fa-warning"></l> Waiting for Finance Team to approve your request
+                                </p>
+
+                                {% endif %}
+
+
+                              {% else %}
+
+
+
+
+                              <p class="text-muted">
+                                We Found some quotes are over 1 Lakhs, would you like to ask approvals from FO
+                              </p>
+                              
+                              <div class="pad-ver">
+                              <form action="/purchase/quote/approval/{{purchase.id}}" method="POST">{% csrf_token %}
+                                <div class="col-sm-6">
+                                  <select class="form-control" name="quote" required>
+                                  <option value="" disabled selected>-select the quote-</option>
+                                  {% for quote in quotes %}
+                                  <option value="{{quote.id}}">{{quote.vendor}}-{{quote.item_cost}} {{quote.currency}}</option>
+                                  {% endfor %}
+                                </select>
+                                </div>
+                                <button class="btn btn-success" type="submit">Ask For Approval</button>
+                                </form>
+                                </div>
+                              <!-- </div> -->
+
+
+                                
+                              {% endif %}
+                            </div>
+                          
+                          {% else %}
+                          <div class="panel text-center">
+                            <div class="panel-body bg-purple">
+                              <span alt="Avatar" class="img-lg img-circle img-border mar-btm"> <l class="fa fa-check fa-5x"></l> </span>
+                      
+                              <h4 class="mar-no">{{purchase.cost_center.manager}}</h4>
+                              <p>{{purchase.cost_center}}</p>
+                            </div>
+                      
+                            <div class="pad-all">
+                              <p class="text-muted">
+                                No Approvals required as cost is below 1 lakh
+                              </p>
+                            </div>
+                          </div>
+                          {% endif %}
+                        </div>
+                        </div>
+                        <div class="col-sm-6">
+
+                           <p class="panel-title text-center">CIO Approval</p>
+
+                              <div class="panel text-center">
+                            <div class="panel-body bg-mint">
+                              <span alt="Avatar" class="img-lg img-circle img-border mar-btm"> <l class="fa fa-user fa-5x"></l> </span>
+                      
+                              <h4 class="mar-no">CIO</h4>
+                              <p>Approval</p>
+                            </div>
+                      
+                            <div class="pad-all">                             
+                              <div class="pad-ver">
+                                  {% if cio %}
+                                   <label>Approval Status:</label>
+                                   {% if cio.is_approve == True %} <label class="label label-success">Approved</label>
+                                   {% else %} <label class="label label-danger">Rejected</label>{% endif %}
+                                   {% if cio.attachment %}
+                                   <br>
+                                   <label>Attachment</label>
+                                   <a class="btn btn-success" href="/media/{{cio.attachment}}" download>Download</a>
+                                   {% endif %}
+
+                                  {% else %}
+                                <form action="/purchase/approval/confirm/{{purchase.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                  <p class="text-muted">
+                                    Please attach files if any
+                                  </p>
+                                  <input type="file" name="attachments" style="margin-left:35%">
+                                  <br>
+                                  <button class="btn btn-info" name="approval" value="True" type="submit">All Approvals Obtained</button>
+                                  <button class="btn btn-danger ciorejection" name="approval" value="False" type="submit">CIO Rejected</button>
+                                </form>
+                                  <br>
+                                <!--   <a href="/purchase/approval/confirm/rejected/{{purchase.id}}" class="btn btn-danger"></a> -->
+                                  {% endif %}
+                              </div>
+                            </div>
+                        </div>
+
+
+
+                          
+                        </div>
+                          
+                            
+                            
+                
+                        </div>
+                </div>
+              </div>  
+
+            </div>
+          </div>
+        </div>
+
+    {% if messages %}
+    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+    {% for message in messages %}
+      <div class="alert-wrap in animated jellyIn">
+        <div class="alert alert-success" role="alert">
+          <button class="close" type="button">
+          <i class="fa fa-times-circle"></i>
+          </button>
+          <div class="media">
+            <div class="media-body">
+              <h4 class="alert-title"></h4>
+              <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+
+
+      
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    $(document).ready(function(){
+
+          $('.ciorejection').click(function(){
+              var c = confirm('Are you sure want to continue ?');
+              if(c==true){
+                  return true;
+              }else{
+                return false;
+              }
+
+          });
+    });
+
+    </script>
+        
+
+
+
+
+    </body>
+</html>

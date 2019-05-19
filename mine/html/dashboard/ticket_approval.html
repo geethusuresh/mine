@@ -1,0 +1,454 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Ticket Approval</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"/>
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+            .dl-horizontal dt {
+                width:100px;
+            }
+            .dl-horizontal dd {
+                margin-left: 110px;
+            }
+            .padding-md {
+                padding: 2px!important;
+            }
+            /*.timeline-centered .timeline-entry {
+                width: 78%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+                position: absolute;
+                left: -152px;
+                text-align: right;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            .timeline-centered:before {
+                background: #A5A2A2;
+                left: 22%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+                border-color: rgba(140, 126, 126, 0) #8C8787 transparent transparent;
+            }*/
+            .timeline-centered .timeline-entry {
+                width: 78%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+                position: absolute;
+                text-align: right;
+                background: none;
+                /* padding: 0 10px; */
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            .timeline-centered:before {
+                background: #A5A2A2;
+                left: 22%;
+            }
+            .timeline-time {
+                color: #000;
+                left: -140px !important;
+                max-width: 125px !important;
+            }
+            .example-base, .example-blocks, .example-coupon, .example-multiple {
+                -webkit-transition: all 0.5s ease-in-out;
+                -moz-transition: all 0.5s ease-in-out;
+                -ms-transition: all 0.5s ease-in-out;
+                -o-transition: all 0.5s ease-in-out;
+                transition: all 0.5s ease-in-out;
+                background-color: #ddd;
+                border: 1px solid transparent;
+                border-radius: 1px;
+                color: #444;
+                margin: 20px 0;
+                text-align: center;
+                padding: 20px;
+            }
+            /*.timeline-centered .timeline-entry {
+                width: 75%;
+            }*/
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label h2 {
+                font-size: 16px;
+                font-weight: 500;
+            }
+            .nav-tabs > li > a:hover {
+                color: #555;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Approval Details |<small> Approval Desk</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Approval Desk</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="active"><a href="#basic1" role="tab" data-toggle="tab">Ticket Details</a></li>
+                                        <li><a href="#att1" role="tab" data-toggle="tab">Ticket Worklog</a></li>
+                                        {% if attachments %}
+                                            <li><a href="#attachments" role="tab" data-toggle="tab">Ticket Attachments</a></li>
+                                        {% endif %}
+                                        <a href="#" class="btn btn-info pull-right" data-toggle="modal" data-target="#send_email">Send Query</a>
+                                    </ul>
+                                    <div class="tab-content pad-all">
+                                        <div class="tab-pane active" id="basic1">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label><strong>Summary:</strong> </label>
+                                                    {{ approval.ticket.summary }}<br>
+                                                </div>
+                                                <div class="col-md-2" style="border-left:1px solid black" >
+                                                    <h4 class="text-thin">{{ approval.ticket.ticketid }}</h4>
+                                                    <label class="label label-success" style="font-size:14px" >{{approval.ticket.status| real:approval.ticket.customer.id}}</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12"><br>
+                                                    <label><strong>Description:</strong>  </label>
+                                                    <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ approval.ticket.description }}" rows="8" cols="20" readonly></textarea>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="box-body padding-md">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Affected By :</dt>
+                                                            <dd>{{ approval.ticket.affectedperson }}</dd>
+                                                            <dt>Phone No :</dt>
+                                                            <dd> {{ approval.ticket.affectedphone }}</dd>
+                                                            <dt>AffectedEmail :</dt>
+                                                            <dd>{{ approval.ticket.affectedemail }}</dd>
+                                                            <dt>Reported By :</dt>
+                                                            <dd>{{ approval.ticket.reportedby }}</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <hr>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="box-body padding-md">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Category :</dt>
+                                                            <dd>{{ approval.ticket.category }}</dd>
+                                                            <dt>Ownergroup</dt>
+                                                            <dd> {{approval.ticket.subgroup}}</dd>
+                                                            <dt>Source :</dt>
+                                                            <dd>{{ approval.ticket.source }}</dd>
+                                                            <dt>Owner :</dt>
+                                                            <dd>{{ approval.ticket.owner }}</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <hr>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="box-body padding-md">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Created Date :</dt>
+                                                            <dd>{% tzone approval.ticket.creationdate %}</dd>
+                                                            <dt>Reported Date :</dt>
+                                                            <dd> {% tzone approval.ticket.reportdate %}</dd>
+                                                            <dt>Affected Date :</dt>
+                                                            <dd>{% tzone approval.ticket.affecteddate %}</dd>
+                                                            <dt>Last Change :</dt>
+                                                            <dd>{% tzone approval.ticket.changedate %}</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                                {% if attributes %}
+                                                    <div class="col-md-6">
+                                                        {% for attribute in attributes %}
+                                                            <div class="box-body padding-md">
+                                                                <dl class="dl-horizontal">
+                                                                    <dt>Project Name :</dt>
+                                                                    <dd>{{ attribute.project }}</dd>
+                                                                    <dt>Quantity :</dt>
+                                                                    <dd> {{ attribute.quantity }}</dd>
+                                                                    <dt>Note :</dt>
+                                                                    <dd> {{attribute.remark }}</dd>
+                                                                    <dt>Request Type :</dt>
+                                                                    <dd> {{attribute.permanent_type }}</dd>
+                                                                </dl>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="att1">
+                                            <div class="timeline-centered">
+                                                {% if activity %}
+                                                    {% for act in activity %}
+                                                        <article class="timeline-entry">
+                                                            <div class="timeline-entry-inner">
+                                                                <h4>
+                                                                <time class="timeline-time" datetime="2014-01-10T03:45"><span> {{ act.time|naturaltime}}</span> <span>
+                                                                    {% tzone act.time %}
+                                                                </span></time></h4>
+                                                                <div class="timeline-icon palette-alizarin">
+                                                                    <i class="fa fa-comment"></i>
+                                                                </div>
+                                                                <div class="timeline-label">
+                                                                    <h2><a href="#">{{ act.owner }}</a> <span>{{act.note}}</span></h2>
+                                                                    <div class="row pad-btm">
+                                                                        {% if act.html_description %}
+                                                                            <div class="col-sm-4">
+                                                                                <a href="#" class="btn btn-info" onclick="show_html_version({{act.id}}, 'worklog')">View Html Version</a>
+                                                                            </div>
+                                                                        {% endif %}
+                                                                        <div class="col-sm-4">
+                                                                            {% if act.ticketattachments_set.all|length > 0 %}
+                                                                                <a href="#" class="btn btn-info pull-right" onclick="fetch_attachments({{act.id}})">View Attachments</a>
+                                                                            {% elif act.attachment %}
+                                                                                <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                    {% if act.remark %}
+                                                                        <pre>{{ act.remark|safe }}</pre>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    No feeds. Please Sent Back a Remark to HelpDesk for more.
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="history">
+                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                <thead>
+                                                    <tr role="row">
+                                                        <th >User</th>
+                                                        <th >Status</th>
+                                                        <th >ChangeTime</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody >
+                                                    {% for act in historys %}
+                                                        <tr>
+                                                            <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.status}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="tab-pane" id="attachments">
+                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                <thead>
+                                                    <tr role="row">
+                                                        <th >Uploaded by</th>
+                                                        <th> File name</th>
+                                                        <th >Time</th>
+                                                        <th >Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody >
+                                                    {% for act in attachments %}
+                                                        <tr class="odd">
+                                                            <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                                                            <td>
+                                                                <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}" download="{{attachments.docfile}}">
+                                                                    <i class="fa fa-download "></i>
+                                                                </a>
+                                                                <a class="btn btn-danger btn-sm" onclick="remove_attachments('{{act.id}}')" href="#" >
+                                                                    <i class="fa fa-trash-o "></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Approvals</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form action="/ticket/approval/{{approval.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                        <select style="width:45%;margin-bottom:5px" name = "approve" required>
+                                            <option value=""> Select</option>
+                                            <option value="True"> Approve</option>
+                                            <option value="False"> Decline</option>
+                                        </select>
+                                        <textarea type="text" name="note" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea> <br/>
+                                        <input type="file" name="attachment_file" class="file_check" />
+                                        <span class="file_check_error" style="color:red"></span><br/>
+                                        <button class="btn btn-success" style="width:49%;margin-top:5px;" type="submit">Update</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modal -->
+        <div class="modal fade" id="send_email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Send query related to this ticket</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/email/{{approval.ticket.id}}" class="form-horizontal" method="POST" enctype="multipart/form-data" id="send_email_form">{% csrf_token %}
+                            <input type="hidden" multiple id="to" name="to" style="width:70%;" class="form-control" value="{{ approval.ticket.affectedperson.user.email}}" >
+                            <input type="hidden" name="visibility" value="FALSE">
+                            
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                                <div class="col-sm-11">
+                                    <input  type="text" id="subject" name="subject" class="form-control" placeholder="Subject" required>
+                                </div>
+                            </div>
+                            <label>Body:</label>
+                            <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control" placeholder="Mail body.." rows="10" cols="20">{% if profile.signature %}{{profile.signature}}{% endif %}</textarea><br>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <label>Attach Here</label>
+                                    <input type="file" name="attachment_file" id="attachment_file" class="send_mail_image" />
+                                    <span class="error_msg_send_mail" style="color:red;"></span>
+                                </div>
+                                <div class="col-sm-4"></div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-success" style="width:100%" type="submit" >Send Email</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        {% include "components/confirmation_box.html" %}
+        <script src="/static/wysihtml5/lib/js/wysihtml5-0.3.0.js"></script>
+        <script src="/static/wysihtml5/bootstrap-wysihtml5.js"></script>
+        <script>
+            $('#body').wysihtml5({
+                "color": true,
+                "link": false,
+                "image": false,
+                "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"]
+              });
+            (function ($, $win) {
+            'use strict';
+                $( document ).ready(function() {
+                    $('.file_check').bind('change', function() {
+                    //this.files[0].size gets the size of your file.
+                        var ext = $('.file_check').val().split('.').pop().toLowerCase();
+                        //get upload file type
+                        var notAllowedFiles = ["exe", "rar", "dll"];
+                        var validFileStatus = 0;
+                        if(this.files[0].size>10000000){
+                            $(".file_check_error").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                            $('.file_check').val("")
+                            validFileStatus = 1;
+                        }
+                        if(notAllowedFiles.indexOf(ext)!=-1){
+                            $(".file_check_error").html('Upload error try again, exe,rar,dll file types are not allowed')
+                            $('.file_check').val("")
+                            validFileStatus = 1;
+                        }
+                        if(validFileStatus!=1){
+                            $(".file_check_error").empty()
+                        }
+                    });
+
+
+                    $('.send_mail_image').bind('change', function() {
+                    //this.files[0].size gets the size of your file.
+                        var ext = $('.send_mail_image').val().split('.').pop().toLowerCase();
+                        //get upload file type
+                        var notAllowedFiles = ["exe", "rar", "dll"];
+                        var validFileStatus = 0;
+                        if(this.files[0].size>10000000){
+                            $(".error_msg_send_mail").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                            $('.send_mail_image').val("")
+                            validFileStatus = 1;
+                        }
+                        if(notAllowedFiles.indexOf(ext)!=-1){
+                            $(".error_msg_send_mail").html('Upload error try again, exe,rar,dll file types are not allowed')
+                            $('.send_mail_image').val("")
+                            validFileStatus = 1;
+                        }
+                        if(validFileStatus!=1){
+                            $(".error_msg_send_mail").empty()
+                        }
+                    });
+                });
+            }(jQuery, jQuery(window)));
+        </script>
+        <script type="text/javascript">
+            function remove_attachments(attachment_id) {
+                $('#confirm_msg').html("<strong>Are you sure want to remove attachments?</strong>");
+                $('#confirm_type').val(attachment_id);
+                $('#confirm_box').modal('toggle');
+                return false;
+            }
+        </script>
+        <script type="text/javascript">
+            function submit_ok() {
+                if ($('#confirm_type').val()) {
+                    document.location.href = "/attachment/delete/"+$('#confirm_type').val();
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function fetch_attachments(worklog_id) {
+                window.open("/worklog_attachments/"+worklog_id+"/", '"'+worklog_id+'"', "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+            }
+            function show_html_version(type_id, type_name){
+                window.open("/ticket/summary/"+type_id+"/?type_name="+type_name, "show_html_data", "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+            }
+        </script>
+    </body>
+</html>
+
+
+
+
+

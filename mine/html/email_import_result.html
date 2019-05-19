@@ -1,0 +1,13 @@
+{% include "email_admin_header.html" %}  
+      <!-- Main component for a primary marketing message or call to action -->
+      
+      <div class="jumbotron"> 
+      	{% if succeeded_items_count > 0 %}
+      		{{succeeded_items_count}} emails successfully converted as tickets <br />
+      	{% endif %}     
+      	
+      	{% if failed_items_count > 0 %}
+      		{{failed_items_count}} emails are failed to convert as tickets <br />
+      	{% endif %}  
+      </div>
+{% include "email_admin_footer.html" %} 

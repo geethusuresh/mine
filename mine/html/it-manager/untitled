@@ -1,0 +1,238 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+      <!-- Charts -->
+
+      <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->  
+
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+{% if messages %}
+              <ul >
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            <div class="content">
+
+                <div style="padding:30px;margin-top:10px">
+
+                  <div class="row">
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-alizarin"><a href="/ticket/all" style="color:#fff">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{count_new}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>New tickets</p>
+                              <i class="fa fa-ticket"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-nephritis" >
+                              <h3 class="fa fa-cogs"></h3>
+                              <p>Monitoring Dashboard</p>
+                            <i class="fa fa-dashboard"></i>
+{% load zone %}
+
+                          </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-peter-river">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{subc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Subgroup Tickets</p>
+                              <i class="fa fa-bar-chart-o"></i>
+
+                          </div>
+                      </div><!-- ./col -->
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-wet-asphalt">
+                              <h3 class="timer"  data-start="0" data-from="0" data-to="{{ownc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Owned Tickets</p>
+                              <i class="fa fa-tasks"></i>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+
+
+
+            <div class="box">
+                <div class="box-title">
+                  <h3>New Tickets</h3>
+                </div>
+                <div class="box-body no-padding">
+                                      {% if tickets %}
+                        
+                      <table class="table table-striped">
+                        <thead>
+                        <th></th>
+                        <th>Ticket Id</th>
+                        <th>Summary</th>
+                        <th>Customer</th>
+                        <th>Owner</th>
+                        <th>Status</th>
+                        <th>Group</th>
+                        <th>Subgroup</th>
+                          <th>Priority</th>
+                          <th>Loged</th>
+                        </thead>
+
+                        {% for details in tickets %}
+                        <tbody>
+                          <td><a class="btn btn-success btn-sm" href="/ticket/status/edit/{{details.id}}"><i class="fa fa-search-plus "></i></a></td>
+                          <td>{{details.ticketid }}</td>
+                          <td>{{ details.summary }}</td>
+                          <td>{{ details.customer }}</td>
+                          <td>{{ details.reportedby }}</td>
+                          <td>{{ details.status }}</td>
+                          <td>{{ details.group }}</td>
+                          <td> {{details.subgroup}} </td>
+                          <td>{{ details.reportedpriority }}</td>
+                          <td>{% tzone details.reportdate %}</td>
+                          
+                        </tbody>{% endfor %}
+                        
+                      </table>
+
+                        {% else %}
+                          no new tickets
+                        {% endif %}
+                </div>
+              </div> 
+
+             
+
+            </div>
+          </div>
+        </div>      
+
+        {% include "ticket/advanced_search_popup.html" %}
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>       
+        <script type="text/javascript">
+      $(document).ready(function() {
+        $.ajax({
+            url:"/notify/",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data){
+              // noti = JSON.parse(data);
+               // console.log(noti);
+               $("#counter").append(data.length)
+                for (var i in data){
+
+                  // console.log(data[i].ticket__ticketid);
+                  $li = $('<a href="/notifications/"><i class="fa fa-users success">');
+                  $li.append(data[i].note+"-" + data[i].ticket__ticketid);
+                  
+                  $("#noti").append($li);
+
+                  
+              }
+            },
+          });
+        });
+      </script>
+        
+        <script type="text/javascript">
+        (function($) {
+        "use strict";
+          // number count
+          $('.timer').countTo();
+          
+          //TagsInput
+          $("[data-toggle='tags']").tagsinput({ 
+            tagClass: function(item) { 
+              return 'label label-primary';
+            } 
+          });
+          
+          // chat scroll
+          $('#chat-box').slimScroll({
+            height: '250px'
+          }); 
+          
+          //iCheck
+          $("input[type='checkbox'], input[type='radio']").iCheck({
+            checkboxClass: 'icheckbox_minimal',
+            radioClass: 'iradio_minimal'
+          });
+      
+          // ToDo
+          $('#checkbox').on('ifChecked', function(event){
+            $('.check').addClass('through')
+          });
+          $('#checkbox').on('ifUnchecked', function(event){
+            $('.check').removeClass('through')
+          });
+          
+          // gritter
+    
+          
+        })(jQuery);
+        </script>
+        <script>
+     $("#dash").addClass("active")
+     </script>
+        {% include "reports/reports_js.html" %}
+    </body>
+</html>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,21 @@
+<form class="form-horizontal" role="form" method="post" action="{% url 'update_application' server_id application_id %}">
+  {% csrf_token %}
+    <div class="modal-body">
+      <div class="form-group">
+          <label class="control-label col-lg-3">Name:</label>
+          <div class="col-sm-9">
+              {{form.name}}
+          </div>
+      </div>
+      <div class="form-group">
+          <label class="control-label col-lg-3">Description:</label>
+          <div class="col-sm-8">
+              {{form.description}}
+          </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>

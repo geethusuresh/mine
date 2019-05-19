@@ -1,0 +1,231 @@
+ 
+  <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+ <!-- JQuery Data Table -->
+<!-- DataTables -->
+<script src="/static/customer/js/materialize.js"></script>
+
+<script type="text/javascript" src="/static/angular/angular.min.js"></script>
+<script type="text/javascript" src="/static/angular/angular-route.js"></script>
+<script type="text/javascript" src="/static/angular/app.js"></script>
+<script type="text/javascript" src="/static/angular/controllers.js"></script>
+
+<script type="text/javascript" charset="utf8" src="/static/sorter/js/jquery.dataTables.js"></script>
+<!-- <script type="text/javascript" charset="utf8" src="/static/sorter/jquery-migrate-1.2.1.js"></script> -->
+
+    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.5/js/bootstrap-select.min.js" type="text/javascript"></script> -->
+     <script src="/static/customer/bootstrap-select.min.js" type="text/javascript"></script>
+{% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+  <script>
+  $(document).ready(function() {
+      
+        $.ajax({
+            url:"/notify/",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data){
+              // noti = JSON.parse(data);
+               // console.log(noti);
+               $("#counter").append(data.length)
+               if (data.length == 0){
+                $("#noti").append('<p class="text-center">no notifications</p>')
+                }
+                for (var i in data){
+                  $li = $('<a href=""><i class="fa fa-users success">');
+                  $li.append(data[i].owner__user__username +" "+ data[i].note+ "-" + data[i].ticket__ticketid).append($('<p class="hidden" id="tty">').html(data[i].ticket__id)).append($('<p class="hidden" id="type">').html(data[i].notify));
+                  $("#noti").append($li);
+                  $li.bind('click', manga_tholie);
+                  
+        
+                  
+              }
+            },
+          });
+        });
+
+    </script>
+    <script>
+        function manga_tholie(){
+          var x = ($(this).find('p:eq(0)').text())
+          var y = ($(this).find('p:eq(1)').text())
+          if (y=='E'){
+              window.open("/ticket/"+ x);
+          }else{
+              window.open("/ticket/stat/"+ x);
+          }
+        }
+    </script>
+
+{% else %}
+ <script >
+  $(document).ready(function() {
+
+        $.ajax({
+            url:"/notify/",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data){
+              // noti = JSON.parse(data);
+               // console.log(noti);
+               $("#counter").append(data.length)
+                for (var i in data){
+                  $("#counter").append(data.length)
+                   if (data.length == 0){
+                    $("#noti").append('<p class="text-center">no notifications</p>')
+                    }
+                  // console.log(data[i].ticket__ticketid);
+                  $li = $('<a>');
+                  $li.append(data[i].notify);
+                  
+                  $("#noti").append($li);
+                  // $li.bind('click', manga_tholi);
+
+              }
+            },
+          });
+        });
+      $("#ad_pic").hide();
+      $("#av_pic").hide();
+      $.ajax({
+      type: 'HEAD',
+      url: '/static/img/profile_pic/{{profile}}.jpg',
+      success: function() {
+        $("#ad_pic").show();
+      },  
+      error: function() {
+        $("#av_pic").show();
+      }
+    });
+    </script>
+    <script >
+      function manga_tholi(){
+          var x = ($(this).find('p:eq(0)').text())
+          // alert(x)
+          window.open("/ticket/"+ x, "_self");
+        }
+    </script>
+    {% endif %}
+
+  
+    <script type="text/javascript">
+     $("#dash").addClass("active");
+     </script>
+     <script>
+      $.ajax({
+        url: '/static/img/profile_pic/{{profile}}.jpg',
+        type: 'HEAD',
+        success: function () { 
+          $("#pickers").prepend('<img src="/static/img/profile_pic/{{profile}}.jpg" class="pull-left" id="ad_pic" alt="image">');
+         },
+        error: function () { 
+          $("#pickers").prepend('<img src="/static/img/photo.jpg" class="pull-left" id="ad_pic" alt="image">');
+         }
+      });
+    </script>
+    <script>
+    $(document).ready(function(){
+                $("#megamind").click(function(){
+                    var thisobj =  $(this);
+                    if(thisobj.hasClass("open"))
+                    {
+                        $(this).removeClass("open");
+                    }else
+                    {
+                        $(this).addClass("open");
+                    }
+                });
+            });
+    </script>
+
+ <script>
+  $(document).ready(function() {
+        $('.selectpicker').selectpicker({
+          style: 'btn-default',
+          size: 15
+        });
+      });
+      </script>
+
+              <script>
+        $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+  </script>
+
+{% if "Managed_service_category_view" in request.session.logged_user_priv %}
+    <script type="text/javascript">
+        $("#managed_cat option:gt(0)").remove().end();
+        $('#managed_sub_cat option:gt(0)').remove().end();
+        $.ajax({
+          url:"/managed_service_category_list/",
+          type:"GET",
+          dataType:"json",
+            data:{
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              for (var i in data){
+                $("#managed_cat").append($('<option>', {value:data[i][0],text:data[i][1]}))
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              console.log(err);
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#managed_cat').on('change', function(){
+                $('#managed_sub_cat option:gt(0)').remove().end();
+                var cat_id = $('#managed_cat').val();
+                $.ajax({
+                    url:"/managed_service_category_list/?sub_cat=True&cat="+cat_id,
+                    type:"GET",
+                    dataType:"json",
+                      data:{
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                      },
+                      success : function(data) {
+                        for (var i in data){
+                          $("#managed_sub_cat").append($('<option>', {value:data[i][0],text:data[i][1]}))
+                        }
+                      },
+                      error : function(xhr,errmsg,err) {
+                        console.log(err);
+                      }
+                  });
+            });
+        })
+    </script>
+{% endif %}
+{% comment %}
+    {% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles  or "Customer_Dashborad" in request.session.logged_user_priv or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+      {% include "components/sr_cust.html"%}
+    {% endif %}
+{% endcomment %}
+{% include "components/customer_js.html"%}
+{% include "oneconsole_help/modal_help.html" %}
+{% include "components/service_request.html" %}
+<script type="text/javascript">
+        $('#modal_sidehelp').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+            url :$('#modal_sidehelp').prop('href'),
+            type:"GET",
+            dataype:"json",
+            success:function(data){
+                // console.log(data)
+                $('#oc_helpcontent').empty();
+                $('#oc_helpcontent').append(data);
+                $("#oneconsole_help").modal('show');
+            }
+        });
+    });
+
+</script>

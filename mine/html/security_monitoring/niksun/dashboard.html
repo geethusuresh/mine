@@ -1,0 +1,175 @@
+{% load humanize %}
+{% load zone %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html ng-app="security">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style type="text/css" src="/static/feeder/main.css"></style>
+    <style type="text/css" src="/static/feeder/prism.css"></style>
+    <link href="/static/feeder/jquery.mCustomScrollbar.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/angular/angular-chart.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/security_monitoring/custom.css">
+    <style>
+      #nt-example1 li {
+      color: #4E4E4E;
+      background: #FFF none repeat scroll 0% 0%;
+      overflow: hidden;
+      height: 80px;
+      padding: 10px;
+      line-height: 30px;
+      list-style: outside none none;
+      font-size: 12px;
+      text-align: left;
+      border-bottom: 1px dotted #2C8162;
+      }
+    </style>
+    </head>
+    <body class="fixed" style="font-size:13px" ng-controller='sandsdashboardnew'>    
+     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+ 
+          {% if alert_message %}
+          {% for alert in alert_message %}
+          <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+          {% endfor %}
+          {% endif %}
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Threat Management |<small> Events</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li>Threat Management</li>
+                    <li class="active">Events</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <br><br>
+
+              <div class="col-sm-12">
+              {% for event in events %}
+                <div class="col-md-4 col-sm-6">
+                  <div class="company-info-area bgcolor" style="display: none;" colors="{{ event.color_code }}">
+                      <a href="/security_tool/dashboard/{{ event.name }}">
+                      <div class="logo-area"><img src="/media/{{ event.source_image }}" alt="{{ event.name }}"/></div>
+                      <div class="company-threat-count-area">
+                        <h4>{{ event.name }}</h4>
+                        {% for name, all_events, active_events in  event_sources %}
+                          {% if event.name ==  name %}
+                            <div class="company-threat-count-portion">{{all_events}}<span>All</span></div>
+                            <div class="company-threat-count-portion">{{active_events}}<span>Active</span></div>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                      </a>
+                  </div>
+                </div>
+              {% endfor %}
+
+              </div>
+
+
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="panel-title text-center"><strong>Events Trend</strong> (Last 7 days)</p>
+                    </div>
+                    <div class="panel-body text-center">                      
+                        <canvas id="line" class="chart chart-line" chart-data="data"
+                                  chart-labels="labels" chart-legend="true" chart-series="series" chart-options="options" height="100">
+                        </canvas>
+                    </div>                    
+                  </div>
+                 <!--  <div id="nt-example1-container">
+                    <i class="fa fa-arrow-up" id="nt-example1-prev"></i>
+                            <ul id="nt-example1">
+                                <li>Etiam imperdiet volutpat libero eu tristique. Aenean, rutrum felis in. <a href="#">Read more...</a></li>
+                                <li>Curabitur porttitor ante eget hendrerit adipiscing. Maecenas at magna. <a href="#">Read more...</a></li>
+                                <li>Praesent ornare nisl lorem, ut condimentum lectus gravida ut. <a href="#">Read more...</a></li>
+                                <li>Nunc ultrices tortor eu massa placerat posuere. Vivamus viverra sagittis. <a href="#">Read more...</a></li>
+                                <li>Morbi sodales tellus sit amet leo congue bibendum. Ut non mauris eu neque. <a href="#">Read more...</a></li>
+                                <li>In pharetra suscipit orci sed viverra. Praesent at sollicitudin tortor, id. <a href="#">Read more...</a> </li>
+                                <li>Maecenas nec ligula sed est suscipit aliquet sed eget ipsum, suspendisse. <a href="#">Read more...</a></li>
+                                <li>Onec bibendum consectetur diam, nec euismod urna venenatis eget.. <a href="#">Read more...</a> </li>
+                            </ul>
+                            <i class="fa fa-arrow-down" id="nt-example1-next"></i>
+                        </div> -->
+                    <!-- <div class="panel" style="text-aligin:center" id="scrolling_div" >
+                        <div class="panel-heading">
+                          <h4 class="text text-center text-warning"><i class="fa fa-rss"></i><l >Latest CVE RSS Feed</l></h4>
+                        </div>
+                        <marquee  behavior="scroll" direction="up" scrollamount="2" style="height:184px;">
+                          {% for item in feed_list %}
+                            <p class="text-primary">{{ item }}</p>
+                          {% endfor %}
+                        </marquee>
+                    </div> -->
+                </div>
+                <!-- <div id="feed"></div> -->
+            </div>
+          </div>
+        </div>
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}   
+    <script src="/static/js/chart.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-chart.js"></script>
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+    <script type="text/javascript" src="/static/angular/controllers.js"></script>   
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('.bgcolor').each(function() {
+          var colors = $(this).attr('colors');
+          if(colors == "")
+          {
+            var color1 = "#df4620";
+            var color2 = "#ff3300";
+          }
+          else{
+            var array = colors.split(",");
+            var color1 = array[0];
+            var color2 = array[1];
+          }
+          $(this).css("background-color", color1);
+          $('.bgcolor').show();
+          $(this).hover(function() {
+            $(this).css("background-color", color2);
+          }, function() {
+              //mouse out
+              $(this).css('background', color1);
+          });
+        });
+      });
+    </script>
+            
+    <script>
+      $("#snd_dash").addClass("active");
+      $("#sec_open").css('display','block');
+      $("#security").addClass("active");
+    </script>
+    </body>
+</html>

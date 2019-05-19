@@ -1,0 +1,197 @@
+{% load humanize %}
+{% load zone %}
+{% load pagination %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+        select {
+display: inline;
+}
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+
+        <div class="wrapper">
+        {% if "asset_management" in request.session.logged_user_priv %}
+        
+       
+          {% include "side_bar/asset_sidebar.html"%}
+        {% endif %}
+        
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Individual Hardware Asset<small>List</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/asset/">Asset Management</a></li>
+                    <li class="active"><a href="{% url 'hardwareasset' %}">Hardware Asset</a></li>
+                    
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+              {% if msg %}
+              <div class="panel media pad-all" id="message">
+                      <div class="media-left">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+                          <i class="fa fa-comment fa-2x"></i>
+                          </span>
+                      </div>
+          
+                      <div class="media-body">
+                          <p class="text-2x mar-no text-thin">{{msg}}</p>
+                          <p class="text-muted mar-no">Desktop and Laptop Asset</p>
+                      </div>
+                  </div>
+                {% endif %}
+
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-title">
+                      <span class="panel-heading"><strong>Hardware Details</strong></span>
+                      <!-- <a href="" data-toggle="modal" data-target="#addstock">
+                      <small class="label label-success pull-right">Add Stock</small></a> -->
+                      
+                      <a class="btn btn-info pull-right" href="{% url 'createhwasset' %}">ADD H/W ASSET</a>
+                      <!-- <h3><i class="fa fa-file-excel-o"></i></h3> -->
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                    <table class="table table-striped" id="table_id"  >
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th></th>
+                              <th>Employee Name</th>
+                              <th>Email Id</th>
+                              <th>Location</th>
+                              <th>Hardware Type</th>
+                              <th>Hardware Make</th>
+                              <th>Model</th>
+                              <th>Serial Number</th>
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for asset in asset_overview %}
+                          <tr>
+                            <td class="grey">
+                              <a class="btn btn-success btn-sm" href="{% url 'asset_details'  asset.id  %}" data-original-title="View" data-toggle="tooltip">
+                                <i class="fa fa-bars"></i> 
+                              </a>
+                            </td>
+                            <td class="grey">
+                              <a class="btn btn-success btn-sm" href="{% url 'asset_update'  asset.id  %} " data-original-title="Edit" data-toggle="tooltip">
+                                <i class="fa fa-edit"></i> 
+                              </a>
+                            </td>
+                            <td class="grey">{{asset.empname}}</td>
+                            <td class="grey">{{asset.emp_mail}}</td>
+                            <td class="grey" >{{asset.emp_loc}}</td>
+                            <td class="grey">{{asset.emp_hwtype}}</td>
+                            <td class="grey">{{asset.emp_hwmake}}</td>
+                            <td class="grey">{{asset.emp_hwmodel}}</td>
+                            <td class="grey">{{asset.serial_num}}</td>
+                            
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table> 
+                        <div class="col-sm-12 pull-right pad-all">
+                                        <div class="dataTables_paginate paging_simple_numbers pull-right">
+                                            {% pagination asset_page 2 2 4 4 %}
+                                        </div>
+                                    </div>       
+                    </div>
+                  </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+    {% include "asset/addtostock.html" %}
+    {% include "components/footer.html"%}
+    <script>
+    $("#table_id").DataTable({
+      "bPaginate": false,
+                "bInfo": false,
+                "bFilter": false,
+                "scrollX": true
+    });
+    $("#asset_menu").addClass("active");
+    </script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+       
+   $("#message").delay(1000).fadeOut("slow");
+
+    });
+    </script>
+    
+</body>
+</html>

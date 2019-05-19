@@ -1,0 +1,200 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+        <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+.tab-stacked-right .nav-tabs {
+  width: 15%;
+  border: 0;
+}
+    </style>
+
+    <style>
+table, th, td {
+    /*border: 1px solid black;*/
+    /*border-collapse: collapse;*/
+}
+th, td {
+    padding: 0px;
+    text-align: left;
+}
+</style>
+
+  <style type="text/css">
+  [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+  }
+  </style>
+  <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+
+    <!-- <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script> -->
+  </head>
+  <body class="fixed" ng-cloak style="font-size:13px" ng-app="oneconsole" ng-controller="signature">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Profile  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Profile</li>
+                </ol>
+            </div>
+
+              {% if messages %}
+              <ul >
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            <div class="content">
+
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="panel text-center">
+                  <div class="panel-body bg-purple">
+                    <img class="img-lg img-circle img-border mar-btm" id="profile_ad" style="border-radius: 50%;" src="/static/img/profile_pic/{{profile}}.jpg" alt="@roybarberuk">
+                    <img class="img-lg img-circle img-border mar-btm" id="profile_av" style="border-radius: 50%;" src="/static/img/photo.jpg" alt="@roybarberuk">
+                    <!-- <img alt="Avatar" class="img-lg img-circle img-border mar-btm" src="img/av5.png"> -->
+            
+                    <h4 class="mar-no">{{profile.user.first_name}} {{profile.user.last_name}} </h4>
+                    <p>{{profile.title}}</p>
+                  </div>
+            
+                  <div class="pad-all">
+                    <p class="text-muted">
+                    
+                    </p>
+                    <form action="/signature/save/" method="POST">{% csrf_token %}
+                    <div class="pad-ver">
+                      <input type="text" name="name" class="form-control" ng-model="first_name" placeholder="your name" required><br>
+                      <input type="text" name="title" class="form-control" ng-model="titles" placeholder="your position" required><br>
+                      <input type="email" name="email"  class="form-control" ng-model="email" placeholder="your email" required><br>
+                      <input type="text" name="number"  class="form-control" ng-model="phone_number" placeholder="your phone number" required><br>
+                      <label>Address</label>
+                      <select class="form-control" name="company" ng-model="office" required>
+                        <option value="" selected disabled> -select company name- </option>
+                        {% for locate in companies %}
+                        <option value="{{locate.name}}">{{locate.name}}</option>
+                        {% endfor %}
+                      </select><br>
+                      <select class="form-control" name="address" ng-model="locations" >
+                        <option value="" selected disabled>-select your Location- </option>
+                        {% for locate in locations %}
+                        <option value="{{locate.address}}">{{locate.location}}</option>
+                        {% endfor %}
+                      </select><br>
+                      <textarea class="form-control"  name="address" ng-model="locations" >[[locations]]</textarea>
+                      <button style="margin-top:2%" class="btn btn-mint btn-labeled fa fa-location-arrow">Save</button>
+                    </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-8">
+                <div class="panel">
+                  <div class="panel-body">
+                    <p class="text-center h4 text-thin">Signature Preview</p>
+
+                    <div class="row" style="margin-top:10%">
+                      <!-- <div class="col-sm-1"></div> -->
+                      <div class="col-sm-12">
+
+                        <table style="width:100%">
+                          <tr>
+                            <td rowspan="7" style="width:180px !important"><a href="http://marlabs.com/"><image src="/static/social/marlabs_full.jpg" style="width:180px !important"></a> </td>
+                            <td colspan="4"><strong>[[first_name]] |</strong> [[titles]]</td>
+                          </tr>
+                          <tr>
+                            <td colspan="4">[[office]]</td>
+                          </tr>
+                          <tr ng-show="locations">
+                             <td colspan="4">[[locations]]</td>
+                          </tr>
+                          <tr>
+                            <td colspan="4">[[phone_number]] </td>
+                          </tr>
+                          <tr>
+                            <td colspan="4">[[email]]</td>
+                          </tr>
+                          <tr>
+                            
+                            <td  colspan="4"><a href="https://www.facebook.com/marlabsinc"><img src="/static/social/Facebook.png"> </a>
+                              <a href="https://twitter.com/Marlabs"><img src="/static/social/Twitter.png"> </a>
+                              <a href="https://www.linkedin.com/company/marlabs-inc"><img src="/static/social/Linkedin.png"> </a>
+                              <a href="https://plus.google.com/+MarlabsIncorporated/posts"><img src="/static/social/Google-plus.png"> </a>
+                              <a href="https://www.youtube.com/user/Marlabsinc"><img src="/static/social/Youtube.png"> </a>
+                            </td>                          </tr>
+                        </table>
+                      </div>
+                      <!-- <div class="col-sm-1"></div> -->
+                    </div>
+                  </div>
+                </div>
+            </div>
+            </div>
+
+
+
+            </div>
+          </div>
+        </div>
+
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    <script>
+    $("#profile_ad").hide()
+    $("#profile_av").hide()
+    $.ajax({
+    type: 'HEAD',
+    url: '/static/img/profile_pic/{{profile}}.jpg',
+    success: function() {
+      $("#profile_ad").show()
+    },  
+    error: function() {
+      $("#profile_av").show()
+    }
+});
+    $("#profile").addClass("active")
+    </script>
+    <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+    <script type="text/javascript" src="/static/angular/controllers.js"></script>
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+    <script>
+    var first_name = '{{first_name}}';
+    var phone_number = '{{phone_number}}';
+    var email = '{{email}}';
+    var titles = '{{title}}';
+    var locations = '';
+    var locate = '{{loc}}';
+    var office = '{{office}}';
+    </script>
+    </body>
+</html>
+

@@ -1,0 +1,399 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">  
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard Layout Management<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard Layout Details</li>
+                </ol>
+            </div>
+            <div class="content">
+            <div class="col-sm-12">
+              {% if messages %}               
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}               
+              {% endif %}
+              </div>
+              <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab">                       
+                      <li class="{% if topbox_activate %} active {% endif %}"><a data-toggle="tab" href="#topbox">Top Box Details</a></li>
+                      <li class="{% if speedo_activate  %} active {% endif %}"><a data-toggle="tab" href="#speedo">Speedo Details</a></li>
+                      <li class="{% if graph_activate  %} active {% endif %}"><a data-toggle="tab" href="#graph">Graph Details</a></li>                     
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+
+                      <!--Top Box Details -->
+                      <div id="topbox" class="tab-pane fade in {% if topbox_activate %} active {% endif %}">
+                          <div class="row" style="margin-top:10px;">
+                            <div class="col-sm-6">
+                               <div class="box">
+                                <div class="box-title">                                  
+                                  <h3>
+                                  {% if op == "update" %}
+                                    Update Top Box Details
+                                  {% else %}
+                                    Add New Top Box Details
+                                  {% endif %}
+                                  </h3>                                  
+                                </div>
+                                <div class="box-body">
+                                  <form method="post" action="/advanced_monitoring/layout_details/">
+                                  {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" style="text-align: center;">
+                                      <select class="form-control" id="customer" name="customer" required style="width:300px;display: block;margin: 0 auto;">
+                                        <option value="">Select Customer</option>
+                                          {% for customer in customers %}
+                                            {% if selected_customer.id == customer.id %}
+                                            <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                                            {% else %}
+                                            <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                            {% endif %}
+                                          {% endfor %}
+                                      </select><br />          
+                                      <input class="form-control " type="text" id="" name="top_boxname" required placeholder="Top Boxname" style="width:300px; display:table-cell;vertical-align:middle;" value="{{selected_topbox_name}}"><br />
+                                      <input type="hidden" name="update_id" value="{{topbox_id}}" />
+                                      <button class="btn btn-success" type="submit">
+                                      {% if op == "update" %}
+                                      <input type="hidden" name="op" value="update" />
+                                        Update Top Box
+                                      {% else %}
+                                      <input type="hidden" name="op" value="Add" />
+                                        Add Top Box
+                                      {% endif %}
+                                      </button> 
+                                    </div>
+                                    </fieldset>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <table class="table table-hover" id="topbox_table">
+                            <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>Topbox Name</th>
+                              <th>Customer</th>
+                              <th>Status</th>
+                              <th>Delete</th>
+                              <th>Edit</th>                              
+                            </tr> 
+                            </thead>
+                            <tbody>
+                            {% for topbox_item in topbox_details  %}                              
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{topbox_item.topbox_name}}</td>
+                                <td>{{topbox_item.customer.customername}}</td>                          
+                                {% if topbox_item.active %}
+                                <td>                                 
+                                  <input value="{{topbox_item.id}}"  type="checkbox" name="topbox_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                                </td>
+                                {% else %}
+                                <td>                                  
+                                  <input value="{{topbox_item.id}}" type="checkbox" class="switch" name="topbox_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                                </td>
+                                {% endif %}
+                                <td>
+                                  <a href="/advanced_monitoring/delete_topbox/{{topbox_item.id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                                </td>                                
+                                <td>
+                                  <a class="btn btn-info btn-sm" href="/advanced_monitoring/layout_topbox_edit/{{topbox_item.id}}">
+                                    <span class="text">Edit</span>
+                                  </a>
+                                </td>
+                              </tr>
+                            {% endfor %}                              
+                            </tbody>
+                          </table>
+                      </div>                     
+                     <!--End Top box details -->
+
+                     <!--Speedo Details -->
+                      <div id="speedo" class="tab-pane fade in {% if speedo_activate  %} active {% endif %}">
+
+                          <div class="row" style="margin-top:10px;">
+                            <div class="col-sm-6">
+                               <div class="box">
+                                <div class="box-title">
+                                  <h3>
+                                  {% if op_speedo == "update" %}
+                                    Update Speedo Meter Details
+                                  {% else %}
+                                   Add New Speedo Meter Details
+                                  {% endif %}
+                                  </h3>
+                                </div>
+                                <div class="box-body">
+                                  <form method="post" action="/advanced_monitoring/speedo_details/">
+                                  {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" style="text-align: center;">
+                                      <select class="form-control" id="customer" name="customer" required style="width:300px;display: block;margin: 0 auto;">
+                                        <option value="">Select Customer</option>
+                                          {% for customer in customers %}
+                                            {% if selected_customer_speedo.id == customer.id  %}
+                                            <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                                            {% else %}
+                                            <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                            {% endif %}
+                                            
+                                          {% endfor %}
+                                      </select><br />          
+                                      <input class="form-control " type="text" id="" name="speedo_name" required placeholder="Speedo Name" style="width:300px; display:table-cell;vertical-align:middle;" value="{{selected_speedo_name}}"><br />
+                                      <input type="hidden" name="speedo_update_id" value="{{speedo_id}}" />
+                                      <button class="btn btn-success" type="submit">
+                                      {% if op_speedo == "update" %}
+                                      <input type="hidden" name="op_speedo" value="update" />
+                                        Update Speedo Meter
+                                      {% else %}
+                                      <input type="hidden" name="op_speedo" value="Add" />
+                                        Add Speedo Meter
+                                      {% endif %}
+                                      </button>  
+                                    </div>
+                                    </fieldset>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <table class="table table-hover" id="speedo_table">
+                            <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>Speedo Name</th>
+                              <th>Customer</th>
+                              <th>Status</th>
+                              <th>Delete</th>
+                              <th>Edit</th>       
+                            </tr> 
+                            </thead>
+                            <tbody>                             
+                             {% for speedo_item in speedo_details  %}                              
+                              <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{speedo_item.speedo_name}}</td>
+                                <td>{{speedo_item.customer.customername}}</td>                         
+                                {% if speedo_item.active %}
+                                <td>                                 
+                                  <input value="{{speedo_item.id}}"  type="checkbox" name="speedo_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                                </td>
+                                {% else %}
+                                <td>                                  
+                                  <input value="{{speedo_item.id}}" type="checkbox" class="switch" name="speedo_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                                </td>
+                                {% endif %}
+
+                                <td>
+                                  <a href="/advanced_monitoring/delete_speedo/{{speedo_item.id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                                </td>  
+
+                                <td>
+                                  <a class="btn btn-info btn-sm" href="/advanced_monitoring/speedo_edit/{{speedo_item.id}}">
+                                    <span class="text">Edit</span>
+                                  </a>
+                                </td>
+                              </tr>
+                            {% endfor %}                              
+                            </tbody>
+                          </table>
+                      </div>                     
+                     <!--End Speedo details -->
+
+                     <!--Graph Details -->
+                      <div id="graph" class="tab-pane fade in {% if graph_activate  %} active {% endif %}">
+                          <div class="row" style="margin-top:10px;">
+                            <div class="col-sm-6">
+                               <div class="box">
+                                <div class="box-title">
+                                  <h3>Add New Graph Details</h3>
+                                </div>
+                                <div class="box-body">
+                                  <form method="post" action="/advanced_monitoring/graph_details/">
+                                  {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" style="text-align: center;">
+                                      <select class="form-control" id="customer" name="customer" required style="width:300px;display: block;margin: 0 auto;">
+                                        <option value="">Select Customer</option>
+                                          {% for customer in customers %}
+                                          {% if selected_customer_graph.id == customer.id %}
+                                          <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                                          {% else %}
+                                          <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                      </select><br />          
+                                      <input class="form-control" type="text" id="" name="graph_name" required placeholder="Graph Name" style="width:300px; display:table-cell;vertical-align:middle;" value="{{selected_graph_name}}"><br />
+                                      <input type="hidden" name="graph_update_id" value="{{graph_id}}" />
+                                      {% if op_graph == "update" %}
+                                      <input type="hidden" name="op_graph" value="update" />
+                                      {% else %}
+                                      <input type="hidden" name="op_graph" value="Add" />
+                                      {% endif %}
+                                      {% if op_graph == "update" %}
+                                      <button class="btn btn-success" type="submit">Update Graph Details</button>
+                                      {% else %}
+                                      <button class="btn btn-success" type="submit">Add Graph Details</button>
+                                      {% endif %}
+                                    </div>
+                                    </fieldset>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <table class="table table-hover" id="graph_table">
+                            <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>Graph Name</th>
+                              <th>Customer</th>
+                              <th>Status</th>
+                              <th>Delete</th>
+                              <th>Edit</th>       
+                            </tr> 
+                            </thead>
+                            <tbody>
+                            {% for graph_item in graph_details %}                   
+                              <tr>
+                               <td>{{ forloop.counter }}</td>
+                                <td>{{graph_item.graph_name}}</td>
+                                <td>{{graph_item.customer.customername}}</td>
+                                {% if graph_item.active %}
+                                <td>                                 
+                                  <input value="{{graph_item.id}}"  type="checkbox" name="graph_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                                </td>
+                                {% else %}
+                                <td>                                  
+                                  <input value="{{graph_item.id}}" type="checkbox" class="switch" name="graph_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                                </td>
+                                {% endif %}
+
+                                <td>
+                                  <a href="/advanced_monitoring/delete_graph/{{graph_item.id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                                </td>  
+                                <td>
+                                   <a class="btn btn-info btn-sm" href="/advanced_monitoring/graph_edit/{{graph_item.id}}">
+                                    <span class="text">Edit</span>
+                                  </a>
+                                </td>
+                              </tr>
+                            {% endfor %}      
+                            </tbody>
+                          </table>
+                      </div>                     
+                     <!--End Graph details -->
+
+                     
+                    </div>
+                  </div>
+                </div>
+              </div>             
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+      $("#mon_admin_main").addClass("active");
+      $("#mon_admin_sub").css({'display' : 'block'});
+      $("#lay_details").addClass("active"); 
+    </script> 
+    <script type="text/javascript">  
+    $(document).ready(function(){ 
+      $("#topbox_table").dataTable({
+        bLengthChange :false,
+        bInfo:false        
+      });
+      $("#speedo_table").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });
+      $("#graph_table").dataTable({
+        bLengthChange :false,
+        bInfo:false
+      });      
+    });
+  </script>
+  <script type="text/javascript">
+    var status=0;
+    $("input[name='topbox_status']").bootstrapSwitch();       
+    $('input[name="topbox_status"]').on('switchChange.bootstrapSwitch', function(event, state) {     
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/topbox_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/topbox_activate/'+this.value;
+        status = 1;
+      }
+    });
+
+    $("input[name='speedo_status']").bootstrapSwitch();       
+    $('input[name="speedo_status"]').on('switchChange.bootstrapSwitch', function(event, state) {     
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/speedo_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/speedo_activate/'+this.value;
+        status = 1;
+      }
+    });
+
+    $("input[name='graph_status']").bootstrapSwitch();       
+    $('input[name="graph_status"]').on('switchChange.bootstrapSwitch', function(event, state) {     
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/graph_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/graph_activate/'+this.value;
+        status = 1;
+      }
+    });
+
+    function delete_item(){
+      if(confirm("Are you sure. You want to delete it? ")){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    </script>  
+</html>
+

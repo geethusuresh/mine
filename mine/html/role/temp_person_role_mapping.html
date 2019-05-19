@@ -1,0 +1,52 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <form  id="myform" name ="myform" method='post' action='' enctype="multipart/form-data" >{%csrf_token%}
+              <fieldset>
+                <!-- <div class="controls" style="width:400px;margin-left:20%">   -->
+                <input type="radio" name="choice" value="resolver">resolver<br>
+                <input type="radio" name="choice" value="servicedesk">servicedesk<br>
+                <input type="radio" name="choice" value="enduser">enduser
+                <input type="file" name="csvfile" size="chars" ><br> 
+                 <button class="btn btn-success" type="submit" id="rw">Upload Now</button>  
+                 <!--  -->
+                  </form> 
+                  <a href="/change/username/" class="btn btn-info">Update Username</a>
+                <!-- </div> -->
+              </fieldset>    
+              </form>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>

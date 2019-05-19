@@ -1,0 +1,46 @@
+{% for key, value in vm.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}} = {{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br>
+
+
+{% for key, value in sql.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}} = {{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br>
+
+
+{% for key, value in storage.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}}={{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br>
+
+
+{% for key, value in redis.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}} = {{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br>
+
+
+{% for key, value in webapp.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}} = {{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br><br>
+
+
+{% for key, value in webjob.iteritems %}
+[{{ key }}]<br>
+{% for k, v in value.iteritems %}
+{{k}} = {{v}}<br>
+{% endfor %}<br>
+{% endfor %}<br>

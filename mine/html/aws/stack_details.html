@@ -1,0 +1,230 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+<script type="text/javascript">
+  var cloud_account_id = {{ cloud_account_id }};
+  var stack_id = '{{ stack_id }}';
+</script>
+
+
+    <h1>
+        Application Group {{stack_obj.Name}} Details
+        <small>Application Details</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+        </li>
+        <li>
+            <a href="{% url 'get_aws_opswork_list' cloud_account_id %}">Application Group Dashboard </a>
+        </li>
+    <!--     <li>
+           <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+        <li class="active">
+            <strong>Application Group Details</strong>
+        </li>
+    </ol>
+
+
+{% endblock %}
+
+{% block basecontent %}
+
+<div ng-controller="StackDetailsController">
+  <div class="row">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-10">
+          <!--Mint Panel-->
+          <!--===================================================-->
+          <div class="panel panel-mint">
+              <div class="panel-heading">
+                  <a href="{% url 'aws_opswork_instance_list' cloud_account_id stack_id %}"><h3 class="panel-title">Overall Instances Details In Application Group</h3></a>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-9">
+                      <div class="w-14">
+                        <div class="instances-watcher svg" data-binding="instances-watcher">
+                            <div data-binding="total" class="total" data-counter="{[{instance_total}]}">
+                                <span>Instances</span>
+                                <canvas id="myChart" width="188" height="188"></canvas>
+                            </div>
+                            <div data-binding="online" class="online" data-counter="{[{instance_running}]}"><span>online</span></div>
+                            <div data-binding="setting_up" class="setting_up" data-counter="{[{instance_setup}]}"><span>setting up</span></div>
+                            <div data-binding="shutting_down" class="shutting_down" data-counter="{[{instance_shuting_down}]}"><span>shutting down</span></div>
+                            <div data-binding="stopped" class="stopped" data-counter="{[{instance_stopped}]}"><span>stopped</span></div>
+                            <div data-binding="error" class="error" data-counter="{[{instance_error}]}"><span>error</span></div>
+                        </div>
+                      </div>
+                  </div>
+                  <div class="col-md-2">
+                    <a href="{% url 'create_myinstance_aws_opswork' cloud_account_id stack_id %}" class="btn btn-app" style="margin-top: 83%; color: rgb(51, 136, 221); background-color: aliceblue;">
+                      <span class="badge badge-pink"><i class="fa fa-play"></i></span><ul style="font-size: medium;   padding-left: 4px;">Create New Instance</ul>
+                    </a>
+                  </div>
+                </div><!-- /.row -->
+                  <a href="{% url 'aws_opswork_instance_list' cloud_account_id stack_id %}" class="btn btn-info pull-right">Instances Details</a>
+              </div>
+          </div>
+          <!--===================================================-->
+          <!--End Mint Panel-->
+      </div>
+  </div>
+</div>
+
+<div class="row">
+    <div class="col-md-1">
+    </div>
+    <div class="col-md-10">
+        <div class="panel panel-purple">
+          <div class="panel-heading">
+            <h3 class="panel-title">Application Group settings</h3>
+          </div>
+          <div class="panel-body">
+            {% for stack in stack_details %}
+                <div class="row">
+                    <div class="col-md-2">
+                    </div>
+                    <div class="col-md-9">
+                      <dl class="dl-horizontal">
+                        <dt>Name</dt>
+                        <dd>{{stack.Name}}</dd>
+                        <dt>Region</dt>
+                        <dd>{{stack.Region}}</dd>
+                        <dt>VPC</dt>
+                        <dd>{{stack.VpcId}}</dd>
+                        <dt>Default subnet</dt>
+                        <dd>{{stack.DefaultSubnetId}}</dd>
+                        <dt>Default operating system</dt>
+                        <dd>{{stack.DefaultOs}}</dd>
+                        <dt>Default root device type</dt>
+                        <dd>{{stack.DefaultRootDeviceType}}</dd>
+                        <dt>IAM role</dt>
+                        <dd>{{stack.ServiceRoleArn}}</dd>
+                        <dt>Default SSH key</dt>
+                        <dd>{{stack.DefaultSshKeyName}}</dd>
+                        <dt>Default IAM instance profile</dt>
+                        <dd>{{stack.DefaultInstanceProfileArn}}</dd>
+                        <dt>Hostname theme</dt>
+                        <dd>{{stack.HostnameTheme}}</dd>
+                        <dt>Stack ID</dt>
+                        <dd>{{stack.StackId}}</dd>
+                        <dt>ARN</dt>
+                        <dd>{{stack.Arn}}</dd>
+                        <hr>
+                         <!-- <h4>Configuration management</h4>
+                        <hr>
+                      <!--   <h4>Security</h4>
+                        <hr>
+                        <dt>Use OpsWorks security groups</dt>
+                        <dd>{{stack.UseOpsworksSecurityGroups}}</dd> -->
+                      </dl>
+                  </div>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
+    </div>
+</div>
+
+
+<style type="text/css">
+      .w-14 {
+          float: left;
+          margin-right: 16px;
+          width: 656px;
+      }
+
+      .instances-watcher {
+          font-size: 0;
+          margin: 0 8px 8px;
+          padding-top: 50px;
+      }
+      .instances-watcher div::after {
+          content: attr(data-counter);
+          display: block;
+          font-size: 36px;
+          line-height: 36px;
+          padding-bottom: 20px;
+          position: relative;
+          top: -76px;
+      }
+
+      .instances-watcher div.setting_up {
+          border-top-color: #38d;
+          color: #38d;
+      }
+
+      .instances-watcher div {
+          display: inline-block;
+          height: 40px;
+          margin-right: 16px;
+          margin-top: 80px;
+          text-align: center;
+          vertical-align: top;
+          width: 76px;
+      }
+
+      .instances-watcher div span {
+          border-top: 1px solid;
+          display: block;
+          font-size: 15px;
+          height: 28px;
+          line-height: 16px;
+          padding-top: 13px;
+          width: 100%;
+      }
+
+      .instances-watcher div.online {
+          border-top-color: #759c3e;
+          color: #759c3e;
+      }
+
+      .instances-watcher div.shutting_down {
+          border-top-color: #986291;
+          color: #986291;
+      }
+
+
+
+      .instances-watcher div.stopped {
+          border-top-color: #ebaa4b;
+          color: #ebaa4b;
+      }
+
+      .instances-watcher div.error {
+          border-top-color: #e05243;
+          color: #e05243;
+      }
+
+
+    .instances-watcher div.total {
+        border-top-color: #fff !important;
+        color: #444;
+        height: 80px;
+        position: relative;
+        width: 160px;
+    }
+
+ .instances-watcher div.total canvas {
+    display: block;
+    left: -14px;
+    position: absolute;
+    top: -104px;
+}
+
+
+ .instances-watcher div.total span {
+    border-top: 0 none;
+    line-height: 16px;
+}
+
+
+
+.instances-watcher div.total::after {
+    font-size: 48px;
+}
+</style>
+
+{% endblock %}

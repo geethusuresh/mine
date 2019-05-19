@@ -1,0 +1,59 @@
+ <div class="leftside">
+  <div class="sidebar">
+      <div class="" style="padding:10px;background-color:white">
+          <div>
+              <img style="width:100%" src="/media/{{profile.customer.logo}}" alt="" />
+          </div>
+      </div>
+      <ul class="sidebar-menu">
+
+      
+        <li id="dash">
+            <a href="/">
+              <i class="fa fa-home"></i>
+              <span class="text">Monitoring Dashboard</span>
+            </a>
+        </li>
+
+        <li id="groups">
+            <a href="/monitor_details/">
+              <i class="fa fa-dashboard"></i>
+              <span class="text">Monitored Groups</span>
+            </a>
+        </li>
+
+        {% if "Network_Monitoring_View" in request.session.logged_user_priv  %}         
+         <li id="network_detail">
+            <a href="/advanced_monitoring/network_monitoring/">
+              <i class="fa fa-dashboard"></i>
+              <span class="text">Network Monitoring</span>
+            </a>
+        </li>
+        {% endif %}
+
+        <li id="maintenance">
+            <a href="/advanced_monitoring/maintanance_details/">
+              <i class="fa fa-list"></i>
+              <span class="text">Scheduled Maintenance</span>
+            </a>
+        </li>
+        
+        <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+
+      </ul>
+
+
+    <div class="sidebar-widget online-users">
+      <div class="body online-list">              
+        <div class="footer">
+          <span class="btn btn-info" style="width:100%">
+            <l class="fa fa-envelope-o" style="font-size:12px">
+              {{profile.customer.help_text}}
+            </l>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,157 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Update Routine Task</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+        .bs{
+            background-color: transparent;
+        }
+        .page {
+            width: 100%;
+            height: auto;
+        }
+        table.dataTable.no-footer {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable thead th, table.dataTable thead td {
+            border-bottom-color: #ddd;
+        }
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable tbody th, table.dataTable tbody td {
+            padding-bottom: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 8px;
+        }
+        #tick_details.tbody th, #tick_details.dataTable tbody td{
+            padding: 15px;
+        }
+        .sortorder:after {
+          content: '\25b2' !important;
+        }
+        .sortorder.reverse:after {
+          content: '\25bc' !important;
+        }
+        [ng-cloak]
+        {
+          display: none !important;
+        }
+        table.scroll tbody {
+            height: 100px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed ng-cloak" style="font-size:13px" ng-controller="FetchReportsController" ng-init="init('{{csrf_token}}')" ng-cloak>
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        {% include "components/msg_div.html"%}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Routine Tasks | <small>Update Routine Task</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/routine_task/">Routine Tasks</a></li>
+                        <li class="active">Update Routine Task</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <form action="#" method="POST"> {% csrf_token %}
+                                        <div class="col-sm-12">
+                                            <label class="control-label">Task Title</label>
+                                            <input type="text" id="task_title" class="form-control" required name="task_title" value="{{ task.task_title }}">
+                                            <label class="control-label">Task Description</label>
+                                            <textarea class="form-control" name="task_desc" id="task_descr" required >{{ task.task_description }}</textarea><br/>
+                                            <label class="control-label">Workgroup</label>
+                                            <select class="form-control" name="task_group" id="tsk_group" required>
+                                                <option value="">Select Workgroup</option>
+                                                {% for group in workgroups %}
+                                                    <option value="{{ group.0 }}" {% if group.0 == task.workgroup.id %}selected{% endif %}>{{ group.1 }}</option>
+                                                {% endfor %}
+                                            </select><br/>
+                                            <label class="control-label">Subgroup</label>
+                                            <select class="form-control" name="task_subgroup" id="tsk_subgroup" required>
+                                                <option value="">Select Subgroup</option>
+                                            </select><br/>
+                                            <label class="control-label">Task Description</label>
+                                            <textarea class="form-control" name="task_desc" id="task_descr" required >{{ task.task_description }}</textarea><br/>
+                                            <input type="submit" class="btn btn-success pad-top" value="Save Changes" />
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            function get_subgroup_list(wg_id) {
+                $.ajax({
+                    url:"/ticket/incident/create",
+                    type:"POST",
+                    data: {
+                        workgroupid : wg_id,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(data){
+                        var groups = JSON.parse(data);
+                        for (var i in groups) {
+                            $('#tsk_subgroup').append($('<option>',
+                                {
+                                    value:groups[i].pk,
+                                    text:groups[i].fields.subgroupname
+                                }
+                            ))
+                        }
+                        $('#tsk_subgroup').val('{{task.subgroup.id}}');
+                    }
+                })
+            }
+        </script>
+        <script type="text/javascript">
+            $('#tsk_group').on('change', function(){
+                $('#tsk_subgroup option:gt(0)').remove().end();
+                var workgroup_id = $('#tsk_group').val();
+                if (workgroup_id) {
+                    get_subgroup_list(workgroup_id);
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                get_subgroup_list($('#tsk_group').val());
+            })
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        {% include "components/angular_files.html" %}
+    </body>
+</html>

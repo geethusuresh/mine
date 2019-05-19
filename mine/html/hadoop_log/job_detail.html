@@ -1,0 +1,159 @@
+{% extends 'hadoop_log/base.html' %}
+{% block content %}
+    <div id="detail_page">
+    <h2>Job id: {{ job.job_id }}<a class="home_btn" href="{% url 'web:job_list'%}">Back</a></h2>
+    
+        <ul id="job_table">
+            <li class="title">File System Counters</li>
+                <ul class="left">
+                    <li class="left_content">FILE: Number of bytes read</li>
+                    <li class="left_content">FILE: Number of bytes written</li>
+                    <li class="left_content">FILE: Number of read operations</li>
+                    <li class="left_content">FILE: Number of large read operations</li>
+                    <li class="left_content">FILE: Number of write operations</li>
+                    <li class="left_content">HDFS: Number of bytes read</li>
+                    <li class="left_content">HDFS: Number of bytes written</li>
+                    <li class="left_content">HDFS: Number of read operations</li>
+                    <li class="left_content">HDFS: Number of large read operations</li>
+                    <li class="left_content">HDFS: Number of write operations</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.file_number_of_bytes_read }}</li>
+                    <li class="right_content">{{ job.file_number_of_bytes_written }}</li>
+                    <li class="right_content">{{ job.file_number_of_read_operations }}</li>
+                    <li class="right_content">{{ job.file_number_of_large_read_operations }}</li>
+                    <li class="right_content">{{ job.file_number_of_write_operations }}</li>
+                    <li class="right_content">{{ job.hdfs_number_of_bytes_read }}</li>
+                    <li class="right_content">{{ job.hdfs_number_of_bytes_written}}</li>
+                    <li class="right_content">{{ job.hdfs_number_of_read_operations }}</li>
+                    <li class="right_content">{{ job.hdfs_number_of_large_read_operations }}</li>
+                    <li class="right_content">{{ job.hdfs_number_of_write_operations }}</li>
+                </ul>
+                <div class="line"></div>
+
+                <li class="title">Job Counters</li>
+                <ul class="left">
+                    <li class="left_content">Launched map tasks</li>
+                    <li class="left_content">Launched reduce tasks</li>
+                    <li class="left_content">Data-local map tasks</li>
+                    <li class="left_content">Total time spent by all maps in occupied slots (ms)</li>
+                    <li class="left_content">Total time spent by all reduces in occupied slots (ms)</li>
+                    <li class="left_content">Total time spent by all map tasks (ms)</li>
+                    <li class="left_content">Total time spent by all reduce tasks (ms)</li>
+                    <li class="left_content">Total vcore-seconds taken by all map tasks</li>
+                    <li class="left_content">Total vcore-seconds taken by all reduce tasks</li>
+                    <li class="left_content">Total megabyte-seconds taken by all map tasks</li>
+                    <li class="left_content">Total megabyte-seconds taken by all reduce tasks</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.launched_map_tasks }}</li>
+                    <li class="right_content">{{ job.launched_reduce_tasks }}</li>
+                    <li class="right_content">{{ job.data_local_map_tasks }}</li>
+                    <li class="right_content">{{ job.total_time_spent_by_all_maps }}</li>
+                    <li class="right_content">{{ job.total_time_spent_by_all_reduces }}</li>
+                    <li class="right_content">{{ job.total_time_spent_by_all_map_tasks }}</li>
+                    <li class="right_content">{{ job.total_time_spent_by_all_reduce_tasks }}</li>
+                    <li class="right_content">{{ job.total_vcore_seconds_taken_by_all_map_tasks }}</li>
+                    <li class="right_content">{{ job.total_vcore_seconds_taken_by_all_reduce_tasks }}</li>
+                    <li class="right_content">{{ job.total_megabyte_seconds_taken_by_all_map_tasks }}</li>
+                    <li class="right_content">{{ job.total_megabyte_seconds_taken_by_all_reduce_tasks }}</li>
+                </ul>
+                <div class="line"></div>
+
+                <li class="title">Map-Reduce Framework</li>
+                <ul class="left">
+                    <li class="left_content">Map input records</li>
+                    <li class="left_content">Map output records</li>
+                    <li class="left_content">Map output bytes</li>
+                    <li class="left_content">Map output materialized bytes</li>
+                    <li class="left_content">Input split bytes</li>
+                    <li class="left_content">Combine input records</li>
+                    <li class="left_content">Combine output records</li>
+                    <li class="left_content">Reduce input groups</li>
+                    <li class="left_content">Reduce shuffle bytes</li>
+                    <li class="left_content">Reduce input records</li>
+                    <li class="left_content">Reduce output records</li>
+                    <li class="left_content">Spilled Records</li>
+                    <li class="left_content">Shuffled Maps</li>
+                    <li class="left_content">Failed Shuffles</li>
+                    <li class="left_content">Merged Map outputs</li>
+                    <li class="left_content">GC time elapsed (ms)</li>
+                    <li class="left_content">CPU time spent (ms)</li>
+                    <li class="left_content">Physical memory (bytes) snapshot</li>
+                    <li class="left_content">Virtual memory (bytes) snapshot</li>
+                    <li class="left_content">Total committed heap usage (bytes)</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.map_input_records }}</li>
+                    <li class="right_content">{{ job.map_output_records }}</li>
+                    <li class="right_content">{{ job.map_output_bytes }}</li>
+                    <li class="right_content">{{ job.map_output_materialized_bytes }}</li>
+                    <li class="right_content">{{ job.input_split_bytes }}</li>
+                    <li class="right_content">{{ job.combine_input_records }}</li>
+                    <li class="right_content">{{ job.combine_output_records }}</li>
+                    <li class="right_content">{{ job.reduce_input_groups }}</li>
+                    <li class="right_content">{{ job.reduce_shuffle_bytes }}</li>
+                    <li class="right_content">{{ job.reduce_input_records }}</li>
+                    <li class="right_content">{{ job.reduce_output_records }}</li>
+                    <li class="right_content">{{ job.spilled_records }}</li>
+                    <li class="right_content">{{ job.shuffled_maps }}</li>
+                    <li class="right_content">{{ job.failed_shuffles }}</li>
+                    <li class="right_content">{{ job.merged_map_outputs }}</li>
+                    <li class="right_content">{{ job.gc_time_elapsed }}</li>
+                    <li class="right_content">{{ job.cpu_time_spent }}</li>
+                    <li class="right_content">{{ job.physical_memory_bytes_snapshot }}</li>
+                    <li class="right_content">{{ job.virtual_memory_bytes_snapshot }}</li>
+                    <li class="right_content">{{ job.total_committed_heap_usage_bytes }}</li>
+
+
+                </ul>
+                <div class="line"></div>
+
+                <li class="title">Shuffle Errors</li>
+                <ul class="left">
+                    <li class="left_content">BAD_ID</li>
+                    <li class="left_content">CONNECTION</li>
+                    <li class="left_content">IO_ERROR</li>
+                    <li class="left_content">WRONG_LENGTH</li>
+                    <li class="left_content">WRONG_MAP</li>
+                    <li class="left_content">WRONG_REDUCE</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.bad_id }}</li>
+                    <li class="right_content">{{ job.connection }}</li>
+                    <li class="right_content">{{ job.io_error }}</li>
+                    <li class="right_content">{{ job.wrong_length }}</li>
+                    <li class="right_content">{{ job.wrong_map }}</li>
+                    <li class="right_content">{{ job.wrong_reduce }}</li>
+                </ul>
+                <div class="line"></div>
+
+                <li class="title">File Input Format Counters</li>
+                <ul class="left">
+                    <li class="left_content">Bytes Read</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.bytes_read }}</li>
+                </ul>
+                <div class="line"></div>
+
+                <li class="title">File Output Format Counters</li>
+                <ul class="left">
+                    <li class="left_content">Bytes Written</li>
+                </ul>
+                <ul class="right">
+                    <li class="right_content">{{ job.bytes_written }}</li>
+                </ul>
+
+        </ul>
+    </div>
+{% endblock %}
+
+
+
+
+
+
+
+
+

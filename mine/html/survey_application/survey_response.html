@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Survey</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px" ng-controller="SurveyResponseController" ng-init="init('{{csrf_token}}', '{{survey.id}}', '{{ticket.id}}', '{{user.id}}')">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Survey Response</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Survey Response</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-6"> 
+                                    <div ng-repeat="quest in survey_questions" class="form-control" style="height:auto; width:auto;">
+                                        <p>[[$index+1]] . [[quest.question]]</p>
+                                        <div ng-show="quest.choices.length > 0" ng-repeat="choice in quest.choices">
+                                            <input type="radio" ng-change="choose_answer(choice, quest)" ng-model="choice.answer_choice" name="[[quest.q_id]]" ng-value="choice"/>
+                                            [[choice.choice_name]]
+                                        </div>
+                                        <textarea ng-show="quest.q_type=='text'" class="form-control" ng-model="quest.answer_text" placeholder="Enter the answer here"></textarea>
+                                    </div><br/>
+                                    <p id="error_msg">[[error_message]]</p>
+                                    <input type="submit" name="submit" value="Save Response" class="btn btn-success" ng-click="save_response()"/>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% include 'components/footer.html' %}
+        <script type="text/javascript" src="/static/js/angular/controllers.js"></script>
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_survy').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

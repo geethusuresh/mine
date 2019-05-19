@@ -1,0 +1,432 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+<script type="text/javascript">
+  var cloud_account_id = {{ cloud_account_id }}
+  var csrftoken = '{{ csrf_token }}';
+
+  var user_timezone = '{{ profile.timezone }}';
+
+
+  // $(document).ready(function() {
+  //     $(".select").select2({placeholder: "Select"});
+  // });
+
+</script>
+    <h1>
+        AWS Instances
+        <small>Instance Overview</small>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+        </li>
+    <!--     <li>
+           <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+        <li class="active">
+            <strong>AWS Instances</strong>
+        </li>
+    </ol>
+
+{% endblock %}
+
+
+{% block content %}{% load staticfiles %}
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-danger fade in custom-alert">
+            <button data-dismiss="alert" class="close"><span>×</span></button>
+           {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success alert-dismissable fade in custom-alert">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+<div ng-controller="AwsNodeListController">
+
+<span id="response_messages"></span>
+
+  <div class="row" ng-cloak>
+    <div class="col-lg-8">
+      <!-- TABLE: LATEST ORDERS -->
+      <div class="panel panel-mint">
+        <div class="panel-heading">
+            <div class="panel-control">
+              <div class="btn-group">
+                   <input type="text" autocomplete="off" class="form-control ng-pristine ng-untouched ng-valid" ng-model="group_sort.$" placeholder="Search Instance" id="demo-input-search2">
+              </div>
+            </div>
+            <h3 class="panel-title">Instances List</h3>
+
+
+
+<!-- 
+          <div class="row">
+              <div class="col-sm-6 table-toolbar-left">
+              </div>
+              <div class="col-sm-6 table-toolbar">
+                <div class="form-group">
+                  <input type="text" autocomplete="off" class="form-control ng-pristine ng-untouched ng-valid" ng-model="group_sort.node_id" placeholder="Search Instance" id="demo-input-search2">
+                </div>
+              </div>
+            </div>
+ -->
+
+
+        </div><!-- /.box-header -->
+        <div class="panel-body">
+          <div class="img-container" ng-if="loading_instance_list_data">   
+              <img id="loading_gif" src="/static/cloud-static-files/img/throbber.svg" alt="Product Image">
+          </div>
+                <div ng-if="filterd_node_list.length==0">No instances found </div>
+
+          <div class="table-responsive" id="node_list_table">
+            <table class="table" id="node_table">
+              <thead ng-if="filterd_node_list.length!=0">
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Public IPs</th>
+                  <th>State</th>
+                  <th>Schedule</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat= 'each_node in filterd_node_list=(aws_node_list | filter:group_sort)' ng-class="{node_selected: isActive(each_node.node_id)}">
+                  <td class="rid">
+                    <a href="#" ng-click='each_node_details(each_node.node_id)' class="text-primary">{[{each_node.node_id}]}</a>
+                  </td>
+                  <td>{[{each_node.name}]}</td>
+                  <td>{[{each_node.public_ips}]}</td>
+                  <td ng-if="each_node.state == 'running'">
+                    <span class="label label-table label-success">Running</span>
+                  </td>
+                  <td ng-if="each_node.state == 'stopped'">
+                    <span class="label label-table label-danger">Stopped</span>
+                  </td>
+                  <td ng-if="each_node.state == 'terminated'">
+                    <span class="label label-table label-danger">Terminated</span>
+                  </td>
+                  <td  ng-if="each_node.state == 'stopping' || each_node.state == 'pending' || each_node.state == 'shutting-down' ">
+                    <span class="label label-table label-warning">Waiting</span>
+                    <img id="loading_gif" src="/static/cloud-static-files/img/server_load.gif" alt="Product Image">
+                  </td>
+
+
+                  <td>
+                    <a class="btn btn-info btn-sm" href="#" ng-click='shedule_task_for_node(each_node.node_id, each_node.name)'><i class="fa fa-clock-o fa-lg"></i></a>
+                  </td>
+
+
+                  <td>
+                    <a class="btn btn-success btn-sm" href="/cloud_management/aws/{{cloud_account_id}}/instance/{[{each_node.node_id}]}/details/" style='color:white'>
+                      <i class="fa fa-search fa-lg"></i>
+                    </a>
+                  </td>
+                </tr>
+               
+
+              </tbody>
+            </table>
+            
+
+          </div><!-- /.table-responsive -->
+        </div><!-- /.box-body -->
+        <div class="footer clearfix">
+         <button class="btn btn-block btn-info btn-flat" ng-click="create_aws_node_list_page()">Launch New Instance</button>
+        </div><!-- /.box-footer -->
+      </div><!-- /.box -->
+    </div><!-- /.col md 8-->
+    <div class="col-lg-4">
+      <!-- PRODUCT LIST -->
+      <div class="panel panel-purple">
+        <div class="panel-heading">
+          <div class="panel-control">
+          </div>
+          <h3 class="panel-title">Instance Statistics <small>(Two Hrs)</small></h3>
+        </div><!-- /.box-header -->
+        <div class="panel-body" id="instance-graph"  aria-expanded="true">
+
+            <div class="alert alert-warning fade in" ng-show="instance_not_selcted">
+              Please click on instance ID to view the statistics
+            </div>
+
+          <img id="loading_gif" src="/static/cloud-static-files/img/loader.gif" alt="Product Image" style="display:none">
+          <span id="instance_statstics_chart">
+          </span><!-- /important -->
+        </div><!-- /.box-body -->
+        <div class="box-footer text-center">
+        </div><!-- /.box-footer -->
+      </div><!-- /.box -->
+    </div><!-- /.col md 4-->
+  </div><!-- /.row -->
+
+
+
+
+  <div id="aws-instance-creation-nodedetails" class="modal fade bs-example-modal-lg" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Add Instance</h4>
+        </div><!-- MODAL HEADER-->
+        <form method="post" class="form-horizontal style-form" id="aws-form" action="{%url 'aws_node_listpage_creation' cloud_account_id %}">{% csrf_token %}
+        <div class="modal-body">
+            <div class="panel panel-info">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-sm-6" style="min-height: 313px;">
+                    <div class="panel panel-success">
+                      <div class="panel-body">
+                        {{aws_node_form}}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6" id="aws_size_detail_div" style="display:none">
+                    <h3 class="panel-title">Instance Size Details</h3>
+                    <table class="table table-striped table-hover" id="instance-size-information">
+                      <tbody>
+                        <tr>
+                          <td>
+
+                          <span class="icon-wrap icon-wrap-sm icon-circle">
+                              <img src="/static/cloud-static-files/img/ram.jpg" alt="Product Image" style="width:40px;">
+                          </span>
+                          <td><span id = "aws_ram_size_details"></span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                              <span class="icon-wrap icon-wrap-sm icon-circle">
+                                  <img src="/static/cloud-static-files/img/disk.jpg" alt="Product Image" style="width:40px;">
+                              </span>
+                            </td>
+
+                            <td><span id = "aws_disc_size_details"></span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                              <span class="icon-wrap icon-wrap-sm icon-circle">
+                                  <img src="/static/cloud-static-files/img/Dollar.png" alt="Product Image" style="width:40px;">
+                              </span>
+                            </td>
+                          <td><span id ="aws_prince_size_details"></span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+        </div><!-- MODAL body-->
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="submit" id="form-submit">Submit</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+        </form>
+      </div><!-- /.MODAL CONTENT -->
+    </div>
+  </div><!-- /.MODAL -->
+
+
+
+
+
+  <div id="aws-instance-cron-job" class="modal fade bs-example-modal-lg">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background-color: #E7EBEE;">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Schedules for {[{selcted_node_id}]} ({[{selcted_node_name}]}) </h4>
+        </div><!-- MODAL HEADER-->
+        <div class="modal-body">
+
+
+ <div class="row" >
+
+              <div class="col-lg-6">
+
+
+
+                <div class="panel">
+                    <div class="panel-heading">
+                      <div class="panel-control">
+                         <button ng-if="schedule_update" ng-click="create_schedule_button()" class="btn"><i class="fa fa-clock-o  text-info"> New Schedule</i></button>
+                      </div>
+                     <h3 class="panel-title">Upcoming Schedules</h3>
+                    </div>
+                  <div class="panel-body">
+
+                    <div class="table-responsive" id="schedule_list_table">
+                      <span ng-if="schedules.length==0"> No Upcoming Schedules</span>
+                        <table class="table table-border" ng-if="schedules.length!=0">
+                          <thead>
+                            <tr>
+                              <th class="text-center">Name</th>
+                              <th class="text-center">Schedule</th>
+                              <th class="text-center">Action</th>
+                              <th class="text-center"><i class="fa fa-edit"></i></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+
+                            <tr ng-repeat="schedule in schedules" ng-class="{node_selected: isScheduleActive(schedule.pk)}">
+                              <td class="text-center">{[{schedule.name}]}</td>
+                              <td class="text-center">{[{schedule.next_run}]}</td>
+                              <td class="text-center" ng-if="schedule.action=='0'"><span class="label label-table label-danger" >Stop</span></td>
+                              <td class="text-center" ng-if="schedule.action==='1'"><span class="label label-table label-success" >Start</span></td>
+
+                              <td class="text-center">
+                                <a id="schedule_edit_click" ng-click="get_instance_schedule(schedule.pk)" data-original-title="Delete" href="#" data-toggle="tooltip" class="btn btn-xs btn-info add-tooltip"><i class="fa fa-edit"></i></a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                   
+
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <div class="panel-control">
+                          <button ng-if="schedule_update" ng-click="remove_schedule_cron(schedule_id)" class="btn"><i class="fa fa-trash fa-lg  text-danger"></i></button>
+                      </div>
+                      <h5 class="panel-title" ng-if="schedule_update">Update Schedule <span style="color: #268FDD;">{[{schedule_name}]}</span></h5>
+                      <h5 class="panel-title" ng-if="!(schedule_update)">Create New Schedule</h5>
+                    </div>
+                    <div class="panel-body">
+                      <cron-selection output="myOutput" init="serverData" config="cronConfig"></cron-selection>
+                      <div class="form-group">
+                        <p>Select instance action to schedule.</p>
+                        <select class="form-control" ng-model="instance_action">
+                            <option value="1" selected>Start</option>
+                            <option value="0">Stop</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <p>Schedule Name.</p>
+                            <input type="text" ng-model="schedule_name" class="form-control">
+                      </div>
+                    </div>
+
+                    <div class="modal-footer" ng-if="!(schedule_update)">
+                        <button class="btn btn-primary" ng-click='create_new_shedule(selcted_node_id)' id="form-submit">Submit</button>
+                    </div>
+
+                    <div class="modal-footer" ng-if="schedule_update">
+                        <button class="btn btn-primary" ng-click='update_shedule(selcted_node_id)' id="form-submit">Update</button>
+                    </div>
+                </div>
+              </div>
+
+</div>
+
+
+
+
+
+        </div><!-- MODAL body-->
+      </div><!-- /.MODAL CONTENT -->
+    </div>
+  </div><!-- /.MODAL -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><!-- /.ng controller -->
+
+
+<style type="text/css">
+  .node_selected {
+      background-color: #D7D8D8;
+  }
+
+  .img-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      text-align:center; /* Align center inline elements */
+      font: 0/0 a;
+  }
+
+  .img-container:before {
+      content: ' ';
+      display: inline-block;
+      vertical-align: middle;
+      height: 100%;
+  }
+
+  .img-container img {
+      vertical-align: middle;
+      display: inline-block;
+  }
+
+</style>
+
+<script type="text/javascript">
+
+
+  $("#id_size").change(function () {
+      if ($("#id_size").val() != "") {
+          $.ajax({
+            type: "GET",
+            url: '/cloud_management/aws/'+$("#id_cloud_account_id").val()+'/size_details/'+$("#id_size").val()+'/',
+            success: function(data){
+               $('#aws_ram_size_details').html('<p>Ram Size: '+data.ram+'</p>')
+               $('#aws_disc_size_details').html('<p>Disk Size: '+data.disk+'</p>')
+               $('#aws_prince_size_details').html('<p>Price: '+data.price+'</p>')
+               $("#ram_progress").css("width", data.ram_percentage);
+               $("#disc_progress").css("width", data.disc_percentage);
+               $('#aws_size_detail_div').show()
+            },
+            dataType: "json"
+          });
+      }else{
+
+          $('#aws_size_detail_div').hide()
+      }
+  });
+
+  {% if form_error %}
+    $("#aws-instance-creation-nodedetails").modal('show');
+  {% endif %}
+
+  $('#node_list_table').slimScroll({
+      height: '350px'
+  });
+
+setTimeout(function() { $('.custom-alert').remove(); }, 8000);
+</script>
+{% endblock%}

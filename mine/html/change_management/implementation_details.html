@@ -1,0 +1,69 @@
+{% load zone %}
+<div class="row">
+    <div class="col-sm-12">
+        {% comment %}
+            <div class="col-sm-12" style="margin-top:10px">
+                <div class="col-sm-2">
+                    <a class="btn btn-warning" href="/rfc/proceed_to_next_phase/{{rfc.id}}/" {% if rfc.status == 'COMP' and view_status == True %} {% else %} disabled {% endif %}>Start Review
+                    </a>
+                </div>
+                {% if change_start_exceeds and rfc.status == 'IMPL' %}
+                    <div class="col-sm-2">
+                        <a class="btn btn-info" href="#" {% if activate_change == True %} {% else %} disabled {% endif %} data-toggle="modal" data-target="#activate_change">Activate Change
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endcomment %}
+        <div class="col-md-12 row">
+            <div class="btn-group diff-btn">
+                <a class="btn btn-default" href="/rfc/proceed_to_next_phase/{{rfc.id}}/" {% if rfc.status == 'COMP' and view_status == True %} {% else %} disabled {% endif %}><i class="fa fa-play" aria-hidden="true"></i> Start Review </a>
+                {% if change_start_exceeds and rfc.status == 'IMPL' %}
+                    <a class="btn btn-default" href="#" {% if activate_change == True %} {% else %} disabled {% endif %} data-toggle="modal" data-target="#activate_change"><i class="fa fa-power-off" aria-hidden="true"></i> Activate Change </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane fade in active" id="imp_tasks">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h3 class="panel-title" style="text-align:center">Tasks Review</h3>
+                        <table class="table table-stripped" id="task_review_tab">
+                            <thead>
+                                <tr>
+                                    <th class="hidden"></th>
+                                    <th>TaskID</th>
+                                    <th>Task Title</th>
+                                    <th>Implementer</th>
+                                    <th>Scheduled Start</th>
+                                    <th>Scheduled Finish</th>
+                                    <th>Domain</th>
+                                    <th>Status</th>
+                                    <!-- <th>Status</th> -->
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tsk in scheduled_tasks %}
+                                    <tr>
+                                        <td class="hidden">{{tsk.id}}</td>
+                                        <td>{{tsk.task.taskid}}</td>
+                                        <td>{{tsk.task.task_name}}</td>
+                                        <td>{{tsk.task.owner}}</td>
+                                        <td>{% tzone tsk.task.scheduled_start %}</td>
+                                        <td>{% tzone tsk.task.scheduled_finish %}</td>
+                                        <td>{{tsk.task.group}}</td>
+                                        <td>{{ tsk.task.status.status }}</td>
+                                        <td>
+
+                                        <a href="/task/details/{{tsk.task.id}}/" target="_blank" class="btn btn-success" {% if rfc.status == 'IMPL' or rfc.status == 'INPROG' and tsk.task.owner == profile %} {% else %} disabled {% endif %}>View</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

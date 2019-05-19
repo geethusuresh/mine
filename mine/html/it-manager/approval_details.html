@@ -1,0 +1,918 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/asset_css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Ticket for Approval<small></small></h1>
+                    <em>
+                        {% if ticket.is_task == True %}
+                            <div class="well well-sm">Ticket is currently Freezed as Task is running.</div>
+                        {% else %}
+                            {% if ticket.status == "WAITAPPR" %}
+                                <a class="btn btn-success" href="" data-toggle="modal" data-target="#tohelp">Approve/Reject</a>
+                            {% else %}
+                                <a href="" class="label label-info">Email Sent to {{ticket.affectedperson}}</a>
+                            {% endif %}
+                        {% endif %}
+                    </em>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Approval Details</li>
+                    </ol>
+                    {% if ticket.ticketattribute_set.all|length > 0 and ticket.ticketattribute_set.all.0.additional_category %}
+                        <em class="pull-right" style="padding:10px; font-size:14px"><a href="" class="label label-warning"> Ticket is moved to {{ticket.ticketattribute_set.all.0.additional_category|tic_categorize}}</a></em>
+                    {% endif %}
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="panel-control">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href="#demo-tabs2-box-1">
+                                                    <i class="fa fa-magic fa-lg"></i> Basic Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href="#demo-tabs2-box-2">
+                                                    <i class="fa fa-globe fa-lg"></i> Worklogs
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href="#approval_hist">
+                                                    <i class="fa fa-globe fa-lg"></i> Approval History
+                                                </a>
+                                            </li>
+                                            {% if attachments %}
+                                                <li>
+                                                    <a data-toggle="tab" href="#attachments">
+                                                        <i class="fa fa-globe fa-lg"></i> Attachments
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <h3 class="panel-title">{{ticket.ticketid}}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="tab-content">
+                                        <div id="demo-tabs2-box-1" class="tab-pane fade in active">
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <label><strong>Summary:</strong> </label>
+                                                    {{ ticket.summary }}<br>                        
+                                                </div>
+                                                <div class="col-sm-2" style="border-left:1px solid black" >
+                                                    <h4>{{ ticket.ticketid }}</h4>
+                                                    <label class="label label-success" style="font-size:14px" >{{ticket.status | real:ticket.customer.id}}</label>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-sm-12"><br>
+                                                    <label><strong>Description:</strong>  </label>
+                                                    <p>{{ ticket.description|safe }}</p>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6"> 
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Affected Person :</dt>
+                                                        <dd>{{ ticket.affectedperson }}</dd>
+                                                        <br>
+                                                        <dt>Reported By :</dt>
+                                                        <dd>{{ ticket.reportedby }}</dd><br>
+                                                        <dt>Phone No :</dt>
+                                                        <dd>{{ ticket.affectedphone }}</dd><br>
+                                                        <dt>Email :</dt>
+                                                        <dd>{{ ticket.affectedemail }}</dd><br>
+                                                    </dl>
+                                                    <hr>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Category :</dt>
+                                                        <dd>{{ ticket.category }}</dd>
+                                                        <br>
+                                                        <dt> SubCategory :</dt>
+                                                        <dd>{{ ticket.subcategory }}</dd><br>
+                                                        <dt>Domain :</dt>
+                                                        <dd>{{ ticket.group }}</dd><br>
+                                                        <dt>Subdomain :</dt>
+                                                        <dd>{{ ticket.subgroup }}</dd><br>
+                                                    </dl>
+                                                    <hr>
+                                                </div>
+                                            </div>
+                                            <div class="row">                
+                                                <div class="col-md-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Created Date :</dt>
+                                                        <dd>{% tzone ticket.creationdate %}</dd>
+                                                        <br>
+                                                        <dt> Reported Date :</dt>
+                                                        <dd>{% tzone ticket.creationdate %}</dd><br>
+                                                        <dt>Worklocation :</dt>
+                                                        <dd>{{ ticket.extrafield1 }}</dd><br>
+                                                        <dt>Affected Date :</dt>
+                                                        <dd>{% tzone ticket.affecteddate %}</dd><br>
+                                                        <dt>Source :</dt>
+                                                        <dd>{{ ticket.source }}</dd>
+                                                    </dl>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {% if attributes %}
+                                                        {% for attribute in attributes %}
+                                                            <dl class="dl-horizontal">
+                                                                <dt>Project Name :</dt>
+                                                                <dd>{{ attribute.project }}</dd>
+                                                                <br>
+                                                                <dt> Quantity :</dt>
+                                                                <dd>{{ attribute.quantity }}</dd><br>
+                                                                <dt>Note :</dt>
+                                                                <dd>{{attribute.remark }}</dd><br>
+                                                                <dt>Request Type :</dt>
+                                                                <dd>{{attribute.permanent_type }}</dd><br>
+                                                            </dl>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="demo-tabs2-box-2" class="tab-pane fade">
+                                            <h4 class="text-thin"><i class="fa fa-globe fa-fw"></i> Ticket Worklog</h4>
+                                            <div class="row">
+                                                <div class="col-sm-1"></div>
+                                                <div class="col-sm-10">
+                                                    <div class="box" style="margin-bottom: 30px">
+                                                        <div class="box-body">
+                                                            <form action="/ticket/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                                                <textarea placeholder="Add Worklog"  name="remark" class="form-control" rows="4" required></textarea>
+                                                                <input type="text" value="itmanager" class="hidden" name="itmanager">
+                                                                <br/>
+                                                                <select name="msg_type" required class="form-control">
+                                                                    <option value="">- Choose Message Type -</option>
+                                                                    <option value="AI">Additional Information</option>
+                                                                    <option value="G">Greetings</option>
+                                                                    <option value="IN"> Internal Log </option>
+                                                                </select>
+                                                                <br/>
+                                                                <input type="file" name="image" style="margin-top:5px">
+                                                                <div class="box-footer clearfix">
+                                                                    <button class="pull-right btn btn-success" type="submit">Update <i class="fa fa-arrow-circle-right"></i></button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <div class="timeline">
+                                                        <div class="timeline-header">
+                                                            <div class="timeline-header-title bg-info">Now</div>
+                                                        </div>
+                                                        {% for act in activity %}
+                                                            <div class="timeline-entry">
+                                                                <div class="timeline-stat">
+                                                                    <div class="timeline-icon"></div>
+                                                                    <div class="timeline-time">{% tzone act.time %}</div>
+                                                                </div>
+                                                                <div class="timeline-label">
+                                                                    {% if act.flag %}
+                                                                        <span class="badge badge-info pull-right">Internal Log</span>
+                                                                    {% else %}
+                                                                        <span class="badge badge-info pull-right">External Log</span>
+                                                                    {% endif %}
+                                                                    <p class="mar-no pad-btm pull-left"><span class="text-bold">{{act.owner.user.first_name }}</span>&nbsp;{{act.note}}.
+                                                                    </p>
+                                                                    {% if act.remark %}
+                                                                        <br/><br/>
+                                                                        <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                                                                    {% endif %}
+                                                                    {% if act.ticketattachments_set.all|length > 0 %}
+                                                                        <a class="btn btn-info pull-right" onclick="fetch_attachments({{act.id}})">View Attachments</a>
+                                                                    {% elif act.attachment %}
+                                                                        <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                    {% endif %}
+                                                                    <br/><br/><br/>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>                            
+                                                </div>
+                                                <div class="col-sm-1"></div>
+                                            </div>
+                                        </div>
+                                        <div id="approval_hist" class="tab-pane fade">
+                                            <h4 class="text-thin"><i class="fa fa-globe fa-fw"></i>Approval History</h4>
+                                            <table class="table table-striped no-padding">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Approver</th>
+                                                        <th>Created Date</th>
+                                                        <th>Status</th>
+                                                        <th>Approved Date</th>
+                                                        <th>Note</th>
+                                                        <th>Approval Type</th>
+                                                        <th>Approval Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for history in historys %}
+                                                        <tr>
+                                                            <td>{{history.approver}}</td>
+                                                            <td>{{history.created_date | date:'d-m-Y P'}}</td>
+                                                            {% if history.note %}
+                                                                <td>{{history.approve | approval}}</td>
+                                                                <td>{{history.approved_date | date:'d-m-Y P'}}</td>
+                                                                <td>{{history.note}}</td>
+                                                            {% else %}
+                                                                <td> <label class="label label-warning">Pending</label> </td>
+                                                                <td></td>
+                                                                <td>{{history.note}} </td>
+                                                            {% endif %}
+                                                            <td>{{history.approvaltype }}</td>
+                                                            <td>
+                                                                {% if history.status == True %}
+                                                                    Active
+                                                                {% elif history.status == False %}
+                                                                    Inactive
+                                                                {% else %}
+                                                                    No status
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div id="attachments" class="tab-pane fade">
+                                            <h4 class="text-thin"><i class="fa fa-globe fa-fw"></i>Ticket Attachments</h4>
+                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                <thead>
+                                                    <tr role="row">
+                                                        <th >Uploaded by</th>
+                                                        <th> File name</th>
+                                                        <th >Time</th>
+                                                        <th >Actions</th>
+                                                    </tr>
+                                                </thead>         
+                                                <tbody >
+                                                    {% for act in attachments %}
+                                                        <tr class="odd">
+                                                            <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.time|naturaltime}}</a></td>
+                                                            <td>
+                                                                <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}"   download="{{attachments.docfile}}">
+                                                                    <i class="fa fa-download "></i>
+                                                                </a>
+                                                                <a class="btn btn-danger btn-sm" onclick="remove_attachments({{act.id}})" href="#" >
+                                                                    <i class="fa fa-trash-o "></i> 
+                                                              </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}         
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="panel-group accordion" id="accordion">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title btn-success">
+                                            <a data-parent="#accordion" data-toggle="collapse" href="#collapseOne" aria-expanded="false" class="collapsed" style="text-align:center">Ask For Approval</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse" id="collapseOne" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <form action="/ticket/app/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                <label>Ask Approval to </label>
+                                                <input type="email" id="person" name="person" class="form-control" placeholder="Enter Person" required>
+                                                <br >
+                                                <label>Enter CC:</label>
+                                                <input type="text" id="cc_person" name="cc_person" class="form-control" placeholder="Enter Cc">
+                                                <br>
+                                                <label>Why you ask for approval ?</label>
+                                                <textarea type="text" name="note" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>  
+                                                <br>          
+                                                <div class="row" >
+                                                    <div class="col-sm-6">
+                                                        <label>Estimated Cost:</label>
+                                                        <input type="text" name="cost"  class="form-control" placeholder="Cost"  >
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label>Approximate Time :</label>
+                                                        <input type="text" name="time"  class="form-control" placeholder="Approximate time"  >
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="col-sm-12">
+                                                    <select  name="availability" class="form-control" name="availability">
+                                                        <option value="" >-Availability-</option>
+                                                        <option value="Need to Procure" >Need to Procure</option>
+                                                        <option value="Instock" >Instock</option>
+                                                    </select>
+                                                    <br/>
+                                                </div>
+                                                <div class="col-sm-12">
+                                                    <select name="finance_committee_approval" required class="form-control">
+                                                        <option value="">- Finance Committee Approval -</option>
+                                                        <option value="Yes">Yes</option>
+                                                        <option value="N/A">N/A</option>
+                                                    </select>
+                                                </div>  
+                                                <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Ask to approve</button>
+                                            </form> 
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-pink">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-parent="#accordion" data-toggle="collapse" href="#tic_categorize" aria-expanded="false" class="collapsed text-center"> Ticket Belongs To </a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse" id="tic_categorize" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <form action="/ticket/categorize/{{ticket.id}}/" method="POST">{% csrf_token %}
+                                                <label>Do you know this ticket belongs which category ? </label>
+                                                <div class="col-sm-12">
+                                                    <select  name="tic_cat" class="form-control" required>
+                                                        <option value="" >-Categorize-</option>
+                                                        {% if ticket.ticketattribute_set.all|length > 0 and ticket.ticketattribute_set.all.0.additional_category %}
+                                                        <option value="0" {% if ticket.ticketattribute_set.all.0.additional_category == "0" %} selected {% endif %}>Purchase</option>
+                                                        <option value="1" {% if ticket.ticketattribute_set.all.0.additional_category == "1" %} selected {% endif %}>Support</option>
+                                                        {% else %}
+                                                        <option value="0" >Purchase</option>
+                                                        <option value="1" >Support</option>
+                                                    {% endif %}
+                                                    </select>
+                                                    <br/>
+                                                </div>
+                                                <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Save</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title btn-danger">
+                                            <a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed text-center" aria-expanded="false">Initiated Task</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            {% if tasks %}
+                                                <ul class="list-group">
+                                                    {% for task in tasks %}
+                                                        <a href="{% if task.is_normal_task %}/task/details/{{task.id}}/{% else %}/task/panel/{{task.id}}{% endif %}" target="_blank">
+                                                            <li class="list-group-item">
+                                                            {% if task.task_closed %}
+                                                                <span class="badge badge-danger">Task Closed</span>
+                                                            {% else %}
+                                                                <span class="badge badge-primary">{{task.task_name}} - {{task.status}}</span>
+                                                            {% endif %}
+                                                            {{task.taskid}}
+                                                            </li>
+                                                        </a>
+                                                    {% endfor %}
+                                                </ul>
+                                                {{task.task_name}}
+                                            {% else %}
+                                                <p>Currently no task has been created</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title btn-warning">
+                                        <a data-parent="#accordion" data-toggle="collapse" href="#collapseThree" class="text-center" aria-expanded="true">Create a Purchase Task with {{ticket.ticketid}}</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-collapse collapse in" id="collapseThree" aria-expanded="true">
+                                        <div class="panel-body">
+                                            <form action="/task/create/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                                <label>Task is for ?</label>
+                                                <input type="text" name="task_name" class="form-control" required>
+                                                <br>
+                                                <label>Task Type</label>
+                                                <select class="form-control" name="task_type" id="task_type">
+                                                    <option value="">--Select--</option>
+                                                    <option value="assign">Assign Asset</option>
+                                                    <option value="return">Return Asset</option>
+                                                </select><br/>
+                                                <!-- <div class="col-sm-12" id="stock_details" style="display:none"> -->
+                                                <div class="col-sm-12 stock_details" style="display:none">
+                                                    <label >Serial Number</label>
+                                                </div>
+                                                <div class="col-sm-8 stock_details" style="display:none">
+                                                    <input type="text" name="serial_number" id="serial_number" class="form-control col-sm-8 stock_details">
+                                                </div>
+                                                <div class="col-sm-4 stock_details" style="display:none">
+                                                <!-- data-toggle="modal" data-target="search_stock" -->
+                                                    <a href="#" class="btn btn-success" id="search_stock_serial_no">Search</a>
+                                                </div>
+                                                <div class="stock_details" style="display:none"><br/><br/></div>
+                                                <input type="hidden" name="stock_id" id="stock_id" class="stock_details">
+                                                <!-- </div> -->
+                                                <label>Please Select tag</label>
+                                                <select class="form-control" name="tag" required id="tag_data">
+                                                  {% for tag in tags %}
+                                                    <option value="{{tag.id}}" >{{tag.item_type}}</option>
+                                                  {% endfor %}
+                                                </select>
+                                                <label>Please Select CostCenter</label>
+                                                <select class="form-control" name="costcenter" required id="cost_center_data">
+                                                    {% for cost in costcenter %}
+                                                        <option value="{{cost.id}}" >{{cost.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="row col-sm-12">
+                                                    <br>
+                                                    <button class="pull-right btn btn-success" type="submit">Create Purchase Task<i class="fa fa-arrow-circle-right"></i></button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#email"><i class="" ></i><span class="text" > Send Email </span></a>
+                                {% if ticket.status == "WAITAPPR" %}
+                                    <a class="btn btn-warning" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#create_task"><i class="" ></i><span class="text" > Create Normal Task </span></a>
+                                {% endif %}
+                                {% comment %}
+                                    {% if ticket.is_task == True %}
+                                    {% else %}
+                                        <a href="#" class="btn btn-danger" style="margin-top:3px;width:100%"><i class="" ></i><span class="text" >Close Ticket</span></a>
+                                    {% endif %}
+                                {% endcomment %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="assignengg" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Assign task </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/approved/{{ticket.id}}"  method="POST">{% csrf_token %}
+                            <select class="form-control"  name="approval">
+                                <option value="TRUE">Approve</option>
+                                <option value="FALSE">Rejected</option>
+                            </select>
+                            <br>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Confirm</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="tohelp" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Forwarding Ticket to Helpdesk</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/approved/{{ticket.id}}"  method="POST">{% csrf_token %}
+                            <select class="form-control"  name="approval">
+                                <option value="TRUE">Approve</option>
+                                <option value="FALSE">Rejected</option>
+                            </select>
+                            <br>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Confirm</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="worklog" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Ask something</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <textarea placeholder="Add Worklog"  name="remark" class="form-control" rows="4" required></textarea>
+                            <input type="file" name="image" style="margin-top:5px">
+                            <div class="box-footer clearfix">
+                                <button class="pull-right btn btn-success" type="submit">Update <i class="fa fa-arrow-circle-right"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="newtask" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Create a new Task</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/task/create/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <label>Task is for ?</label>
+                            <input type="text" name="task_name" class="form-control">
+                            <label>Please Select tag</label>
+                            <select class="form-control" name="tag">
+                                <option>-select-</option>
+                                {% for tag in tags %}
+                                    <option value="{{tag.id}}">{{tag.name}}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="row col-sm-12">
+                                <br>
+                                <button class="pull-right btn btn-success" type="submit">Create Task<i class="fa fa-arrow-circle-right"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <p>*Please note this ticket wont be proceeded untill task is closed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Send email related to this ticket</h4>
+                     </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-3">
+                                <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Impacted User
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}"> Reported User 
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                            </div>
+                        </div>
+                        <form action="/ticket/email/{{ticket.id}}" class="form-horizontal" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <br>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">To:</label>
+                                <div class="col-sm-10">
+                                    <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                                </div>
+                                <div class="col-sm-1">
+                                    <input type="button" id="append_to" class="btn-info btn btn-sm pull-right" value="Add">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                                <div class="col-sm-11">
+                                    <input type="email" multiple id="cc_list" value="" name="cc_list" class="form-control" placeholder="Cc" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                                <div class="col-sm-11">
+                                    <input  type="text" id="subject" name="subject" class="form-control" placeholder="Subject" required value="{{ ticket.summary }}">
+                                </div>
+                            </div>
+                            <label>Message Type:</label>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <select name="msg_type" required class="form-control">
+                                        <option value="">- Choose Message Type -</option>
+                                        <option value="AI">Additional Information</option>
+                                        <option value="G">Greetings</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <br/>
+                            <label>Body:</label>
+                            <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control" placeholder="" rows="10" cols="20" required>{% if profile.signature %}{{profile.signature}}{% endif %}</textarea><br>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <input type="file" name="attachment_file" />
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="form-control" name="visibility" required>
+                                        <option value="TRUE">Internal Visbility</option>
+                                        <option value="FALSE">Enduser Visibility</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-success" style="width:100%" type="submit">Send Email</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="search_stock" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Search Stock</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-stripped" id="search_thru_stock">
+                            <thead>
+                                <tr>
+                                    <th style="display:none;">ID</th>
+                                    <th>Serial Number</th>
+                                    <th>Stock Id</th>
+                                    <th style="display:none;">Cost Center</th>
+                                    <th style="display:none;">Tag</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <!-- <p>*Please note this ticket wont be proceeded untill task is closed</p> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- create_task -->
+        <div class="modal fade" id="create_task" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Create Normal Task </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'create_it_task' ticket.id %}" id="create_task_form">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-6">
+                                        <label><strong>Task Title</strong></label>
+                                        <input type="text" name="task_title"  class="form-control" required/>
+                                        <label><strong>Category</strong></label>
+                                        <select name="task_cat" id="task_cate" class="form-control" required>
+                                            <option value="">--Select--</option>
+                                            {% for cat in categories %}
+                                                <option value="{{cat.id}}">{{cat.name}}</option>
+                                            {% endfor %}
+                                        </select><br/>
+                                        <label><strong>SubCategory</strong></label>
+                                        <select name="task_subcat" id="task_sub_cat" class="form-control" required>
+                                            <option value="">--Select--</option>
+                                        </select><br/>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label><strong>Domain</strong></label>
+                                        <select name="task_domain" id="task_doma" class="form-control" required>
+                                            <option value="">--Select--</option>
+                                            {% for group in group_list %}
+                                                <option value="{{group.id}}">{{group.workgroup}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label><strong>Subdomain</strong></label>
+                                        <select name="task_sub_doma" id="task_sub_domain" class="form-control" required>
+                                            <option value="">--Select--</option>
+                                        </select><br/>
+                                        <label><strong>Priority</strong></label>
+                                        <select name="task_priority" class="form-control" required>
+                                            <option value="">--Select--</option>
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select><br/>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label><strong>Description</strong></label>
+                                        <textarea name="task_desc" class="form-control" required></textarea><br/>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success" style="float:right" id="task_submit">Submit</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        {% include "components/confirmation_box.html" %}
+
+        <script>
+            $("#adash").addClass("active")
+            $("#append_to").click(function(){
+                mails = ''
+                $('input[name="email_fill"]:checked').each(function(){
+                    if(this.value.length > 0){
+                        mails += this.value;
+                        mails+=','
+                    }
+                });
+                mails = mails.substring(0, mails.length - 1);
+                $("#to").val(mails);
+            });
+            $("#append_cc").click(function(){
+                mails = ''
+                $('input[name="email_fill"]:checked').each(function(){
+                    if(this.value.length > 0){
+                        mails += this.value;
+                        mails+=','
+                    }
+                });
+                mails = mails.substring(0, mails.length - 1);
+                $("#cc_list").val(mails);
+            });
+        </script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+        <script type="text/javascript">
+            $('#task_type').on('change', function () {
+                if ($(this).val() == 'return') {
+                    // new code comes here
+                    $('.stock_details').show();
+                } else {
+                    $('.stock_details').hide();
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            $('#search_stock_serial_no').on('click', function(){
+                // $.ajax({
+                //     url: "/asset/search/?serial_number="+$('#serial_number').val(),
+                //     dataType: "json",
+                //     success: function( data) {
+                //         var items = data;
+                //         console.log(items);
+                //     },
+                //     error: function(data){
+                //          console.log( data);
+                //     }
+                // });
+                if ($('#serial_number').val()) {
+                    $('#search_thru_stock').DataTable().destroy()
+                    $('#search_thru_stock').dataTable( {
+                        "processing": true,
+                        "ajax": {
+                            "processing": true,
+                            "url": "/asset/search/?serial_number="+$('#serial_number').val(),
+                            "dataSrc": ""
+                        },
+                        "bSearch": false,
+                        "bLengthChange": false,
+                        "columns": [
+                            { "": "fields.id",sClass: "hidden" },
+                            { "": "fields.searial_number" },
+                            { "": "fields.stockid" },
+                            { "": "fields.cost_center", sClass:"hidden" },
+                            { "": "fields.tag", sClass:"hidden" },
+                            { "": "","bSortable": false, },
+                        ],
+                    "columnDefs": [ {
+                        "targets": 5,
+                        "data": null,
+                        "defaultContent": "<input type='button' class='btn btn-success' name='stock_deta' value='Choose'>"
+                    }]
+                    });
+                    $('#search_stock').modal('show');
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            $('#search_thru_stock').on('click', 'td', function(e){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == ""){
+                    var stockid = $(this).prev().prev().prev().html();
+                    var serial_number = $(this).prev().prev().prev().prev().html();
+                    var costcenter = $(this).prev().prev().html();
+                    var tag_id = $(this).prev().html();
+                    var stk_id = $(this).prev().prev().prev().prev().prev().html();
+                    // console.log(stockid, serial_number, costcenter, tag_id);
+                    $("#cost_center_data").val(costcenter);
+                    $("#tag_data").val(tag_id);
+                    $('#serial_number').val(serial_number);
+                    $('#stock_id').val(stk_id)
+                    $('#search_stock').modal('hide');
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            function remove_attachments(attachment_id) {
+                $('#confirm_msg').html("<strong>Are you sure want to remove attachments?</strong>");
+                $('#confirm_type').val(attachment_id);
+                $('#confirm_box').modal('toggle');
+                return false;
+            }
+        </script>
+        <script type="text/javascript">
+            function submit_ok() {
+                if ($('#confirm_type').val()) {
+                    document.location.href = "/attachment/delete/"+$('#confirm_type').val();
+                }
+            }
+        </script>
+        <script>
+            function fetch_attachments(worklog_id) {
+                window.open("/worklog_attachments/"+worklog_id+"/", '"'+worklog_id+'"', "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+            }
+            $("#task_doma").on('change', function(){
+                $("#task_sub_domain option:gt(0)").remove().end();
+                $("#task_owner option:gt(0)").remove().end();
+                if($("#task_doma :selected").text()!='--Select--'){
+                  $.ajax({
+                    url:"/ticket/incident/create",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                      workgroupid : this.value,
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                      data = JSON.parse(data);
+                        for (var i in data){
+                            $("#task_sub_domain").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                        }
+                    },
+                    error : function(xhr,errmsg,err) {
+                      console.log(err);
+                    }
+                  });
+                  return false;
+                }
+            });
+            $('#task_cate').on('change', function(){
+                $('#task_sub_cat option:gt(0)').remove().end();
+                if ($('#task_cate').text() != '--Select--'){
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{catty: $('#task_cate').val() ,
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#task_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            } 
+                        },
+                        error: function(xhr,errmsg,err){
+                        }       
+                    });
+                }
+            })
+        </script>
+    </body>
+</html>

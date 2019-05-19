@@ -1,0 +1,313 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+.dataTables_length{
+  margin-left:0px; 
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Approval  <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Item Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-8">
+
+<div class="panel panel-primary">
+          
+                <!--Panel heading-->
+                <div class="panel-heading">
+                  <div class="panel-control">
+          
+                    <!--Nav tabs-->
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#Details" aria-expanded="true">Basic Details</a>
+                      </li>
+                      {% if users %}
+                      <li class=""><a data-toggle="tab" href="#Configurations" aria-expanded="false">User Details</a>
+                      </li>
+                      {% endif %}
+                    </ul>
+          
+                  </div>
+                  <h3 class="panel-title"></h3>
+                </div>
+          
+                <!--Panel body-->
+                <div class="panel-body">
+          
+                  <!--Tabs content-->
+                  <div class="tab-content">
+
+                    <div id="Details" class="tab-pane fade active in">
+                      <h4 class="text-thin">Basic Details</h4>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <div class="panel panel-info panel-colorful">
+                              <div class="panel-body text-center">
+                                <p class="text-uppercase mar-btm text-sm">{{purchase.cost_center}}</p>
+                                <i class="fa fa-dollar fa-5x"></i>
+                                <hr>
+                                <p class="h2 text-thin">{{purchase.cost_center.total_cost}} {{purchase.cost_center.currency}}</p>
+                                <p class="h4 text-thin"> If u approve this request it will reach <strong>{{ new_cost }} {{purchase.cost_center.currency}}</strong> </p>
+                                
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Purchase Request :</dt>
+                              <dd>{{purchase}}</dd><br>
+                              <dt>Project :</dt>
+                              <dd></dd><br>
+                              <dt>Quote From :</dt>
+                              <dd>{{quote.vendor}}</dd><br>
+                              <dt>Warranty Expiry :</dt>
+                              <dd>{{stock.warranty_expiry}}</dd><br>
+                              <dt>Cost :</dt>
+                              <dd>${{stock.cost}}</dd><br>
+                            </dl>
+                          </div>
+                        </div>
+                    </div>
+
+                    <div id="Configurations" class="tab-pane fade ">
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <dl class="dl-horizontal">
+                            <dt>User :</dt>
+                            <dd>{{users.username}}</dd><br>
+                            <dt>Designation :</dt>
+                            <dd>{{users.title}}</dd><br>
+                          </dl>
+                        </div>
+                        <div class="col-sm-6">
+                          <dl class="dl-horizontal">
+                            <dt>Location :</dt>
+                            <dd>{{users.location}}</dd><br>
+
+                          </dl>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <p class="h4 text-thin text-center">Currently using assets</p>
+                        <table class="table table-striped" id="table_id" class="display" >
+                            <thead>
+                              <tr>
+                                <th></th>
+                                <th>Asset ID</th>
+                                <th>Tag</th>
+                                <th>Manufacturer</th>
+                                <th>cost</th>
+                              </tr>
+                            </thead>   
+                            <tbody>
+                            {% for asset in assets %}
+                            <tr>
+                              <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/asset/stock/{{asset.id}}">
+                                <i class="fa fa-edit "></i>       
+                              </a></td>
+                              <td class="grey">{{asset.stockid}}</td>
+                              <td class="grey">{{asset.tag}}</td>
+                            
+
+                              <td class="grey" >{{asset.manufacturer}}</td>
+                              <td class="grey">{{asset.total_cost}}</td>
+                             
+                            
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                          </table>    
+                      </div>
+                        
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+
+
+                </div>
+
+
+                <div class="col-sm-4">
+                    <div class="panel text-center">
+                      <div class="panel-body bg-mint">
+
+                        <span alt="Avatar" class="img-lg img-circle img-border mar-btm"> <l class="fa fa-user fa-5x"></l> </span>
+                
+                        <h4 class="mar-no">{{purchase.cost_center.manager}}</h4>
+                        <p>{{purchase.cost_center}}</p>
+                      </div>
+                
+                      <div class="pad-all">                            
+                        <div class="pad-ver">
+                            {% if purchase.closed %}
+                              <dl class="dl-horizontal">
+                                <dt>Quote Cost :</dt>
+                                <dd>{{quote.item_cost}} {{quote.currency}}</dd><br>
+                                <dt>Status :</dt>
+                                <dd>{% if approval.is_approve == True %} <label class="label label-success">Approved</label> {% else %} <label class="label label-success">Approved</label> {% endif %}   </dd><br>
+                                {% if approval.attachment %}
+                                <dt>attachment :</dt>
+                                <dd>{{approval.attachment}}</dd><br>
+                                {% endif %}
+                                <label>Remark</label>
+                                <textarea class="form-control" value="{{approval.remark}}" disabled></textarea>
+                              </dl>
+                            {% else %}
+                             <h4 class="text-thin">We need your appoval to continue apurchase process as the quote amount is <strong> {{quote.item_cost}} {{quote.currency}}</strong> which is above 1 lakh</h4>
+                             <br>
+                          <form action="/purchase/approval/fh/confirm/{{approval.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <label>Remark</label>
+                            <textarea class="form-control" name="remark" rows="4"></textarea>
+                            <label>Attachment</label>
+                            <input type="file" name="attachments" style="margin-left:35%">
+                            <br>
+                            <button class="btn btn-info" value="True" name="approval" type="submit">Approve</button>
+                            <button class="btn btn-danger" value="False" name="approval" type="submit">Reject</button>
+                          </form>
+                            <br>
+                           
+                            
+                            {% endif %}
+                        </div>
+                      </div>
+                  </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+  <div class="modal fade" id="addrelation" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New Relationship</h4>
+        </div>
+        <form action="/asset/stock/relation/{{stock.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Select tag</label>
+              <select name="type" class="form-control" id="tag">
+                  {% for tag in tags %}
+                <option value="{{tag.id}}">{{tag.item_type}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label>Select asset</label>
+              <select name="asset2" class="form-control" id="taggroup">
+                <option>-select-</option>
+              </select>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <label>relation</label>
+              <input type="text" name="soft" class="form-control">
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Add Relationship</button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+{% include "asset/addtostock.html" %}
+      
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable();
+    })
+    </script>
+   
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+ 
+
+    </body>
+</html>

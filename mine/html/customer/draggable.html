@@ -1,0 +1,254 @@
+
+
+
+
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/static/gridster/css/jquery.gridster.css">
+    <link rel="stylesheet" type="text/css" href="/static/gridster/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+      .demo {
+    margin: 50px;
+    padding: 0px;
+    background: transparent;
+    }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+              
+              <h1 class="text-thin pull-left">Customize Dashboard |<small> Step 2 : Arrange your widgets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+              
+
+
+
+
+              <section class="demo">
+                <div class="gridster">
+                  <ul>
+                    {% if "ticket_all" in items %}
+                    <li data-row="1" data-col="1" data-sizex="1" fa="fa-ticket" type="ico-sm" data-sizey="1" name="All Tickets"  id="tcount" class="panel" href="/customer/tickets/">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">32</span>
+                          <p>Tickets</p>
+                          <i class="fa fa-code"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+<!--                     {% if "ticket_your" in items %}
+                    <li data-row="2" data-col="1" data-sizex="1" type="ico-sm" data-sizey="1" class="panel" href="/customer/tickets/raised/">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">32</span>
+                          <p>New Tickets</p>
+                          <i class="fa fa-code"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %} -->
+                    {% if "asset_all" in items %}
+                    <li data-row="3" data-col="1" data-sizex="1" fa="fa-sitemap"  type="ico-sm" data-sizey="1" class="panel" href="/management/assets/" name="Assets">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">22</span>
+                          <p>Assets</p>
+                          <i class="fa fa-sitemap"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+                    {% if "work_hours" in items %}
+                    <li data-row="1" data-col="2" data-sizex="2" type="ico-md" data-sizey="1" class="panel" fa="fa-hourglass-half" name="Work Hours" id="work_hours">
+                      <div class=" panel-mint panel-colorful text-center"  style="height:100%">
+                        <div class="panel-body" style="padding:2%">
+                          <h1 class="text-thin">120</h1>
+                        </div>
+                        <div class="bg-light pad-ver">
+                          <h4 class="mar-no text-thin"><i class="fa fa-hourglass-half"></i> Work Hours</h4>
+                        </div>
+                      </div>
+                    </li>
+                    {% endif %}
+                    {% if "security" in items %}
+                    <li data-row="2" data-col="2" data-sizex="2" type="ico-lg" data-sizey="2" class="panel" href="/dashboard/index/" name="Security" fa="fa-shield" id="security_count">
+                      <div class="panel panel-danger panel-colorful" style="height:100%">
+                        <div class="panel-body text-center">
+                          <p class="text-uppercase mar-btm text-sm">Security</p>
+                          <i class="fa fa-shield fa-5x"></i>
+                          <hr>
+                          <p class="h2 text-thin">873</p>
+                          <small><span class="text-semibold"><i class="fa fa-unlock-alt fa-fw"></i></span> Events</small>
+                        </div>
+                      </div>
+                    </li>
+                    {% endif %}
+
+                    {% if "host" in items %}
+                    <li data-row="1" data-col="4" data-sizex="1"  type="ico-sm"  data-sizey="1" class="panel"  href="/management/assets/" name="Hosts" fa="fa-ioxhost" id="host_count">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">5</span>
+                          <p>Hosts</p>
+                          <i class="fa fa-ioxhost"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+                    {% if "datacenter" in items %}
+                    <li data-row="2" data-col="4" data-sizex="2"  type="ico-md" data-sizey="1" class="panel" href="/management/infrastructure/" name="DataCenters" fa="fa-server" id="dc_count">
+                      <div class=" panel-mint panel-colorful text-center"  style="height:100%">
+                        <div class="panel-body" style="padding:2%">
+                          <h1 class="text-thin">7</h1>
+              
+                        </div>
+                        <div class="bg-light pad-ver">
+                          <h4 class="mar-no text-thin"><i class="fa fa-server"></i> Data Centers</h4>
+                        </div>
+                      </div>
+                    </li>
+                    {% endif %}
+                    {% if "count_ci" in items %}
+                    <li data-row="3" data-col="4" data-sizex="2"  type="ico-md" data-sizey="1"  href="/management/assets/" name="Configuration Item" fa="fa-archive" id="cies">
+                      <div class=" panel-mint panel-colorful text-center"  style="height:100%">
+                        <div class="panel-body" style="padding:2%">
+                          <h1 class="text-thin">42</h1>
+              
+                        </div>
+                        <div class="bg-light pad-ver">
+                          <h4 class="mar-no text-thin"><i class="fa fa-archive"></i> Configuration items</h4>
+                        </div>
+                      </div>
+                    </li>     
+                    {% endif %}
+                    {% if "applications" in items %}
+                    <li data-row="3" data-col="5" data-sizex="1"  type="ico-sm" data-sizey="1" href="/management/application/" name="Applications" fa="fa-support" id="app_count">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">24</span>
+                          <p>Applications</p>
+                          <i class="fa fa-support"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+                    {% if "ticket_your" in items %}
+                    <li data-row="1" data-col="6" data-sizex="1"  type="ico-sm" data-sizey="1" name="Your Tickets" href="/customer/tickets/raised/" fa="fa-ticket" id="yt_count">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">32</span>
+                          <p>Your Tickets</p>
+                          <i class="fa fa-ticket"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+                    {% if "events" in items %}
+                    <li data-row="1" data-col="6" data-sizex="1"  type="ico-sm" data-sizey="1" href="/security/dashboard" name="Events" fa="fa-map-pin" id="event_count">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">987</span>
+                          <p>Events</p>
+                          <i class="fa fa-map-pin"></i>
+                        </div>
+                      </div> 
+                    </li>
+                    {% endif %}
+                    {% if "blocked" in items %}
+                    <li data-row="2" data-col="6" data-sizex="1"  type="ico-sm" data-sizey="1" name="BLocked IPS" fa="fa-ban" id="block_count">
+                      <div class="panel panel-purple panel-colorful"  style="height:100%">
+                        <div class="pad-all text-center">
+                          <span class="text-5x text-thin">2</span>
+                          <p>Blocked IPs</p>
+                          <i class="fa fa-ban"></i>
+                        </div>
+                      </div> 
+                    </li> 
+                    {% endif %}      
+                  </ul>
+                </div>
+              </section>
+
+              <a href="/customize/dashboard/finish/" class="btn btn-mint btn-lg pull-right">Next ></a>
+               <!-- <a href="/" class="btn btn-mint btn-lg pull-right">Next</a> -->
+
+
+
+            </div>
+          </div>
+        </div>
+    {% include "components/customer_footer.html"%}
+    <script type="text/javascript" src="/static/gridster/jquery.js"></script>
+    <script type="text/javascript" src="/static/gridster/jquery.gridster.js" charster="utf-8"></script>
+    <script type="text/javascript">
+      var thenga_kola = $(".gridster ul").gridster({
+      widget_margins: [10, 10], 
+      widget_base_dimensions: [140, 140],
+      // resize.enabled:true,
+      serialize_params: function($w, wgd) {
+            return {
+                x: wgd.col,
+                y: wgd.row,
+                width: wgd.size_x,
+                height: wgd.size_y,
+                id: $($w).attr('id'),
+                name: $($w).attr('name'),
+                ico: $($w).attr('type'),
+                href:  $($w).attr('href'),
+                fa:  $($w).attr('fa'),
+                color:  $($w).attr('color'),
+                class: $($w).attr('class'),
+            }
+        }
+    }).data('gridster');
+
+    var json_initial = JSON.stringify(thenga_kola.serialize());
+     $(document).ready(function(){
+
+        $.ajax(
+            {   
+                url : "/customize/dashboard/drag/",
+                type:"POST",
+                dataType:"json",
+                  data:{
+                    list_val : json_initial,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                  },
+                success: function(result){
+                    console.log("success");
+                }
+              });
+
+     });
+
+    </script>
+    </body>
+</html>

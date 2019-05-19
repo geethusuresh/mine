@@ -1,0 +1,349 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+     <style>
+        @media screen and (max-width: 640px) {
+        table {
+          overflow-x: auto;
+          display: block;
+        }
+      }
+        .dl-horizontal dt {
+          width:100px;
+        }
+        .dl-horizontal dd {
+          margin-left: 110px;
+          }
+          .padding-md {
+          padding: 2px!important;
+          }
+          .timeline-centered .timeline-entry {
+         
+          width: 78%;
+          }
+          .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+          position: absolute;
+          left: -152px;
+          text-align: right;
+          /* padding: 0 10px; */
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+          }
+          .timeline-centered:before {
+          background: #A5A2A2;
+          left: 22%;
+          }
+          .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+          border-color: rgba(140, 126, 126, 0) #8C8787 transparent transparent;
+          }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Approval Desk  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Approval Desk</li>
+                </ol>
+            </div>
+      {% if messages %}
+          {% for message in messages %}
+          <p class="label label-info">{{ message }}</p>
+          {% endfor %}
+      {% endif %}
+
+            <div class="content">
+
+              <div class="row">
+                <div class="col-md-8">
+                    <div class="box">
+                        <div class="box-body">
+                             
+
+<!-- tabbed -->
+
+                    <ul class="nav nav-tabs" role="tablist">
+                      <li class="active"><a href="#basic1" role="tab" data-toggle="tab">Ticket Details</a></li>
+                      <li><a href="#att1" role="tab" data-toggle="tab">Ticket Worklog</a></li>
+                      {% if attachments %}
+                      <li><a href="#attachments" role="tab" data-toggle="tab">Ticket Attachments</a></li>
+                      {% endif %}
+                      <!-- <li><a href="#history" role="tab" data-toggle="tab">Ticket History</a></li> -->
+
+                    </ul>
+                    <br>
+                    <div class="tab-content">
+
+<!-- tabbed plane 1 -->
+                      <div class="tab-pane active" id="basic1">
+
+                            <div class="row">
+                              <div class="col-md-8">
+                                <label><strong>Summary:</strong> </label>
+                                {{ approval.ticket.summary }}<br>                        
+                              </div>
+                              <div class="col-md-2" style="border-left:1px solid black" >
+
+                                <h4>{{ approval.ticket.ticketid }}</h4>
+                                <label class="label label-success" style="font-size:14px" >{{approval.ticket.status| real:approval.ticket.customer.id}}</label>
+                                                      
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-sm-12"><br>
+                              <label><strong>Description:</strong>  </label>
+                                <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ approval.ticket.description }}" rows="8" cols="20" readonly></textarea> </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                              <div class="col-md-6"> 
+
+                                <div class="box-body padding-md">
+                                    <dl class="dl-horizontal">
+                                        <dt>Affected By :</dt>
+                                        <dd>{{ approval.ticket.affectedperson }}</dd>
+                                        <dt>Phone No :</dt>
+                                        <dd> {{ approval.ticket.affectedphone }}</dd>
+                                        <dt>AffectedEmail :</dt>
+                                        <dd>{{ approval.ticket.affectedemail }}</dd>
+                                        <dt>Reported By :</dt>
+                                        <dd>{{ approval.ticket.reportedby }}</dd>
+                                        
+                                    </dl>
+                                </div>
+
+
+                                <hr>
+                              </div>
+
+                              <div class="col-sm-6">
+
+                               <div class="box-body padding-md">
+                                <dl class="dl-horizontal">
+                                    <dt>Category :</dt>
+                                    <dd>{{ approval.ticket.category }}</dd>
+                                    <dt>Ownergroup</dt>
+                                    <dd> {{approval.ticket.subgroup}}</dd>
+                                    <dt>Source :</dt>
+                                    <dd>{{ approval.ticket.source }}</dd>
+                                    <dt>Owner :</dt>
+                                    <dd>{{ approval.ticket.owner }}</dd>
+                                    
+                                </dl>
+                                </div>
+                                <!-- <hr> -->
+                              </div>
+                            </div>
+
+
+
+                            <div class="row">                
+                              <div class="col-md-6">
+                                <div class="box-body padding-md">
+                                  <dl class="dl-horizontal">
+                                      <dt>Created Date :</dt>
+                                      <dd>{% tzone approval.ticket.creationdate %}</dd>
+                                      <dt>Reported Date :</dt>
+                                      <dd> {% tzone approval.ticket.reportdate %}</dd>
+                                      <dt>Affected Date :</dt>
+                                      <dd>{% tzone approval.ticket.affecteddate %}</dd>
+                                      <dt>Last Change :</dt>
+                                      <dd>{% tzone approval.ticket.changedate %}</dd>
+                                      
+                                  </dl>
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <div class="box-body padding-md">
+                                  <!-- <dl class="dl-horizontal">
+                                    <dt>Target Start :</dt>
+                                    <dd>{{  approval.ticket.targetstart|naturaltime  }}</dd>
+                                    <dt>Actual Start :</dt>
+                                    <dd>{% tzone approval.ticket.actualstart %}</dd> -->
+                                        <!-- {% tzone approval.ticket.creationdate %} -->
+                                    <!-- <dt>Target Finish :</dt>
+                                    <dd>{{  approval.ticket.targetfinish|naturaltime }}</dd>
+                                    <dt>Actual Finish :</dt>
+                                    <dd>{{ approval.ticket.actualfinish }}</dd>
+                                      
+                                  </dl> -->
+                                </div>
+
+                              </div>
+                             
+                            </div>
+                            <hr>
+                            <div>
+                               {% if attributes %}
+                                    {% for attribute in attributes %}
+                              <div class="box-body padding-md">
+                                  <dl class="dl-horizontal">
+                                    
+                                    <dt>Project Name :</dt>
+                                    <dd>{{ attribute.project }}</dd>
+                                    <dt>Quantity :</dt>
+                                    <dd> {{ attribute.quantity }}</dd>
+                                    <dt>Note :</dt>
+                                    <dd> {{attribute.remark }}</dd>
+                                    <dt>Request Type :</dt>
+                                    <dd> {{attribute.permanent_type }}</dd>
+                                    
+                                  </dl>
+                                </div>
+                              {% endfor %}
+                              {% endif %}
+                            </div>
+                          </div>
+
+<!-- tabbed plane 2 -->
+
+                      <div class="tab-pane" id="att1">
+                        <div class="timeline-centered">
+                        {% if activity %}
+                        {% for act in activity %}
+                        <article class="timeline-entry">
+                          <div class="timeline-entry-inner">
+                            <h4>
+                            <time class="timeline-time" datetime="2014-01-10T03:45"><span> {{ act.time|naturaltime}}</span> <span>
+                              
+                            </span></time></h4>
+                              <div class="timeline-icon palette-alizarin">
+                                <i class="fa fa-comment"></i>
+                              </div>
+                            <div class="timeline-label">
+                              <h2><a href="#">{{ act.owner }}</a> <span>{{act.note}}</span></h2>
+                              {% if act.attachment %}
+                              <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                              {% endif %}
+                              {% if act.remark %}<pre>{{ act.remark|safe }}</pre>      {% endif %}
+                            </div>
+                          </div>     
+                        </article>
+                        {% endfor %}
+                        {% else %}
+                        No feeds. Please Sent Back a Remark to HelpDesk for more.
+                        {% endif %} 
+                      </div>
+                    </div>
+
+
+<!-- tabbed plane 3 -->
+
+                    <div class="tab-pane" id="history">
+                      <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                        <thead>
+                          <tr role="row">
+                          <th >User</th>
+                          <th >Status</th>
+                          <th >ChangeTime</th>
+
+                          </tr>
+                        </thead>
+                        
+                        <tbody >
+                        {% for act in historys %}
+                          <tr>
+                          <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                          <td class="grey"><a  style="color:#555">{{act.status}}</a></td>
+                          <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>   
+                       
+                        {% endfor %}         
+                        </tbody>
+                      </table>
+                      </div>
+
+<!-- tabbed plane 4 -->
+
+
+                      <div class="tab-pane" id="attachments">
+                        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                          <thead>
+                            <tr role="row">
+                            <th >Uploaded by</th>
+                            <th> File name</th>
+                            <th >Time</th>
+                            <th >Actions</th>
+                            </tr>
+                          </thead>         
+                          <tbody >
+                          {% for act in attachments %}
+                            <tr class="odd">
+                            <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                            <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                            <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                            <td>
+                              <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}"   download="{{attachments.docfile}}">
+                                <i class="fa fa-download "></i>                                            
+                              </a>
+                              <a class="btn btn-danger btn-sm" href="/attachment/delete/{{act.id}}" >
+                                <i class="fa fa-trash-o "></i> 
+                              </a>
+                            </td>
+                          {% endfor %}         
+                          </tbody>
+                        </table>
+                      </div>
+
+<!-- end of tabb -->
+
+                    </div>
+                  </div>
+                </div><!-- /.box -->
+                </div><!-- /.col -->
+                <div class="col-sm-4">
+                  <div class="box">
+                    <div class="box-title">
+                      <h3>Approvals</h3>
+                    </div>
+                    <div class="box-body">
+                      <form action="/ticket/approval/{{approval.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                  
+                          <select style="width:45%;margin-bottom:5px" name = "approve" required>
+                            <option value=""> Select</option>
+                            <option value="True"> Approve</option>
+                            <option value="False"> Decline</option>
+                          </select>
+
+                          
+                          <textarea type="text" name="note" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea> <br/>
+                          <input type="file" name="attachment_file" />
+                        
+                          <button class="btn btn-success" style="width:49%;margin-top:5px;" type="submit">Update</button> 
+                          
+                        </form> 
+                    </div>
+                    
+                  </div>
+                </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/customer_footer.html"%}
+    {% include "components/service_request.html" %}
+    </body>
+</html>
+
+
+
+
+

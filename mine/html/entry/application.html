@@ -1,0 +1,665 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">{{app}} |<small> Dashboard</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/management/application/">Applications</a></li>
+                    <li class="active">{{app}}</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+
+              <div class="col-sm-12">
+                <div class="panel">
+                  <div class="panel-heading">
+                    <div class="panel-control">
+                      <ul class="nav nav-tabs">
+                        <!-- <li class="active"><a href="#relateditems" data-toggle="tab" aria-expanded="true">Related Items</a></li>
+                        <li class=""><a href="#demo-tabs-box-1" data-toggle="tab" aria-expanded="true">Configuration Items</a></li> -->
+                        <li class="active"><a href="#relateditems" data-toggle="tab" aria-expanded="true">Details Tab</a></li>
+                        <li class=""><a href="#demo-tabs-box-2" data-toggle="tab" aria-expanded="false">Application Map</a></li>
+                      </ul>
+                    </div>
+                    <h3 class="panel-title" style="min-height:100%"></h3>
+                  </div>
+            
+                  <div class="panel-body">
+                    <div class="col-sm-4">
+                      <div class="text-center" style="margin-top:10%">
+                        <span class="icon-wrap icon-wrap-lg icon-circle bg-trans-dark" style="text-align:center; padding-left:15px;">
+                          <i class="fa fa-connectdevelop fa-4x" style="color:grey"></i>
+                        </span>
+                        
+                        <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;color:grey;margin-top:5%">
+                          <li style="padding: 10px;">
+                              <!-- <span class="fa fa-database"></span> -->
+                              <i class="fa fa-connectdevelop fa-1x" style="color:grey"></i>
+                              <label class="clb">Application : </label>
+                              {{app}}
+                          </li>
+                           
+                          <li style="padding: 10px;">
+                              <span class="fa fa-server"></span>
+                              <label class="clb">Hosts : </label>
+                              {% if app.host.all %}{% for host in app.host.all %}<label class="label label-{% cycle "success" "mint" "info" "primary" %}">{{host}}</label> {% endfor %}{% else %}<label>None</label>{% endif %}
+                          </li>
+                          <!-- <li style="padding: 10px;">
+                              <span class="fa fa-globe"></span>
+                              <label class="clb"> Classification Type : </label>
+                              {{app.classification}}
+                          </li> -->
+                        </ul>
+
+                        <div class="btn-group btn-group-md">
+                          <a href="/management/application/monitoring/{{app.id}}" class="btn btn-mint btn-active-dark" style="margin-right:7px;"><l class="fa fa-dashboard"></l> Monitoring</a>
+                          <a href="/dashboard/application/security/{{app.id}}" class="btn btn-success btn-active-dark"><l class="fa fa-shield"></l> Security Analysis</a>
+                        </div>
+                        <hr>
+                        <div class="row" >
+                          <h4 class="text-thin text-center">Application Log Path</h4>                            
+                          {% if app.link %}
+                              <h4 class="text-lg text-mint">{{app.link}}</h4>
+                            {% else %}
+                              Please add a query to monitor<br />
+                            {% endif %}
+                            <a href="" data-target="#updater" data-toggle="modal" class="label label-info label-md">Update Path</a>
+                            
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-8">
+                      <div class="tab-content">
+                        <div class="tab-pane fade active in" id="relateditems">
+                          <h4 class="text-thin text-center">Related Items</h4>
+                            {% if relations %}
+                            <a href="" data-toggle="modal" data-target="#relate"  class="btn btn-purple btn-labeled fa fa-sitemap pull-right">Relate Configuration Items</a>
+                            <table class="table table-striped table-hover r_table">
+                            <thead>
+                              <tr>
+                                <th>Host-CI</th>
+                                <th class="text-center">Relation</th>
+                                <th class="text-center">Host-CI</th>
+                                <th class="text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for ci in relations %}
+                              <tr>
+                                <td>{{ci.obj1.host}} - {{ci.obj1}}</td>
+                                <td class="text-center">{{ci.relation}}</td>
+                                <td class="text-center">{{ci.obj2.host}} - {{ ci.obj2 }}</td>
+                                <td class="text-right"><span><a href="#" class="label label-table label-danger" onclick="delete_cirelation('{{ci.id}}')">Delete</a></span></td>                               
+                             </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                          {% else %}
+                            <div class="text-center" style="margin-top:10%">
+                              <alert class="alert alert-info"><l class="fa fa-info"></l> No configuration items are related, <a href="" data-toggle="modal" data-target="#relate">click here</a> to start relating items</alert>
+                            </div>
+                          {% endif %}
+                          <div class="row">
+                              <hr/>
+                          </div>
+                          <h4 class="text-thin text-center">List of configuration items</h4>
+                          <table class="table table-striped table-hover r_table">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th class="text-center">Host</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Version</th>
+                                <th class="text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for ci in cies %}
+                              <tr>
+                                <td>{{ci.name}}</td>
+                                <td class="text-center">{{ci.host}}</td>
+                                <td class="text-center">{{ ci.ci_type }}</td>
+                                <td class="text-center"> v1.2 </td>
+                                <td class="text-right"><a href="/dashboard/index/{{ci.id}}" class="label label-table label-info">Dependency</span></td>
+                             </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="tab-pane fade in" id="demo-tabs-box-1">
+                        </div>
+                        <div class="tab-pane fade" id="demo-tabs-box-2">
+                          <h4 class="text-thin text-center">Application Map</h4>
+                            {% if relations %}
+                           <canvas id="springydemo" width="800" height="480" />
+                            {% else %}
+                              <div class="text-center" style="margin-top:10%">
+                              <alert class="alert alert-info"><l class="fa fa-info"></l> No configuration items are related, <a href="" data-toggle="modal" data-target="#relate">click here</a> to start relating items</alert>
+                            </div>
+                            {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+
+           <!--    {% if relation_list %}
+
+
+              <div class="row">
+                <div class="col-sm-10">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="panel-title">Host Map</p>
+                    </div>
+                    <div class="panel-body">
+                      <canvas id="springydemo" width="960" height="480" />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <a href="/management/host/monitoring/{{host.id}}" >
+                    <div class="panel panel-warning panel-colorful text-center">
+                      <div class="panel-body">
+                        <l class="fa fa-dashboard fa-3x"></l>
+                        <h4 class="mar-no text-thin">Monitoring</h4>
+                      </div>
+                    </div>
+                  </a>
+                  <a href="/management/host/monitoring/{{host.id}}" >
+                    <div class="panel panel-warning panel-colorful text-center">
+                      <div class="panel-body">
+                        <l class="fa fa-dashboard fa-3x"></l>
+                        <h4 class="mar-no text-thin">Monitoring</h4>
+                      </div>
+                    </div>
+                  </a>
+                  <a href="/management/host/monitoring/{{host.id}}" >
+                    <div class="panel panel-warning panel-colorful text-center">
+                      <div class="panel-body">
+                        <l class="fa fa-dashboard fa-3x"></l>
+                        <h4 class="mar-no text-thin">Monitoring</h4>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              {% endif %} -->
+
+              <div class="row">
+                <div class="col-sm-7">
+<!--                   <div class="panel">
+                <div class="panel-heading">
+                  <div class="panel-control">
+                  </div>
+                  <h3 class="panel-title">List of CIs</h3>
+                </div>
+          
+                <div class="panel-body">
+                  <div class="pad-btm form-inline">
+                    <div class="row">
+                      <div class="col-sm-6 table-toolbar-left">
+                        
+                      </div>
+                      <div class="col-sm-6 table-toolbar-right">
+                        <a href="" data-toggle="modal" data-target="#relate"  class="btn btn-purple btn-labeled fa fa-sitemap">relate</a>
+                        <div class="btn-group btn-group">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th class="text-center">Host</th>
+                          <th class="text-center">Type</th>
+                          <th class="text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ci in cies %}
+                        <tr>
+                          <td>{{ci.name}}</td>
+                          <td class="text-center">{{ ci.host }}</td>
+                          <td class="text-center">{{ ci.ci_type }}</td>
+                          <td class="text-right"><a href="/dashboard/index/{{ci.id}}" class="label label-table label-warning">Dependency</span></td>
+                       </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+ -->
+
+                </div>
+                <div class="col-sm-5">
+<!--                   <div class="row"> 
+                    <a href="/management/host/monitoring/{{host.id}}" style="width:50%; float:left">
+                    <div class="panel panel-warning panel-colorful text-center">
+                      <div class="panel-body">
+                        <l class="fa fa-dashboard fa-4x"></l>
+                        <h4 class="mar-no text-thin">Monitoring</h4>
+                      </div>
+                    </div>
+                    </a>
+
+                    <a href="/dashboard/application/security/{{app.id}}" style="width:50%; float:left">
+                    <div class="panel panel-mint panel-colorful text-center">
+                      <div class="panel-body">
+            
+                       <l class="fa fa-shield fa-4x"></l>
+                        <h4 class="mar-no text-thin">Security Analysis</h4>
+                      </div>
+                    </div>
+                    </a>
+                  </div> -->
+                 
+
+
+
+<!-- 
+                  <div class="panel plan">
+                    <div class="panel-heading">
+                      <p class="panel-title">Application Log Path</p>
+                    </div>
+                    <div class="panel-body">
+                    
+                      <div class="row" >
+                        <div class="col-sm-8">
+                          {% if app.link %}
+                            <p class="text-lg text-mint">{{app.link}}</p>
+                          {% else %}
+                            Please add a query to monitor
+                          {% endif %}
+                        </div>
+                        <div class="col-sm-4">
+                          <a href="" data-target="#updater" data-toggle="modal" class="btn btn-block btn-info btn-md">Update</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div> -->
+
+                 <!--  <div class="panel plan">
+                    <div class="panel-body">
+                    <span class="plan-title" style="font-size:20px">Hosts</span>
+                      <div class="row" style="margin-top:5%">
+                        {% for host in app.host.all %}
+                          <div class="col-sm-6">
+                            <a href="/management/host/{{host.id}}">
+                              <div class="panel panel-{% cycle "primary" "success" "mint" %} panel-colorful">
+                                <div class="pad-all text-center">
+                                  <span class="h4 text-thin">{{host.host}}</span>
+                                  <p>{{host.datacenter}}</p>
+                                </div>
+                              </div>
+                            </a>
+                          </div>
+                         {% endfor %}
+                      </div>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+<div class="modal fade" id="cies" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Cies</h4>
+      </div>
+       <form action="/management/application/add_ci/{{app.id}}" method="POST">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <label>Enter Ci Name</label>
+            <input type="text" name="ci_name" class="form-control">
+          </div>
+          <div class="col-sm-6">
+            <label>Ci Type</label>
+            <select class="form-control" name="ci_type">
+               {% for tip in tips %}
+              <option value="{{tip.id}}" >{{tip.name}}</option>
+                {% endfor %}
+            </select>
+          </div>
+        </div>
+        <label>Description</label>
+        <textarea class="form-control" name="desc" rows="4"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" type="submit">Create</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="add_host" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Host</h4>
+      </div>
+      <form id="ipForm" method="POST" action="/application/addhost/{{app.id}}">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <label>Add New Host</label>
+            <input type="ip" name="ip" required class="form-control">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-info pull-right" type="submit">Add Host</button>
+      </div>
+       </form>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="updater" tabindex="-1" role="dialog" aria-labelledby="LargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Update Query</h4>
+      </div>
+      <form id="ipForm" method="POST" action="/management/application/update/query/{{app.id}}">{% csrf_token %}
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <label>Query</label>
+
+            <input type="text" name="query" {% if app.link %}value="{{app.link}}"{% else %}{% endif %} required class="form-control" maxlength="70">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-info pull-right" type="submit">Update</button>
+      </div>
+       </form>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<div class="modal fade" id="relate" tabindex="-1" role="dialog" aria-labelledby="Larges" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Relate Configuration Items</h4>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="/management/application/{{app.id}}/relate/">{% csrf_token %}
+          <div class="row">
+            <div class="col-sm-3">
+              <label>Source</label>
+              <select class="form-control" name="obj1">
+                 {% for ci in cies %}
+                <option value="{{ci.id}}">{{ci.host}}-{{ci.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-sm-3">
+              <label>Type of relation</label>
+              <select class="form-control" name="relation">
+                 {% for relation in all_relations %}
+                <option value="{{relation.id}}">{{relation.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-sm-3">
+              <label>Destination</label>
+              <select class="form-control" name="obj2">
+                 {% for ci in cies %}
+                <option value="{{ci.id}}">{{ci.host}}-{{ci.name}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            
+            <div class="col-sm-2" style="margin-top:2%">
+              <button class="btn btn-info pull-right" type="submit">Relate</button>
+            </div>
+            <br>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--Delete Confirmation-->
+<div class="modal fade" id="delete_confirm">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Confirmation</h4>
+      </div>
+      <form method="POST" id="frm_cirelation" action="/management/app_relation_delete/">
+      {% csrf_token %}       
+        <div class="modal-body">
+            <div class="row">
+              <div class="col-sm-12">
+                <span style="font-size:16px;">Are you really want to delete this CI relation?</span>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">OK</button>
+          <input type="hidden" name="apprelation_id" id="apprelation_id" />     
+        </div>
+      </form>         
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Delete Confirmation-->
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/plain_chart/springy.js"></script>
+    <script src="/static/plain_chart/springyui.js"></script>
+    <script>
+     $("#table_id").DataTable();
+     $("#infra").addClass("active");
+      $("#infraopen").css('display','block');
+      $("#appview").addClass("active");
+
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+    <script>
+var graph = new Springy.Graph();
+
+
+{% for app in relation_list %}
+var {{app.global_name}} = graph.newNode  ({
+  label: '{{app.host}}-{{app.names}}', color:'{{app.color}}',
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.global_name}}, {{app.obj2.global_name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+
+'{% if relations %}'
+  jQuery(function(){
+    var springy = window.springy = jQuery('#springydemo').springy({
+      graph: graph,
+      nodeSelected: function(node){
+        console.log('Node selected: ' + JSON.stringify(node.data));
+      }
+    });
+  });
+'{% endif %}'
+</script>
+
+<script type="text/javascript">
+    function delete_cirelation(relation_id){
+        $('#apprelation_id').val(relation_id);
+        $('#delete_confirm').modal('show');
+    }
+</script>
+<script type="text/javascript">
+   $(document).ready(function() {
+      $(".r_table").dataTable();
+    });
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,480 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+<script type="text/javascript">
+  server_id = {{server_id}}
+  application_id = {{application_id}}
+  used_ports = {{used_port_list}}
+</script>
+<h1 class="text-thin">
+  Create Container |<small>Create Container for application '{{application_name}}'</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_container' server_id application_id %}">{{application_name}}</a></li>
+  <li class="active">Add Container</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="col-md-8">
+        <div class="panel panel-bordered-primary">
+          <form class="form-horizontal form-padding" role="form" method="post" action="{% url 'create_container' server_id application_id %}">
+            {% csrf_token %}
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="selectimage">Select Image</label>
+                    <select class="form-control select-image" id="image" name="image" required>
+                      {% if image_list %}
+                        <option value="">Select Image</option>
+                        {% for image in image_list %}
+                          {% for tag in image.repotag %} 
+                            <option value="{{tag}}">{{tag}}</option>
+                          {% endfor %}
+                        {% endfor %}
+                      {% endif %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <a href="{% url 'search_image' server_id %}" class="pull-right">Add New Image</a>
+                    <ul id="link_append">
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-md-12 form-group">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="row">
+                        <div class="col-md-1">
+                          <label for="port">Port</label>
+                        </div>
+                        <div class="col-md-11">
+                        <button type="button" class="btn btn-link btn-sm" id="add_port"><i class="fa fa-plus-circle fa-2x"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-12" id="add_port_div">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label for="name">Name of Container</label>
+                    <input type="text" name="containername" placeholder="Name of Container" id="containername" class="form-control">
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#home" aria-expanded="false"><i class="fa"></i>Command</a></li>
+                      <li class=""><a data-toggle="tab" href="#menu1" aria-expanded="false"><i class="fa"></i>Volume</a></li>
+                      <li class=""><a data-toggle="tab" href="#menu2" aria-expanded="false"><i class="fa"></i>Network</a></li>
+                      <li class=""><a data-toggle="tab" href="#menu3" aria-expanded="true"><i class="fa"></i>Security/Host</a></li>
+                  </ul>
+                  <div class="tab-content">
+                      <div id="home" class="tab-pane fade in active">
+                        <p>
+                          <div class="row">
+                            <div class="col-md-12 form-group">
+                              <label >Command</label>
+                              <!-- <select class="form-control" id="addcommand" onchange="document.getElementById('command').value=this.options[this.selectedIndex].text;">
+                                <option>Select/Edit</option>
+                              </select> -->
+                              <!-- <input type="text" class="form-control" name="command" placeholder="Add/Select Command" id="command" onfocus="this.select()"> -->
+                              <input type="text" class="form-control" name="command" id="command">
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label>Entry Point</label>
+                              <input name="entry_point" placeholder="eg: /bin/bash" id="entry_point" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label>User</label>
+                              <input name="user" placeholder="eg: apache" id="user" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label>Working Directory</label>
+                                </div>
+                                <div class="col-md-12">
+                                  <input name="working_dir" placeholder="Working Directory" class="form-control" type="text">
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label>Console</label>
+                                </div>
+                                <div class="col-md-3">
+                                  <input name="console" value="it" type="radio">&nbsp;Interactive&amp;TTY(-i -t)
+                                </div>
+                                <div class="col-md-3">
+                                  <input name="console" value="i" type="radio">&nbsp;Interactive(-i)
+                                </div>
+                                <div class="col-md-3">
+                                  <input name="console" value="t" type="radio">&nbsp;TTY(-t)
+                                </div>
+                                <div class="col-md-3">
+                                  <input name="console" value="none" type="radio" checked>&nbsp;None
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <label>Auto Restart</label>
+                                </div>
+                                <div class="col-md-4">
+                                  <input name="auto_restart" value="never" type="radio" checked>&nbsp;Never
+                                </div>
+                                <div class="col-md-4">
+                                  <input name="auto_restart" value="failure" type="radio">&nbsp;On failure,forever
+                                </div>
+                                <div class="col-md-4">
+                                  <input name="auto_restart" value="always" type="radio">&nbsp;Always
+                                </div>
+                                <div class="col-md-6">
+                                  <div class="row">
+                                    <div class="col-md-12">
+                                      <input name="auto_restart" type="radio">&nbsp;On failure,upto
+                                      <input name="auto_restart_no" min="1" type="number">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-md-6"></div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-3">
+                                  <label>Environment Vars</label>
+                                </div>
+                                <div class="col-md-9">
+                                  <button type="button" class="btn btn-link btn-sm" id="add_envt_var" name="add_envt_var"><i class="fa fa-plus-circle fa-2x"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group" id="add_envt_var_div">
+                            </div>
+                          </div>
+                        </p>
+                      </div>
+                      <div id="menu1" class="tab-pane fade">
+                        <p>
+                          <div class="row">
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-5">
+                                  <label>Volume(between host and container)</label>
+                                </div>
+                                <div class="col-md-7">
+                                  <button type="button" class="btn btn-link btn-sm" id="add_volume" name="add_volume"><i class="fa fa-plus-circle fa-2x"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group" id="add_volume_div">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-5">
+                                  <label>Volumes(Container)</label>
+                                </div>
+                                <div class="col-md-7">
+                                  <button type="button" class="btn btn-link btn-sm" id="add_volume_for_container" name="add_volume_for_container"><i class="fa fa-plus-circle fa-2x"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group" id="add_volume_for_container_div">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <label>Volumes from</label>
+                              {% if container_list %}
+                              <select class="form-control" name="volume_from" id="volume_from" multiple="multiple">
+                                  <option disabled selected> -- select an a container -- </option>
+                                  {% for container in container_list %}
+                                  <option value="{{container.name}}">{{container.name}}</option>
+                                  {% endfor %}
+                              </select>
+                              {% else %}
+                              <p class="text-dark">No containers found for volume sharing</p>
+                              {% endif %}
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <label>Volume Driver</label>
+                              <input name="volume_driver" placeholder="volume driver" id="volume_driver" class="form-control" type="text">
+                            </div>
+                          </div>
+                        </p>
+                      </div>
+                      <div id="menu2" class="tab-pane fade">
+                        <p>
+                          <div class="row">
+                            <div class="col-md-12 form-group">
+                              <label>Network</label>
+                              <select class="form-control" name="network_type" id="network">
+                                  <option value="bridge">Bridge</option>
+                                  <option value="container">Container</option>
+                                  <option value="host">Host</option>
+                                  <option value="managed">Managed</option>
+                                  <option value="none">None</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <label>Links</label>
+                              {% if container_list %}
+                              <select class="form-control" name="links" id="links" multiple="multiple">
+                                  <option disabled selected> -- select an a container -- </option>
+                                  {% for container in container_list %}
+                                  <option value="{{container.name}}">{{container.name}}</option>
+                                  {% endfor %}
+                              </select>
+                              {% else %}
+                              <p class="text-dark">No containers found for linking</p>
+                              {% endif %}
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <label>Host Name</label>
+                              <input name="host_name" placeholder="eg: db_sample" id="host_name" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <label>Domain Name</label>
+                              <input name="domain_name" placeholder="eg: domain.com" id="domain_name" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-2">
+                                  <label for="resolvingservers">Resolving Servers</label>
+                                </div>
+                                <div class="col-md-10">
+                                  <button type="button" class="btn btn-link btn-sm" id="add_resolving_server" name="add_resolving_server"><i class="fa fa-plus-circle fa-2x"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group" id="add_resolving_server_div">
+                            </div>
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-2">
+                                  <label for="searchdomain">Search Domains</label>
+                                </div>
+                                <div class="col-md-10">
+                                  <button type="button" class="btn btn-link btn-sm" id="add_search_domain" name="add_search_domain"><i class="fa fa-plus-circle fa-2x"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-12 form-group" id="add_search_domain_div">
+                            </div>
+                          </div>
+                        </p>
+                      </div>
+                      <div id="menu3" class="tab-pane fade">
+                        <p>
+                          <div class="row">
+                            <div class="col-md-12 form-group">
+                              <div class="row">
+                                <div class="col-md-2">
+                                  <label for="privilaged">Privileged</label>
+                                </div>
+                                <div class="col-md-10">
+                                  <input name="privileged" type="radio">&nbsp;Full access to the host
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label for="memorylimit">Memory Limit</label>
+                              <input name="memory_limit" placeholder="eg: 1024(in MB)" id="memory_limit" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label for="memoryswap">Memory Swap</label>
+                              <input name="memory_swap" placeholder="Default disabled" id="memory_swap" class="form-control" type="text">
+                              <label class="text-dark"><small>**swap should greater than memory limit</small></label>
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label for="cpushares">CPU Shares</label>
+                              <input name="cpu_shares" placeholder="eg: 512" id="cpu_shares" class="form-control" type="text">
+                            </div>
+                            <div class="col-md-6 form-group">
+                              <label for="cpu_sets">Cpu Sets</label>
+                              <input name="cpu_sets" placeholder="eg: 0,3: Default:All" id="cpu_sets" class="form-control" type="text">
+                            </div>
+                          </div>
+                        </p>
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-footer">
+              <div class="row">
+                <div class="col-md-4">
+                  <input type="checkbox" id="save_config" name="save_config">&nbsp;Save Configurations of Container
+                </div>
+                <div class="col-md-8" id="save_config_name_div" style="display:none">
+                  <label for="save">Container Configuration Name</label>
+                  <input name="save_config_name" id="save_config_name" class="form-control" type="text">
+                </div>
+                <div class="col-md-12 pad-all">
+                  <button class="btn btn-primary" type="submit">Run Container</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="panel panel-primary panel-bordered-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Image parent history</h3>
+          </div>
+          <div class="panel-body">
+            <div class="timeline" id="parent-history">
+            </div>
+            <div class="" id="parent-history-empty">
+              <h4 class="text-dark text-center">No data available</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+
+  function check_existing_port(elem){
+    port_value = elem.value;
+    $.each(used_ports, function( index, element ){
+      if(port_value == element){
+        $('#port_waring').css('display', 'inline');
+        // break;
+      }
+      else{
+        $('#port_waring').css('display', 'none');
+      }
+    });
+  }
+
+  $("#image").select2();
+
+  $("#add_port").click(function(){
+    $("#add_port_div").append('<div class="row destroy_row"><div class="col-md-4"><label>Public(on Host)</label></div><div class="col-md-4"><label>Private(in Container)</label></div><div class="col-md-4"><label>Protocol</label></div><div class="col-md-4"><input type="text" name="hostport" placeholder="Host Port" id="hostport" class="form-control" onchange="check_existing_port(this);"></div><div class="col-md-4"><input type="text" name="containerport" placeholder="Container Port" id="containerport" class="form-control"></div><div class="col-md-2"><select class="form-control" id="port_type" name="port_type"><option>tcp</option><option>udp</option></select></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div><div class="col-md-12"><h5 class="text-danger" id="port_waring" style="display:none;align">**Port is already used</h5></div></div>');
+  });
+
+  $("#add_envt_var").click(function(){
+      $("#add_envt_var_div").append('<div class="row destroy_row"><div class="col-md-6">Name</div><div class="col-md-6">Value</div><div class="col-md-12"><div class="col-md-5"><input name="envt_variable" type="text" class="form-control" placeholder="eg: foo"></div><div class="col-md-1">=</div><div class="col-md-5"><input name="envt_value" type="text" class="form-control" placeholder="eg: bar"></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div></div></div>');
+  });
+
+  $(document).on('click', "button.destroy", function() {
+    $(this).parents('.destroy_row').empty();
+  });
+
+  $("#add_volume").click(function(){
+      $("#add_volume_div").append('<div class="row destroy_row"><div class="col-md-12"><div class="col-md-1></div><div class="col-md-11"><label>[/path/on/host]:/path/in/container[:ro/rw]</label></div></div><div class="col-md-11"><input name="volume" placeholder="eg:[/path/on/host]:/path/in/container[:ro]" type="text" class="form-control"></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div></div>');
+  });
+
+  $("#add_volume_for_container").click(function(){
+      $("#add_volume_for_container_div").append('<div class="row destroy_row"><div class="col-md-12"><div class="col-md-1></div><div class="col-md-11"><label>[/path/in/container[:ro/rw]</label></div></div><div class="col-md-11"><input name="volume_for_container" placeholder="eg:/path/in/container[:ro]" type="text" class="form-control"></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div></div>');
+  });
+
+  $('#add_resolving_server').click(function(){
+    $('#add_resolving_server_div').append('<div class="row destroy_row"><div class="col-md-11"><input name="resolving_servers" placeholder="eg: 8.8.8.8" type="text" class="form-control"></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div></div>');
+  });
+
+  $('#add_search_domain').click(function(){
+    $('#add_search_domain_div').append('<div class="row destroy_row"><div class="col-md-11"><input name="search_domains" placeholder="eg: some.sample.com" type="text" class="form-control"></div><div class="col-md-1"><button type="button" class="btn btn-link btn-sm destroy"><i class="fa fa-close"></i></button></div></div>');
+  });
+
+  $('#save_config').change(function(){
+    if($('#save_config').prop('checked') == true){
+      $('#save_config_name_div').show();
+    }
+    else{
+      $('#save_config_name_div').hide();
+    }
+  });
+
+  $("#image").change(function() {
+    $('#addcommand').empty();
+    $("#link_append").empty();
+    var image_id = document.getElementById('image').value;
+    $('#save_config_name').val(image_id);
+    if(image_id != 'Select Image') {
+      // Get documentation already saved.
+      $.ajax({
+        url: "/docker_management/server/" + server_id + "/image/attributes",
+        type: 'get',
+        data: {'id': image_id},
+        success : function(data) {
+          data = JSON.parse(data)
+          // command_list = $.parseJSON(data.run_command_list);
+          $('#command').val(data.run_command);
+          $('#entry_point').val(data.entry_point);
+          documentation_list = JSON.parse(data.image_documentation_list);
+          // documentation_list = $.parseJSON(data.image_documentation_list);
+          // if(command_list.length > 0) {
+          //   $.each(command_list, function( index, value ) {
+          //     $('#addcommand').append($('<option>', {
+          //         value: value.fields.command,
+          //         text: value.fields.command
+          //     }));
+          //   });
+          // }
+
+          if(documentation_list.length > 0) {
+            var appendtag = '<h5>Documentation URL</h5>';
+            $("#link_append").append(appendtag);
+            $.each(documentation_list, function( index, value ) {
+              var appendtag = '<li><a target="_blank" href="'+ value.fields.document +'"><span class="tab">' + value.fields.document + '</span></a></li>';
+              $("#link_append").append(appendtag);
+            });
+          }
+        },
+        error : function(xhr,errmsg,err) {
+        },
+      });
+
+      $.ajax({
+        url: "/docker_management/server/" + server_id + "/image/parents",
+        type: 'get',
+        data: {'id': image_id},
+        success : function(data) {
+          $('#parent-history').empty();
+          $('#parent-history-empty').hide();
+          data = JSON.parse(data);
+          if(data.length != 0){
+            string = '<div class="timeline-header"><div class="timeline-header-title bg-success">Now</div></div>'
+            $('#parent-history').append(string);
+            $.each(data, function( index, value ) {
+              tags = ''
+              $.each(value.Tags, function( i, l ){
+                tags = tags + l + ' ';
+              });
+              string = '<div class="timeline-entry"><div class="timeline-stat"><div class="timeline-icon bg-danger"><i class="fa fa-building fa-lg"></i></div><div class="timeline-time">' + value.Size + '(Byte)</div></div><div class="timeline-label"><h5 class="mar-no pad-btm" style="word-wrap: break-word;"><a class="text-danger">' + tags + '</a></h5><p style="word-wrap: break-word;">' + value.CreatedBy + '</p></div></div>'
+              $('#parent-history').append(string);
+            });
+          }
+          else{
+            $('#parent-history-empty').show();
+          }
+        },
+        error : function(xhr,errmsg,err) {
+        },
+      });
+
+    }
+  });
+
+</script>
+
+{% endblock %}

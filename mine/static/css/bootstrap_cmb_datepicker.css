@@ -1,0 +1,108 @@
+
+.input-append, .input-prepend {
+    font-size: 0;
+    margin-bottom: 5px;
+    white-space: nowrap;
+}
+
+.input-append .add-on:last-child, .input-append .btn:last-child, .input-append .btn-group:last-child > .dropdown-toggle {
+    border-radius: 0 4px 4px 0;
+}
+
+.input-append .add-on, .input-append .btn, .input-append .btn-group {
+    margin-left: -1px;
+}
+
+
+.input-append.date .add-on i, .input-prepend.date .add-on i {
+    cursor: pointer;
+    display: block;
+    height: 16px;
+    width: 16px;
+}
+
+.input-append .add-on, .input-prepend .add-on, .input-append .btn, .input-prepend .btn, .input-append .btn-group > .dropdown-toggle, .input-prepend .btn-group > .dropdown-toggle {
+    border-radius: 0;
+    vertical-align: top;
+}
+
+.input-append .add-on, .input-prepend .add-on {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: normal;
+    height: 29px;
+    line-height: 20px;
+    min-width: 16px;
+    padding: 4px 5px;
+    text-align: center;
+    text-shadow: 0 1px 0 #fff;
+    width: auto;
+}
+
+.input-append, .input-prepend {
+    font-size: 0;
+    white-space: nowrap;
+}
+
+
+.icon-calendar {
+    background-position: -192px -120px;
+}
+
+
+
+.input-append .add-on, .input-prepend .add-on {
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 20px;
+    text-align: center;
+    text-shadow: 0 1px 0 #fff;
+}
+
+
+[class^="icon-"], [class*=" icon-"] {
+    background-image: url("../img/glyphicons-halflings.png");
+    background-position: 14px 14px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 14px;
+    line-height: 14px;
+    margin-top: 1px;
+    vertical-align: text-top;
+    width: 14px;
+}
+
+.icon-time {
+    background-position: -48px -24px;
+}
+
+.dropdown-menu li > a {
+    color: #333;
+    font-weight: normal;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.accordion-toggle {
+    cursor: pointer;
+}
+
+.icon-calendar {
+    background-position: -192px -120px;
+}
+
+.dropdown-menu li > a {
+    color: #333;
+    font-weight: normal;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+ul, ol {
+    margin: 0 0 10px 25px;
+    padding: 0;
+}
+
+

@@ -1,0 +1,646 @@
+{% load humanize %}
+{% load zone %}
+
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .list-info li label {
+          width: 100px;
+      }
+      .clb{
+        display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+      }
+      .img-lg {
+          width: 130px;
+          height: 130px;
+      }
+    </style>
+    <script type="text/javascript" src="/static/customer/Chart.min.js"></script>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/cust_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Profile  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Profile</li>
+                </ol>
+            </div>
+
+
+
+            <div class="content">
+              <div class="panel">
+                <div class="eq-height clearfix">
+                  <div class="col-md-3 eq-box-md text-center box-vmiddle-wrap">
+                    <div class="text-center">
+                      <div class="panel-body">
+                        {% if profile.image %}
+                        <img alt="Avatar" class="img-lg img-circle img-border mar-btm" src="/media/{{profile.image}}">
+                        {% else %}
+                        <img alt="Avatar" class="img-lg img-circle img-border mar-btm" src="/static/img/photo.jpg">
+                        {% endif %}
+                        
+                        <h4 class="mar-no">{{profile.user.first_name}} {{profile.user.last_name}}</h4>
+                        <p>{{profile.customer}}</p>
+                      </div>
+                      <div class="pad-all">
+                        <ul class="list-group bg-trans">
+                          <li class="list-group-item list-item-sm">
+                            <i class="fa fa-envelope fa-fw"></i> {{profile.user.email}}
+                          </li>
+                          <li class="list-group-item list-item-sm">
+                            <i class="fa fa-phone fa-fw"></i> +XX XXX XX XXXXX
+                          </li>
+                          <li class="list-group-item list-item-sm text-primary text-semibold">
+                            <a class="btn btn-info btn-labeled fa fa-shield" href="/two_factor_auth/setup/">Enable/Disable Two Factor Auth</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-9 eq-box-md eq-no-panel">
+                      <div class="panel">
+                      <div class="panel-heading">
+                        <div class="panel-control">
+                          <ul class="nav nav-tabs">
+                            <li class="active"><a href="#basic" data-toggle="tab">Basic Info</a></li>
+                            <li><a href="#email" data-toggle="tab">Email Signature</a></li>
+                            <li><a href="#settings" data-toggle="tab">Profile Settings</a></li>
+                            <li><a href="#change" data-toggle="tab">Change Password</a></li>
+                            
+                          </ul>
+                        </div>
+                        <h3 class="panel-title">Details</h3>
+                      </div>
+                      <div class="panel-body">
+                        <div class="tab-content">
+                          <div class="tab-pane fade in active" id="basic">
+                            <div class="col-sm-6">
+                              <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;color:grey;margin-top:5%">
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-user"></span>
+                                    <label class="clb">Username</label>
+                                    {{profile.user.username}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-file"></span>
+                                    <label class="clb">Role</label>
+                                    Role Name
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-map-marker"></span>
+                                    <label class="clb">Location</label>
+                                    {{profile.location}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-globe"></span>
+                                    <label class="clb">TimeZone</label>
+                                    {{profile.timezone}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="fa fa-sign-out"></span>
+                                    <label class="clb">Last Login</label>
+                                    {{profile.user.last_login}}
+                                </li>
+                            </ul>
+                            </div>
+                            <div class="col-sm-6">
+                              <h4 class="text-thin text-center">Accesed Modules</h4>
+                              {% for mod in access %}
+                              <span class="col-sm-3 col-sm-3 text-center" style="margin-top:8%" data-toggle="tooltip" data-original-title="{{mod}}" data-placement="bottom">
+                                <l class="fa {{mod.icon}} fa-3x" style="color:grey"></l>
+                              </span>
+                              
+                              {% endfor %}
+                            </div>
+                            
+                          </div>
+                          <div class="tab-pane fade" id="email">
+                            <alert class="alert alert-success">We are worning on something awesome working hard!</alert>
+                            
+                            
+                          </div>
+                          <div  class="tab-pane fade" id="change">
+                                   <form  name="change_password" action="#" class="form-horizontal" method="POST" >{% csrf_token %}
+                                   <div>
+                                    <div class="form-group">
+                                      <input  type="text" name="user" class="hidden" value="{{puser}}">
+                                    </div> 
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">Old Password</label>
+                                      <div class="col-sm-6">
+                                      <input type="password" name="old_pass" id="old_pass" class="form-control" placeholder="Old Password"/ required>
+                                      </div>
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">New Password</label>
+                                      <div class="col-sm-6">
+                                      <input type="password" name="pass1" id="pass1" class="form-control" placeholder="New Password" onchange="checkPass(); return false;" required>
+                                      </div>
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;"  class="col-sm-3 control-label">Repeat New Password </label>
+                                      <div class="col-sm-6">
+                                        <input type="password" name="pass2" id="pass2"  onkeyup="checkPass(); return false;"  class="form-control" placeholder="Repeat New Password"/ required>
+                                      </div>
+                                      <div class="col-sm-6">
+                                        <br/><br/>
+                                        <div class="alert alert-danger" id="message">{{ message|safe }}</div>
+                                      </div>
+                                      </div>
+                                    <div class="row">
+                                        
+                                       <a href="#" class=" btn btn-info" style="color:#FFF" onclick="clear_all()">Clear</a>               
+                                      <span class="col-sm-7"></span>            
+
+                                      <button type="button" id="submitt" class=" btn btn-success" onclick="reset_password()" >Update Password</button> 
+                                    </div>
+                                      
+                                </div>
+                              </form>
+                          </div>
+                          <div class="tab-pane fade" id="settings">
+                            <form action="/profile/" method="post" class="panel-body form-horizontal form-padding" enctype="multipart/form-data">{% csrf_token %}
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">First Name</label>
+                                    <div class="col-md-8">
+                                      <input type="text" name="first_name" class="form-control" value="{{profile.user.first_name}}">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">Last Name</label>
+                                    <div class="col-md-8">
+                                      <input type="text" name="last_name" class="form-control" value="{{profile.user.last_name}}">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">Location</label>
+                                    <div class="col-md-8">
+                                      <input type="text" name="location" class="form-control" value="{{profile.location}}">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">TimeZone</label>
+                                    <div class="col-md-8">
+                                      <select class="form-control" name="tz">
+                                        {% if profile.timezone %}
+                                        <option value="{{profile.timezone}}">{{profile.timezone}}</option>
+                                        {% endif %}
+                                        {% for tz in timezone %}
+                                        <option>{{tz}}</option>
+                                        {% endfor %}
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                               <div class="row">
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">Phone Number</label>
+                                    <div class="col-md-8">
+                                      <input type="text" name="phone" class="form-control" value="{{profile.phone}}">
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-6">
+                                  <div class="form-group">
+                                    <label class="col-md-4 control-label">Designation</label>
+                                    <div class="col-md-8">
+                                      <input type="text" name="descig" class="form-control" value="{{profile.title}}">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                                    
+
+                              <div class="form-group pull-right">
+                                <label class="col-md-6 control-label">Profile Picture</label>
+                                <div class="col-md-6">
+                                  <span class="pull-left btn btn-default btn-file">
+                                    Browse ..<input type="file" name="image">
+                                  </span>
+                                </div>
+                              </div>
+                            <div>
+                          </div>
+                          <br>
+                          <div class="row">
+                            <span class="col-sm-9"></span>
+                            <button type="submit" class="btn btn-success">Update</button>
+                          </div>
+                                      
+
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+
+             <!--  <div class="col-sm-5">
+                <div id="spr_0" class="panel panel-default plain profile-widget">
+                                <div class="panel-body">
+                                    <div class="col-lg-4 col-md-4 col-sm-12">
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive" style="border-radius: 50%;" src="/static/img/photo.jpg" alt="@roybarberuk">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-8 col-sm-12">
+                                        <div class="profile-name" style="margin-top: 15px;font-size: 22px;margin-bottom: 10px;">
+                                            
+                                            <span class="label label-success">{{ profile.customer }}</span>
+                                        </div>
+                                        <div class="profile-quote">
+                                        </div>
+                                        <div class="profile-stats-info">
+                                            <h4>{{profile.title}}</h4>
+                                        </div>
+                                        <span  style="list-style: outside none none" style="padding: 8px 15px;"><i class="label btn-info btn-circle fa fa-phone "></i> {{profile.phonenumber_set.all.0.primary}}</span>
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                      <div class="media" style="color: #767676;margin-left:10% ">
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">First name</label>
+                                    {{profile.user.first_name}}
+                                </li>
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Last name</label>
+                                    {{profile.user.last_name}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Email</label>
+                                    {{profile.user.username}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-home"></span>
+                                    <label class="clb">Location</label>
+                                    {{profile.location}}
+                                </li>
+                            </ul>
+                            
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="col-sm-7">
+                            <div class="box">
+                              <div class="box-body">
+                                <ul class="nav nav-tabs" role="tablist">
+                                  {% if profile.admin %}
+                                  <li class="active"><a href="#info" role="tab" data-toggle="tab">Statistics </a></li>
+                                  {% else %}
+                                  <li class="active"><a href="#modules" role="tab" data-toggle="tab">Module Access </a></li>
+                                  <li><a href="#info2" role="tab" data-toggle="tab">Change Password</a></li>
+                                  <li><a href="#info3" role="tab" data-toggle="tab">Profile Settings</a></li>
+                                  {% endif %}
+
+                              </ul>
+                              <div class="tab-content" style="margin-left:7%;margin-top:2%">
+                              {% if profile.admin %}
+                              
+                                <div class="tab-pane active" id="info">
+                                    <div class="media" style="color: #767676;">
+                                <div class="row">
+                                  <div class="col-sm-8">
+                                    <canvas id="profilechart" width="300" height="300"></canvas>
+                                  </div>
+                                  <div class="col-sm-4">
+                                    <label style="width:60%"><span class='btn btn-danger'></span> New</label>: {{news}}<br>
+                                    <label style="width:60%"><span class='btn btn-warning'></span> Queued</label>: {{queued}}<br>
+                                    <label style="width:60%"><span class='btn btn-success'></span> InProgress</label>: {{progress}}  <br>
+                                    <label style="width:60%"><span class='btn btn-primary'></span> Resolved</label>: {{resolved}}<br>
+                                    <label style="width:60%"><span class='btn btn-info'></span> Awaiting</label>: {{await}}<br>
+                                  </div>
+                                </div>
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+
+                            </ul>
+                            
+                        </div>
+                    </div>
+                                </div>
+
+                                {% else %}
+                                <div class="tab-pane" id="info2">
+                                   <form  name="change_password" action="#" class="form-horizontal" method="POST" >{% csrf_token %}
+                                   <div>
+                                    <div class="form-group">
+                                      <input  type="text" name="user" class="hidden" value="{{puser}}">
+                                    </div> 
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">Old Password</label>
+                                      <div class="col-sm-6">
+                                      <input type="password" name="old_pass" id="old_pass" class="form-control" placeholder="Old Password"/ required>
+                                      </div>
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;" class="col-sm-3 control-label">New Password</label>
+                                      <div class="col-sm-6">
+                                      <input type="password" name="pass1" id="pass1" class="form-control" placeholder="New Password" onchange="checkPass(); return false;" required>
+                                      </div>
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="input-text" style="font-size: 13px;"  class="col-sm-3 control-label">Repeat New Password </label>
+                                      <div class="col-sm-6">
+                                        <input type="password" name="pass2" id="pass2"  onkeyup="checkPass(); return false;"  class="form-control" placeholder="Repeat New Password"/ required>
+                                      </div>
+                                      <div class="col-sm-6">
+                                        <br/><br/>
+                                        <div class="alert alert-danger" id="message">{{ message|safe }}</div>
+                                      </div>
+                                      </div>
+                                    <div class="row">
+                                        
+                                       <a href="#" class=" btn btn-info" style="color:#FFF" onclick="clear_all()">Clear</a>               
+                                      <span class="col-sm-7"></span>            
+
+                                      <button type="button" id="submitt" class=" btn btn-success" onclick="reset_password()" >Reset Password</button> 
+                                    </div>
+                                      
+                                </div>
+                              </form>
+                                </div>
+                                  <div class="tab-pane" id="info3">
+                                  <form action="/profile/" method="post" class="panel-body form-horizontal form-padding">{% csrf_token %}
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <label class="col-md-4 control-label">First Name</label>
+                                            <div class="col-md-8">
+                                              <input type="text" name="first_name" class="form-control" value="{{profile.user.first_name}}">
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <label class="col-md-4 control-label">Last Name</label>
+                                            <div class="col-md-8">
+                                              <input type="text" name="last_name" class="form-control" value="{{profile.user.last_name}}">
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <label class="col-md-4 control-label">Location</label>
+                                            <div class="col-md-8">
+                                              <input type="text" name="location" class="form-control" value="{{profile.location}}">
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <label class="col-md-4 control-label">TimeZone</label>
+                                            <div class="col-md-8">
+                                              <select class="form-control" name="tz">
+                                                {% if profile.timezone %}
+                                                <option value="{{profile.timezone}}">{{profile.timezone}}</option>
+                                                {% endif %}
+                                                {% for tz in timezone %}
+                                                <option>{{tz}}</option>
+                                                {% endfor %}
+                                              </select>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    
+
+                                          <div class="form-group pull-right">
+                                            <label class="col-md-5 control-label">Profile Picture</label>
+                                            <div class="col-md-7">
+                                              <span class="pull-left btn btn-default btn-file">
+                                                Browse... <input type="file">
+                                              </span>
+                                            </div>
+                                          </div>
+                                      <div>
+
+                                      </div>
+                                      <br>
+                                      <div class="row">
+                                        <span class="col-sm-9"></span>
+                                        <button type="submit" class="btn btn-success">Update</button>
+                                      </div>
+                                      
+
+                                    </form>
+
+                                </div>
+
+                                <div class="tab-pane active" id="modules">
+                                  
+                                     Module info goes here
+
+                                </div>
+                                
+                              </div>
+                              {% endif %}
+
+                            </div>
+
+                          </div>
+
+                        </div> -->
+
+
+            </div>
+
+          </div>
+        </div>
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+    {% include "components/customer_footer.html" %}
+    <script>
+    $("#profile").addClass("active")
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#message').hide();
+    })
+    </script>
+    <script>
+    var ctx = document.getElementById("profilechart").getContext("2d");
+          var data = [
+        {
+            value: {{news}},
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: "New"
+        },
+        {
+            value: {{resolved}},
+            color: "#1d364f",
+            highlight: "#1d3640",
+            label: "Resolved"
+        },
+        {
+            value: {{queued}},
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: "Queued"
+        },
+        {
+            value: {{progress}},
+            color: "#27ae60",
+            highlight: "#5cb85c",
+            label: "In Progress"
+        },
+        {
+            value: {{await}},
+            color: "#3498db",
+            highlight: "#5bc0de",
+            label: "Awaiting"
+        }
+    ]
+    var myDoughnutChart = new Chart(ctx).Doughnut(data, {
+    animateScale: true
+});
+    </script>
+
+    <script type="text/javascript">
+    function reset_password() {
+      var pass1 = $('#pass1').val();
+      var pass2 = $('#pass2').val();
+      var old_pass = $('#old_pass').val();
+      if (pass1 && pass2 && old_pass) {
+        $.ajax({
+          url:"/change_password/",
+          type:"POST",
+          dataType:"json",
+            data:{
+              "pass1" : pass1,
+              "pass2": pass2,
+              "old_pass": old_pass,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              message = document.getElementById('message');
+              message.style.display = 'none';
+              message.innerHTML = '';
+              if(data.result == 'ok') {
+                document.location.href = "/";
+              } else if (data.result == 'invalid_pass'){
+                message.innerHTML = "Old Password Do Not Match!";
+                message.style.display = 'block';
+              } else if (data.result == 'not_valid') {
+                message.style.display = 'block';
+                message.innerHTML = "Invalid new passwords";
+              }
+            }
+        });
+      } else {
+        message = document.getElementById('message');
+        message.innerHTML = "Please fill all the fields";
+        message.style.display = 'block';
+      }
+    }
+    </script>
+    <script type="text/javascript">
+
+          function clear_all(){
+            $('#pass1').val('');
+            $('#pass2').val('');
+            $('#old_pass').val('');
+            var pass2 = document.getElementById('pass2');
+            pass2.style.backgroundColor = '#fff';
+          }
+
+        </script>
+        <script>
+    
+      function checkPass()
+      {
+          //Store the password field objects into variables ...
+          var pass1 = document.getElementById('pass1');
+          var pass2 = document.getElementById('pass2');
+          //Set the colors we will be using ...
+          var goodColor = "#66cc66";
+          var badColor = "#ff6666";
+          //Compare the values in the password field
+          //and the confirmation field
+          if(pass1.value == pass2.value){
+              //The passwords match.
+              //Set the color to the good color and inform
+              //the user that they have entered the correct password
+              pass2.style.backgroundColor = goodColor;
+              $( "#submitt" ).prop( "disabled", false );
+          }else{
+              //The passwords do not match.
+              //Set the color to the bad color and
+              //notify the user.
+              pass2.style.backgroundColor = badColor;
+              $( "#submitt" ).prop( "disabled", true );
+          }
+      }  
+    </script>
+    </body>
+</html>
+

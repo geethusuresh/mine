@@ -1,0 +1,167 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li><a href="/admin_settings/privileges/">Privileges</a></li>
+                        <li class="active">Privilege Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="col-sm-6">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Details</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <form method="post" action="/admin_settings/privilege/details/{{ priv.id }}/">{% csrf_token%}
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Privilege Name</label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" value="{{priv.privname}}" name="privname" class="form-control"><br/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Description</label>
+                                                <div class="col-sm-9">
+                                                    <textarea name="description" class="form-control">{{priv.description}}</textarea><br/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3">Functionality</label>
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" name="func_admin">
+                                                        <option value="">--Select Functionality</option>
+                                                        {% for func in functionalities %}
+                                                            <option value="{{ func.id }}" {% if priv.func_admin == func %} selected {% endif %}>{{ func.func_name}}</option>
+                                                        {% endfor %}
+                                                    </select><br/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="submit" value="Update" class="btn btn-success btn-labelled fa fa-times" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Privilege Roles</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <form action="/admin_settings/privilege/{{priv.id}}/role/remove/" method="post">{% csrf_token %}
+                                            <button class="btn btn-danger btn-labelled fa fa-times"> Remove</button>
+                                            <input type="hidden" id="checked_list_data" name="removed_data">
+                                        </form>
+                                        <table class="table table-stripped" id="priv_roles_tab">
+                                            <thead>
+                                                <tr>
+                                                    <th class="hidden">ID</th>
+                                                    <th>Role</th>
+                                                    <th>Description</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+        <script type="text/javascript" src="/static/js/form-validation.js"></script>
+        <script type="text/javascript">
+            $('#priv_roles_tab').dataTable( {
+                "processing": true,
+                "bPaginate": false,
+                "bInfo": false,
+                "bFilter": false,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/privilege/details/{{ priv.id }}/?roles=true",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    
+                    { "": "fields.role__id",sClass: "hidden" },
+                    { "": "fields.role__rolename" },
+                    { "": "fields.role__description" },
+                    { "": "","bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 3 ,
+                    "data": null,
+                    "defaultContent": "<input type='checkbox' name='romv_priv_role' class='form-control romv_priv_role' style='height:auto'>"
+                }]
+            });
+        </script>
+        <script type="text/javascript">
+            $('#priv_table').on('click', 'tr', function(e){
+                var row = $(this).find('td:eq(0)').text();
+            })
+        </script>
+        <script type="text/javascript">
+            $('#priv_roles_tab').on('click','td' , function(e){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == ""){
+                    var checked_list = [];
+                    var rows = $('#priv_roles_tab').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.romv_priv_role')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    $('#checked_list_data').val(checked_list);
+                    console.log(checked_list);
+                }
+            });
+        </script>
+    </body>
+</html>

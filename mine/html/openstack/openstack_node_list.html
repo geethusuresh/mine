@@ -1,0 +1,259 @@
+{% extends 'cloud_management/home.html'%}
+
+{% block section_header %}
+<script type="text/javascript">
+  var cloud_account_id = {{ cloud_account_id }}
+</script>
+    <h1>
+        Instance List
+        <small>Openstack Instance List</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Home</a></li>
+        <li><a href="{% url 'openstack_accounts_view' %}">Openstack accounts</a></li>
+        <li><a href="/cloud_management/openstack/{{cloud_account_id}}/dashboard">Dashboard</a></li>
+        <li>Node List</li>
+    </ol>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+<div class="row">
+    <div class="col-md-1">
+    </div>
+    <div class="col-md-8">
+      {% if resize_status %}
+        <div class="alert alert-success alert-dismissable alert_div">
+        <i class="fa fa-check"></i>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+        <b>Success! : </b>{{resize_message}}</div>
+      {% elif resize_message %}
+          <div class="alert alert-danger alert-dismissable alert_div"><i class="fa fa-ban"></i>
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
+          <b>Failed! : </b>{{resize_message}}</div>
+      {% endif %}
+    </div>
+</div>
+<div ng-controller = "OpenstackNodeListController">
+  <div class="row">
+      <div class="col-md-1">
+      </div>
+
+      <div class="col-md-8 table-responsive">
+        <div class="panel panel-mint">
+          <div class="panel-heading">
+            <div class="panel-control">
+              <div class="btn-group">
+                  <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#instance-list-minmize-button" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+              </div>
+            </div>
+            <h3 class="panel-title">Instance List</h3>
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-xs-11">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>IP</th>
+                            <th>key name</th>
+                            <th>State</th>
+                            <th>Actions</th>
+                            <th>Pending Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="value in instace_details">
+                            <td>{[{value['name']}]}</td>
+                            <td ng-repeat="(key, values) in value['instacne_ip']">
+                            {[{key}]} : {[{values}]}<br>
+                            </td>
+                            <td  ng-if="value['key_name'] == None"> None</td>
+                            <td  ng-if="value['key_name'] != None">{[{value['key_name']}]}</td>
+                            <td>
+                                {[{value['status']}]}<br>
+                                <span ng-if="value['status'] == 'RESIZE' || value['status'] == 'BUILD'"><img id="loading_gif" src="/static/cloud-static-files/img/server_load.gif" alt="Product Image" ></span>
+                            </td>
+                            <td><a class="btn btn-success btn-sm" href="/cloud_management/openstack/{{ cloud_account_id }}/node/{[{value['id']}]}/details" style='color:white'> <i class="fa fa-search fa-lg"></i> </a></td>
+                            <td ng-if="value['status'] == 'VERIFY_RESIZE'"><a class="btn btn-warning btn-sm" ng-click="resize_node_confirm(value['id'])" style='color:white'>Confirm Resize</a></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+            <button class="btn btn-block btn-info" id="create-node" style="margin-bottom:2%">Create Node</button>
+
+
+              </div>
+            </div>
+          </div><!-- /.box-body -->
+        </div>
+
+
+      </div><!-- /.col -->
+
+  </div><!-- /.row -->
+
+
+
+
+
+<div id="resize_node_conform" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Confirm or Cancel Node Rsize</h4>
+            </div>
+            <div class="modal-body">
+               <div class="col-xs-12">
+            <div class="box box-solid" style="padding:6px">
+                <div class="box-body">
+                    <div class="row">
+
+                 <div class="col-md-9 col-sm-9">
+                 <span id = "account_error"></span>
+                  <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active">
+
+                  <a href="#" ng-click='openstck_node_resize_conformation(selected_node_id_for_resize)' class="btn btn-block btn-info btn-lg">Confirm NodeResize</a>
+                  <a href="#" ng-click='openstck_node_resize_cancelation(selected_node_id_for_resize)' class="btn btn-block btn-warning btn-lg">Cancel NodeResize</a>
+
+                    </div>
+                  </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+            </div>
+
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /ng-controller -->
+
+<div id="create-node-popup" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-laptop"></i> Create Node</h4>
+            </div>
+          <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'create_node_openstack' cloud_account_id %}">{% csrf_token %}
+            <div class="modal-body">
+                  <div class="mailbox row">
+                    <div class="col-xs-12">
+                        <div class="panel panel-success">
+             <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-6">
+                      {{openstack_node_form.as_p}}
+                  </div>
+                  <div class="col-lg-6">
+                    <div class="panel" id="aws_size_detail_div" style="display:none">
+                      <div class="box-header with-border">
+                        <h3 class="panel-title">Size Details</h3>
+                      </div><!-- /.box-header -->
+                      <div class="panel-body">
+                        <div class="panel media middle">
+                          <div class="media-left pad-all">
+
+                            <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                                <img src="/static/cloud-static-files/img/ram.jpg" alt="Product Image" style="width:40px;">
+                            </span>
+                          </div>
+                          <div class="media-body pad-lft">
+                              <a href="javascript::;" class="product-title">Ram </a><small>(MB)</small>
+                              <span id = "aws_ram_size_details"></span>
+                          </div>
+                        </div>
+                        <div class="panel media middle">
+                          <div class="media-left pad-all">
+                            <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                                <img src="/static/cloud-static-files/img/disk.jpg" alt="Product Image" style="width:40px;">
+                            </span>
+                          </div>
+                          <div class="media-body pad-lft">
+                              <a href="javascript::;" class="product-title">Disc </a><small>(GB)</small>
+                              <span id = "aws_disc_size_details"></span>
+                          </div>
+                        </div>
+                        <div class="panel media middle">
+                          <div class="media-left pad-all">
+                            <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                                <img src="/static/cloud-static-files/img/Dollar.png" alt="Product Image" style="width:40px;">
+                            </span>
+                          </div>
+                          <div class="media-body pad-lft">
+                              <a href="javascript::;" class="product-title">Price </a><small>(hourly)</small>
+                              <span id ="aws_prince_size_details"></span>
+                          </div>
+                        </div>
+                      </div><!-- /.box-body -->
+                    </div>
+                  </div>
+                </div>
+             </div>
+          </div>
+                    </div>
+                  </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+               <button class="btn btn-primary" type="submit" id="form-submit">Create</button>
+            </div>
+          </form>
+
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+
+<script type="text/javascript">
+
+
+  $( document ).ready(function() {
+    $( "#create-node").click(function(){
+        $("#create-node-popup" ).modal('show');
+    });
+    $('#id_network').select2();
+    $('#id_image').select2();
+    $('#id_size').select2();
+
+    $("#id_size").change(function(){
+      if ($("#id_size").val() != "") {
+          $.ajax({
+            type: "GET",
+            url: '/cloud_management/openstack/'+cloud_account_id+'/size/'+$("#id_size").val()+'/details',
+            success: function(data){
+               $('#aws_ram_size_details').html('<p>Ram Size: '+data.ram+'</p>')
+               $('#aws_disc_size_details').html('<p>Disk Size: '+data.disk+'</p>')
+               $('#aws_prince_size_details').html('<p>vcpus: '+data.vcpus+'</p>')
+               $('#aws_size_detail_div').show()
+            },
+            dataType: "json"
+          });
+      }else{
+
+        $('#aws_size_detail_div').hide()
+
+
+          
+      }
+    });
+
+
+  });
+</script>
+{% endblock %}
+{% endblock%}

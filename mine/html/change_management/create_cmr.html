@@ -1,0 +1,931 @@
+{% extends "change_management/change_base.html" %}
+{% load static %}
+
+{% block title_content %} Create Change Request {% endblock title_content %}
+
+{% block page_head %} Change Management | <small>Create Change Request</small> {% endblock page_head %}
+
+{% block bread_crumb %} <li class="active">Create RFC</li> {% endblock bread_crumb %}
+
+{% block body_content %}
+    <div class="col-md-12 create-change-manage">
+        <div class="stepwizard">
+            <div class="stepwizard-row setup-panel">
+                <div class="stepwizard-step"> <a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
+                    <p>Change Details</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-2" type="button" class="btn btn-default btn-circle" disabled="disabled">2</a>
+                    <p>Category and Ownership</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">3</a>
+                    <p>Change Implementation Plan</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-4" type="button" class="btn btn-default btn-circle" disabled="disabled">4</a>
+                    <p>Impact Details</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-5" type="button" class="btn btn-default btn-circle" disabled="disabled">5</a>
+                    <p>CI Details</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-6" type="button" class="btn btn-default btn-circle" disabled="disabled">6</a>
+                    <p>Schedule Details</p>
+                </div>
+                <div class="stepwizard-step"> <a href="#step-7" type="button" class="btn btn-default btn-circle" disabled="disabled">7</a>
+                    <p>Attachment Details</p>
+                </div>
+            </div>
+        </div>
+        <form role="form" action="{% url 'create_change_request' %}" method="post" >{% csrf_token %}
+            <div class="row setup-content" id="step-1">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <h4>Change Details</h4>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Summary <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <input data-toggle="tooltip" title="A brief description about change"  type="text" required="required" class="form-control" placeholder="Max 50 characters" name="summary" maxlength="50" />
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Change Type <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required data-toggle="tooltip" title="Change process steps that are needed" class="form-control" name="change_type" id="change_type">
+                                        <option value="">--Select--</option>
+                                        <option value="Normal">Normal</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Emergency">Emergency</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 pad-top">
+                                <label class="control-label col-sm-3 approval_attachments" style="display:none">
+                                Approval Attachments <span class="required-star">*</span></label>
+                                <div class="col-sm-9 approval_attachments" style="display:none">
+                                    <input type="file" name="approval_attachment" id="approval_attachment_file" />
+                                    <span class="approval_attachment_file_error_msg" style="color:red;" id='approval_attachment_file_error_msg'></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Description <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Description" id="description" name="description"></textarea>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Reason for Change <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Reason for Change" name="reason"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Change Impact <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Change Impact" data-toggle="tooltip" title="Change Impact " id="risk" name="risk"></textarea>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Impact if not implemented<span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Impact if not implemented" name="effect" ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Pre Implementation details<span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Pre Implementation details" id="pre_test_details" name="pre_test_details"></textarea>
+                                    <input  data-toggle="tooltip" data-placement="right" title="" type="file" name="pre_imple_architectural_dia" id="pre_imple_architectural_dia"/>
+                                    <span style="color:red;" id='pre_imple_architectural_dia_error_msg'></span>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Post Implementation details<span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea required class="form-control" placeholder="Post Implementation details" name="post_implementation_details"></textarea>             
+                                    <input  data-toggle="tooltip" data-placement="right" title="" type="file" name="post_imple_architectural_dia" id="post_imple_architectural_dia"/>
+                                    <span style="color:red;" id='post_imple_architectural_dia_error_msg'></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Downtime required <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required data-toggle="tooltip" title="Change process steps that are needed" class="form-control" id="down_time_required" name="down_time_required">
+                                        <option value="">--Select--</option>
+                                        <option value="yes">Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 dw_time" style="display:none">
+                                <label class="col-sm-3 control-label"> Down Time:<label style="color:red">*</label>
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="number" name="down_time" id="down_time" class="form-control" min="0" placeholder="Down time in minutes ">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <button class="btn btn-info nextBtn" type="button" >Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-2">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <h4>Category and Ownership</h4>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Customer <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required data-toggle="tooltip" title="Customer" class="form-control" id="c_cust" name="customer">
+                                        <option value="">--Select--</option>
+                                        {% for cust in customers %}
+                                            <option value="{{cust.id}}">{{cust.customername}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Assignment Group <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required class="form-control" id="c_group" name="group">
+                                       <option value="">-- Select Group --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Category <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required data-toggle="tooltip" title="Customer" class="form-control" id="c_cat" name="category">
+                                        <option value="">--Select Category--</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Assignment Subgroup <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required class="form-control" id="c_subgroup" name="subgroup">
+                                        <option value="">-- Select Subgroup--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Subcategory <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required data-toggle="tooltip" title="Customer" class="form-control" id="c_sub_cat" name="subcategory">
+                                        <option value="">-- Select Subcategory --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 ">
+                                <label class="control-label col-sm-3">Assigned to <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <select required class="form-control" id="c_owner" name="owner">
+                                        <option value="">-- Select Assigned to --</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Change Requester <span class="required-star">*</span></label>
+                                <div class="col-sm-9">
+                                    <!-- <div class="right-inner-addon">
+                                        <i class="icon-search"></i>
+                                        <input type="search" class="form-control" placeholder="Search" />
+                                    </div> -->
+                                    <div class="col-sm-8">
+                                        <input type="text" name="change_requester" id="change_requester" class="form-control" required>
+                                        <span class="change_requester_error" style="color:red;"></span>
+                                    </div>
+                                    <div class="col-sm-1" style="padding-left:0px;padding-top: 7px;cursor:pointer;">
+                                    <a id="change_requester_search" class="fa fa-search" style=""></a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <button class="btn btn-info nextBtn" type="button" >Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-3">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <h4>Change Implementation Plan</h4>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Pre Implementation Checklist </label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" placeholder="Pre Implementation Checklist" name="pre_implementation_checklist"></textarea>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Step by Step Plan</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" name="step_by_step_plan" placeholder="Step by Step Plan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class=" form-group">
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Post Implementation Checklist</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" name="post_implementation_checklist" placeholder ="Post Implementation Checklist"></textarea>
+                                </div>
+                            </div>
+                            <div class=" col-sm-6 ">
+                                <label class="control-label col-sm-3">Roll-Back Plan</label>
+                                <div class="col-sm-9">
+                                    <textarea class="form-control" name="roll_back_plan" placeholder ="Roll-Back Plan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <button class="btn btn-info nextBtn" type="button" >Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-4">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <h4>Impact Details</h4>
+                    </div>
+                    <div class=" form-group">
+                        <div class=" col-sm-6 ">
+                            <label class="control-label col-sm-3">Impact </label>
+                            <div class="col-sm-9">
+                                <select data-toggle="tooltip" title="Customer" class="form-control" name="impact" id="impact">
+                                    <option value="">--Select--</option>
+                                    {% for impact_val in impact_values %}
+                                        <option value="{{impact_val.field_value}}">{{impact_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class=" col-sm-6 ">
+                            <label class="control-label col-sm-3">Urgency </label>
+                            <div class="col-sm-9">
+                                <select data-toggle="tooltip" title="Customer" class="form-control" name="urgency" id="urgency">
+                                     <option value="">--Select--</option>
+                                    {% for urgency_val in urgency_values %}
+                                        <option value="{{urgency_val.field_value}}">{{urgency_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" form-group change_priority" style="display:none">
+                        <div class=" col-sm-6 ">
+                            <label class="control-label col-sm-3">Priority</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" name="priority" id="change_priority">
+                                   <option value="">-- Select Priority --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-info nextBtn" type="button" >Next</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-5">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <h4>CI DETAILS</h4>
+                    </div>
+                    <div class=" form-group">
+                        <div class="col-sm-6">
+                            <label class="col-sm-3 control-label" > Primary CI:<label style="color:red">*</label></label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="ci_data" name="c_ci" required>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="col-sm-3 control-label" >Additional CIs:</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="add_ci" name="add_ci_dat" multiple>
+                                    <option value="">--Select--</option>
+                                </select><br/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <button class="btn btn-info nextBtn" type="button" >Next</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-6">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <h4>SCHEDULE DETAILS</h4>
+                        <div class="form-group">
+                            <div class="col-sm-6">
+                                <label class="col-sm-3 control-label" >Start Date:<label style="color:red">*</label></label>
+                                <div class="col-sm-9">
+                                   <div class='input-group date' id='datetimepicker1'  >
+                                        <input type='text' class="form-control" required id="sched_start_dat" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </span>
+                                    </div>
+                                    <input type="hidden" id="utc_date1" name="sched_start" />
+                                    <br/>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="col-sm-3 control-label" >Finish Date:<label style="color:red">*</label></label>
+                                <div class="col-sm-9">
+                                    <div class='input-group date' id='datetimepicker2'>
+                                        <input type='text' class="form-control"  required id="sched_start_dat2" />
+                                        <span class="input-group-addon">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="sched_finish" id="utc_date2" />
+                                    <br/>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 pad-all">
+                                <label id="re_sched_date_conflict" class="label label-danger " style="margin-bottom:10px; display:none;"></label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <button class="btn btn-info nextBtn" type="button" >Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row setup-content" id="step-7">
+                <div class="col-xs-12">
+                    <div class="col-md-12">
+                        <h4> ATTACHMENT DETAILS</h4>
+                        <div class="form-group">
+                            <div class="col-sm-8">
+                                <label class="col-sm-3 control-label">Attachment:</label>
+                                <div class="col-sm-9">
+                                    <input type="file" name="attachment" class="file_data" />
+                                    <span class="file_error_msg" style="color:red;" id='file_error_msg'></span>
+                                    <br/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <button class="btn btn-success" type="submit"  id="re_submit">Finish</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock body_content %}
+{% block modal_content %}
+    <div class="modal fade" id="users_data_section" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="ModalLabel">Users</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table" id="users_table">
+                        <thead>
+                            <th>Email</th>
+                            <th>Choose</th>
+                        </thead>
+                    </table>
+                    <button class="btn btn-success pull-right" type="button" id="user_id_update">Update</button>
+                </div>
+                <div class="modal-footer" style="border:0px">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock modal_content %}
+{% block footer_content %}
+    <script src="{% static 'change_static/js/wizard.js' %}"></script>
+    <script>
+        $("#c_cust").on('change',function(){
+            $("#c_cat option:gt(0)").remove().end();
+            $("#c_group option:gt(0)").remove().end();
+            $('#c_sub_cat option:gt(0)').remove().end();
+            $('#c_subgroup option:gt(0)').remove().end();
+            $("#c_owner option:gt(0)").remove().end();
+            $('#ci_data option:gt(0)').remove().end();
+            $('#asset_data option:gt(0)').remove().end();
+            $('#add_ci option:gt(0)').remove().end();
+            if($("#c_cust :selected").text()!='--Select--'){
+                $.ajax({
+                    url:"/ticket/incident/customer",
+                    type:"POST",
+                    dataType:"json",
+                      data:{
+                        groupid : this.value,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                      },
+                      success : function(data) {
+                        data = JSON.parse(data['group_list']);
+                        for (var i in data){
+                          $("#c_group").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}))
+                        }
+                      },
+                      error : function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                });
+                $.ajax({
+                    url :"/category/enduser",
+                    type:"POST",
+                    data:{custid: this.value,
+                          csrfmiddlewaretoken:'{{csrf_token}}'},
+                    success:function(data){            
+                       cat_list = JSON.parse(data);
+                      for (var i in cat_list){
+                        
+                        $("#c_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+                      } 
+                     },
+                     error: function(xhr,errmsg,err){
+                      console.log(xhr);
+                     }       
+                });
+                $.ajax({
+                    url: "/rfc/ci_list/",
+                    type:"POST",
+                    data:{
+                        customer_id:$('#c_cust').val(),
+                        csrfmiddlewaretoken:'{{csrf_token}}',
+                        type_val: 'ci',
+                    },
+                    success:function(data){
+                        list_data = JSON.parse(data);
+                        for (var i in list_data){
+                            $("#add_ci").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                            $("#ci_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                        }
+                    },
+                    error: function(xhr, errmsg, err){
+                        console.log("error");
+                    }
+                });
+                $.ajax({
+                    url: "/rfc/ci_list/",
+                    type:"POST",
+                    data:{
+                        customer_id:$('#c_cust').val(),
+                        csrfmiddlewaretoken:'{{csrf_token}}',
+                        type_val: 'asset',
+                    },
+                    success:function(data){
+                        list_data = JSON.parse(data);
+                        for (var i in list_data){
+                            $("#add_asset").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                        }
+                    },
+                    error: function(xhr, errmsg, err){
+                        console.log("error");
+                    }
+                });
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function get_list_data(type_name) {
+            $('#ci_data option:gt(0)').remove().end();
+            $('#asset_data option:gt(0)').remove().end();
+            if (type_name == 'ci') {
+                $('#ci_data').attr('disabled', false);
+                $('#asset_data').attr('disabled', true);
+                $('#ci_data').attr('required', true);
+                $('#asset_data').attr('required', false);
+            } else if (type_name == 'asset') {
+                $('#asset_data').attr('disabled', false);
+                $('#ci_data').attr('disabled', true);
+                $('#ci_data').attr('required', false);
+                $('#asset_data').attr('required', true);
+            }
+            if ($('#c_cust').val() && (type_name == 'ci' || type_name == 'asset')) {
+                $('.ci_asset_disable').attr('disabled', true);
+                $.ajax({
+                    url: "/rfc/ci_list/",
+                    type:"POST",
+                    data:{
+                        customer_id:$('#c_cust').val(),
+                        csrfmiddlewaretoken:'{{csrf_token}}',
+                        type_val: type_name,
+                    },
+                    success:function(data){
+                        $('.ci_asset_disable').removeAttr('disabled');
+                        list_data = JSON.parse(data);
+                        for (var i in list_data){
+                            if ( type_name == "ci")
+                                $("#ci_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                            else if (type_name == "asset")
+                                $("#asset_data").append($('<option>', {value:list_data[i].pk, text:list_data[i].name}));
+                        }
+                    },
+                    error: function(xhr, errmsg, err){
+                        console.log("error");
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        $("#c_group").on('change',function(){
+            $("#c_subgroup option:gt(0)").remove().end();
+            $("#c_owner option:gt(0)").remove().end();
+            if($("#c_group :selected").text()!='-Select Group-'){
+              $.ajax({
+                url:"/ticket/incident/create",
+                type:"POST",
+                dataType:"json",
+                data:{
+                  workgroupid : this.value,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success : function(data) {
+                  data = JSON.parse(data);
+                    for (var i in data){
+                        $("#c_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                    }
+                },
+                error : function(xhr,errmsg,err) {
+                  console.log(err);
+                }
+              });
+              return false;
+            }
+        });
+    </script>
+    <script>
+        $('#c_cat').on('change', function(){
+            var catid = $('#c_cat').val();
+            $("#c_sub_cat option:gt(0)").remove().end();
+            if (catid){
+                $.ajax({
+                    url :"/category/enduser",
+                    type:"POST",
+                    data:{catty: catid,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+                    success:function(data){
+                        cat_list = JSON.parse(data);
+                        for (var i in cat_list){
+                            $("#c_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                        } 
+                    },
+                    error: function(xhr,errmsg,err){
+                        console.log(xhr);
+                    }       
+                });
+            }
+        });
+    </script>
+    <script>
+        $('#c_subgroup').on('change', function(){
+            $("#c_owner option:gt(0)").remove().end();
+            var subgroup_id = $('#c_subgroup').val();
+            if($("#c_subgroup").text()!='-Select Owner-'){
+                $.ajax({
+                  url :"/subgroup/members/",
+                  type:"POST",
+                  data:{"subgroup_id": subgroup_id,
+                        csrfmiddlewaretoken:'{{csrf_token}}'},
+                  success:function(data){
+                      $("#c_owner option:gt(0)").remove();
+                      member_list = data;
+                    for (var i in member_list){
+                      $("#c_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                    } 
+                   },
+                   error: function(xhr,errmsg,err){
+                    console.log(xhr);
+                   }       
+                });
+            }
+        });
+    </script>
+    <script>
+        function add_user_info(){
+            var x = ($(this).find('td:eq(1)').text());
+            var y = ($(this).find('td:eq(2)').text());
+            var z = ($(this).find('td:eq(3)').text());
+            var i = ($(this).find('td:eq(4)').text());
+            var j = ($(this).find('td:eq(5)').text());
+            $('#affected_person_id').val(i);
+            $('#user_data').val(z);
+        } 
+    </script>
+    <script>
+        $('#user_selection_box').click(function(){
+            if ($('#user_data').val()) {
+                $.ajax({
+                    url:"/search/user/",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                      'user' : $("#user_data").val(),
+                      'customerid':$("#c_cust").val(),
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    type: "POST",
+                    success : function(data){
+                        i=0;
+                        $('#fields tr').slice(1).remove();
+                        for (var i in data){
+                            $tr = $('<tr>');
+                            $tr.append($('<td><input type="radio" name="user_selct">')).append($('<td>').html(data[i].user__first_name)).
+                            append($('<td>').html(data[i].user__last_name)).
+                            append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id)).append($('<td class="hidden">').html(data[i].primary));
+                            $(".trhide").hide();
+                            $(".names").show();
+                            $("#fields").append($tr);
+                            $tr.bind('click', add_user_info);
+                        }
+                    },
+                });
+            } else {
+                console.log("innnn else");
+                $('#users_data_section').hide();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function check_re_scheduled_dates(){
+            val_1 = new Date($('#utc_date1').val());
+            val_2 = new Date($('#utc_date2').val());
+            if (val_1 && val_2) {
+                if (val_2 <= val_1){
+                    $("#re_sched_date_conflict").show();
+                    $('#re_sched_date_conflict').text("Finish date should be greater than Start date");
+                    $('#re_submit').attr('disabled', 'true');
+                } else {
+                    $("#re_sched_date_conflict").hide();
+                    $('#re_submit').removeAttr('disabled');
+                }
+            } else {
+                console.log("please choose the date")
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#datetimepicker1').datetimepicker()
+            .on('change.dp', function (e) {
+                $('#utc_date1').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function (){
+                $('#utc_date1').val(moment($('#sched_start_dat').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                check_re_scheduled_dates();
+            })
+        });
+        
+        $(function () {
+            $('#datetimepicker2').datetimepicker()
+            .on('change.dp', function (e) {
+                $('#utc_date2').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function(){
+                $('#utc_date2').val(moment($('#sched_start_dat2').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                check_re_scheduled_dates();
+            })
+        });
+        
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#create_rfc_req').addClass('active');
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+        // $('#change_requester').autocomplete({
+        //     width: 300,
+        //     max: 10,
+        //     delay: 100,
+        //     minLength: 1,
+        //     autoFocus: true,
+        //     cacheLength: 1,
+        //     scroll: true,
+        //     highlight: false,
+        //     source: function(request, response) {
+        //         $(".change_requester_error").empty();
+        //         var customer_id = $('#c_cust').val();
+        //         var name = $('#change_requester').val();
+        //         if (customer_id) {
+        //             $.ajax({
+        //                 url: "/admin_settings/users/search/?customer_id="+customer_id+'&name='+name,
+        //                 dataType: "json",
+        //                 data: request,
+        //                 success: function( data, textStatus, jqXHR) {
+        //                     var items = data;
+        //                     response(items);
+        //                     if (items.length == 0)
+        //                         $(".change_requester_error").html('No users found');
+        //                 },
+        //                 error: function(jqXHR, textStatus, errorThrown){
+        //                      console.log( textStatus);
+        //                 }
+        //             });
+        //         } else  {
+        //             console.log("Please choose the customer")
+        //             $(".change_requester_error").html('Please choose the customer');
+        //         }
+        //     }
+        // });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#eventForm').on('submit', function(e){
+                // e.preventDefault();
+                if ($('#sched_start_dat').val()&& $('#sched_start_dat2').val()){
+                    $('#re_sched_date_conflict').hide()
+                    $('#re_submit').removeAttr('disabled');
+                    return
+                } else {
+                    e.preventDefault();
+                    $('#re_sched_date_conflict').show();
+                    $('#re_sched_date_conflict').text("Please choose the start and finish date");
+                    $('#re_submit').attr('disabled', true);
+                }
+            });
+            $('#users_table').on('click', 'td', function(){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == "Choose"){
+                    var row = $(this).prev().html();
+                    $('#change_requester').val(row);
+                } 
+            })
+            $('#user_id_update').on('click', function(){
+                $('#users_data_section').modal('hide');
+            })
+        })
+    </script>
+    <script type="text/javascript">
+        $('#change_requester_search').on('click', function(){
+            $(".change_requester_error").empty();
+            var customer_id = $('#c_cust').val();
+            var name = $('#change_requester').val();
+            // user_selection_box
+            if (customer_id) {
+                $.ajax({
+                    url: "/admin_settings/users/search/?is_change_requestor=true&customer_id="+customer_id+'&name='+name,
+                    dataType: "json",
+                    success: function( data, textStatus, jqXHR) {
+                        var items = data;
+                        if (items.length == 0) {
+                            $(".change_requester_error").html('No users found');
+                        } else {
+                            var data_to_pass = []
+                            for (var i in items){
+                                data_to_pass.push([items[i], '<input type="radio" name="users_choose" class="select">'])
+                            }
+                            $('#users_table').DataTable( {
+                                "bDestroy": true,
+                                "data": data_to_pass
+                            } );
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                         console.log( textStatus);
+                    }
+                });
+                $('#users_data_section').modal('show');
+            } else  {
+                $(".change_requester_error").html('Please choose the customer');
+            }
+        });
+        $('#down_time_required').on('change', function(){
+            if (this.value && this.value == 'yes' ) {
+                $('.dw_time').show();
+                $('#down_time').prop('required', 'required');
+            } else {
+                $('.dw_time').hide();
+                $('#down_time').prop('required', '');
+            }
+        });
+        function fetch_priority_list() {
+            var impact = $('#impact').val();
+            var urgency = $('#urgency').val();
+            $("#change_priority option:gt(0)").remove().end();
+            if (impact && urgency) {
+                $.ajax({
+                    url: "/rfc/create/?impact="+impact+'&urgency='+urgency,
+                    dataType: "json",
+                    success: function( data, textStatus, jqXHR) {
+                        var items = data;
+                        if (items.length > 0) {
+                            $(".change_priority").show();
+                        } else {
+                            $(".change_priority").hide();
+                        }
+                        for (var i in items){
+                            $("#change_priority").append($('<option>', {value:items[i].field_value, text:items[i].display_value}));
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                         console.log( textStatus);
+                    }
+                });
+            }
+        }
+        $('#urgency').on('change', function(){
+            if (this.value) {
+                fetch_priority_list();
+            }
+        });
+        $('#impact').on('change', function(){
+            if (this.value) {
+                fetch_priority_list();
+            }
+        });
+        $('#change_type').on('change', function() {
+            if (this.value == "Emergency") {
+                $('.approval_attachments').show();
+                $('#approval_attachment_file').prop('required', true);
+            } else {
+                $('.approval_attachments').hide();
+                $('#approval_attachment_file').prop('required', false);
+            }
+        });
+        var notAllowedFiles = ["exe", "rar", "dll"];
+        $('#approval_attachment_file').bind('change', function() {
+            var approval_validFileStatus = 0;
+            var ext = $('#approval_attachment_file').val().split('.').pop().toLowerCase();
+            if(this.files[0].size>10000000){
+                $("#approval_attachment_file_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)');
+                $('#approval_attachment_file').val("")
+                approval_validFileStatus = 1;
+            }
+            if(notAllowedFiles.indexOf(ext)!=-1){
+                $("#approval_attachment_file_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed');
+                $('#approval_attachment_file').val("")
+                approval_validFileStatus = 1;
+            }
+            if(approval_validFileStatus!=1){
+                $("#approval_attachment_file_error_msg").empty()
+            }
+        });
+        $('#pre_imple_architectural_dia').bind('change', function() {
+            var pre_impl_validFileStatus = 0;
+            var ext = $('#pre_imple_architectural_dia').val().split('.').pop().toLowerCase();
+            if(this.files[0].size>10000000){
+                $("#pre_imple_architectural_dia_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)');
+                $('#pre_imple_architectural_dia').val("")
+                pre_impl_validFileStatus = 1;
+            }
+            if(notAllowedFiles.indexOf(ext)!=-1){
+                $("#pre_imple_architectural_dia_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed');
+                $('#pre_imple_architectural_dia').val("")
+                pre_impl_validFileStatus = 1;
+            }
+            if(pre_impl_validFileStatus!=1){
+                $("#pre_imple_architectural_dia_error_msg").empty()
+            }
+        });
+        $('#post_imple_architectural_dia').bind('change', function() {
+            var post_imple_validFileStatus = 0;
+            var ext = $('#post_imple_architectural_dia').val().split('.').pop().toLowerCase();
+            if(this.files[0].size>10000000){
+                $("#post_imple_architectural_dia_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)');
+                $('#post_imple_architectural_dia').val("")
+                post_imple_validFileStatus = 1;
+            }
+            if(notAllowedFiles.indexOf(ext)!=-1){
+                $("#post_imple_architectural_dia_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed');
+                $('#post_imple_architectural_dia').val("")
+                post_imple_validFileStatus = 1;
+            }
+            if(post_imple_validFileStatus!=1){
+                $("#post_imple_architectural_dia_error_msg").empty()
+            }
+        });
+    </script>
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock footer_content %}

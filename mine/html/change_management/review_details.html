@@ -1,0 +1,37 @@
+{% load zone %}
+<div class="row">
+    <div class="col-md-12 row">
+        <div class="btn-group diff-btn">
+            <a href="#" class="btn btn-default" data-toggle="modal" data-target="#review_change" {% if rfc.status == 'REVIEW' and view_status == True and rfc.is_reviewed == False %} {% else %} disabled {% endif %}><i class="fa fa-eye" aria-hidden="true"></i> Review </a>
+            <a href="#" class="btn btn-default" data-toggle="modal" data-target="#create_ticket" {% if rfc.status == 'REVIEW' and rfc.is_reviewed and view_status == True %} {% else %} disabled {% endif %}><i class="fa fa-plus" aria-hidden="true"></i> Create Ticket</a>
+            <a href="#" class="btn btn-default" data-toggle="modal" data-target="#close_change" {% if rfc.status == 'REVIEW' and rfc.is_reviewed and view_status == True %} {% else %} disabled {% endif %}><i class="fa fa-times" aria-hidden="true"></i>  Close </a>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <h4 class="panel-title">Related Tickets</h4>
+        <table class="table table-stripped" id="related_tickets_tab">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>TicketID</th>
+                    <th>Summary</th>
+                    <th>Created Date</th>
+                    <th>Customer</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in rfc.related_tickets.all %}
+                    <tr>
+                        <td><a href="/ticket/{{ticket.id}}" data-toggle="tooltip" data-placement="bottom" class="btn btn-success btn-sm" data-original-title="View" target="_blank"><i class="fa fa-edit "> </a></td>
+                        <td>{{ticket.ticketid}}</td>
+                        <td>{{ticket.summary}}</td>
+                        <td>{% tzone ticket.creationdate%}</td>
+                        <td>{{ticket.customer}}</td>
+                        <td>{{ticket.owner}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

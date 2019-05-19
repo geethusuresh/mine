@@ -1,0 +1,162 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Service Catalog</title>
+
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+    {% include "components/msg_div.html" %}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Create Ticket<small>| Service Catalog</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Service Catalog</li>
+                    <li class="active">Create</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="panel">
+                <div class="panel-heading">
+                  {% if "HR_Login" in request.session.logged_user_priv %}
+                    <h3 class="panel-title"> Create Service Request </h3>
+                  {% else %}
+                    <h3 class="panel-title"> Create Service Request (Approval Required)</h3>
+                  {% endif %}
+                </div>
+                <div class="panel-body">  
+                  <form action="/ticket/template/" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="row">
+                        <input type="hidden" name="template_id_val" value="{{ template.id }}">
+                        <div class="col-sm-8">
+                          <label>Summary:</label>
+                          <input type="text" name="summ" id="ticket" class="form-control" value="{{ template.summary }}" readonly><br>
+                          <label>Description</label>
+                          <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description *" rows="4" cols="20" required></textarea><br>
+                        </div>
+                        <div class="col-sm-4">
+                          <label>Customer</label>
+                          <select class="form-control" name="customer" style=""  id="customer">
+                            <option value="{{ template.customer.id }}">{{ template.customer.customername }}</option>
+                          </select><br/>
+                          <label>Category:</label>
+                          <select  class="form-control" name="category">
+                            <option  value="{{template.category.id}}">{{ template.category }}</option>
+                          </select><br/>
+                          <label>Subcategory:</label>
+                          <select  class="form-control" name="subcategory">
+                            <option  value="{{template.subcategory.id}}">{{ template.subcategory }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-4">
+                          <label>Email:</label>
+                          <input type="email" name="email" class="form-control" placeholder="email"  value="{{profile.user.email}}" required> 
+                        </div>
+                        <div class="col-sm-4">
+                        <label>Phone Number</label>
+                          <input type='number' title='Phone Number ' name="phone" class="form-control" placeholder="Contact Number *" required>
+                        </div>
+                      </div>
+                        <br>
+                        <br>
+                      <div class="row">
+                        <div class="col-sm-12">
+                          <input id="id_image" type="file" class="file_check" name="image"  multiple><br>
+                          <span class="file_check_error" style="color:red;"></span>
+                          <button id="delay" type="submit" class="btn btn-success btn-huge" style="float:right">Create Service Request</button>
+                        </div>  
+                      </div>
+                      </form>
+                </div>
+              </div>     
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+     <script type="text/javascript">
+        $(document).ready(function(){ 
+       $('#cat').on('change', function(){
+        var catid = $('#cat').val(); 
+         // alert(catid);
+        $.ajax({
+          url :"/category/enduser",
+          type:"POST",
+          dataype:"json",
+          data:{catty: catid,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){            
+             $("#sub_category1 option:gt(0)").remove();
+             cat_list = JSON.parse(data);
+            for (var i in cat_list){
+              
+              $("#sub_category1").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+            } 
+            console.log(data);
+           },
+           error: function(xhr,errmsg,err){
+            alert(xhr);
+           }       
+        });
+        return false;
+      });
+    });
+
+</script>
+ <script>$("#template").addClass("active")</script>
+ <script>
+    (function ($, $win) {
+      'use strict';
+
+      $( document ).ready(function() {
+
+        $('.file_check').bind('change', function() {
+          //this.files[0].size gets the size of your file.
+          var ext = $('.file_check').val().split('.').pop().toLowerCase();
+          //get upload file type
+          var notAllowedFiles = ["exe", "rar", "dll"];
+          var validFileStatus = 0;
+          if(this.files[0].size>10000000){
+
+            $(".file_check_error").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+            $('.file_check').val("")
+            validFileStatus = 1;
+          }
+
+          if(notAllowedFiles.indexOf(ext)!=-1){
+            $(".file_check_error").html('Upload error try again, exe,rar,dll file types are not allowed')
+            $('.file_check').val("")
+            validFileStatus = 1;
+          }
+          if(validFileStatus!=1){
+              $(".file_check_error").empty()
+          }
+        });
+      });
+
+    }(jQuery, jQuery(window)));
+
+</script>
+    </body>
+</html>
+

@@ -1,0 +1,218 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | {% if "Customer_KB_Management" in request.session.logged_user_priv %} Administration {% else %} Knowledgebase List {% endif %}</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+        .bs{
+            background-color: transparent;
+        }
+        .page {
+            width: 100%;
+            height: auto;
+        }
+        table.dataTable.no-footer {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable thead th, table.dataTable thead td {
+            border-bottom-color: #ddd;
+        }
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable tbody th, table.dataTable tbody td {
+            padding-bottom: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 8px;
+        }
+        #tick_details.tbody th, #tick_details.dataTable tbody td{
+            padding: 15px;
+        }
+        .sortorder:after {
+          content: '\25b2' !important;
+        }
+        .sortorder.reverse:after {
+          content: '\25bc' !important;
+        }
+        [ng-cloak]
+        {
+          display: none !important;
+        }
+        table.scroll tbody {
+            height: 100px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed ng-cloak" style="font-size:13px" ng-controller="KnowledgebaseController" ng-init="init('{{csrf_token}}')" ng-cloak>
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        {% include "components/msg_div.html"%}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin"> Knowledge Base| <small> {% if "Customer_KB_Management" in request.session.logged_user_priv %} Administration {% else %} Knowledgebase List {% endif %}</small> </h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">{% if "Customer_KB_Management" in request.session.logged_user_priv %} Administration {% else %} Knowledgebase List {% endif %}</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row pad-all">
+                        <div class="panel">
+                            <div class="panel-body">
+                                {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                    <a class="btn btn-success" href="{% url 'create_kb' %}">Create Knowledgebase Data</a>
+                                {% endif %}
+                                <div class="col-sm-4 pull-right">
+                                    <input type="text" ng-model="search" placeholder="Search" class="form-control">
+                                </div>
+                                <table class="table data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Customer</th>
+                                            <th>Subgroup</th>
+                                            <th>Contact</th>
+                                            <th>View{% if "Customer_KB_Management" in request.session.logged_user_priv %}/Edit{% endif %}</th>
+                                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                                <th>Delete</th>
+                                                <th>Activation</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="kb in filtered | filter:search | startFrom:(currentPage-1)*entryLimit | limitTo:entryLimit">
+                                            <td> [[ kb.title ]] </td>
+                                            <td> [[ kb.customer ]] </td>
+                                            <td> [[ kb.subgroup ]]</td>
+                                            <td> [[ kb.contact ]] </td>
+                                            <td><a href="/knowledge_base/edit/[[ kb.id ]]/" class="btn btn-success" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit"><i class="fa fa-edit"></i></a></td>
+                                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                                <td><a href="#" class="btn btn-danger" type="button" data-toggle="tooltip" data-placement="bottom" title="Delete" ng-click="delete_kb([[ kb.id ]])"><i class="fa fa-trash"></i></a></td>
+                                                <td>
+                                                    <a href="#" ng-show="kb.active == true" class="btn btn-danger" type="button" data-toggle="tooltip" data-placement="bottom" title="Deactivate" ng-click="kb_activation([[ kb.id ]], [[ kb.active ]])">Deactivate</a>
+                                                    <a href="#" ng-show="kb.active == false" class="btn btn-success" type="button" data-toggle="tooltip" data-placement="bottom" title="Activate" ng-click="kb_activation([[ kb.id ]], [[kb.active]])">Activate</a>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="pull-right">
+                                    <pagination page="currentPage" max-size="noOfPages" total-items="totalItems" items-per-page="entryLimit" boundary-links="true" num-pages="numPages" force-ellipses="true"></pagination>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="loader" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content text-center">
+                    <span class="modal-title pad-all text-center" style="font-weight:500">Loading</span>
+                    <img src="/static/img/Loading_icon.gif" style="width:25%">
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% comment %}
+            {% include "components/dashboard_footer.html"%}
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "components/sr_cust.html"%}
+            {% else %}
+                {% include "components/service_request.html"%}
+            {% endif %}
+        {% endcomment %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            // $('#routine_task_table').dataTable();
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#report_table').dataTable({
+                    aaSorting: [[2, 'desc']],
+                    "bPaginate": false,
+                    "bFilter": false,
+                    "scrollX": true
+                });
+            })
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        {% include "components/angular_files.html" %}
+        {% include "components/confirmation_box.html" %}
+        <script>
+            $('#cust_kb_main').addClass("active");
+            $('#kb_head').addClass("active");
+            $('#cust_kb_list').css("display", "block");
+            $('#kb_list').addClass('active');
+            $('#cust_kb_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+        <script type="text/javascript">
+            function submit_ok() {
+                if ($('#confirm_type').val() == "delete") {
+                    document.location.href = "/knowledge_base/delete/"+$('#delete_id').val()+"/";
+                } else if($('#confirm_type').val() == "activate") {
+                    document.location.href = "/knowledge_base/activation/"+$('#delete_id').val()+"/?activate=true";
+                } else if($('#confirm_type').val() == "deactivate") {
+                    document.location.href = "/knowledge_base/activation/"+$('#delete_id').val()+"/?deactivate=true";
+                }
+            }
+        </script>
+  </body>
+</html>
+
+{% block body_content %}
+    <!-- <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Knowledgebase Data</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Title</th>
+                                <th>Escalation Group</th>
+                                <th>Escalation Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for kb in knowledge_base_data %}
+                                <tr>
+                                    <td>{{ kb.customer }}</td>
+                                    <td>{{ kb.kb_title }}</td>
+                                    <td>{{ kb.escalation_subgroup }}</td>
+                                    <td>{{ kb.escalation_contact }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> -->
+{% endblock body_content %}
+
+{% block modal_content %}
+{% endblock modal_content %}

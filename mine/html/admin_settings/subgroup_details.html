@@ -1,0 +1,254 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/customers/all/">Customers</a></li>
+                        <li><a href="/admin_settings/customers/{{subgroup.workgroup.customer.id}}/">Customer Details</a></li>
+                        <li><a href="/admin_settings/workgroup/{{subgroup.workgroup.id}}/">Workgroup Details</a></li>
+                        <li class="active">Subgroup Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title pull-left"> Subgroup Details</h3>
+                                    <a href="/admin_settings/workgroup/{{subgroup.workgroup.id}}/" class="btn btn-info pull-right" style="margin:10px">View Workgroup</a>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-4">
+                                        <dl class="dl-horizontal">
+                                            <dt>Name :</dt>
+                                            <dd>{{ subgroup.subgroupname }}</dd>
+                                            <br>
+                                            <dt>Description :</dt>
+                                            <dd>{{ subgroup.description}}</dd>
+                                        </dl>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <dl class="dl-horizontal">
+                                            <dt>Workgroup :</dt>
+                                            <dd>{{ subgroup.workgroup.workgroup }}</dd>
+                                            <br>
+                                            <dt>Status :</dt>
+                                            <dd>
+                                                {% if subgroup.active %}
+                                                    Active
+                                                {% else %}
+                                                    Deactive
+                                                {% endif %}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <dl class="dl-horizontal">
+                                            <dt>Customer :</dt>
+                                            <dd>{{ subgroup.workgroup.customer.customername }}</dd>
+                                            <br>
+                                            {% if subgroup.active %}
+                                                <dt></dt>
+                                                <dd><a href="/admin_settings/subgroup/{{subgroup.id}}/?activate=0" class="btn btn-danger">Deactivate</a></dd>
+                                            {% else %}
+                                                <dt></dt>
+                                                <dd><a href="/admin_settings/subgroup/{{subgroup.id}}/?activate=1" class="btn btn-success">Activate</a></dd>
+                                            {% endif %}
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title text-center">Members</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="newtoolbar">
+                                        <div class="table-toolbar-left">
+                                            <a href="#" class="btn btn-info btn-labeled fa fa-times" onclick="remove_person()">Remove Person</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <table class="table table-stripped" id="sub_member_tab">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none">Id</th>
+                                                    <th>Member</th>
+                                                    <th>Status</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>                                        
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title text-center">Add New Members</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="newtoolbar">
+                                        <div class="table-toolbar-left">
+                                            <a href="#" class="btn btn-success btn-labeled fa fa-times" onclick="add_person()">Add Person</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <table class="table table-stripped" id="nonmembers_tab">
+                                            <thead>
+                                                <tr>
+                                                    <th style="display:none"></th>
+                                                    <th>Person</th>
+                                                    <th>Username</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        <script type="text/javascript" src="/static/js/form-wizard.js"></script>
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $('#sub_member_tab').dataTable( {
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/subgroup/{{subgroup.id}}/",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    
+                    { "": "id",sClass: "hidden" },
+                    { "": "person" },
+                    { "": "status" },
+                    { "": "","bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 3,
+                    "data": "null",
+                    "defaultContent": "<input type='checkbox' name='checkbox_mem' class='form-control remove' value='member' style='height:auto'>"
+                }]
+            });
+            // non_sub_member_tab functionality should come here
+            $('#nonmembers_tab').dataTable( {
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/admin_settings/non_subgroup_members/{{subgroup.id}}/",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    
+                    { "": "id",sClass: "hidden" },
+                    { "": "person" },
+                    { "": "username" },
+                    { "": "","bSortable": false, }
+                ],
+                "columnDefs": [ {
+                    "targets": 3,
+                    "data": "member",
+                    "defaultContent": "<input type='checkbox' class='form-control add' style='height:auto' value='member'>"
+                }]
+            });
+        </script>
+        <script type="text/javascript">
+            function remove_person() {
+                var checked_list = []
+                var rows = $('#sub_member_tab').dataTable().fnGetNodes();
+                for(var i=0; i < rows.length; i++) {
+                    if ($(rows[i]).find('td:eq(0)').text()) {
+                        if ($(rows[i]).find('.remove')[0].checked){
+                            checked_list.push($(rows[i]).find('td:eq(0)').text());
+                        }
+                    }
+                }
+                if (checked_list.length > 0) {
+                    $.ajax({
+                        "method": "post",
+                        "url": "/admin_settings/remove_subgroup_member/{{subgroup.id}}/",
+                        "data": {
+                            "remove_data": checked_list.toString(),
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                        }, 
+                        success : function(data){
+                            document.location.href = "/admin_settings/subgroup/{{subgroup.id}}/"
+                        }
+                    })
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function add_person() {
+                var checked_list = []
+                var rows = $('#nonmembers_tab').dataTable().fnGetNodes();
+                for(var i=0; i < rows.length; i++) {
+                    if ($(rows[i]).find('td:eq(0)').text()) {
+                        if ($(rows[i]).find('.add')[0].checked){
+                            checked_list.push($(rows[i]).find('td:eq(0)').text());
+                        }
+                    }
+                }
+                if (checked_list.length > 0) {
+                    $.ajax({
+                        "method": "post",
+                        "url": "/admin_settings/add_subgroup_member/{{subgroup.id}}/",
+                        "data": {
+                            "add_members": checked_list.toString(),
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                        }, 
+                        success : function(data){
+                            document.location.href = "/admin_settings/subgroup/{{subgroup.id}}/"
+                        }
+                    })
+                }
+            }
+        </script>
+    </body>
+</html>

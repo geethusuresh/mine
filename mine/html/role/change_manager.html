@@ -1,0 +1,173 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Reporting Manager Updation</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">SD Settings | <small>Change Manager</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Reporting Manager Updation</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="row">
+            </div>
+            <div class="row" style="margin-top:10px">
+              <div class="col-sm-10">
+                <div class="box">
+                      
+                  <div class="box-title">
+                      <div class="col-sm-8 form-control"> {% if new_managers %}Following are the list of users with new managers {% else %}
+                        Following are the list of users who have changes in reporting manager.
+                      {% endif %}</div>
+
+                  </div>
+                  <div class="box-body no-padding">
+                  {% if new_managers %}
+                    <table class="table table-striped table-hover">
+                      <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Person</th>
+                        <th>Manager</th>
+                        
+                      </tr> 
+                      </thead>
+                      <tbody>
+                      {% for x in new_managers %}
+                        <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ x.0 }}</td>
+                          <td>{{ x.1 }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                    </table>
+                  {% else %}
+                    <table class="table table-striped" id="kb_table">
+                      <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Person</th>
+                        <th>Current Manager</th>
+                        <th>New Manager</th>
+                        <th>Change</th>
+                      </tr> 
+                      </thead>
+                      <tbody>
+                      {% for change in changes %}
+                        <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ change.user__user__username }}</td>
+                          <td>{{ change.previous }}</td>
+                          <td>{{ change.supervisor__username }}</td>
+                          <td><a class="btn btn-success btn-sm" title="" data-placement="bottom" data-toggle="tooltip" data-original-title="Change" href="/change_manager/{{change.id}}/"><i class="glyphicon glyphicon-pencil "></i></a></td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                    </table>
+                  {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-2">
+              {% if new_managers %}
+                <a type="submit" class="btn btn-info" style="margin-top:3px;width:100%" href="/" > Done </a>
+              {% else %}
+                <form method="post" action="#" id="change_all_managers">
+                {% csrf_token %}
+                {% if changes %}
+                  <input type="text " class="" style="display:none;" value="1"/>
+                  <button type="submit" class="btn btn-info" style="margin-top:3px;width:100%" > Change All </button>
+                {% endif %}
+                </form>
+              {% endif %}
+              </div>
+            </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    {% include "components/confirmation_box.html" %}
+
+    </body>
+    <script type="text/javascript">
+    $("#kb_table").dataTable({
+        "bPaginate": false,
+          "bFilter": false,
+    });
+    </script>
+    <script type="text/javascript">
+        $('#tkt_sd_sett').addClass("active");
+        $('#tkt_sd_sub').addClass("active");
+        $('#sub_add_temp').css("display", "block");
+        $('#change_manag').addClass("active");
+        $('#tkt_sd_sett').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+        $('#change_all_managers').on('submit', function() {
+            if ($('#confirm_type').val()){
+                $('#confirm_box').modal('hide');
+                return true;
+            } else {
+                $('#confirm_msg').html("<strong>Are you sure you want to change all the managers?</strong>");
+                $('#confirm_type').val("checking_to_change_manager");
+                $('#confirm_box').modal('toggle');
+                return false;
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function submit_ok() {
+            $('#change_all_managers').submit();
+        }
+    </script>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

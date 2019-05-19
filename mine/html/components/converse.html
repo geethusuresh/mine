@@ -1,0 +1,88 @@
+<input type="hidden" id="chat_tktid" name="chat_tktid" value="{{ticket.id}}" />
+<script type="text/javascript" src="/static/js/bootbox.min.js"></script>
+<script type="text/javascript" src="/static/js/converse_functions.js"></script>
+<script type="text/javascript" src="/static/js/converse.min.js"></script>
+<link rel="stylesheet" href="/static/css/converse.min.css" type="text/css">
+<script type="text/javascript">
+	require(['converse'], function (converse) {
+		converse.initialize({"domain_placeholder": "{{request.session.xampp_details.xmpp_domain}}", "jid": "{{request.session.xampp_details.jid}}", "auto_login": true, "authentication": "login", "debug": true, "password": "{{request.session.xampp_details.password}}", "bosh_service_url": "{{request.session.xampp_details.xmpp_bosh_url}}", "keepalive": true});
+	});
+</script>
+
+<script type="text/javascript">  
+
+  $(document).on('click','.chat-head-chatbox .close-chatbox-button',function(){
+    var chat_body = "";
+    $(".chat-content .chat-message").each(function(){
+        if($(this).parents('div.chat-area').length == 0){
+          chat_body = chat_body + $(this).html();
+          chat_body = chat_body + "<br />";
+        }
+    });
+    
+    var ticket_id = $('#chat_tktid').val();
+    if(chat_body!= ""){
+      bootbox.confirm("Do you want to save this chat history to ticket worklog?", function(result) {
+          if(result==true){          
+            $.ajax({
+                url :"/chatdetails/worklog",
+                type:"POST",
+                dataype:"json",
+                data:{ticket_id:ticket_id,
+                      chat_body:chat_body,
+                      csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){
+                  if(data.status=="success"){                                    
+                    $('.chatbox .toggle-clear').trigger("click");
+                    window.location.reload();
+                  }                
+                },
+                error: function(){
+                  bootbox.alert("Error Occured. Not able to add your chat details to worklog");               
+                }       
+              });
+          }
+      });
+    }     
+  });
+  
+
+  $(document).on('click','.chat-head-chatroom .close-chatbox-button',function(){    
+    var chat_body = "";
+    $(".chat-content .chat-message").each(function(){
+        if($(this).parents('div.chat-area').length > 0){
+          chat_body = chat_body + $(this).html();
+          chat_body = chat_body + "<br />";
+        }
+    });
+
+    var ticket_id = $('#chat_tktid').val();
+    if(chat_body!= ""){
+      bootbox.confirm("Do you want to save this chat history to ticket worklog?", function(result) {
+          if(result==true){          
+            $.ajax({
+                url :"/chatdetails/worklog",
+                type:"POST",
+                dataype:"json",
+                data:{ticket_id:ticket_id,
+                      chat_body:chat_body,
+                      csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){
+                  if(data.status=="success"){                                    
+                    $('.chatroom .toggle-clear').trigger("click");
+                    window.location.reload();
+                  }                
+                },
+                error: function(){
+                  bootbox.alert("Error Occured. Not able to add your chat details to worklog");               
+                }       
+              });
+          }
+      });
+    }     
+  });  
+</script>
+
+
+
+

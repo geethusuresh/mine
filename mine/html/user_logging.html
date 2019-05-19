@@ -1,0 +1,739 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>Oneconsole | User Logging</title>
+		{% include "components/css.html"%}
+ 		<script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+ 		<script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+ 		<script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+ 		<script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+	    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+	    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+ 		<script src="/static/js/highcharts/highcharts.js"></script>
+	    <script src="/static/js/highcharts/highcharts-more.js"></script>
+	    <script src="/static/js/highcharts/exporting.js"></script>
+	    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>   
+
+	</head>
+	<body style="font-size:13px">
+		{% include "components/header.html"%}
+		<div class="wrapper">
+			{% include "side_bar/sidebar.html"%}
+			<div class="right_side">
+				<div class="page-head" style="margin-top:10px">
+					<ol class="breadcrumb">
+                   		<li>You are here:</li>
+                		<li><a href="/">Home</a></li>
+                		<li class="active">User Logging</li>
+                	</ol>
+				</div>
+				<br/>
+				<div class="content">
+				<div class="box">
+					<!-- <div class="box-title">Filter Options</div> -->
+					<div class="box-body">
+						<form class="form" method="post" action="." id="filter_form">{% csrf_token %}
+						<div class="row">
+							<div class="col-md-12">
+								<div class="col-md-2 bg-primary">
+									<h5 class="text-center">Filter Options</h5>
+								</div>
+								<div class="col-md-4">
+									<select class="form-control " required id="customer_select" name="customer_select">
+										<option value="">Select Customer</option>
+										{% for customer in customers %}
+											{% if cust_id|add:"0" == customer.id %}
+												<option value="{{customer.id}}" selected>{{customer.customername}}</option>
+											{% else %}
+												<option value="{{customer.id}}">{{customer.customername}}</option>
+											{% endif %}
+										{% endfor%}
+									</select>
+								</div> 
+								<div class="col-md-4">
+									<select class="form-control "  id="user_select" name="user_select">
+										<option value="">Select User</option>
+									</select>
+								</div> 
+								<div class="col-md-2">
+									<input class="btn btn-success pull-right" type="submit" value="Filter">
+								</div>
+								<div class="col-md-1"></div>
+							</div>
+						</div>
+						</form>	
+					</div>
+				</div>
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="box">
+								<div class="box-title">
+									<h3>User Logging</h3>
+								</div>
+								<div class="box-body">
+									<div class="row">
+										<div class="col-sm-12">
+											<div id="hourly_hit_container"></div>
+										</div>
+									</div>
+									<br/>
+									<div class="row">
+										<div class="col-sm-12">
+											<div id="hourly_uni_visitor_container"></div>
+										</div>
+									</div>
+									<br/>
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="col-sm-6">
+												<div id="daily_hit_data_cont"></div>
+											</div>
+											<div class="col-sm-6">
+									        	<div id="daily_uni_visit_container"></div>
+									        </div>
+										</div>
+									</div>
+									<br/>
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="col-sm-6">
+									        	<div id="weekly_hit_container"></div>
+									        </div>
+									        <div class="col-sm-6">
+									        	<div id="weekly_uni_visitor_cont"></div>
+									        </div>
+										</div>
+									</div>
+									<br/>
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="col-sm-6">
+									        	<div id="container_hit"></div>
+									        </div>
+									        <div class="col-sm-6">
+									        	<div id="container_visitor"></div>
+									        </div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				// monthly_user_logging();
+				// weekly_user_logging();
+				// daily_user_logging();
+				// hourly_user_logging();
+				// $.ajax({
+				// 	url:'/user_logging/',
+				// 	type:'GET',
+				// 	success: function(data){
+				// 		if (data){
+				// 			monthly_user_logging(data);
+				// 			weekly_user_logging(data);
+				// 			daily_user_logging(data);
+				// 			hourly_user_logging(data);
+				// 		}
+				// 	}
+				// });
+			});
+		</script>
+		<script type="text/javascript">
+			function monthly_user_logging() {
+				$('#container_hit').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Year',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in monthly_req_hit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '13px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Hits(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Hits',
+			            data: [{% for x in monthly_req_hit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#F7A35C '
+			        }]
+			    });
+				$('#container_visitor').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Year',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories:[{% for x in monthly_uniq_visit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '13px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Unique Visitors(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Visitors',
+			            data: [{% for x in monthly_uniq_visit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#90ED7D'
+			        }]
+			    });
+			}
+	    </script>
+		<script type="text/javascript">
+        	function weekly_user_logging(data) {
+        		$('#weekly_hit_container').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Month',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in weekly_req_hit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Hits(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Hits',
+			            data: [{% for x in weekly_req_hit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#90ED7D'
+			        }]
+			    });
+				$('#weekly_uni_visitor_cont').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Month',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in weekly_uniq_visit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Unique Visitors(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Visitors',
+			            data: [{% for x in weekly_uniq_visit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#F7A35C'
+			        }]
+			    });
+			}
+        </script>
+        <script type="text/javascript">
+        	function daily_user_logging() {
+        		$('#daily_hit_data_cont').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Week',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in daily_req_hit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Hits(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Hits',
+			            data:[ {% for x in daily_req_hit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#90ED7D',
+			        }]
+			    });
+
+
+        		$('#daily_uni_visit_container').highcharts({
+			        title: {
+			            text: 'Traffic Graph - This Week',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [ {% for x in daily_uniq_visit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Unique Visitors(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Visitors',
+			            data: [ {% for x in daily_uniq_visit%}
+			            				{{x.1}},
+			            			 {% endfor %}],
+			            color: '#F7A35C'
+			        }]
+			    });
+			}
+        </script>
+        <script type="text/javascript">
+        	function hourly_user_logging() {
+        		$('#hourly_hit_container').highcharts({
+			        title: {
+			            text: 'Traffic Graph - Today',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in hours_req_hit%}
+			            				'{{x.0}}',
+			            			 {% endfor %}
+			            ] ,
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Hits(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Hits',
+			            data: [{% for x in hours_req_hit%}
+		            				{{x.1}},
+	            			 	{% endfor %}],
+			            color: '#F7A35C'
+			        }]
+			    });
+        		$('#hourly_uni_visitor_container').highcharts({
+			        title: {
+			            text: 'Traffic Graph - Today',
+			            x: -20, //center
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        subtitle: {
+			            text: 'Source: oneconsole.marlabs.com',
+			            x: -20,
+			            style: {
+		                    fontSize: '12px',
+		                    fontFamily: 'Verdana, sans-serif'
+		                }
+			        },
+			        xAxis: {
+			            categories: [{% for x in hours_uniq_visit%}
+		            				'{{x.0}}',
+	            			 	{% endfor %}],
+			            labels: {
+			            	rotation: -45,
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        yAxis: {
+			            title: {
+			                text: 'Unique Visitors(#)'
+			            },
+			            plotLines: [{
+			                value: 0,
+			                width: 1,
+			                color: '#808080'
+			            }],
+			            labels: {
+			                style: {
+			                    fontSize: '12px',
+			                    fontFamily: 'Verdana, sans-serif'
+			                }
+			            }
+			        },
+			        tooltip: {
+			            valueSuffix: '#'
+			        },
+			        legend: {
+			            layout: 'vertical',
+			            align: 'right',
+			            verticalAlign: 'middle',
+			            borderWidth: 0
+			        },
+			        series: [{
+			            name: 'Visitors',
+			            data: [{% for x in hours_uniq_visit%}
+		            				{{x.1}},
+	            			 	{% endfor %}],
+			            color: '#90ED7D'
+			        }]
+			    });
+			}
+			$(document).ready(function(){
+				hourly_user_logging();
+				daily_user_logging();
+				weekly_user_logging();
+				monthly_user_logging();
+				if($("#customer_select").val()!=''){
+					console.log("ans"+'{{user_id}}');
+					$.ajax({
+				        url:"/user_logging/",
+				        type:"POST",
+				        dataType:"json",
+				        data:{
+				          custid : $("#customer_select").val(),
+				          csrfmiddlewaretoken: '{{ csrf_token }}'
+				        },
+				        success : function(data) {
+				          // data = JSON.parse(data)
+				          // console.log(data);
+				          for (var i in data){
+				          	// console.log(data[i][1]);
+				          	console.log
+				          	if(data[i][0] == '{{user_id}}'){
+				          		$("#user_select").append($('<option >', {text:data[i][1],value:data[i][0],selected: true }));
+				          	}
+				          	else{
+				          		$("#user_select").append($('<option>', {text:data[i][1],value:data[i][0]}));
+				          	}
+				          }
+				          
+
+				        },
+				        error : function(xhr,errmsg,err) {
+				          alert(err);
+				        }
+				      });
+				      return false;
+				}
+				// console.log($("#customer_select").val());
+			});
+		$("#customer_select").change(function(){
+			// console.log(this.value);
+			$('#user_select option:gt(0)').remove().end();
+			if(this.value!=''){
+				$.ajax({
+			        url:"/user_logging/",
+			        type:"POST",
+			        dataType:"json",
+			        data:{
+			          custid : this.value,
+			          csrfmiddlewaretoken: '{{ csrf_token }}'
+			        },
+			        success : function(data) {
+			          // data = JSON.parse(data)
+			          
+			          for (var i in data){  
+			          	// console.log(data[i][1]);
+			            $("#user_select").append($('<option>', {text:data[i][1],value:data[i][0]}));
+			          }
+			          
+
+			        },
+			        error : function(xhr,errmsg,err) {
+			          alert(err);
+			        }
+			      });
+			      return false;
+			}
+		})
+		$("#filter_form").submit(function(){
+
+		})
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        {% include "components/dashboard_footer.html" %}
+        {% include "components/service_request.html" %}
+	</body>
+</html>

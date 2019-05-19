@@ -1,0 +1,71 @@
+{% load zone %}
+<html>
+    <body>
+        Hi Team,<br/><br/>
+ 
+        Please find the Resolution SLA completion report for the group {{ workgroup }}/{{ subgroup }} . <br/><br/>
+        Note : The timestamp displayed below are based on timezone EST.<br/><br/>
+        Yellow - 75 % completion <br/><br/>
+        Red - 90% completion <br/><br/>
+        <h4> <strong> <u>Resolution SLA Completion Report - {{ workgroup }}/{{ subgroup }} </u></strong> </h4>
+        <table width="100%" style="border-collapse: collapse;">
+            <tr>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">TicketId</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Customer</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Ticket Summary</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Workgroup</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Subgroup</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Reported Date</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Affected Person</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Internal Priority</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Status</th>
+            </tr>
+            {% if ticket_contents_90|length > 0 %}
+                {% for ticket in ticket_contents_90 %}
+                    <tr>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.ticketid }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.customer.customername }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.summary }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.group.workgroup }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.subgroup.subgroupname }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.reportdate|timeconversion }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.affectedperson }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.internalpriority }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.status|real }}</td>
+                    </tr>
+                {% endfor%}
+            {% else %}
+                <tr><td colspan="13" align="left" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;padding:10px;"> There are no tickets under this category. </td></tr>
+            {% endif %}
+            {% if ticket_contents_75|length > 0 %}
+                {% for ticket in ticket_contents_75 %}
+                    <tr>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.ticketid }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.customer.customername }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.summary }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.group.workgroup }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.subgroup.subgroupname }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.reportdate|timeconversion }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.affectedperson }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.internalpriority }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.status|real }}</td>
+                    </tr>
+                {% endfor%}
+            {% else %}
+                <tr><td colspan="13" align="left" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;padding:10px;"> There are no tickets under this category. </td></tr>
+            {% endif %}
+        </table>
+        <br/>
+        <br/>
+        Thanks & Regards,<br/>
+        MARLABS IT Support<br/><br/>
+
+        Marlabs Software Private Limited<br/>
+        Bagmane World Technology Center, 14th Floor, Citrine Block - 4, Marathalli Outer Ring Road, Doddanakundi Village | Mahadevapura | Bangalore - 560 048 | India<br/>
+        Tel:+91-80-67229750 | VoIP: 732-694-1000 Ext: 4357<br/>
+        Email : helpdesk@marlabs.com | gcc@marlabs.com<br/>
+        www.marlabs.com<br/><br/>
+
+        Note : This is an auto generated email. Please do not reply to this email.<br/>
+    </body>
+</html>

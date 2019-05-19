@@ -1,0 +1,14 @@
+<div class="row">
+<div class="col-md-12" id="alert-message">
+{% if messages %}
+    {% for message in messages %}
+    <div {% if message.tags == 'success' %} class="alert alert-success" {% else %} class="alert alert-danger center-block" {% endif %}>
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <center>
+         {{message}}
+        </center>
+    </div>
+    {% endfor %}
+{% endif %}
+</div>
+</div>

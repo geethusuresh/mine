@@ -1,0 +1,237 @@
+{% load humanize %}
+{% load zone %}
+{% load set_var %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    @page {
+        size: letter landscape;        
+        margin: 0cm;               
+    }
+
+    @font-face {
+        font-family: "Lato";
+        src: url("{{static_dir}}fonts/lato-reg-webfont.ttf");
+    }
+
+    div { font-family: Lato; }
+    table { font-family: Lato; }
+
+    .report_heading{
+    	text-align:center;
+    	font-size:24px;
+    	margin:20px 0px 0px 0px;
+    }
+
+    .summary{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bold;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:18px;
+    }
+
+    .summary_tbl_contents{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:18px;
+    	background-color:#e7eefa;
+    	border:1px solid #FFF;
+    }
+
+    .ticket_details_head{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bolder;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:14px;
+    	border:1px solid #FFF;
+    	color:#154a9b;
+    }
+
+    .ticket_details_cnt{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:14px;
+    	background-color:#93d5fc;
+    	border:1px solid #FFF;
+    }    
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">    
+  </head>
+  <body class="fixed" style="font-size:13px">
+  	<div class="content">
+        <div>
+            <div style="text-align:right;padding-top:10px;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <br />
+        <div>
+            <div style="text-align:center;color:#595959;font-size:35px;">
+                Marlabs OneConsole
+            </div>
+
+            {% if customer.logo %}            
+            <div style="text-align:center;">
+                <img src="{{media_root}}/{{customer.logo}}" style="text-align:center;height:90px;" /> 
+            </div>            
+            {% endif %}
+
+            <div style="text-align:center;color:#000000;font-size:24px;">
+                <h1>{{customer.customername}} </h1>
+            </div>
+            <div style="text-align:center;color:#002060;font-size:24px;">
+            {% if event_type == "escalated" %}
+                All Escalated Events Report ({{title_label}})
+            {% elif event_type == "severity" %}
+                All Events by Severity Report ({{title_label}})
+            {% elif event_type == "source" %}
+                All Events by Source Report ({{title_label}})
+            {% elif event_type == "category" %}
+                All Events by Category Report ({{title_label}})
+            {% endif %}
+            </div>           
+        </div>         
+              
+    	<div style="{% if customer.logo %}padding-top:145px;{% else %}padding-top:235px;{% endif %}">
+    		<div>
+                <span>
+                    <img src="{{static_dir}}img/background-layer.jpeg" style="width:1050px; height:250px;" />
+                </span>
+    		</div>    		
+    	</div>
+
+        
+        <pdf:nextpage />
+
+    	<br />    	
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>        
+        <br />       
+        <br />
+        <div>
+            <img src="{{media_root}}/phantom_shots/{{customer.id}}_{{userprofile.id}}.jpeg" style="text-align:center;width:1014px; height:400px;" /> 
+        </div>       
+        
+
+        <pdf:nextpage />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        
+    	<br />
+    	<br />
+
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:20px;">
+                {% if event_type == "escalated" %}
+                    All Escalated Events Details
+                {% elif event_type == "severity" %}
+                    All Events by Severity Details
+                {% elif event_type == "source" %}
+                    All Events by Source Details
+                {% elif event_type == "category" %}
+                    All Events by Category Details
+                {% endif %}              
+            </div>
+        </div>    
+
+    	<div>
+    		<table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+    			<tr>    				
+    				<th class="ticket_details_head">
+    					<strong>Ticket ID</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Created Date</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Ticket Summary</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Severity</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Status</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Escalated Date</strong>
+    				</th>
+    				<th class="ticket_details_head">
+    					<strong>Source</strong>
+    				</th>
+    			</tr>
+
+    			{% for ticket in my_tickets %}
+    			<tr>    				
+    				<td class="ticket_details_cnt">
+    					{{ticket.ticketid}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{% tzone ticket.creationdate %}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{ticket.summary}}
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{ticket.internalpriority}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{ticket.status| real:ticket.customer.id}} 
+    				</td>
+    				<td class="ticket_details_cnt">
+                        {% if ticket.id in worklogs.keys %}
+                            {{ worklogs|access:ticket.id  }}
+                        {% else %}
+                            None
+                        {% endif %} 
+    				</td>
+    				<td class="ticket_details_cnt">
+    					{{ticket.source}} 
+    				</td>
+    			</tr>
+    			{% endfor %}
+
+    		</table>
+    	</div>
+
+        <pdf:nextpage />
+
+        <br />
+        <br />      
+
+        <div>
+            <div style="text-align:right;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+            </div>
+        </div>
+         <br />
+        <br />
+
+        <div>
+            <div style="text-align:center;">
+            <img src="{{static_dir}}img/thankyou.jpg" style="text-align:right;width:800px;height:500px;" />
+            </div>
+        </div>
+
+        <div style="padding-top:170px;">
+            <div>
+                <img src="{{static_dir}}img/border-line.jpeg" style="width:1050px;height:10px;" />
+            </div>
+        </div>
+    </div>
+  </body>
+  </html>
+

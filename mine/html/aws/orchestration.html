@@ -1,0 +1,199 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+ <script type="text/javascript" src="{% static 'plugins/jQuerySortable/jquery-sortable.js' %}"></script>
+ <section class="content-header">
+        <h1>
+            AWS Orchestration
+            <small>Create and launch application stacks</small>
+        </h1>
+        <ol class="breadcrumb">
+            <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+            <span> > </span>
+            <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+             <span> > </span>
+            <li>AWS Orchestration</li>
+        </ol>
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+<div>
+  <div class="row">
+    <div class="col-md-11">
+      <!-- TABLE: LATEST ORDERS -->
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">Orchestration</h3>
+          <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+          </div>
+        </div><!-- /.box-header -->
+        <div class="box-body">
+          <div class="row">
+              <div class="col-md-6">
+                <div class="box box-success">
+                  <div class="box-header with-border">
+                    <h4 class="box-title">Application Pool</h4>
+                    <div class="box-tools pull-right">
+                    </div>
+                  </div><!-- /.box-header -->
+                  <div class="box-body no-padding">
+                    <ol class='simple_with_animation todo-list'>
+                       <li>
+                            <!-- drag handle -->
+                            <span class="handle">
+                              <i class="fa fa-ellipsis-v"></i>
+                              <i class="fa fa-ellipsis-v"></i>
+                            </span>
+                            <!-- todo text -->
+                            <span class="text">PostgreSQL</span>
+
+                            <!-- Emphasis label -->
+                            <!-- General tools such as edit or delete-->
+                        </li>
+                      <li>
+                        <!-- drag handle -->
+                            <span class="handle">
+                              <i class="fa fa-ellipsis-v"></i>
+                              <i class="fa fa-ellipsis-v"></i>
+                            </span>
+                            <!-- todo text -->
+                            <span class="text">WordPress</span>
+
+                            <!-- Emphasis label -->
+                            <!-- General tools such as edit or delete-->
+                      </li>
+                      <li>
+                        <!-- drag handle -->
+                            <span class="handle">
+                              <i class="fa fa-ellipsis-v"></i>
+                              <i class="fa fa-ellipsis-v"></i>
+                            </span>
+                            <!-- todo text -->
+                            <span class="text">Git</span>
+
+                            <!-- Emphasis label -->
+                            <!-- General tools such as edit or delete-->
+                      </li>
+                      <li>
+                        <!-- drag handle -->
+                            <span class="handle">
+                              <i class="fa fa-ellipsis-v"></i>
+                              <i class="fa fa-ellipsis-v"></i>
+                            </span>
+                            <!-- todo text -->
+                            <span class="text">LAMP</span>
+
+                            <!-- Emphasis label -->
+                            <!-- General tools such as edit or delete-->
+                      </li><li>
+                        <!-- drag handle -->
+                            <span class="handle">
+                              <i class="fa fa-ellipsis-v"></i>
+                              <i class="fa fa-ellipsis-v"></i>
+                            </span>
+                            <!-- todo text -->
+                            <span class="text">MySQL</span>
+
+                            <!-- Emphasis label -->
+                            <!-- General tools such as edit or delete-->
+                      </li>
+                    </ol>
+                  </div><!-- /.box-body -->
+                  <!-- <div class="box-footer text-center">
+                    <a href="javascript::" class="uppercase">View All Users</a>
+                  </div><!-- /.box-footer -->
+                </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="box box-success">
+                    <div class="box-header with-border">
+                      <h4 class="box-title">Selected Applications</h4>
+                      <div class="box-tools pull-right">
+                      </div>
+                    </div><!-- /.box-header -->
+                    <div class="box-body no-padding">
+                       <ol class='simple_with_animation todo-list'>
+                          <li >
+                          </li>
+                        </ol>
+                    </div><!-- /.box-body -->
+                   <!--  <div class="box-footer text-center">
+                      <a href="javascript::" class="uppercase">View All Users</a>
+                    </div><!-- /.box-footer --> 
+                    </div>
+                </div>
+          </div>
+        <a href="{%url 'aws_launch_stack_view' cloud_account_id %}">
+          <button class="btn btn-info btn-block">Launch Stack</button>
+        </a>
+        </div>
+      </div><!-- /.box -->
+    </div><!-- /.col -->
+    <div class="col-md-1">
+    </div><!-- /.col -->
+  </div>
+</div>
+<style type="text/css">
+  body.dragging, body.dragging * {
+    cursor: move !important;
+  }
+
+  .dragged {
+    position: absolute;
+    opacity: 0.5;
+    z-index: 2000;
+  }
+
+  ol.example li.placeholder {
+    position: relative;
+    /** More li styles **/
+  }
+  ol.example li.placeholder:before {
+    position: absolute;
+    /** Define arrowhead **/
+  }
+</style>
+
+<script type="text/javascript">
+  $( document ).ready(function() {
+    var adjustment
+
+    $("ol.simple_with_animation").sortable({
+      group: 'simple_with_animation',
+      pullPlaceholder: false,
+      // animation on drop
+      onDrop: function  (item, targetContainer, _super) {
+        var clonedItem = $('<li/>').css({height: 0})
+        item.before(clonedItem)
+        clonedItem.animate({'height': item.height()})
+        item.animate(clonedItem.position(), function  () {
+          clonedItem.detach()
+          _super(item)
+        })
+      },
+
+      // set item relative to cursor position
+      onDragStart: function ($item, container, _super) {
+        var offset = $item.offset(),
+        pointer = container.rootGroup.pointer
+
+        adjustment = {
+          left: pointer.left - offset.left,
+          top: pointer.top - offset.top
+        }
+
+        _super($item, container)
+      },
+      onDrag: function ($item, position) {
+        $item.css({
+          left: position.left - adjustment.left,
+          top: position.top - adjustment.top
+        })
+      }
+    })
+  });
+    
+</script>
+{% endblock%}

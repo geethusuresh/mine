@@ -1,0 +1,167 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Monitoring Package</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">  
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/cust_header.html"%}
+    {% else %}
+    {% include "components/header.html"%}
+    {% endif %}  
+    
+        <div class="wrapper">          
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+              {% include "side_bar/customer.html"%}
+          {% else %}
+              {% include "side_bar/sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Monitoring Package Manager<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Monitoring Package</li>
+                </ol>
+            </div>
+            <div class="content">
+            <div class="col-sm-12">
+              {% if status %} 
+                {% if status == 'success' %}
+                  <div class="alert alert-success">
+                  Debian package has been created successfully. <a href="/media/debian/zabbixmanager.deb" target="_blank">Please click here to download the package</a>
+                  </div>
+                  {% else %}
+                  <div class="alert alert-danger">System failed to create debian package</div>
+                {% endif %}                          
+              {% endif %}
+              </div>
+
+              <div class="col-sm-12">
+                <div class="panel">
+                  <div class="panel-heading">                   
+                    <h3 class="panel-title">Configure Zabbix Monitoring Package</h3>
+                  </div>
+
+                  <div class="panel-body">                     
+                    
+                          <div class="row">
+                            <div class="col-sm-12">                            
+                                  <form method="post" action="#">
+                                  {% csrf_token %}
+                                  <fieldset>
+                                    <div class="controls" style="text-align:center;">
+
+                                        <div class="row">
+                                          <div class="col-sm-6">
+                                            <select class="form-control" id="hostgroup" name="hostgroup" required style="display: block; height:245px;" multiple>
+                                            <option value="" disabled="disabled">Select Hostgroup</option>
+                                              {% for group in hosts_groups %}
+                                              <option value="{{group.groupid}}">{{group.name}}</option>
+                                              {% endfor %}
+                                            </select>
+                                             <br />
+                                          </div>
+
+                                          <div class="col-sm-6">
+                                            <select class="form-control" id="templates" name="templates" required style="display: block;height:245px;" multiple>
+                                            <option value="" disabled="disabled">Select Templates</option>
+                                              {% for template_details in templates %}
+                                                <option value="{{template_details.templateid}}">{{template_details.name}}</option>
+                                              {% endfor %}
+                                            </select>
+                                             <br />
+                                          </div>
+                                        </div>
+
+                                        <div class="row">
+                                           <div class="col-sm-12">
+                                              <select class="form-control" id="interfaces" name="interfaces" required style="display: block;">
+                                              <option value="" disabled="disabled">Select Monitoring Interface</option>
+                                              <option value="10050">Agent Interfaces</option>
+                                              <option value="161">SNMP Interfaces</option>
+                                              <option value="623">IPMI Interfaces</option>
+                                            </select>
+                                            <br />
+                                           </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                          <div class="col-sm-12">                                          
+                                              <label for="host_name" style="color:#555;font-size: 14px;float:left;margin:0 9px 0 0;
+                                            ">Host Name:</label>
+                                              <label for="hostname_method" style="color:#555;font-size: 14px;float:left;margin:0px 0px 0px 0px;
+                                            ">Dynamic</label>
+                                              <input type="radio" name="hostname_method" id="dynamic" value="1" style="float:left;margin:2px 0 9px 6px;" checked onclick="hostname_select(this.value);">
+                                               <label for="hostname_method" style="color:#555;font-size: 14px;float:left;margin:0 0 0 14px;
+                                            ">Static</label>
+                                            <input type="radio"  name="hostname_method" id="static" value="2" style="float:left;margin:2px 0 9px 6px;" onclick="hostname_select(this.value);">
+                                            <br />
+                                          </div>
+                                          <div class="col-sm-12" id="hostname_block" style="display:none;">
+                                            <input type="text" class="form-control" maxlength="50"  name="host_name" id="host_name" title="Please enter host name" placeholder="Please enter host name">
+                                          </div>
+                                        </div>
+                                        
+                                        <div class="row" style="text-align:right;margin-top:10px;">
+                                          <button class="btn btn-success" type="submit">
+                                            Create Package
+                                          </button>
+                                        </div>
+
+                                    </div>
+                                    </fieldset>
+                                  </form>
+                               
+
+                            </div>
+                          </div>
+                                      
+                      <!--End Package Manager details -->
+                     
+                    
+                  </div>
+                </div>
+              </div>             
+        </div>
+    
+     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+     {% include "components/footer.html"%}
+      {% endif %}
+
+    <script type="text/javascript">
+    function hostname_select(selected_val){      
+      if(selected_val == 2){
+        $("#host_name").prop('required',true);        
+        $('#hostname_block').show();
+      }
+      else if(selected_val == 1){
+        $("#host_name").prop('required',false);        
+        $('#hostname_block').hide();
+      }
+    } 
+    </script>
+
+  <script type="text/javascript">
+      $("#mon_admin_main").addClass("active");
+      $("#mon_admin_sub").css({'display' : 'block'});
+      $("#mon_package").addClass("active"); 
+  </script> 
+    </body>
+</html>
+

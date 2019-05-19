@@ -1,0 +1,77 @@
+{% extends "change_management/base.html" %}
+{% load zone %}
+{% block title_content %} Favourite Tickets {% endblock title_content %}
+{% block page_head %} Ticket Details | <small> Favourite Tickets </small>{% endblock page_head %}
+{% block bread_crumb %} <li class="active">Favourite Tickets</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Favourite Tickets</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-stripped" id="fav_table_id">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Ticket Id</th>
+                                <th>Summary</th>
+                                <th>Affected Person</th>
+                                <th>Created Date</th>
+                                <th>Status</th>
+                                <th>Workgroup</th>
+                                <th>Subgroup</th>
+                                <th>Remove from Favourite List</th>
+                                <th>Owner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in fav_tickets %}
+                                <tr>
+                                    {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                                        <td><a href="/ticket/status/edit/{{ data.ticket.id }}" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="View/Edit"><i class="fa fa-edit"></i></a></td>
+                                    {% elif "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                        <td><a href="/ticket/stat/{{ data.ticket.id }}" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="View/Edit"><i class="fa fa-edit"></i></a></td>
+                                    {% else %}
+                                        <td><a href="/ticket/{{ data.ticket.id }}" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="View/Edit"><i class="fa fa-edit"></i></a></td>
+                                    {% endif %}
+                                    <td>{% if data.ticket.affectedperson.id in vips %}
+                                          <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                                      {% endif %}{{ data.ticket.ticketid }}</td>
+                                    <td>{{ data.ticket.summary }}</td>
+                                    <td>{{ data.ticket.affectedperson }}</td>
+                                    <td>
+                                        <span style="display:none;">{{data.ticket.creationdate.year}}{% if data.ticket.creationdate.month >= 10 %}{{data.ticket.creationdate.month}}{% else %}0{{data.ticket.creationdate.month}}{%endif%}{% if data.ticket.creationdate.day >= 10 %}{{data.ticket.creationdate.day}}{% else %}0{{data.ticket.creationdate.day}}{%endif%} {{data.ticket.creationdate.time | time}}</span>{% tzone data.ticket.creationdate %}
+                                    </td>
+                                    <td>{{ data.ticket.status|real:data.ticket.customer.id }}</td>
+                                    <td>{{ data.ticket.group.workgroup }}</td>
+                                    <td>{{ data.ticket.subgroup.subgroupname }}</td>
+                                    <td><a href="/mark/favourite_ticket/{{data.ticket.id}}/?is_not_favourite=true" class="btn btn-danger" ><i class="fa fa-trash"></i></a></td>
+                                    <td>{{ data.ticket.owner }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript">
+        $("#tickets_main").addClass("active");
+        $("#tickets_nav").css({'display' : 'block'});
+        $("#favourite").addClass("active");
+        $(document).ready(function() {
+            $('#fav_table_id').DataTable({
+                aaSorting: [[4, 'desc']],
+                scrollX: true,
+                "columnDefs": [
+                    { "width": "10%", "targets": 1 },
+                ],
+            });
+        });
+    </script>
+{% endblock footer_content %}
+

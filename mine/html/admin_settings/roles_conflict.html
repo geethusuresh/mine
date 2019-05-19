@@ -1,0 +1,131 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li><a href="/admin_settings/users/all/">Users</a></li>
+                        <li><a href="/admin_settings/users/{{ person.id }}/">User Details</a></li>
+                        <li><a href="/admin_settings/users/{{ person.id }}/deactivate/">User Deactivation</a></li>
+                        <li class="active">Affected Roles</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">User Deactivation - Affected Roles</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-12" style="margin-top:10px;">
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-warning media fade in">
+                                                Deactivation of <strong>{{ person.user.email }}</strong> will affect the following roles. Please do assign new member to the following roles. 
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="panel panel-bordered panel-success">
+                                                <div class="panel-heading">
+                                                    <h3 class="panel-title">Affected Roles</h3>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <table class="table table-striped" >
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Affected Role</th>
+                                                                <th>No. of other members </th>
+                                                                <th>Fix Issue</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for role in roles_data %}
+                                                                <tr>
+                                                                    <td >{{ role.name }}</td>
+                                                                    <td>{{ role.no }}</td>
+                                                                    <td><a href="/admin_settings/roles/{{ role.role_id }}/" data-toggle="tooltip" data-original-title="Fix Role Issue" class="btn btn-success"> Fix</a></td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            // $('#user_deactivate_owned_roles').dataTable({
+            //     "processing": true,
+            //     "bInfo": false,
+            //     "order": [[ 3, "asc" ]],
+            //     "ajax": {
+            //         "processing": true,
+            //         "url": "/admin_settings/users/{{ person.id }}/deactivate/?owned_roles=true",
+            //         "dataSrc": ""
+            //     },
+            //     "columns": [
+            //         { "": "id", sClass:"hidden"},
+            //         { "": "role_name"},
+            //     ],
+            // });
+            // $('#user_deactivate_owned_roles_other').dataTable({
+            //     "processing": true,
+            //     "bInfo": false,
+            //     "order": [[ 2, "asc" ]],
+            //     "ajax": {
+            //         "processing": true,
+            //         "url": "/admin_settings/users/{{ person.id }}/deactivate/?owned_roles_other=true",
+            //         "dataSrc": ""
+            //     },
+            //     "columns": [
+            //         { "": "personid", sClass:"hidden"},
+            //         { "": "role_id", sClass:"hidden"},
+            //         { "": "role_name"},
+            //         { "": "email"},
+            //     ],
+            // });
+        </script>
+    </body>
+</html>

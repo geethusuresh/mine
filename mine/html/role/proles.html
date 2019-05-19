@@ -1,0 +1,89 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 10px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Privilege-{{priv_item.privname}} <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+                {% if messages %}
+                  <ul >
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                      {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              <div class="box">
+                <div class="box-title">
+                  <h3>Roles</h3>
+                      <a href="/list/roles" class="btn btn-success pull-right">Done</a>
+                </div>
+                <div class="box-body">
+                  <table class="table table-hover " id="proles_table">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Role</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr> 
+                    </thead>
+                    <tbody>
+                    {% for role in roles %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ role.rolename }}</td>
+                      <td>{{ role.description }}</td>
+                      <td><a href="/list/proles/{{role.id}}/{{priv_item.id}}" class="btn btn-warning">Remove</a></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  </table>
+                  <div class="row">
+                    
+                  </div>
+                </div>
+              </div>             
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+    $("#proles_table").dataTable();
+    </script>
+</html>

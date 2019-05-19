@@ -1,0 +1,369 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Problem Ticket Details</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            .timeline-centered:before {
+                left: 25%;
+            }
+            .timeline-time {
+                background: none;
+                color: black;
+                max-width: 100%;
+                left: -175px !important;
+                padding-right: 0px !important;
+            }
+            .timeline-centered .timeline-entry {
+                width: 75%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label h2 {
+                font-size: 16px;
+                font-weight: 500;
+            }
+            .notify_filter {
+                font-size: 16px;
+                font-weight: 500;
+                padding: 5px;
+            }
+            a:hover {
+                color: #515151 !important;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin"> Problem Management <small>| Ticket Details</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Problem Ticket Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Root Cause Analysis</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-11">
+                                        <ul class="nav nav-tabs" role="tablist">
+                                            <li class="active"><a href="#basic1" role="tab" data-toggle="tab">Ticket Details</a></li>
+                                            <li><a href="#work_log" role="tab" data-toggle="tab">Worklogs</a></li>
+                                            <li><a href="#tic_hist" role="tab" data-toggle="tab">Ticket History</a></li>
+                                            {% if attachments %}
+                                                <li><a href="#attachments" role="tab" data-toggle="tab"> Attachments</a></li>
+                                            {% endif %}
+                                            <li><a href="#rc_analysis" role="tab" data-toggle="tab">Root Cause Analysis</a></li>
+                                        </ul>
+                                        <br>
+                                        <div class="tab-content">
+                                            <div class="tab-pane active" id="basic1">
+                                                <div class="col-md-8">
+                                                    <label><strong>Summary:</strong> </label>
+                                                    {{ ticket.summary }}<br>
+                                                </div>
+                                                <div class="col-md-2" style="border-left:1px solid black" >
+                                                    <h4>{{ ticket.ticketid }}</h4>
+                                                    <label class="label label-success" style="font-size:14px" >{{ticket.status | real:ticket.customer.id}}</label>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12"><br>
+                                                        <label><strong>Description:</strong>  </label>
+                                                        <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ ticket.description|safe }}" rows="12" cols="20" readonly></textarea> 
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-6"> 
+                                                        <div class="basic-info">
+                                                            <p class="data-row">
+                                                                <span class="data-name">Affected Person :</span>
+                                                                <span class="data-value">  <a href="" data-toggle="modal" data-target="#profile">{{ ticket.affectedperson }}</a></span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Reported By :</span>
+                                                                <span class="data-value">{{ ticket.reportedby }}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Phone No :</span>
+                                                                <span class="data-value"> {{ ticket.affectedphone }}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Email :</span>
+                                                                <span class="data-value">{{ ticket.affectedemail }}</span>
+                                                            </p>
+                                         
+                                                        </div>
+                                                        <hr>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="basic-info">
+                                                            <p class="data-row">
+                                                                <span class="data-name">Category :</span>
+                                                                <span class="data-value">  {{ ticket.category }}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">SubCategory :</span>
+                                                                <span class="data-value">{{ ticket.subcategory }}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Domain :</span>
+                                                                <span class="data-value">{{ticket.group}}</span>
+                                                            </p>                    
+                                                            <p class="data-row">
+                                                                <span class="data-name">Source :</span>
+                                                                <span class="data-value">  {{ ticket.source }}</span>
+                                                            </p>
+                                                            {% if ticket.owner %}
+                                                                <p class="data-row">
+                                                                    <span class="data-name">Owner :</span>
+                                                                    <span class="data-value">{{ ticket.owner }}</span>
+                                                                </p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <hr>
+                                                    </div>
+                                                </div>
+                                                <div class="row">                
+                                                    <div class="col-md-6">
+                                                        <div class="basic-info">
+                                                            <p class="data-row">
+                                                                <span class="data-name">Created Date :</span>
+                                                                <span class="data-value">  {% tzone ticket.creationdate %}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Reported Date :</span>
+                                          
+                                                                <span class="data-value">{% tzone ticket.reportdate %}</span>
+                                                            </p>
+                                                            <p class="data-row">
+                                                                <span class="data-name">Affected Date :</span>
+                                                                <span class="data-value">{% tzone ticket.affecteddate %}</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="basic-info">
+                                                            {% if attributes %}
+                                                                {% for attribute in attributes %}
+                                                                    <p class="data-row">
+                                                                        <span class="data-name">Project Name :</span>
+                                                                        <span class="data-value">{{ attribute.project }}</span>
+                                                                    </p>
+                                                                    <p class="data-row">
+                                                                        <span class="data-name">Quantity :</span>
+                                                                        <span class="data-value">{{ attribute.quantity }}</span>
+                                                                    </p>
+                                                                    <p class="data-row">
+                                                                        <span class="data-name">Note :</span>
+                                                                        <span class="data-value">{{attribute.remark }}</span>
+                                                                    </p>
+                                                                    <p class="data-row">
+                                                                        <span class="data-name">Request Type :</span>
+                                                                        <span class="data-value">{{attribute.permanent_type }}</span>
+                                                                    </p>
+                                                                {% endfor %}
+                                                            {% endif %} 
+                                                        </div>  
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="work_log">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="timeline-centered">
+                                                            {% if work_logs %}
+                                                                {% for worklog in work_logs %}
+                                                                    <article class="timeline-entry">
+                                                                        <div class="timeline-entry-inner">
+                                                                            <h4>
+                                                                                <time class="timeline-time" datetime="2014-01-10T03:45"><span> {{ worklog.time|naturaltime}}</span> <span style="font-size:10px">
+                                                                                {% tzone worklog.time %}
+                                                                                </span></time>
+                                                                            </h4>
+                                                                            <div class="timeline-icon palette-alizarin">
+                                                                                <i class="fa fa-comment"></i>
+                                                                            </div>
+                                                                            <div class="timeline-label">
+                                                                                <h2>
+                                                                                    <a href="#">{{ worklog.owner }}</a> <span>{{worklog.note}}{% if worklog.fromgroup %}
+                                                                                    , changed group from {{worklog.fromgroup}} - {{worklog.fromsubgroup}}
+                                                                                    {% endif %}
+                                                                                    {% if worklog.group %}
+                                                                                        to
+                                                                                        {{worklog.group}} - {{worklog.subgroup}} 
+                                                                                    {% endif %}</span>
+                                                                                </h2>
+                                                                                {% if worklog.attachment %}
+                                                                                    <a href="/media/{{worklog.attachment}}"  style="float:right" download="{{worklog.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                                {% endif %}
+                                                                                {% if worklog.remark %}<pre>{{ worklog.remark|safe }}</pre>{% endif %}
+                                                                            </div>
+                                                                        </div>     
+                                                                    </article>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                No feeds. Please Sent Back a Remark to HelpDesk for more.
+                                                            {% endif %} 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="tic_hist">
+                                                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                    <thead>
+                                                        <tr role="row">
+                                                            <th >User</th>
+                                                            <th >Status</th>
+                                                            <th >ChangeTime</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody >
+                                                        {% for act in histories %}
+                                                            <tr>
+                                                                <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                                                                <td class="grey"><a  style="color:#555">{{act.status|real:act.ticket.customer.id}}</a></td>
+                                                                <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td> 
+                                                            </tr>
+                                                        {% endfor %}         
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="tab-pane" id="attachments">
+                                                <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                    <thead>
+                                                        <tr role="row">
+                                                            <th >Uploaded by</th>
+                                                            <th> File name</th>
+                                                            <th >Time</th>
+                                                            <th >Actions</th>
+                                                        </tr>
+                                                    </thead>         
+                                                    <tbody >
+                                                        {% for act in attachments %}
+                                                            <tr class="odd">
+                                                                <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                                                <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                                                <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                                                                <td>
+                                                                    <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}"   download="{{attachments.docfile}}">
+                                                                        <i class="fa fa-download "></i>                                            
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}         
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="tab-pane" id="rc_analysis">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="col-sm-9">
+                                                            <form action="/problem_management/{{ticket.id}}/" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                                                                <textarea name="root" class="form-control" placeholder="Symptom" {% if ticket.rootcause_set.all %} readonly {% endif %} required>{{ticket.rootcause_set.all.0.root}}</textarea>   
+                                                                <br/>
+                                                                <textarea name="cause" class="form-control" placeholder="Solution" {% if ticket.rootcause_set.all %} readonly {% endif %} required>{{ticket.rootcause_set.all.0.cause}}</textarea><br/>
+                                                                <hr>
+                                                                {% if ticket.rootcause_set.all|length == 0 %} 
+                                                                    <label>Attachments</label>
+                                                                    <hr>
+                                                                    <input type="file" name="attach1"><br/>
+                                                                    <input type="file" name="attach2"><br/>
+                                                                    <input type="file" name="attach3"><br/>
+                                                                    <input type="file" name="attach4"><br/>
+                                                                    <input type="file" name="attach5"><br/>
+                                                                    <div class="row">
+                                                                        <div class="col-sm-12">
+                                                                            <div class="col-sm-10">
+                                                                            </div>
+                                                                            <div class="col-sm-2">
+                                                                                <button type="submit" class="btn btn-info" style="margin-top:3px;width:100%; float:left;" href=""><i class="" ></i><span class="text" > Save </span></button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% else %}
+                                                                    {% if rc_attachments|length > 0 %}
+                                                                        <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                                            <thead>
+                                                                                <tr role="row">
+                                                                                    <th >Uploaded by</th>
+                                                                                    <th> File name</th>
+                                                                                    <th >Time</th>
+                                                                                    <th >Actions</th>
+                                                                                </tr>
+                                                                            </thead>         
+                                                                            <tbody >
+                                                                                {% for act in rc_attachments %}
+                                                                                    <tr class="odd">
+                                                                                        <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                                                                        <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                                                                        <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                                                                                        <td>
+                                                                                            <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}"   download="{{attachments.docfile}}">
+                                                                                                <i class="fa fa-download "></i>                                            
+                                                                                            </a>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                {% endfor %}         
+                                                                            </tbody>
+                                                                        </table>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </form>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            {% if ticket.rootcause_set.all|length > 0 and ticket.status != 'CLOSED' %} 
+                                                                <a class="btn btn-danger" style="margin-top:3px;width:70%" href="" data-toggle="modal" data-target="#close"><i class="" ></i><span class="text" > Close Ticket </span></a>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="close" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="ModalLabel">Close ticket</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/ticket/close/{{ticket.id}}" method="POST">{% csrf_token %}
+                                <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                                <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                                <button class="btn btn-danger" style="float:right;width:50%" type="submit">Close Ticket</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer" style="border:0px">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include "components/footer.html"%}
+            {% include "components/service_request.html" %}
+        </div>
+    </body>
+</html>

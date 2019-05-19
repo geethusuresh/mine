@@ -1,0 +1,159 @@
+{% extends "change_management/base.html" %}
+
+{% block title_content %} Create Knowledgebase {% endblock title_content %}
+
+{% block page_head %} Knowledge Base | <small> Create Knowledgebase</small> {% endblock page_head %}
+
+{% block bread_crumb %} <li> <a href="{% url 'customer_kb_list' %}"
+> Knowledgebase List </a></li> <li class="active">Create Knowledgebase</li> {% endblock bread_crumb %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/css/summernote.css">
+{% endblock extra_head %}
+
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Create Knowledgebase</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- <div class="col-sm-2"></div> -->
+                    <div class="col-sm-12">
+                        <form action="{% url 'create_kb' %}" method="POST">{% csrf_token %}
+                            <div class="col-sm-12">
+                                <div class="col-sm-6">
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-4">Customer:</label>
+                                        <div class="col-md-8">
+                                            {{form.customer}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-4">Escalation Contact:</label>
+                                        <div class="col-md-8">
+                                            {{form.escalation_contact}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-3">Group: <a title="" data-original-title="" href="#" class="add-tooltip fa fa-question-circle fa-lg unselectable" data-html="true" data-title="&lt;strong&gt;Choose customer&lt;strong&gt;" data-toggle="tooltip"></a></label>
+                                        <div class="col-md-9">
+                                            {{form.escalation_subgroup}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-3">Title:</label>
+                                        <div class="col-md-9">
+                                            {{form.kb_title}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Overview:</label>
+                                    <div class="col-md-8">
+                                        {{form.kb_overview}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Configuration Item:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {{form.configuration_item}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Procedure:</label>
+                                    <div class="col-md-8">
+                                        {{form.procedure}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Necessary Requirements:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {{form.necessary_requirements}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Notes:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {{form.notes}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Reference Information:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {{form.reference_info}}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Keywords:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {{form.keywords}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group pad-all">
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-8 pad-all">
+                                    <button type="submit" class="btn btn-success"> Create</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- <div class="col-sm-2"></div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript" src="/static/js/summernote.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#id_reference_info').summernote({
+                height: 150,
+            });
+            $('#id_procedure').summernote({
+                height: 150,
+            });
+            $('#id_necessary_requirements').summernote({
+                height: 150,
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        $('#cust_kb_main').addClass("active");
+        $('#kb_head').addClass("active");
+        $('#cust_kb_list').css("display", "block");
+        $('#kb_create').addClass('active');
+        $('#cust_kb_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+        $('#id_customer').on('change', function(){
+            $.ajax({
+                url :"/ticket/fetch_subgroups/?cust_id="+this.value,
+                type:"GET",
+                dataype:"json",
+                success:function(data){
+                    $("#id_escalation_subgroup option:gt(0)").remove();
+                    escalation_group = data;
+                    if (escalation_group.length > 0) {
+                        for (var i in escalation_group) {
+                            group_name = escalation_group[i][1] + ' / ' + escalation_group[i][2]
+                            $("#id_escalation_subgroup").append($('<option>', {value:escalation_group[i][0], text:group_name}));
+                        }
+                    }
+                },
+                error: function(xhr,errmsg,err) {
+                    console.log(xhr);
+                }
+            });
+        })
+    </script>
+{% endblock footer_content %}

@@ -1,0 +1,33 @@
+
+{% if object_list %}
+	<ul class="list-group">
+	{% for image_document in object_list %}
+		<li class="list-group-item">
+			<span class="badge badge-danger"><button class="btn btn-link btn-xs" onclick="delete_image_documentation('{% url 'delete_image_documentation' server_id image_id image_document.id %}')"><i class="fa fa-trash-o"></i></button></span>
+	  		<a href="{{image_document.document}}" target="_blank">{{image_document.document}}</a>
+		</li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<div class="col-sm-12">
+	  <h5> No documentation available</h5>
+	</div>
+{% endif %}
+</div>
+<script type="text/javascript">
+
+	function delete_image_documentation(delete_url){
+		$.ajax({
+            url: delete_url,
+            type: 'get',
+            success: function(image_documentation_list){
+              $('#image_documentation_div').empty();
+              $('#image_documentation_div').append(image_documentation_list);
+              $('#image_documentation_create_div').hide();
+              $('#id_image_documentation').show();
+            },
+            error: function(xhr,errmsg,err){
+            },
+        });
+	}
+</script>

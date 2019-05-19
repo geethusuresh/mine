@@ -1,0 +1,45 @@
+<div class="content" id="image_crop_area">
+      <div class="row" >
+        <div class="col-sm-3"></div>
+        <div class="col-sm-9">
+          <div id="wrapper">
+        <div class="jc-demo-box">
+       
+          <div id="form-container">
+            <form id="cropimg" name="cropimg" method="post" action="/faq/image_search/">
+              {% csrf_token %}
+                <input type="hidden" id="x" name="x">
+                <input type="hidden" id="y" name="y">
+                <input type="hidden" id="w" name="w">
+                <input type="hidden" id="h" name="h">
+                <input type="hidden" id="natuaralHeight" name="natuaralHeight">
+                <input type="hidden" id="natuaralWidth" name="natuaralWidth">
+            <div id="dropElem">
+            <div id="dropContent">
+              <div id="dropClose" style="">X</div>
+                <div class="modal-header">
+                  <h4 id="ModalLabel" class="modal-title text-center">Crop the Image and Search </h4>
+                  <span> Refine your search by selecting an appropriate area from the screenshot for accurate result. You can select the error text or error popup message at this step. To select the portion click and drag on the image. The selected area will be highlighted.After selecting the portion of the image click on the 'Search' button at the bottom of the page to search. </span>
+                </div>
+                <div class="modal-body" style="text-align:right;">
+                  <div>
+                      <img src="/media/{{image_name}}" alt="blue" id="target" width="{{image_width}}" height="{{image_height}}" align="center"/>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-2 col-md-offset-10">
+                      <div class="pull-right pad-all">
+                        <button id="submit" type="submit" class="btn btn-info btn-huge" value="Search">Search</button>
+                      </div>
+                    </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

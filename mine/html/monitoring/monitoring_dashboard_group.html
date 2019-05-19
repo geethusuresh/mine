@@ -1,0 +1,214 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+     <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>    -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->
+
+    <script type="text/javascript">
+      function box_items_details(app_ids){
+        $('#top_box_appid').val(app_ids);
+        $('#frm_top_box').submit();
+      }
+
+      function multi_customer_perm(){
+        $('#frm_multi_customer').submit();
+      }
+    </script> 
+    <style type="text/css">
+        .panel_modified_heading{
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            padding: 10px 15px;  
+            border-bottom: none;
+            height:auto;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/monitoring_header.html"%}
+    {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+    {% else %}
+      {% include "components/header.html"%}
+    {% endif %}
+        <div class="wrapper">
+          {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+          {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+          {% else %}
+            {% include "side_bar/sidebar.html" %}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>{{selected_customer.customername}}  Monitoring Dashboard<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Monitoring Dashboard</li>
+                </ol>
+            </div>
+            <div class="content">
+
+                <div class="row">
+                  <div class="alert alert-success" role="alert" id="success_alert" style="display:none;"></div>
+                  <div class="alert alert-danger" role="alert" id="failed_alert" style="display:none;"></div>
+                </div>
+
+                {% if customer_count > 1 %}
+                <div class="row">
+                    <div class="col-lg-12" style="margin-bottom:5px;">
+                    <form id="frm_multi_customer" name="frm_multi_customer" method="POST" action="/monitor_dashboard/">
+                    {% csrf_token %} 
+                        <select name="customer" id="customer" class="form-control" onchange="multi_customer_perm()">
+                            <option value="">Select Customer</option>
+                            {% for customer_pem in customer_details %}
+                            {% if customer_pem.customer.id == selected_customer.id %}
+                            <option value="{{customer_pem.customer.id}}" selected="selected">
+                            {{customer_pem.customer.customername}}</option>
+                            {% else %}
+                            <option value="{{customer_pem.customer.id}}">{{customer_pem.customer.customername}}</option>
+                            {% endif  %}
+                            {% endfor %}
+                        </select>
+                    </form>
+                    </div>                   
+                </div>
+                {% endif %}
+
+                <!-- Top Box -->
+                {% for category_items in category_list%}
+                <div class="row">
+                    <div class="col-sm-12" style="margin-top:10px;">
+                        <div class="panel">
+                            <div class="panel-heading">
+                              <h3 class="panel-title">
+                                <i class="fa fa-bar-chart-o fa-fw"></i>
+                                <span style="font-size:16px;">{{category_items.category_name}}</span>
+                                <span  style="font-size:15px;color:#8a6d3b;font-style:italic;">(Monitored Servers:&nbsp;{{category_items.total_servers_monitored}})</span>
+                              </h3>
+                            </div>
+                            <div class="panel-body" style="background-color:#f5f5f5;">
+                     <div class="row">                                
+                    {% for box_items in category_items.top_box_values %}           
+                    <div class="col-lg-3" style="margin-top:12px;">
+                        <div class="panel panel-green">
+                            <div class="panel_modified_heading">
+                                <div class="row">
+                                    <div class="col-xs-8" style="font-size:13px;">
+                                       <span style="color:#009900;font-weight:bold;">{{box_items.count_ok_items}}</span> /  <span style="color:#B82E00;font-weight:bold;">{{box_items.count_problem_items}}</span>
+                                    </div>
+                                    <div class="col-xs-4 text-right">
+                                        <div> 
+                                        {% if box_items.box_status == 1 %}                                   
+                                         <img src="/static/img/red.jpg" style="width:30px;height:28px;" />
+                                        {% elif box_items.box_status == 0 %}
+                                         <img src="/static/img/green.jpg" style="width:30px;height:30px;" />
+                                        {% endif %}                                      
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12 text-left" style="font-size:13px;">
+                                       {{box_items.box_name}}
+                                    </div>                                
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-xs-12 text-right">
+                                        <span style="font-size:13px;color:#8a6d3b;font-style:italic;"> Monitored Servers: {{box_items.total_hostgroup_servers}}</span>
+                                    </div>
+                                </div>                        
+                            </div>
+                            <a href="/advanced_monitoring/monitoring_group_details/{{box_items.hostgroupid}}">
+                                <div class="panel-footer" style="background-color:#FFF;">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>                
+                    {% if forloop.counter|divisibleby:"4" %}                    
+                    </div>
+                    <!-- /.row -->
+                     <div class="row">
+                    {% endif %}
+                {% endfor %}
+                <form name="frm_top_box" id="frm_top_box" method="POST" action="/monitor_box_details/">{% csrf_token %}
+                  <input type="hidden" name="top_box_appid" id="top_box_appid" />
+                </form>
+                    </div>
+                </div>
+                </div>                
+                </div>
+            </div>
+            <!--Top Box End -->
+            {% endfor %}
+
+            </div>
+          </div>
+        </div>
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+     {% include "ticket/advanced_search_popup.html" %}
+     <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+     <script type="text/javascript">
+     function monitor_add_to_dashboard(item_id,report_type){ 
+      $.ajax({
+          type: "POST",
+          url: "/addreport_to_dashboard/",
+          data: { report_type: report_type, item_id: item_id, csrfmiddlewaretoken: '{{ csrf_token }}'}
+          })
+          .done(function( msg ) {             
+              $('#success_alert').html(msg);
+              $('#success_alert').show(1000);
+          })
+          .fail(function() {              
+              $('#failed_alert').html("Oh! Failed to move this report to your dashboard");
+              $('#failed_alert').hide(1000);
+          });                   
+    }
+
+    $("#monitoring_nav").addClass("active");
+    $("#monitoring_sub").css('display','block');
+    $("#mon_dash").addClass("active");
+    </script>
+    {% include "components/dashboard_footer.html" %}  
+    {% include "components/service_request.html" %}  
+    </body>
+</html>

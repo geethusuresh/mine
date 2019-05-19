@@ -1,0 +1,36 @@
+<div class="row" {% if ticket.externalsystem_ticketid %} style="display:block;" {% else %} style="display:none;" {% endif %} id="ext_tkt_display">
+    <div class="col-sm-12">
+        <div class="alert alert-info" role="alert" id="ticket_alert">
+            Ticket has been related with external system ticket number  - <strong> {{ticket.externalsystem_ticketid}} </strong>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <button type="submit" class="btn btn-info" onclick="update_ext_ticket()">Update External Ticket Number</button>
+        <input type="hidden" name="tkt_id" id="tkt_id" value="{{ticket.id}}" />
+      <input type="hidden" name="exttkt_id" id="exttkt_id" value="{{ticket.externalsystem_ticketid}}" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="alert" id="message_box" role="alert"  style="display:none;" >
+        </div>
+    </div>
+</div>
+<div class="row" id="extr_ticket_area" {% if not ticket.externalsystem_ticketid %} style="display:block;" {% else %} style="display:none;" {% endif %} >
+    <div class="col-sm-9">
+        <input type="text" class="form-control" name="extr_tkt" id="extr_tkt" placeholder="Please enter ticket number from external ticket system"/>
+    </div>
+    <div class="col-sm-3">
+        <img src="/static/img/ajax-loader.gif" id="exttkt_loader" style="display:none;margin-top:5px;" />
+    </div>
+    <div class="col-sm-12">
+        <button class="btn btn-success" type="submit" style="margin-top:10px;" onclick="etx_ticket_details()">
+            {% if ticket.externalsystem_ticketid %}
+                Update Ticket
+            {% else %}
+                Submit Ticket
+            {% endif %}
+        </button>
+        <input type="hidden" name="tkt_id" id="tkt_id" value="{{ticket.id}}" />
+    </div>
+</div> 

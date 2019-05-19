@@ -1,0 +1,124 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Service Catalog</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="/static/css/customfor.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html" %}
+
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Create Ticket | <small>Service Catalog</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Service Catalog</li>
+                    </ol>
+                </div>
+
+                <div class="content">
+                    <div class="row">
+                        <div class="col-lg-12" >
+                            <div class="row">
+                                {% if templates|length == 0 %}
+                                    <div class="col-sm-1"></div>
+                                    <div class="col-sm-10 alert alert-danger text-center">No catalogs</div>
+                                    <div class="col-sm-1"></div>
+                                {% endif %}
+                                {% for template in templates %}
+                                    {% if template.privilege.func_admin.func_name in request.session.logged_user_priv%}
+                                        <div class="col-sm-4" style="margin-bottom:20px">
+                                            <div class="fd-tile detail clean tile-green" style="height:160%">
+                                                <div class="content"><h4 class="text-left">{{ template.summary }}</h4>
+                                                </div>
+                                                {% if template.category.approval %}
+                                                    <div class="icon"><i class="fa fa-user"></i></div>
+                                                {% else %}
+                                                    <div class="icon"><i class="fa fa-ticket"></i></div>
+                                                {% endif %}
+                                                <a class="details" style="text-decoration: None;text-transform:none" href="/ticket/template/{{template.id}}"> Click here to create <span><i class="fa fa-arrow-circle-right pull-right"></i></span></a>
+                                            </div>
+                                            <hr style="border-color:#d6d6d6;">
+                                        </div>
+                                    {% endif %}
+                                {%endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        <script type="text/javascript">
+            $("#ticket").on('change',function(){
+                $.ajax({
+                    url:"/faq",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                        summ : this.value,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                        faqlist = JSON.parse(data);
+                        $( "#faqpopup" ).empty();
+                        if($.isEmptyObject(faqlist)){
+                            $("#faqpopup").append('<p></p>');
+                        }else{
+                            console.log(data);
+                            $("#faqpopup").append('<p style = "color : red">Below links may help you to solve your problem</p>');
+                            for (var i in faqlist){
+                                $("#faqpopup").append('<a href="/faq/faqpopup/'+faqlist[i].pk+'" target="_blank">'+faqlist[i].fields.faqquestion+'</a><br>');
+                            }
+                        }
+                    
+                    },
+                    error : function(xhr,errmsg,err) {
+                        // alert(err);
+                    }
+
+                });
+                return false;
+            });
+
+            $(document).ready(function(){
+                $('#cat').on('change', function(){
+                    var catid = $('#cat').val();  //alert(catid);
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{catty: catid,
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){
+                            $("#sub_category1 option:gt(0)").remove();
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#sub_category1").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }
+                    });
+                    return false;
+                });
+            });
+        </script>
+        <script>$("#template").addClass("active")</script>
+    </body>
+</html> 

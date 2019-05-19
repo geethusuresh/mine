@@ -1,0 +1,135 @@
+{% extends "change_management/change_base.html" %}
+
+{% block title_content %} Change Reports {% endblock title_content %}
+{% block page_head %}
+    Change Management | <small>Reports</small>
+{% endblock page_head %}
+{% block bread_crumb %}
+    <li class="active">RFC Reports</li>
+{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">Reports</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <form method="post" action="" id="change_reports_form" target="_blank">
+                    {% csrf_token %}
+                    <div class="col-sm-12">
+                        <div class="col-sm-4">
+                            <label><strong>Report Type</strong></label>
+                            <select class="form-control" name="report_type" id="report_type" onchange="get_action_urls()" required>
+                                <option value="">--Select--</option>
+                                <option value="status_wise">Status Wise Reports</option>
+                                <option value="priority_wise">Priority Wise Reports</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <label><strong>Customer</strong></label>
+                            <select class="form-control" multiple name="customer_data" id="customer_data" required>
+                                <option value="">--Select Customer--</option>
+                                {% for customer in customers %}
+                                    <option value="{{customer.id}}">{{customer.customername}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-sm-4" id="status_wise" style="display:none">
+                            <label><strong>Status</strong></label>
+                            <select class="form-control" multiple name="status_data" id="status_data">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-4" id="priority_wise" style="display:none">
+                            <label><strong>Priority</strong></label>
+                            <select class="form-control" multiple name="priority_data" id="priority_data">
+                                <option value="">--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="col-sm-4">
+                            <label><strong>Start Date</strong></label>
+                            <input type="text" name="start_date" id="start_dat" class="form-control" required/> <br/>
+                            <input type="submit" value="Fetch Reports" class="btn btn-success"/>
+                        </div>
+                        <div class="col-sm-4">
+                            <label><strong>End Date</strong></label>
+                            <input type="text" name="end_date" id="end_dat" class="form-control" required /> <br/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+    <script src="/static/customer/moment.min.js"></script>
+    <script>
+        $('#start_dat').datepicker();
+        $('#end_dat').datepicker();
+    </script>
+    <script>
+        function hide_divs(){
+            $('#status_wise').hide();
+            $('#priority_wise').hide();
+        }
+    </script>
+    <script>
+        $(document).ready( function() {
+            $('#report_type').val('');
+            hide_divs();
+        })
+    </script>
+    <script>
+        function get_action_urls(){
+            var report_type = $('#report_type').val();
+            hide_divs();
+            if (report_type == 'status_wise'){
+
+                $('#change_reports_form').attr('action', '/rfc/status_reports/');
+                $("#status_data option:gt(0)").remove().end();
+                $('#status_wise').show();
+                $('#status_data').attr('required', 'true');
+                document.getElementById("priority_data").removeAttribute('required');
+            } else if (report_type == 'priority_wise'){
+                $('#change_reports_form').attr('action', '/rfc/priority_reports/');
+                $("#priority_data option:gt(0)").remove().end();
+                $('#priority_wise').show();
+                $('#priority_data').attr('required', 'true');
+                document.getElementById("status_data").removeAttribute('required');
+            }
+            $.ajax({
+                url :"/rfc/reports/",
+                type:"POST",
+                dataype:"json",
+                data:{"report_type": report_type,
+                    csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){
+                    if (report_type == 'status_wise') {
+                        status_list = data;
+                        for (var i in status_list){
+                            $("#status_data").append($('<option>', {value:status_list[i], text:status_list[i]}));
+                        }
+                    } else if (report_type == 'priority_wise'){
+                        priority_dict = data;
+                        for (var dict in priority_dict){
+                            $("#priority_data").append($('<option>', {value:priority_dict[dict].id, text:priority_dict[dict].display_value}));
+                        }
+                    }
+                },
+                error: function(xhr,errmsg,err){
+                    console.log(xhr);
+                }
+            });
+        }
+    </script>
+    <script>
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#change_report').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

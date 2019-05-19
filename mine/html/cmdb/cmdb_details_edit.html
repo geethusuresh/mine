@@ -1,0 +1,246 @@
+{% load humanize %}
+{% load zone %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" href="/static/customer/css/datepicker/datepicker.css" />
+        <!--<link rel="stylesheet" href="/static/customer/css/custom.css">-->
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+
+    </head>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} {% include "components/cust_header.html"%} {% else %} {% include "components/header.html"%} {% endif %}
+    <body class="fixed" style="font-size:13px" >
+     <div class="wrapper">
+              {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+              {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+
+            <div class="rightside">
+                  <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">CMDB | <small>EDIT</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="">CMDB</a></li>
+                        <li><a href="/cmdb/info_cm/">CMDB Details</a></li>
+                        <li class="active"><a href="">CMDB Edit</a></li>
+                    </ol>
+                   </div>
+                {% if messages %}
+                    <ul style="padding-right:40px;">
+                        {% for message in messages %}
+                            <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+              <div class="content">
+                  <div class="box">
+                      <div class="box-body">
+
+
+                       {% if default_customer %} <form action="/cmdb/cmdb_edit/?ref={{ref}}&customer={{default_customer}}" id="cmdb_form" method="post"> {% else %} <form action="/cmdb/cmdb_edit/?ref={{ref}}" id="cmdb_form" method="post">{% endif %} {% csrf_token %}
+                           <div class="row">
+                                        <input name="postedcustomer" id="postedcustomer" value="{{default_customer}}" hidden>
+                                    {% if cmdb_class_obj %}
+                                      <div class="col-md-4">
+                                          <div class="col-md-12">
+                                                    <p class="data-row">
+                                                        <span class="data-name"><label >Class *</label></span>
+                                                        <span class="data-value">
+                                                            <select class="form-control" id="cmdb_class" name="cmdb_class" required="">
+                                                                <option value="">-Select-</option>
+                                                                {% for cmdb_class in cmdb_class_obj %}
+                                                                    {% if cmdb_class.id == class.classname.id %}
+                                                                    <option value="{{cmdb_class.classname}}" selected>{{cmdb_class.classname}}</option>
+                                                                    {% else %}
+                                                                    <option value="{{cmdb_class.classname}}">{{cmdb_class.classname}}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </span>
+                                                    </p>
+                                          </div>
+                                      </div>
+                                    {% endif %}
+                            </div>
+                            <div class="row pad-top">
+
+
+                                       {% for obj in cmbd_obj %}
+                                            {% if obj.domain.datatype == 'Date' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class="col-md-12">
+                                                    <label for="date_value" class="active">{{obj.domain.domain_name}}</label>
+                                                    <input id="date_value" type="text" class="form-control" name="{{obj.domain.domain_name}}_date_value" required value="{{obj.value_date | date:"Y-m-d"}}">
+
+                                                </div>
+                                             </div>
+                                            {% elif obj.domain.datatype == 'Char' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class=" col-md-12">
+                                                    <label for="{{obj.domain.domain_name}}_char_value" class="active">{{obj.domain.domain_name}}</label>
+                                                    <input id="{{obj.domain.domain_name}}_char_value" class="form-control" type="text" name="{{obj.domain.domain_name}}_char_value" required value="{{obj.value_char}}">
+
+                                                </div>
+                                             </div>
+                                            {% elif obj.domain.datatype == 'Integer' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class=" col-md-12">
+                                                    <label for="{{obj.domain.domain_name}}_int_value" class="active">{{obj.domain.domain_name}}</label>
+                                                    <input id="{{obj.domain.domain_name}}_int_value" class="form-control" type="number" step="1" name="{{obj.domain.domain_name}}_int_value" required value="{{obj.value_int}}">
+
+                                                </div>
+                                             </div>
+                                            {% elif obj.domain.datatype == 'Float' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class=" col-md-12">
+                                                    <label for="{{obj.domain.domain_name}}_float_value" class="active">{{obj.domain.domain_name}}</label>
+                                                    <input id="{{obj.domain.domain_name}}_float_value" class="form-control" type="number" step=.0001 name="{{obj.domain.domain_name}}_float_value" required value="{{obj.value_float}}">
+
+                                                </div>
+                                             </div>
+                                            {% elif obj.domain.datatype == 'Text' %}
+                                             <div class="col-md-12 pad-top">
+                                                <div class=" col-md-12">
+                                                    <label for="{{obj.domain.domain_name}}_text_value" class="active">{{obj.domain.domain_name}}</label>
+                                                    <textarea id="{{obj.domain.domain_name}}_text_value"  class="form-control" name="{{obj.domain.domain_name}}_text_value" required >{{obj.value_text}}</textarea>
+
+                                                </div>
+                                             </div>
+                                            {% endif %}
+                                    {% endfor %}
+
+
+                               {% for field in extra_fields %}
+                                    {% if field.datatype == 'Date' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class="input-field col-md-12">
+                                                    <label for="date_value" class="active">{{field.domain_name}}</label>
+                                                    <input id="date_value" type="text"  class="form-control" name="{{field.domain_name}}_date_value" required >
+
+                                                </div>
+                                             </div>
+                                            {% elif field.datatype == 'Char' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class="input-field col-md-12">
+                                                    <label for="{{field.domain_name}}_char_value" class="active">{{field.domain_name}}</label>
+                                                    <input id="{{field.domain_name}}_char_value"  class="form-control" type="text" name="{{field.domain_name}}_char_value" required >
+
+                                                </div>
+                                             </div>
+                                            {% elif field.datatype == 'Integer' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class="input-field col-md-12">
+                                                     <label for="{{field.domain_name}}_int_value" class="active">{{field.domain_name}}</label>
+                                                    <input id="{{field.domain_name}}_int_value"  class="form-control" type="number" step="1" name="{{field.domain_name}}_int_value" required >
+
+                                                </div>
+                                             </div>
+                                            {% elif field.datatype == 'Float' %}
+                                             <div class="col-md-4 pad-top">
+                                                <div class="input-field col-md-12">
+                                                     <label for="{{field.domain_name}}_float_value" class="active">{{field.domain_name}}</label>
+                                                    <input id="{{field.domain_name}}_float_value"  class="form-control" type="number" step=.0001 name="{{field.domain_name}}_float_value" required >
+
+                                                </div>
+                                             </div>
+                                            {% elif field.datatype == 'Text' %}
+                                             <div class="col-md-12 pad-top">
+                                                <div class=" col-md-12">
+                                                    <label for="{{field.domain_name}}_text_value" class="active">{{field.domain_name}}</label>
+                                                    <textarea id="{{field.domain_name}}_text_value"  class="form-control" name="{{field.domain_name}}_text_value" required ></textarea>
+
+                                                </div>
+                                             </div>
+                                            {% endif %}
+                               {% endfor %}
+
+
+
+
+
+                          </div>
+
+                            <!--<div class="row">-->
+                                <!--{% for dom in cmdb_domains %}-->
+                                        <!--{% for obj in cmbd_obj %}-->
+
+                                            <!--{% if dom.datatype == 'Char' %}-->
+                                                    <!--{% if dom.id = obj.domain.id %}-->
+                                                    <!--<div class="col-md-4">-->
+                                                        <!--<div class="input-field col s12">-->
+                                                            <!--<input id="{{dom.domain_name}}_char_value" type="text" name="{{dom.domain_name}}_char_value" required value="{{obj.value_char}}">-->
+                                                            <!--<label for="{{dom.domain_name}}_char_value" class="active">{{dom.domain_name}}</label>-->
+                                                        <!--</div>-->
+                                                     <!--</div>-->
+                                                    <!--{% endif %}-->
+                                            <!--{% elif dom.datatype == 'Date' %}-->
+                                                        <!--{% if dom.id = obj.domain.id %}-->
+                                                        <!--<div class="col-md-4">-->
+                                                            <!--<div class="input-field col s12">-->
+                                                                <!--<input id="date_value" type="text" name="{{obj.domain.domain_name}}_date_value" required value="{{obj.value_date | date:"Y-m-d"}}">-->
+                                                                <!--<label for="date_value" class="active">{{dom.domain_name}}</label>-->
+                                                            <!--</div>-->
+                                                         <!--</div>-->
+                                                    <!--{% endif %}-->
+                                            <!--{% endif %}-->
+
+
+
+
+
+                                        <!--{%  endfor %}-->
+                                    <!--{%  endfor %}-->
+
+                            <!--</div>-->
+
+
+                              <div class="row pad-top">
+                                    <div class="col-md-4">
+                                        <div class="col-md-6">
+                                    <button class="btn  btn-info pull-left " style="width:100%; " type="submit" id="submit_btn">Submit</button>
+                                            </div>
+                                         <div class="col-md-6"><input class="btn btn-danger pull-left " action="action" type="button" style="width:100%; " value="Cancel" onclick="history.go(-1);" />
+                                            </div>
+                                    </div>
+                              </div>
+                        </form>
+
+                      </div>
+
+                  </div>
+              </div>
+
+            </div>
+     </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/customer_footer.html"%}
+          {% else %}
+          {% include "components/footer.html"%}
+          {% endif %}
+
+        <link href="/static/customer/date/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+        <script type="text/javascript" src="/static/customer/date/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/static/customer/date/js/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+
+        <script type="text/javascript">
+            $("#date_value").datepicker({ dateFormat: "yy-mm-dd" });
+        </script>
+
+        <script src="/static/customer/js/plugins/datepicker/datepicker.js" type="text/javascript"></script>
+        <script>
+
+            $("#subsec").css('display', 'block');
+        $("#cmdb").addClass("active");
+        $("#sec_detail").addClass("active");
+
+         </script>
+    </body>
+</html>

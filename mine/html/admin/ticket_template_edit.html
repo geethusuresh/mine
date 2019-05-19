@@ -1,0 +1,591 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+        /*-----Style for the modal-----*/
+            .modal-dialog{
+                overflow-y: initial !important;
+            }
+            .modal-body{
+                height: 500px!important;
+                overflow-y: auto!important;
+            }
+
+            @media (min-height: 500px) {
+                .modal-body { height: 400px; }
+            }
+
+            @media (min-height: 800px) {
+                .modal-body { height: 600px; }
+            }
+    </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">SD Settings | <small>Ticket Templates</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Edit Ticket Templates</li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-1"> </div>
+                        <div class="col-sm-10">
+                            <div class="box">
+                                <div class="box-title">
+                                    <h3>Edit Ticket Template</h3>
+                                </div>
+                                {% if template %}
+
+                                <div class="box-body">
+                                    <form action="/ticket_templates/edit/{{template.id}}/" method="post" enctype="multipart/form-data">    {% csrf_token %}
+                                        <input type="text" name="summ" id="" class="form-control" placeholder="Summary (Max 30 characters)" value="{{ template.tic_summary}}" required maxlength="50"><br>
+                                        <input type="hidden" id="customer_customer_id">
+                                        <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required>{{ template.tic_desc }}</textarea><br>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <select class="form-control" name="customer" id="customer_data"  autocomplete="off" required>
+                                                    <option value="">-Select Customer-</option>
+                                                    {% for customer in customers %}
+                                                        {% if template.tic_customer.id == customer.id %}
+                                                            <option  value="{{customer.id}}" selected="selected">{{customer}}</option>
+                                                        {% else %}
+                                                            <option value="{{customer.id}}">{{customer}}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select><br/>
+
+                                                <select class="form-control" name="domain"  id="domain" required>
+                                                    <option value="">-Select Domain-</option>
+                                                </select><br>
+                                                <select class="form-control" name="subdomain" id="subdomain" required>
+                                                    <option value="">-Select Subdomain-</option>
+                                                </select><br>
+                                                <select class="form-control" name="ip"  id="internal_priority" required>
+                                                    <option value="">-Select InternalPriority-</option>
+                                                </select><br>
+                                                <div class="row">
+                                                    <div class="col-sm-11">
+                                                        <input type="text" name="reportedby" id="impc" class="form-control"  maxlength="50" placeholder="Impacted User">
+                                                        <span class="data-value"><input type="text" style="display:none" id="hide_impacted" name="impacted_user" class="form-control"></span>
+                                                        <input type="hidden" name="hidden_user_type" id="user_type"/>
+                                                    </div>
+                                                    <div class="col-sm-1" id="users_div" style="margin-top: 6px;margin-left: inherit;">
+                                                        <a href=""data-toggle="modal" data-target="#i_user" class="fa fa-search" onclick="search_user('impacted')"></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+
+                                                <select class="form-control" name="tic_class" id="ticket_type" required>
+                                                    <option value="">-Select Ticket Type-</option>
+                                                    <!-- <option value="SR">Service Request</option>
+                                                    <option value="IN">Incident</option>
+                                                    <option value="PB">Problem</option>
+                                                    <option value="CH">Change</option> -->
+                                                </select><br>
+                                                <select class="form-control" id="cat" name="category" required>
+                                                    <option value="">-Select Category-</option>
+                                                </select><br>
+                                                <select class="form-control" id="sub_category" name="subcat" required >
+                                                    <option value="">-Select Subcategory-</option>
+                                                </select><br>
+
+                                                <select class="form-control" id="severity" name="severity" required style="display:none; margin-bottom:19px">
+                                                    <option value="">-Select Severity-</option>
+                                                </select>
+                                                <div class="row">
+                                                    <div class="col-sm-11">
+                                                        <input type="text" name="reportedby" id="rep" class="form-control"  maxlength="50" placeholder="Reported User" >
+                                                        <span class="data-value"><input type="text" style="display:none" id="hide_reportedby" name="reportedby" class="form-control"></span>
+                                                    </div>
+                                                    <div class="col-sm-1" id="users_div" style="margin-top: 6px;margin-left: inherit;">
+                                                        <a href=""data-toggle="modal" data-target="#r_user" class="fa fa-search" onclick="search_user('reported')"></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <button type="submit" class="btn btn-success btn-huge">Submit</button>
+                                        <a href="/ticket_templates/add/"> <button class="btn btn-danger btn-huge">Cancel</button></a>
+                                    </form>
+                                </div>
+
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="r_user" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Search Users</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table" id="r_user_list">
+                            <thead>
+                                <th></th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th></th>
+                            </thead>
+                        </table>
+
+
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="i_user" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Search Users</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table" id="i_user_list">
+                            <thead>
+                                <th></th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th></th>
+                            </thead>
+                        </table>
+
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        <script>
+            $("#tkt_sd_sett").addClass("active");
+            $("#sub_add_temp").css({'display' : 'block'});
+            $("#tkt_temp").addClass("active");
+            $('#tkt_sd_sett').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+            $('#table_id').DataTable({
+                "scrollX": true
+            });
+        </script>
+        <!--<script>-->
+           <!--$(document).ready(function(){-->
+            <!--customer_id = {{ template.tic_customer.id }}-->
+            <!--alert(customer_id)-->
+            <!--$("#customer_data option[value=customer_id]").attr('selected', selected);-->
+           <!--});-->
+
+        <!--</script>-->
+        <script>
+                $("#customer_data").on('change',function(){   //start
+                    $("#cat option:gt(0)").remove().end();
+                    $("#sub_category option:gt(0)").remove();
+                    $("#domain option:gt(0)").remove().end();
+                    $("#subdomain option:gt(0)").remove().end();
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{custid: $("#customer_data").val(),
+                              csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){
+                            cat_list = JSON.parse(data);
+                            $("#cat").empty();
+                            $("#cat").append($('<option>', {value:"", text:"-Select Category-"}));
+                            for (var i in cat_list){
+                                $("#cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }
+                    });
+                    if($("#customer_data :selected").text()!='-Select-'){
+                        $.ajax({
+                            url:"/ticket/incident/customer",
+                            type:"POST",
+                            dataType:"json",
+                            data:{
+                                groupid : this.value,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success : function(data) {
+                                $('#customer_customer_id').val(data['customer']);
+                                data = JSON.parse(data['group_list']);
+                                var customerid = $('#customer_customer_id').val();
+                                console.log("customerid == ", customerid)
+                                $("#domain").empty();
+                                $("#domain").append($('<option>', {value:"",text:"-Select Domain-"}));
+                                for (var i in data){
+                                    $("#domain").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}));
+                                }
+                                if (customerid == 'EGA') {
+                                    $("#ticket_type").append($('<option>', {value:"SR",text:"Service Request"}))
+                                    $("#ticket_type").append($('<option>', {value:"IN",text:"Incident"}));
+                                } else {
+                                    $("#ticket_type").append($('<option>', {value:"SR",text:"Service Request"}))
+                                    $("#ticket_type").append($('<option>', {value:"IN",text:"Incident"}))
+                                    $("#ticket_type").append($('<option>', {value:"PB",text:"Problem"}));
+                                    $("#ticket_type").append($('<option>', {value:"CH",text:"Change"}))
+                                }
+                            },
+                            error : function(xhr,errmsg,err) {
+                                console.log(err);
+                            }
+                        });
+                    }
+                }); //end
+        </script>
+        <script>
+
+            $(document).ready(function(){
+            window.onload = function customerdata(){   //start
+                    $("#cat option:gt(0)").remove().end();
+                    $("#sub_category option:gt(0)").remove();
+                    $("#domain option:gt(0)").remove().end();
+                    $("#ticket_type option:gt(0)").remove().end();
+                    $("#internal_priority option:gt(0)").remove().end();
+                    $("#severity option:gt(0)").remove().end();
+                    $("#severity").hide();
+                    $("#subdomain option:gt(0)").remove().end();
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{custid: $("#customer_data").val(),
+                              csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            }
+                            $('#cat').val('{{template.tic_category.id}}');
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }
+                    });
+                    if($("#customer_data :selected").text()!='-Select-'){
+                        $.ajax({
+                            url:"/ticket/incident/customer",
+                            type:"POST",
+                            dataType:"json",
+                            data:{
+                                groupid : $("#customer_data").val(),
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success : function(data) {
+                                $('#customer_customer_id').val(data['customer']);
+                                data = JSON.parse(data['group_list']);
+                                var customerid = $('#customer_customer_id').val();
+                                for (var i in data){
+                                    $("#domain").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}));
+                                }
+                                $('#domain').val('{{ template.tic_domain.id }}');
+                                if (customerid == 'EGA') {
+                                    $("#ticket_type").append($('<option>', {value:"SR",text:"Service Request"}))
+                                    $("#ticket_type").append($('<option>', {value:"IN",text:"Incident"}));
+                                } else {
+                                    $("#ticket_type").append($('<option>', {value:"SR",text:"Service Request"}))
+                                    $("#ticket_type").append($('<option>', {value:"IN",text:"Incident"}))
+                                    $("#ticket_type").append($('<option>', {value:"PB",text:"Problem"}));
+                                    $("#ticket_type").append($('<option>', {value:"CH",text:"Change"}))
+                                }
+                                $('#ticket_type').val('{{template.tic_type}}');
+                                fetch_subdomain('true');
+                                fetch_subcategory_list('true');
+                                get_priority_list();
+                                get_severity_list($('#customer_data').val(), '{{ template.customer_priority.id}}', 'true');
+                            },
+                            error : function(xhr,errmsg,err) {
+                                console.log(err);
+                            }
+                        });
+                    }
+                } //end
+                });
+        </script>
+        <script>
+            $(document).ready(function(){
+                $('#cat').on('change', function(){
+                    fetch_subcategory_list('false');
+                });
+            });
+            function fetch_subcategory_list(is_load) {
+                var catid = $('#cat').val();
+                $.ajax({
+                    url :"/category/enduser",
+                    type:"POST",
+                    dataype:"json",
+                    data:{catty: catid,
+                        csrfmiddlewaretoken:'{{csrf_token}}'},
+                    success:function(data){
+
+                        cat_list = JSON.parse(data);
+                        $("#sub_category").empty();
+                        $("#sub_category").append($('<option>', {value:"", text:"-Select Subcategory-"}));
+
+                        for (var i in cat_list){
+                            $("#sub_category").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                        }
+                        if (is_load == 'true')
+                            $("#sub_category").val('{{ template.tic_subcategory.id }}');
+                    },
+                    error: function(xhr,errmsg,err){
+                        alert(xhr);
+                    }
+                });
+            }
+        </script>
+        <script>
+            $(document).ready(function(){
+                $('#domain').on('change', function(){
+                    var catid = $('#cat').val();
+                    $("#subdomain option:gt(0)").remove().end();
+                    if($("#domain :selected").text()!='-Select Group-'){
+                        // $.ajax({
+                        //     url:"/ticket/incident/create",
+                        //     type:"POST",
+                        //     dataType:"json",
+                        //     data:{
+                        //         workgroupid : this.value,
+                        //         csrfmiddlewaretoken: '{{ csrf_token }}'
+                        //     },
+                        //     success : function(data) {
+                        //         data = JSON.parse(data);
+                        //         $("#subdomain").empty();
+                        //         $("#subdomain").append($('<option>', {value:"",text:"-Select Subdomain-"}));
+                        //         for (var i in data){
+                        //             $("#subdomain").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}));
+                        //         }
+                        //     },
+                        //     error : function(xhr,errmsg,err) {
+                        //         console.log(err);
+                        //     }
+                        // });
+                        fetch_subdomain('false');
+                        return false;
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function get_severity_list(customer_ids, priority, is_load) {
+                $.ajax({
+                    url :"/fetch_severity_list/?customer="+customer_ids+"&priority="+priority,
+                    type:"GET",
+                    dataype:"json",
+                    success:function(data){
+                        $("#severity option:gt(0)").remove();
+                        // severity_list = JSON.parse(data);
+                        severity_list = data;
+                        if (severity_list.length > 0) {
+                            $('#severity').show();
+                            $('#severity').prop('required',true);
+                            for (var i in severity_list) {
+                                $("#severity").append($('<option>', {value:severity_list[i][0], text:severity_list[i][1]}));
+                            }
+                            if (is_load == 'true'){
+                                $('#severity').val('{{template.ticket_severity.id}}');
+                            }
+                        } else {
+                            $('#severity').hide();
+                            $('#severity').prop('required',false);
+                        }
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(xhr);
+                    }
+                });
+            }
+            function fetch_subdomain(is_load){
+                $.ajax({
+                    url:"/ticket/incident/create",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                        workgroupid : $('#domain').val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                        data = JSON.parse(data);
+                        $("#subdomain").empty();
+                        $("#subdomain").append($('<option>', {value:"",text:"-Select Subdomain-"}));
+                        for (var i in data){
+                            $("#subdomain").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}));
+                        }
+                        if (is_load == 'true')
+                            $('#subdomain').val('{{template.tic_subdomain.id}}');
+                    },
+                    error : function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#ticket_type').on('change', function(){
+                    $("#internal_priority option:gt(0)").remove().end();
+                    // $("#internal_priority").empty()
+                    // $("#internal_priority").append($('<option>', {value:'',text:'-Select InternalPriority-'})) ;
+                    // var ticket_class = $('#ticket_type').val();
+                    // if (ticket_class == 'IN' || ticket_class == 'PB'){
+                    //     $("#internal_priority").append($('<option>', {value:'Critical',text:'Critical'})) ;
+                    //     $("#internal_priority").append($('<option>', {value:'High',text:'High'})) ;
+                    //     $("#internal_priority").append($('<option>', {value:'Medium',text:'Medium'})) ;
+                    //     $("#internal_priority").append($('<option>', {value:'Low',text:'Low'})) ;
+                    // } else if (ticket_class == 'SR'){
+                    //     $('#internal_priority').append($('<option>', {value:'Urgent',text:'Urgent'}));
+                    //     $('#internal_priority').append($('<option>', {value:'Normal',text:'Normal'}));
+                    //     $('#internal_priority').append($('<option>', {value:'Purchase',text:'Purchase'}));
+                    // } else if (ticket_class == 'CH') {
+                    //     $('#internal_priority').append($('<option>', {value:'Change',text:'Change'}));
+                    // }
+                    get_priority_list();
+                    var priority = $('#internal_priority').val();
+                    if ( priority ) {
+                        var customer_ids = $("#customer_data").val();
+                        get_severity_list(customer_ids, priority, 'false');
+                    }
+                });
+            });
+            function get_priority_list() {
+                $('#internal_priority option:gt(0)').remove().end();
+                if ($('#customer_data').val() && $('#ticket_type').val()){
+                    $.ajax({
+                        url:"/priority_management/list/?customer="+$('#customer_data').val()+'&ticket_type='+$('#ticket_type').val(),
+                        type:"GET",
+                        dataType:"json",
+                        success: function(data) {
+                            for (var i in data){
+                                $("#internal_priority").append($('<option>', {value:data[i]['id'],text:data[i]['priority']}))
+                            }
+                            $("#internal_priority").val('{{ template.customer_priority.id}}');
+                        }
+                    });
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#severity').hide();
+                $('#internal_priority').on('change', function(){
+                    // var ticket_class = $('#ticket_type').val();
+                    var priority = $('#internal_priority').val();
+                    if ( priority ) {
+                        var customer_ids = $("#customer_data").val();
+                        get_severity_list(customer_ids, priority, 'false');
+                    }
+                    // $('#severity option:gt(0)').remove().end();
+                    // if (ticket_class == 'IN' && priority == 'Critical'){
+                    //     $('#severity').show();
+                    //     $('#severity').prop('required',true);
+                    //     $("#severity").append($('<option>', {value:'3',text:'S1'})) ;
+                    //     $("#severity").append($('<option>', {value:'2',text:'S2'})) ;
+                    //     $("#severity").append($('<option>', {value:'1',text:'S3'})) ;
+                    // } else {
+                    //     $('#severity').hide();
+                    //     $('#severity').prop('required',false);
+                    // }
+                });
+            });
+        </script>
+        <script>
+            function assign_data(){
+                var user_type = $('#user_type').val();
+                var user_firstname = ($(this).find('td:eq(1)').text());
+                var user_lastname = ($(this).find('td:eq(2)').text());
+                var user_email = ($(this).find('td:eq(3)').text());
+                var user_id = ($(this).find('td:eq(4)').text());
+                var user_ph = ($(this).find('td:eq(5)').text());
+                if (user_type == 'reported'){
+                    $('#hide_reportedby').val(user_id);
+                    $('#rep').val(user_firstname);
+                } else if (user_type == 'impacted') {
+                    $('#hide_impacted').val(user_id);
+                    $('#impc').val(user_firstname);
+                }
+              }
+        </script>
+        <script>
+            function search_user(user_type){
+                if (user_type == 'reported')
+                    user_name = $('#rep').val();
+                else if (user_type == 'impacted')
+                    user_name = $('#impc').val();
+                customerid = $("#customer_data").val()
+                if (customerid) {
+                    $.ajax({
+                        url:"/search/user/",
+                        type:"POST",
+                        dataType:"json",
+                        data:{
+                          'user' : user_name,
+                          'customerid':$("#customer_data").val(),
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        type: "POST",
+                        success : function(data){
+                            i=0;
+                            if (user_type == 'reported')
+                                $('#r_user tr').slice(1).remove();
+                            else
+                                $('#i_user tr').slice(1).remove();
+                            for (var i in data){
+                                $tr = $('<tr>');
+                                $tr.append($('<td><input type="radio" name="user_ids">')).append($('<td>').html(data[i].user__first_name)).
+                                append($('<td>').html(data[i].user__last_name)).
+                                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id)).append($('<td class="hidden">').html(data[i].primary));
+                                $(".trhide").hide();
+                                $(".names").show();
+                                if (user_type == 'reported')
+                                    $("#r_user_list").append($tr);
+                                else
+                                    $("#i_user_list").append($tr);
+                                $("#user_type").val(user_type);
+                                $tr.bind('click', assign_data);
+                            }
+                        },
+                    });
+                }
+            }
+        </script>
+    </body>
+</html>

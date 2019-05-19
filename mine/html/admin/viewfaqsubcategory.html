@@ -1,0 +1,184 @@
+
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>View Faq SubCategory</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    
+    
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){ //To get the subcategory for selected ids
+       $('#cat_list').on('change', function(){
+        var selectedcat = $('#cat_list').val();  
+        $.ajax({
+          url :"/faq/subcategory/view",
+          type:"POST",
+          dataype:"json",
+          data:{selected_id : selectedcat,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){
+            show_list = JSON.parse(data);      
+             
+             $('.wizard').empty();
+             if ($.isEmptyObject(show_list)){
+                  $('.wizard').append('<p style="font-size:15px" style="float:left">No Subcategories Found</p>');                      
+             }else{ 
+              for (var i=0; i<show_list.length;i++){
+                $( ".wizard" ).append('<a href="/faq/subcategory/delete/'+show_list[i].pk+'" id = "delete" class ="glyphicon glyphicon-trash" style ="float:right" title="Click to delete category" onClick="return confirmdelete('+show_list[i].pk+');"></a>');
+                $( ".wizard" ).append('<a href="/faq/subcategory/edit/'+show_list[i].pk+'" class ="glyphicon glyphicon-pencil" style= "float:right;min-width:20%" title = "Click to edit a category"></a>'); 
+                $( ".wizard" ).append('<p style="font-size:15px" style="float:left">'+show_list[i].fields['subcategory']+'</p>');
+                }
+             } //console.log(data);
+          },
+          error:function(){
+            alert('Error');
+          }
+        });
+        
+       }); 
+      
+        
+      });
+    function confirmdelete(id){
+      if(confirm("Are you sure you want to delete?")){
+        var url = "/faq/subcategory/delete/"+id;
+        console.log(url);
+        window.location = url;
+        return false;
+      }else{
+          return false;
+
+      } 
+      }
+   </script>
+   <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">OneConsole</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <div class="sidebar-content">
+              <img src="/static/img/logo.png">
+              </div>
+                {% include "side_bar/sidebar.html"%}
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+              <div class="col-lg-4 ">
+                <ul class="breadcrumb">
+                  <li><i class="fa fa-home"></i><a href="#">Home</a></li>
+                  <li><a href="#">Faq SubCategory</a></li> <li class="active">Wizard</li>
+                </ul>
+              </div>
+              <div class="col-lg-8 ">
+              </div>
+            </div>
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Faq Sub Categories</h2>
+                <em>Detail List</em>
+              </div>
+
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Available Subcategories</h3></div>
+                  <div class="widget-content">
+                      <label for"cat_list" style="font-weight:bold;">Select Catogery List :</label>
+                      <select id ="cat_list" name="cat_list" >
+                         <option value="0">All</option>
+                         {% for cat_list in cat_list%}
+                         <option value="{{ cat_list.id }}">{{ cat_list.category }}</option>
+                         {% endfor %}
+                       </select>
+
+                      <div class="wizard-wrapper mainw">
+
+                       <div id="demo-wizard" class="wizard">
+                       {% if faq_sub %}
+                        {% for sub_cat in faq_sub %}
+                        <strong></strong>
+                        <a href="/faq/subcategory/delete/{{ sub_cat.id }}" id = "delete" class ="glyphicon glyphicon-trash" style ="float:right" title="Click to delete category" onClick="return confirmdelete({{sub_cat.id}});"></a>
+
+                        <a href="/faq/subcategory/edit/{{ sub_cat.id }}" class ="glyphicon glyphicon-pencil" style= "float:right;min-width:20%" title = "Click to edit a category"></a>
+
+                        <p style="font-size:15px" style="float:left">{{forloop.counter}}  {{ sub_cat.subcategory }}</p> 
+
+                        {% endfor %}
+                          <p style="font-size:15px" style="float:left">{{forloop.counter}}  {{ sub_cat.subcategory }}</p> 
+                        {% else %}
+                          <p style="font-size:15px" style="float:left">No Subcategories Found</p> 
+                        {% endif%}
+
+
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+
+          </div>
+        </div>
+      </div>
+  </body>
+
+</html>
+
+
+
+

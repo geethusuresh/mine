@@ -1,0 +1,206 @@
+{% extends "change_management/base.html" %}
+
+{% block title_content %} Knowledgebase Edit {% endblock title_content %}
+
+{% block page_head %} Knowledge Base | <small> Knowledgebase Edit </small> {% endblock page_head %}
+
+{% block bread_crumb %} <li> <a href="{% url 'customer_kb_list' %}"
+> Knowledgebase List </a></li><li class="active"> Knowledgebase Edit </li> {% endblock bread_crumb %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/css/summernote.css">
+{% endblock extra_head %}
+
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Knowledgebase Edit </h3>
+                </div>
+                <div class="panel-body">
+                    <!-- <div class="col-sm-2"></div> -->
+                    <div class="col-sm-12">
+                        <form action="{% url 'kb_edit' kb.id %}" method="POST">{% csrf_token %}
+                            <div class="col-sm-12">
+                                <div class="col-sm-6">
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-4">Customer:</label>
+                                        <div class="col-md-8">
+                                            {{kb.customer}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-4">Escalation Contact:</label>
+                                        <div class="col-md-8">
+                                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                                <input type="text" class="form-control" required name="escalation_contact" value="{{kb.escalation_contact}}">
+                                            {% else %}
+                                                {{kb.escalation_contact}}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-3">Group:</label>
+                                        <div class="col-md-9">
+                                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                                <select class="form-control" required name="escaltion_subgroup">
+                                                    <option value="">--Select--</option>
+                                                    {% for subgroup in subgroups %}
+                                                        <option value="{{subgroup.id}}" {% if kb.escalation_subgroup.id == subgroup.id %} selected {% endif %}>{{ subgroup.workgroup.workgroup}} / {{ subgroup.subgroupname }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                {{kb.escalation_subgroup.workgroup.workgroup }}/ {{ kb.escalation_subgroup.subgroupname }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="form-group pad-all">
+                                        <label class="control-label col-md-3">Title:</label>
+                                        <div class="col-md-9">
+                                            <!-- {{form.kb_title}} -->
+                                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                                <input type="text" value="{{kb.kb_title}}" class="form-control" required name="kb_title">
+                                            {% else %}
+                                                {{ kb.kb_title }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Overview:</label>
+                                    <div class="col-md-8">
+                                        <!-- {{form.kb_overview}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" required name="kb_overview">{{kb.kb_overview}}</textarea>
+                                        {% else %}
+                                            {{kb.kb_overview }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Configuration Item:</label>
+                                    <div class="col-md-8 pad-all">
+                                        <!-- {{form.configuration_item}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" name="configuration_item" >{{kb.configuration_item}}</textarea>
+                                        {% else %}
+                                            {{kb.configuration_item }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Procedure:</label>
+                                    <div class="col-md-8">
+                                        <!-- {{form.procedure}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" name="procedure" id="id_procedure" >{{kb.procedure}}</textarea>
+                                        {% else %}
+                                            <pre>{{kb.procedure|safe}}</pre>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Necessary Requirements:</label>
+                                    <div class="col-md-8 pad-all">
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" name="necessary_requirements" id="id_necessary_requirements">{{kb.necessary_requirements|safe}}</textarea>
+                                        {% else %}
+                                            <pre>{{ kb.necessary_requirements|safe}}</pre>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Notes:</label>
+                                    <div class="col-md-8 pad-all">
+                                        <!-- {{form.notes}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" name="notes" >{{kb.notes}}</textarea>
+                                        {% else %}
+                                            {{kb.notes}}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Reference Information:</label>
+                                    <div class="col-md-8 pad-all">
+                                        <!-- {{form.reference_info}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" name="reference_info" id="id_reference_info">{{kb.reference_info}}</textarea>
+                                        {% else %}
+                                            <pre>{{ kb.reference_info|safe}}</pre>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-group pad-all">
+                                    <label class="control-label col-md-4">Keywords:</label>
+                                    <div class="col-md-8 pad-all">
+                                        <!-- {{form.keywords}} -->
+                                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                            <textarea class="form-control" required name="keywords" placeholder="Please enter comma separated words" >{{kb.keywords}}</textarea>
+                                        {% else %}
+                                            {{kb.keywords}}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                                <div class="col-sm-12">
+                                    <div class="form-group pad-all">
+                                        <div class="col-md-4"></div>
+                                        <div class="col-md-8 pad-all">
+                                        <button type="submit" class="btn btn-success"> Edit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <!-- <div class="col-sm-2"></div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript" src="/static/js/summernote.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_reference_info').summernote({
+            height: 150,
+        });
+        $('#id_procedure').summernote({
+            height: 150,
+        });
+        $('#id_necessary_requirements').summernote({
+            height: 150,
+        });
+    });
+    </script>
+    <script type="text/javascript">
+        $('#id_customer').on('change', function(){
+            $.ajax({
+                url :"/ticket/fetch_subgroups/?cust_id="+this.value,
+                type:"GET",
+                dataype:"json",
+                success:function(data){
+                    $("#id_escalation_subgroup option:gt(0)").remove();
+                    escalation_group = data;
+                    if (escalation_group.length > 0) {
+                        for (var i in escalation_group) {
+                            group_name = escalation_group[i][1] + ' / ' + escalation_group[i][2]
+                            $("#id_escalation_subgroup").append($('<option>', {value:escalation_group[i][0], text:group_name}));
+                        }
+                    }
+                },
+                error: function(xhr,errmsg,err) {
+                    console.log(xhr);
+                }
+            });
+        })
+    </script>
+{% endblock footer_content %}

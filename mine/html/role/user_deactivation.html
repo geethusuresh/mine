@@ -1,0 +1,163 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link href="/static/select2/select2.css" rel="stylesheet" />
+    <link href="/static/select2/select2-2.css" rel="stylesheet" />
+    <style type="text/css">
+      #s2id_groupSelect, .select2-input, .select2-container, .select2-search-field, .select2-choices {
+          width: 180px;
+        }
+        .popover{
+            width:700px;
+            max-width: none;    
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+     {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+
+          {% if alert_message %}
+          {% for alert in alert_message %}
+              {% if profile.customer in alert.viewable_custs.all %}
+                <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+              {% endif %}
+          {% endfor %}
+          {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Deactivate |<small> Users</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/management/schedule/">Management Commands</a></li>
+                    <li class="active">Script Status</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% include "components/msg_div.html" %}
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="panel">
+                      <div class="panel-heading">
+                        <p class="panel-title text-center"><strong>Deactivate List</strong></p>
+                       </div>
+                      <div class="panel-body table-responsive ">
+                        {% if users_list|length > 0 %}
+                          <form action="/create_deactivation_ticket/" method="post">{% csrf_token %}
+                            <input type="hidden" name="checked_list_data" id="checked_list_data">
+                            <br/>
+                            <input type="submit" class="btn btn-success" value="Create Ticket">
+                            <a href="/download/csv/deactive/"><button class="btn btn-warning" type="button"> Download csv </button></a>
+                           <table class="table table-hover " id="table_index">
+                              <thead>
+                              <tr>
+                                  <th><input type="checkbox" class="all"/><span
+                                  class="span_class">Select All</span></th>
+                                  <th>name</th>
+                                  <th>Note</th>
+                                  <th>Action</th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                                {% for user in users_list%}
+                                <tr >
+                                  <td><input type="checkbox" name="deactivate_group" value="" class=".checkbox .checkbox-primary select checkboxclass"/></td>
+                                  <td>{{ user.user }}</td>
+                                  <td>{{ user.reason }}</td>
+                                  <td><button class="btn btn-success"><a href="/admin_settings/users/{{ user.user.id }}/deactivate/">Deactivate</a></button></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </form>
+                        {% else %}
+                            <table class="table table-hover " id="table_index">
+                              <thead>
+                              <tr>
+                                  <th>Name</th>
+                                  <th>Note</th>
+                                  <th>Deactivate</th>
+                                  <th>Remove</th>
+                              </tr> 
+                              </thead>
+                              <tbody>
+                                {% for user in ticket_created_list %}
+                                <tr >
+                                  <td>{{ user.user }}</td>
+                                  <td>{{ user.reason }}</td>
+                                  <td><button class="btn btn-success"><a href="/admin_settings/users/{{ user.user.id }}/deactivate/">Deactivate</a></button></td>
+                                  <td><button class="btn btn-danger"><a href="/deactivate/users?profile={{ user.user.id }}&ticket={{user.ticket.id}}">Remove</a></button></td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    <script>
+      $("#table_index").dataTable({
+        'bLengthChange':false
+      })
+    </script>
+    <script type="text/javascript">
+        $('#table_index').on('click', 'td', function(){
+            var th = $(this).closest('table').find('th').eq( this.cellIndex );
+            var head_th = th.find("span.span_class");
+            if (head_th){
+              var head_th = th.find("span.span_class");
+              var rows = $('#table_index').dataTable().fnGetNodes();
+              var checked_list = []
+              for(var i=0; i < rows.length; i++) {
+                  if ($(rows[i]).find('td:eq(0)').find('input.select')[0].checked) {
+                      checked_list.push($(rows[i]).find('td:eq(1)').text());
+                  }
+              }
+              $('#checked_list_data').val(checked_list);
+              console.log(checked_list);
+            }
+        });
+        $(".all").on('change', function () {
+          var checked_list = []
+          var rows = $('#table_index').dataTable().fnGetNodes();
+          for(var i=0;i<rows.length;i++){
+            $(rows[i]).find('td:eq(0)').find('input.select')[0].checked = this.checked;
+            checked_list.push($(rows[i]).find('td:eq(1)').text());
+          }
+          if($(this)[0].checked == false){
+            checked_list = []  
+          }
+          $('#checked_list_data').val(checked_list);
+        });
+        $("#tkt_sd_sett").addClass("active");
+        $("#sub_add_temp").css({'display' : 'block'});
+        $("#deactivate_list").addClass("active");
+        $('#tkt_sd_sett').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+</html>

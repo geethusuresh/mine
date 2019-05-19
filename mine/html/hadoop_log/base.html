@@ -1,0 +1,73 @@
+{% load staticfiles %}
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Hadoop Log</title>
+    {% include "components/css.html"%}
+        <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+    </style>
+        <script type="text/javascript" src="/static/customer/Chart.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{% static 'hadoop_log/css/base.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'hadoop_log/css/style.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'mootools/css/MultiSelect.css' %}" />
+
+        <script type="text/javascript" src="{% static 'mootools/js/mootools-core-1.4.2-full-compat-yc.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mootools/js/mootools-more-1.4.0.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mootools/js/multiselect.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mootools/js/index.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mootools/js/moopload.js' %}"></script>
+    {% include "components/header.html"%}
+
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Map-Reduce | <small>Jobs</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Hadoop</li>
+                </ol>
+            </div>
+            {% include "components/msg_div.html" %}
+			<div class="content">
+				{% block content %}
+				{% endblock %}
+			</div>
+    </body>
+
+    <script type="text/javascript">
+        $( document ).ready(function(){
+        var current = location.pathname;
+        $('#sidebar li a').each(function(){
+        var $this = $(this);
+        // if the current path is like this link, make it active
+        if($this.attr('href').indexOf(current) !== -1){
+        $this.parents('.sub-nav, li').addClass('active');
+        $this.parents('.sub-menu').css('display','block');
+        }
+        })
+        })
+    </script>
+{% include "components/footer.html"%}
+</html>
+

@@ -1,0 +1,146 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="owned_ticket_page">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Issues | <small>Predict Issues</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Predict Issues</li>
+                </ol>
+            </div>
+
+            <div class="content">
+                {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                {% endfor %}
+                </ul>
+              {% endif %}
+
+    {% if piostatus == 'alive' %}
+
+             <form action="{%url 'similar_issues' %}" method="post" class="form-group"> {% csrf_token %}
+
+                 <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">Email</span>
+                    <input style="width:250px !important" type="text" aria-describedby="basic-addon1" class="form-control" name = "userid" {% if user_email %} value = "{{user_email}}" {% endif %}>
+                    <input type="submit" class="btn btn-info" value="submit" >
+                 </div>
+
+
+
+            </form>
+        {% if matching_summaries %}
+                <h3>{{user_name}} may face these issues:</h3>
+            <table id="myTable" class="table   table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>SI</th>
+                        <th>Ticket Summary</th>
+                        <th>Resolution Steps</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for ticket_pre in matching_summaries %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>{{ticket_pre.ticket_summary}}</td>
+                        <td><button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#myModal_{{forloop.counter}}">View Resolution</button></td>
+                        <!--<td>{{ticket_pre.resolution}}</td>-->
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% elif email_does_not_exists %}
+        <h4>{{piostatus}}</h4>
+    {% elif ticket_does_not_exists %}
+        <h4>{{piostatus}}</h4>
+
+    {% elif not_recommended %}
+         <h3>Cannot initialize Prediction IO Recommendation Engine .</h3>
+    {% else %}
+        <table id="errTable" class="table   table-striped table-hover">
+        <thead>
+            <tr>
+                <th>SI</th>
+                <th>Ticket Summary</th>
+                <th>Resolution Steps</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td></td>
+                <td>No data Available.</td>
+                <td></td>
+            </tr>
+        </tbody>
+        </table>
+    {% endif %}
+
+{% if matching_summaries %}
+{% for ticket_pre in matching_summaries %}
+<!-- Modal -->
+<div class="modal fade" id="myModal_{{forloop.counter}}" role="dialog">
+<div class="modal-dialog">
+
+  <!-- Modal content-->
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Resolution</h4>
+    </div>
+    <div class="modal-body">
+      <p>{{ticket_pre.resolution}}</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+  </div>
+
+</div>
+</div>
+<!--End Modal -->
+{% endfor  %}
+{% endif %}
+
+{% include 'components/footer.html' %}
+{% include 'components/service_request.html'%}
+<script>
+
+$("#service").addClass("active");
+$("#subc").css({'display' : 'inline-block'});
+$("#pitkt").addClass("active");
+
+$(document).ready(function(){
+$('#myTable').DataTable({
+"bLengthChange": false
+});
+});
+
+</script>

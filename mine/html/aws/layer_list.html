@@ -1,0 +1,77 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+ <section class="content-header">
+    <h1>
+        AWS Layer List
+        <small>Layer Overview</small>
+    </h1>
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+<ol class="breadcrumb">
+    <li>
+        <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+    </li>
+<!--     <li>
+       <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+    </li> -->
+    <li class="active">
+        <strong>AWS Layer List</strong>
+    </li>
+</ol>
+
+<div>
+<div class="row">
+  <div class="col-md-11">
+    <!-- TABLE: LATEST ORDERS -->
+    <div class="box box-warning">
+      <div class="box-header with-border">
+        <h3 class="box-title">Layers</h3>
+        <div class="box-tools pull-right">
+          <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+          <button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <div class="row" style="margin-bottom: 1%; !important">
+          <a class="btn btn-sm btn-primary btn-flat pull-right"href="javascript::;" id="add_layer_button">Add Layer</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table no-margin" id= "image_table">
+            <thead bgcolor='#E6E6E6'>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Created Date</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody bgcolor='EAF3FE'>
+              {% for layer in layers %}
+              <tr>
+                <td>{{layer.name}}</td>
+                <td>{{layer.type}}</td>
+                <td>{{layer.created_date}}</td>
+                <td><a href="{% url 'aws_opswork_layer_details' cloud_account_id layer.id %}"><i class="fa fa-search"></i></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
+      </div><!-- /.box-body -->
+    </div><!-- /.box -->
+  </div><!-- /.col -->
+  <div class="col-md-1">
+  </div><!-- /.col -->
+</div>
+ {% include 'aws/add_layer_popup.html' %}
+</div>
+
+<script type="text/javascript">
+  $( "#add_layer_button" ).click(function() {
+    $("#add_layer_popup").modal('show');
+  });
+</script>
+{% endblock%}

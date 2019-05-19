@@ -1,0 +1,209 @@
+{% extends 'cloud_management/home.html'%}
+
+{% block section_header %}
+      <h1>
+          <small></small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><a href="{% url 'openstack_dashboard' %}">Home</a></li>
+          <li><a href="{% url 'list_key_pair' %}">networks</a></li>
+          <li>key Pair</li>
+      </ol>
+{% endblock %}
+
+{% block content%}
+
+<div ng-controller='networkController'>
+    <section class="content">
+      <div class="row" style="margin-bottom:15px !important">
+            <div class="col-md-12">
+                <div class="col-md-8">
+                </div>
+                <div class="col-md-3">
+                      <button class="btn btn-primary" id="create-key_pair"></button>
+                </div>
+            </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-1">
+          </div>
+          <div class="col-md-9">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Project</th>
+                  <th>Network Name</th>
+                  <th>Subnets</th>
+                  <th>Shared</th>
+                  <th>Status</th>
+                  <th>Admin State</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="each_item in network_list_obj">
+                  <td></td>
+                  <td></td>
+                  <td >{[{each_item.name}]}</td>
+                  <td ng-click=subnetdetails(each_item.subnets[0]) class="text-aqua"><a href="javascript:void(0)">Details</a></td>
+                  <td >{[{each_item.shared}]}</td>
+                  <td >{[{each_item.status}]}</td>
+                  <td >{[{each_item.admin_state_up}]}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div id="create-network-popup" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Create Network</h4>
+            </div>
+            <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'create_node_openstack' %}">{% csrf_token %}
+              <div class="modal-body">
+                <div class="mailbox row">
+                  <div class="col-xs-12">
+                    <div class="box box-solid">
+                      <div class="box-header">
+                          <h3 class="text-aqua" >
+                          <i class="fa fa-laptop"></i>
+                          Create Network</h3>
+                      </div>
+                      <div class="box-body">
+                        <div class="row">
+                          <div class="col-lg-9 main-chart callout callout-info">
+                            <div class="form-group">
+                              <label>Network Name</label>
+                              <input type="text" class="form-control" placeholder="Enter Network Name">
+                            </div>
+                            <div class="form-group">
+                              <label>Admin State</label>
+                              <select class="form-control">
+                                <option value="True">UP</option>
+                                <option value="False">DOWN</option>
+                              </select>
+                            </div>
+                            <div class="form-group">
+                              <label>Provider Network Type</label>
+                                <select class="form-control switchable" id="id_network_type" name="network_type" data-original-title="" title="">
+                                <option value="local">Local</option>
+                                <option value="flat">Flat</option>
+                                <option value="vlan">VLAN</option>
+                                <option value="gre">GRE</option>
+                                <option value="vxlan">VXLAN</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                    <input type="checkbox">
+                                    External Network
+                                </label>
+                                <label>
+                                    <input type="checkbox">
+                                    Shared
+                                </label>
+                              </div>
+                            </div>
+                          </div> 
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit" id="form-submit">Create</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div id="subnet_details-popup" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Subnet Details</h4>
+            </div>
+              <div class="modal-body">
+                <div class="mailbox row">
+                  <div class="col-xs-12">
+                    <div class="box box-solid">
+                      <div class="box-header">
+                          <h3 class="text-aqua" >
+                          <i class="fa fa-laptop"></i>
+                          Subnet Details</h3>
+                      </div>
+                      <div class="box-body">
+                        <div class="row">
+                          <div class="col-lg-9">
+                            <table class="table table-bordered">
+                              <thead>
+                                <tr>
+                                  <th>Name</th>
+                                  <th>Enable Dhcp</th>
+                                  <th>Network Id</th>
+                                  <th>Allocation Pools</th>
+                                  <th>Gateway Ip</th>
+                                  <th>Ip Version</th>
+                                  <th>Cidr</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>{[{subnet_details_obj.name}]}</td>
+                                  <td>{[{subnet_details_obj.enable_dhcp}]}</td>
+                                  <td>{[{subnet_details_obj.network_id}]}</td>
+                                  <td>{[{subnet_details_obj.allocation_pools}]}</td>
+                                  <td>{[{subnet_details_obj.gateway_ip}]}</td>
+                                  <td>{[{subnet_details_obj.ip_version}]}</td>
+                                  <td>{[{subnet_details_obj.cidr}]}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div> 
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% if error %}
+
+<script type="text/javascript">
+        $("#create-keyPair-popup" ).modal('show');
+        $('#key-error').delay(5000).fadeOut('slow')
+</script>
+
+
+{% endif %}
+
+
+<script type="text/javascript">
+      $( "#create-key_pair").click(function() {
+        $("#create-keyPair-popup" ).modal('show');
+      });
+</script>
+{% load staticfiles %}
+
+ <script type="text/javascript">
+
+
+
+ </script>
+
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "change_management/base.html" %}
+
+{% block title_content %} Knowledgebase Search {% endblock title_content %}
+
+{% block page_head %} Knowledge Base | <small> Knowledgebase Search </small> {% endblock page_head %}
+
+{% block bread_crumb %} <li> <a href="{% url 'customer_kb_list' %}"
+> Knowledgebase List </a></li><li class="active"> Knowledgebase Search </li> {% endblock bread_crumb %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/css/summernote.css">
+{% endblock extra_head %}
+
+{% block body_content %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Knowledgebase Search </h3>
+                </div>
+                <div class="panel-body">
+                    <!-- <div class="col-sm-2"></div> -->
+                    <div class="col-sm-12">
+                        <form action="{% url 'kb_search' %}" method="POST" id="kb_search_form">{% csrf_token %}
+                            <div class="col-sm-4">
+                                <label>Title : </label>
+                                <input type="text" class="form-control" name="kb_title" id="kb_title">
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Overview : </label>
+                                <input type="text" class="form-control" name="kb_overview" id="kb_overview">
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Keyword : </label>
+                                <input type="text" class="form-control" name="keywords" id="keywords">
+                            </div>
+                            <div class="col-sm-4 pad-top">
+                                <button type="submit" class="btn btn-success" id="kb_search_submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-12 pad-top">
+                        <table class="table table-hover borderless" id="kb_search_result_table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Title</th>
+                                    <th>Customer</th>
+                                    <th>Subgroup</th>
+                                    <th>Contact</th>
+                                </tr> 
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script type="text/javascript">
+        $('#kb_search_result_table').dataTable({
+            "bScrollCollapse": true,
+            // "scrollX": "200",
+        });
+        $('#kb_search_form').submit(function(e) {
+            e.preventDefault();
+            // document.getElementById("kb_search_submit").disabled = true;
+            // $('#fountainG').show();
+            var formData = {};
+            $("#kb_search_form").find("input[name]").each(function (index, node) {
+                formData[node.name] = node.value;
+            });
+            // $("#kb_search_form").find("select[name]").each(function (index, node) {
+            //     formData[node.name] = $('#'+node.id).val()
+            // });
+            $('#kb_search_result_table').DataTable( {
+                "processing": true,
+                "serverSide": false,
+                "iDisplayLength": 10,
+                "bAutoWidth": true,
+                "searching": true,
+                "bDestroy": true,
+                "pageLength": 10,
+                "pagingType": "simple_numbers",
+                "bScrollCollapse": true,
+                "scrollX": "200",
+                "language": {
+                    "emptyTable": "No data available"
+                },
+                "ajax": {
+                    "url": "/knowledge_base/search/",
+                    "type": "GET",
+                    "data": formData,
+                    "dataType": 'json',
+                    "dataSrc": function(data){
+                        // document.getElementById("kb_search_submit").disabled = false;
+                        // $('#fountainG').hide();
+                        // if(data.length > 0){
+                        //     $('#export_to_excel').show();
+                        // }
+                        // else{
+                        //     $('#export_to_excel').hide();
+                        // }
+                        return data;
+                    },
+                },
+                "columns": [
+                    { "data": "kb_edit_url",
+                        "orderable": false,
+                        "searchable": false
+                    },
+                    { "data": "kb_title" },
+                    { "data": "customer" },
+                    { "data": "subgroup" },
+                    { "data": "escalation_contact" },
+                ]
+            });
+            // Supress Data Table Warning messages    
+            $.fn.dataTable.ext.errMode = 'none';
+            $('#kb_search_result_table').DataTable().draw();
+        });
+    </script>
+    <script type="text/javascript">
+        $('#cust_kb_main').addClass("active");
+        $('#kb_head').addClass("active");
+        $('#cust_kb_list').css("display", "block");
+        $('#kb_search').addClass('active');
+        $('#cust_kb_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

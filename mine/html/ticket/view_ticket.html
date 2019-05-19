@@ -1,0 +1,1678 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Ticket Details</title>
+        {% include "components/asset_css.html"%}
+         <link rel="stylesheet" type="text/css" href="/static/customer/css/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">  
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+            /*.dl-horizontal dt {
+                width: 100px;
+            }*/
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Ticket Details<small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Ticket Details</li>
+                    </ol>
+                </div>
+                {% if messages %}
+                    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+                        {% for message in messages %}
+                            <div class="alert-wrap in animated jellyIn">
+                                <div class="alert alert-success" role="alert">
+                                    <button class="close" type="button">
+                                        <i class="fa fa-times-circle"></i>
+                                    </button>
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <h4 class="alert-title"></h4>
+                                            <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <div class="panel-control">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a href="#basic_data" role="tab" data-toggle="tab">Details</a></li>
+                                            <li><a href="#work_logs" role="tab" data-toggle="tab">Worklog</a></li>
+                                            {% if attachments %}
+                                                <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
+                                            {% endif %}
+                                            <li><a href="#history" role="tab" data-toggle="tab">History</a></li>
+
+                                            {% if "Resolver_Dashboard" in request.sessions.logged_user_priv %}
+                                                <li><a href="#related" role="tab" data-toggle="tab">Related Ticket</a></li>
+                                            {% endif %}
+                                            {% if resolutions %}
+                                                <li><a href="#resolution" role="tab" data-toggle="tab">Ticket Resolutions</a></li>
+                                            {% endif %}
+                                            <li><a href="#tasks" role="tab" data-toggle="tab">Tasks</a></li>
+                                            <a href="/create/prints/{{ticket.id}}" target="_blank" class="btn btn-primary pull-right btn-sm"><i class="fa fa-download"></i> Generate PDF</a>
+                                        </ul>
+                                    </div>
+                                    <h3 class="panel-title">{{ticket.ticketid}}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="tab-content">
+                                                <div id="basic_data" class="tab-pane fade in active">
+                                                    <div class="row">
+                                                        <div class="col-sm-8">
+                                                            <label><strong>Title:</strong> </label>
+                                                            {{ ticket.summary }}     
+                                                        </div>
+                                                        <div class="col-md-4" style="border-left:1px solid black" >
+                                                            <h4>{{ ticket.ticketid }}</h4>
+                                                            <label class="label label-success" style="font-size:14px" >{{ticket.status | real}}</label>
+                                                            {% if ticket.targetfinish %}
+                                                                <br/>
+                                                                <label><strong>Estimated Resolution Time</strong></label><br/>
+                                                                {% tzone ticket.targetfinish %}
+                                                            {% endif %}               
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <hr/>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <label><strong>Description : </strong>  </label>
+                                                            <!-- <pre style="margin-top:1px" id = "desc">{{ ticket.description }}</pre> -->
+                                                            <br/>
+                                                            <div class="col-sm-6">
+                                                                {% if ticket.html_description %}
+                                                                    <a href="#" onclick="show_html_version({{ticket.id}}, 'ticket')" class="btn btn-info">View Html Version</a> <br/>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <button class="btn btn-info" style="float:right" id="btnSelect">Select Content</button>
+                                                            </div>
+                                                            <div class="col-sm-12" style="margin-top:12px">
+                                                                <pre id="desc">{{ticket.description|safe}}</pre>
+                                                                <textarea id="desc_text" readonly="readonly" class="form-control" style="cursor:text;height:300px"></textarea>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <hr/>
+                                                            </div>
+                                                            <div class="col-sm-6" style="margin-top:12px">
+                                                                <dl class="dl-horizontal">
+                                                                    <dt>Impacted User :</dt>
+                                                                    <dd>{{ ticket.affectedperson }}</dd>
+                                                                    <br>
+                                                                    <dt>Phone No :</dt>
+                                                                    <dd>{{ticket.affectedphone}}</dd><br>
+                                                                    <dt>User Email :</dt>
+                                                                    <dd>{{ ticket.affectedemail }}</dd><br/>
+                                                                    <dt>Submitted By :</dt>
+                                                                    <dd>{{ ticket.reportedby }}</dd><br/>
+                                                                    <dt>Woklocation/ Workstation :</dt>
+                                                                    <dd>{{ ticket.extrafield1}}</dd><br/>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <dl class="dl-horizontal">
+                                                                    <dt>Domain :</dt>
+                                                                    <dd>{{ ticket.group }}</dd>
+                                                                    <br>
+                                                                    <dt>Subdomain :</dt>
+                                                                    <dd>{{ ticket.subgroup }}</dd><br>
+                                                                    <dt>Category :</dt>
+                                                                    <dd>{{ ticket.category}}</dd><br/>
+                                                                    <dt>Subcategory :</dt>
+                                                                    <dd>{{ ticket.subcategory }}</dd><br/>
+                                                                    <dt>Source :</dt>
+                                                                    <dd>{{ ticket.source}}</dd><br/>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="col-sm-12">
+                                                                <hr/>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <dl class="dl-horizontal">
+                                                                    <dt>Assigned to :</dt>
+                                                                    <dd>{{ ticket.owner }}</dd>
+                                                                    <br>
+                                                                    <dt>Created Date :</dt>
+                                                                    <dd>{% tzone ticket.creationdate %}</dd><br>
+                                                                    <dt>Last Updated :</dt>
+                                                                    <dd>{% tzone ticket.changedate %}</dd><br/>
+                                                                    <dt>Target Start :</dt>
+                                                                    <dd>{% tzone ticket.targetstart %}</dd><br/>
+                                                                    <dt>Ticket Age :</dt>
+                                                                    <dd>{{ticket_age}}</dd>
+                                                                </dl>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <dl class="dl-horizontal">
+                                                                    <dt>Actual Start :</dt>
+                                                                    <dd>{% tzone ticket.actualstart %}</dd>
+                                                                    <br>
+                                                                    <dt>Actual Finish :</dt>
+                                                                    <dd>{% tzone ticket.actualfinish %}</dd><br>
+                                                                    <dt>SLA :</dt>
+                                                                    <dd>{{ ticket.sla}}</dd><br/>
+                                                                    <dt>Target Finish :</dt>
+                                                                    <dd>{% tzone ticket.targetfinish %}</dd><br/>
+                                                                    <dt>Priority: </dt>
+                                                                    <dd>{{ ticket.internalpriority }}</dd>
+                                                                </dl>
+                                                            </div>
+                                                            {% if ticket.ticketattribute_set.all|length > 0 %}
+                                                                <div class="col-sm-12">
+                                                                    <hr/>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <dl class="dl-horizontal">
+                                                                        <dt>Quantity : </dt>
+                                                                        <dd>{{ ticket.ticketattribute_set.all.0.quantity }}</dd><br/>
+                                                                        <dt>Type : </dt>
+                                                                        <dd>{{ ticket.ticketattribute_set.all.0.permanent_type }}</dd>
+                                                                    </dl>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <dl class="dl-horizontal">
+                                                                        <dt>Project : </dt>
+                                                                        <dd>{{ ticket.ticketattribute_set.all.0.project }}</dd>
+                                                                    </dl>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="history" class="tab-pane fade">
+                                                    <!-- <h4 class="text-center text-thin">Ticket History</h4> -->
+                                                    <div class="panel panel-warning panel-bordered">
+                                                        <h4 class="panel-title text-center">Ticket History</h4>
+                                                        <div class="panel-body">
+                                                            <table class="table table-sorting dataTable table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                                <thead>
+                                                                    <tr role="row">
+                                                                        <th >User</th>
+                                                                        <th >Status</th>
+                                                                        <th >Last Update Time</th>
+                                                                  </tr>
+                                                                </thead>
+                                                                <tbody >
+                                                                    {% for act in history %}
+                                                                        <tr>
+                                                                            <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                                                                            <td class="grey"><a  style="color:#555">{{act.status|real}}</a></td>
+                                                                            <td class="grey"><a  style="color:#555">{% tzone act.time %}</a></td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel panel-danger panel-bordered">
+                                                        <h4 class="panel-title text-center">Email Notification History</h4>
+                                                        <div class="panel-body">
+                                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;" >
+                                                                <thead>
+                                                                    <tr role="row">
+                                                                        <th>To</th>
+                                                                        <th>CC</th>
+                                                                        <th>Sent Time</th>
+                                                                        <th>Sent Status</th>
+                                                                    </tr>
+                                                                </thead>
+                                                              <tbody>
+                                                                    {% for notify in ticket.emaillog_set.all %}
+                                                                        <tr>
+                                                                            <td class="grey" style="color:#555">{{ notify.to_addresses|split_email }}</td>
+                                                                            <td class="grey" style="color:#555">{{ notify.cc_address|split_email }}</td>
+                                                                            <td class="grey" style="color:#555">{% tzone notify.sent_time %}</td>
+                                                                            <td class="grey" style="color:#555">{% if notify.status %}<strong style="color:green"> Success </strong>{% else %} <strong style="color:red"> Failed </strong>{% endif %}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                              </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <!-- <h4 class="text-center text-thin">Email Notification History</h4>
+                                                     -->
+                                                </div>
+                                                <div id="work_logs" class="tab-pane fade" >
+                                                    {% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+                                                        <div class="col-sm-1">
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="box">
+                                                                <div class="box-body">
+                                                                    <form action="/ticket/stat/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                                                        <input class="hidden" name="status" value="{{ticket.status}}">
+                                                                        <select class="form-control" style="margin-bottom:5px" name = "flag" required>
+                                                                            <option value="TRUE">Internal Log</option>
+                                                                            <option value="FALSE">Enduser Visibility</option>
+                                                                        </select>
+                                                                        <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>
+                                                                        <input id="image" type="file" class="" name="image" >
+                                                                        <button class="btn btn-success pull-right"type="submit">Add WorkLog</button><br/><br/> 
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-1">
+                                                        </div>
+                                                    {% endif %}
+                                                    <div class="col-sm-12">
+                                                        <div class="timeline">
+                                                            <div class="timeline-header">
+                                                                <div class="timeline-header-title bg-info">Now</div>
+                                                            </div>
+                                                            {% for act in activity %}
+                                                                <div class="timeline-entry">
+                                                                    <div class="timeline-stat">
+                                                                        <div class="timeline-icon"></div>
+                                                                        <div class="timeline-time">{% tzone act.time %}</div>
+                                                                    </div>
+                                                                    <div class="timeline-label">
+                                                                        <p><strong>{{ act.owner.user.username }}</strong> {{act.note}}</p>
+                                                                        {% if act.remark %}
+                                                                            <blockquote class="bq-sm bq-open">{{act.remark}}</blockquote>
+                                                                        {% endif %}
+                                                                        {% if act.attachment %}
+                                                                            <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="resolution" class="tab-pane fade">
+                                                    <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th >Ticket</th>
+                                                                <th >Engineer</th>
+                                                                <th >Time taken in hours</th>
+                                                                <th >Updated On</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody >
+                                                            {% for act in ticket.ticketresolution_set.all %}
+                                                                <tr class="odd">
+                                                                    <td class="grey"><a  style="color:#555">{{act.ticket}}</a></td>
+                                                                    <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                                                                    <td class="grey"><a  style="color:#555">{{act.time_taken|hour_cal}}</a></td>
+                                                                    <td class="grey"><a  style="color:#555">{% tzone act.last_activity %}</a></td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div id="tasks" class="tab-pane fade">
+                                                    <div class="row" id="task_data_block" style="padding:10px">
+                                                        <form name="task_creation" method="post" action="/task/create/{{ticket.id}}">
+                                                            <div class="col-sm-12">
+                                                                <input type="text" class="form-control" name="task_name" placeholder="Task Name (Max 30 characters)"/><br/>
+                                                                <textarea name="task_desc" class="form-control" placeholder="Task Description"></textarea>
+                                                                <br/>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                               <select name="task_group" class="form-control" style="margin-bottom:5px" id="t_group">
+                                                                    <option value="">-Select Domain-</option>
+                                                                    {% for group in group_list %}
+                                                                        <option value="{{group.id}}">{{group.workgroup}}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <br/>
+                                                                <select name="task_category" class="form-control" style="margin-bottom:5px" id="t_cat">
+                                                                    <option value="">-Select Category-</option>
+
+                                                                    {% for cat in category_list%}
+                                                                        <option value="{{cat.id}}">{{cat.name}}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                                <br/>
+                                                                <select class="form-control" id="task_owner" style="margin-bottom:5px" name="owner_id">
+                                                                    <option value="">-Select Owner-</option>
+                                                                </select>
+                                                                <br/>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <select name="task_subgroup" id="tsub_group" class="form-control" style="margin-bottom:5px">
+                                                                    <option value="">-Select Subdomain-</option>
+                                                                </select>
+                                                                <br/>
+                                                                <select name="task_sub_cat" class="form-control" style="margin-bottom:5px" id="t_sub_cat">
+                                                                    <option value="">-Select Subcategory-</option>
+                                                                </select>
+                                                                <br/>
+                                                                <select class="form-control" style="margin-bottom:5px" name="priority">
+                                                                    <option value="">-Select Priority-</option>
+                                                                    <option value="Low">Low</option>
+                                                                    <option value="Medium">Medium</option>
+                                                                    <option value="High">High</option>
+                                                                </select>
+                                                            </div>
+                                                            <button class="btn btn-success" type="submit" style="float:right;margin-right:10px">Create</button>
+                                                            <a class="btn btn-danger" type="button" style="float:right;margin-right:10px" onclick="exit_task_creation()">Cancel</a>
+                                                        </form>
+                                                        <br/>
+                                                        <div class="col-sm-12">
+                                                           <hr style="border-color:#d6d6d6;">
+                                                        </div>
+                                                    </div>
+                                                    <br/>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;" id="task_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th></th>
+                                                                        <th>TaskId</th>
+                                                                        <th>Title</th>
+                                                                        <th>Description</th>
+                                                                        <th>Status</th>
+                                                                        <th>Owner</th>
+                                                                        <th>Created Date</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for task in ticket.task_set.all %}
+                                                                        <tr>
+                                                                            <td>
+                                                                                <a data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success btn-sm" href="/task/details/{{task.id}}/" data-original-title="View/Edit">
+                                                                                   <i class="fa fa-edit "></i>
+                                                                                </a>
+                                                                            </td>
+                                                                            <td>{{task.taskid}}</td>
+                                                                            <td>{{task.task_name}}</td>
+                                                                            <td>{{task.description}}</td>
+                                                                            <td>{{task.status.status}}</td>
+                                                                            {% if task.owner %}
+                                                                                <td>{{task.owner.user.username}}</td>
+                                                                            {% else %}
+                                                                                <td>{{task.owner}}</td>
+                                                                            {% endif %}
+                                                                            <td>{% tzone task.created_date %}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div> <!-- end of .tab-content -- >
+                                        </div> <!-- end of .col-sm-12 -- >
+                                    </div> <!-- end of .row -- >
+                                </div> <!-- end of panel-body -- >
+                            </div> <!-- end of panel-primary -- >
+                        </div>  <!-- end col9 -->
+                    </div>  <!-- end row -->
+                </div>  <!-- end content -->
+            </div>  <!-- end right side -->
+        </div>  <!-- end wrapper -->
+        <!-- take ownership -->
+        <div class="modal fade" id="ownership" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                     <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Change Status to In Progress</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/ownership/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            {% if ticket.internalpriority %}
+                            {% else %}
+                                <label>Ticket Don't Have an Internal Priority, Set internal priority</label>
+                                <select name="internal">
+                                    <option value="High"> High</option>
+                                    <option value="Medium"> Medium </option>
+                                    <option value="Low"> Low </option>
+                                </select>
+                            {% endif %}
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Take ownership</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Assign to subgroup member -->
+        <div class="modal fade" id="assign_subgroup" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Assign To Subgroup Member</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/assign_subgroup_member/{{ticket.id}}/" method="POST">{% csrf_token %}
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <label>Assign To</label>
+                            <select class="form-control" required name="subgroup_member">
+                                <option value="">Select Subgroup Member</option>
+                                {% for membr in subgorup_membrs %}
+                                    <option value="{{membr.id}}">{{membr.person.user.first_name}} {{membr.person.user.last_name}}</option>
+                                {% endfor %}
+                            </select><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign Ticket</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="assign_ticket" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Assign Ticket</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-1">
+                            </div>
+                            <div class="col-sm-10">
+                                <form action="/ticket/assign/{{ticket.id}}" method="POST" >
+                                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                                    <input type="hidden" name="ticket_cust" id="ticket_cust" value="{{ticket.customer.customerid}}"/>
+                                    <!-- <div class="row"> -->
+                                        <dl class="dl-horizontal">
+                                            {% if ticket.cls == "REQ" %}
+                                                <dt >Customer:</dt>
+                                                <!-- <br/> -->
+                                                <dd >
+                                                    <select style="padding:2px;width:100%;margin-top:5px" name = "ticket_customer" requried id="ticket_customer">
+                                                        <option value="">-Select Customer-</option>
+                                                        {% for customer in customers %}
+                                                            <option value="{{customer.id}}" {% if ticket.customer == customer %} selected {% endif %}> {{customer.customername}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </dd>
+                                                <dt >Class :</dt>
+                                                <dd >
+                                                    <select  style="padding:2px;width:100%;margin-top:5px" name = "cls" requried id="ticket_typee">
+                                                        <option value="" >-Select Class-</option>
+                                                        <option value="SR" >Service Request</option>
+                                                        <option value="IN" >Incident</option>
+                                                        <option value="PB" >Problem</option>
+                                                        <option value="CH" >Change</option>
+                                                    </select>
+                                                </dd>
+                                                <dt style="width:100px" class="approval_required">Approval Required</dt>
+                                                <dd style="margin-left:110px" class="approval_required">
+                                                    <input type="checkbox" name="approval_required" onchange="checking_approval()" id="is_approval_req" value="true"/> 
+                                                </dd>
+                                            {% else %}
+                                                <input class="hidden" value="{{ticket.cls}}" id="ticketclass">
+                                            {% endif %}
+                                            <dt class="sr_approval_required" >Domain :</dt>
+                                            <dd class="sr_approval_required" >
+                                                <select  style="padding:2px;width:100%;margin-top:5px" id = "workgroup" name="group" requried>
+                                                    {% if ticket.group %}
+                                                        <option value="{{ticket.group.id}}">Group - {{ticket.group}}</option>
+                                                    {% else %}
+                                                        <option value="" >-Select Group-</option>
+                                                    {% endif %}
+                                                    {% for group in groups %}
+                                                        <option value="{{group.id}}"> {{group.workgroup}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </dd>
+                                            <dt class="sr_approval_required" >Sub Domain :</dt>
+                                            <dd class="sr_approval_required" >
+                                                <select  style="padding:2px;width:100%;margin-top:5px" name = "subgroup" id="subgroup" requried>
+                                                    {% if ticket.subgroup %}
+                                                        <option vlaue="{{ticket.subgroup.id }}">Subgroup - {{ticket.subgroup}}</option>  
+                                                    {% else %}
+                                                        <option value="">-Select Subgroup-</option>  
+                                                    {% endif %}
+                                                </select>
+                                            </dd>
+                      <!-- </dd> -->
+                                            <dt class="sr_approval_required" >Priority :</dt>
+                                            <dd class="sr_approval_required" >
+                                                <select  style="padding:2px;width:100%;margin-top:5px" id = "internal_priority" name="internal" requried>
+                                                    {% if ticket.internalpriority %}
+                                                        <option value="{{ticket.internalpriority}}">Internal Priority {{ticket.internalpriority}}</option>
+                                                    {% else %}
+                                                        <option value="">-Select-</option>
+                                                        {% if ticket.cls == 'SR'%}
+                                                            <option value="Urgent">Urgent</option>
+                                                            <option value="Normal">Normal</option>
+                                                            <option value="Purchase">Purchase</option>
+                                                        {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                                            <option value="Critical">Critical</option>
+                                                            <option value="High">High</option>
+                                                            <option value="Medium">Medium</option>
+                                                            <option value="Low">Low</option>
+                                                        {% elif ticket.cls == 'CH' %}
+                                                            <option value="Change">Change</option>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </select>
+                                            </dd>
+                                            <dt id="severity_dt" >Severity :</dt>
+                                            <dd >
+                                                <select  style="padding:2px;width:100%;margin-top:5px" id="severity" name="impact" >
+                                                    {% if ticket.impact %}
+                                                        <option value="{{ticket.impact}}">{{ticket.impact}}</option>
+                                                    {% else %}
+                                                        <option value="">-Choose Severity-</option>
+                                                    {% endif %}
+                                                </select>
+                                            </dd>
+                                            <dt class="sr_approval_required" >Category :</dt>
+                                            <dd class="sr_approval_required" >
+                                                <select style="padding:2px;width:100%;margin-top:5px" id="cat_name" name="category_id" required onchange="load_subcategory_list()">
+                                                    <option value="">-Choose Category-</option>
+                                                    {% for category in category_list %}
+                                                        <option value="{{category.id}}" {% if ticket.category.id == category.id %} "selected" {% endif %} > {{category.name}}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </dd>
+                                            <dt class="sr_approval_required" >Subcategory :</dt>
+                                            <dd class="sr_approval_required" >
+                                                <select style="padding:2px;width:100%;margin-top:5px" id="sub_cat_name" name="sub_cat_id" required>
+                                                    <option value="">-Choose Subcategory-</option>
+                                                    {% if ticket.subcategory %}
+                                                        <option value="{{ticket.subcategory.name}}">{{ticket.subcategory.name}}</option>
+                                                    {% endif %}
+                                                </select>
+                                            </dd>
+                                        </dl>
+                                    <!-- </div> -->
+                                    <textarea style="margn-top:5px" type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Add remark" rows="4" cols="10" ></textarea>
+                                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                                    {% if ticket.approve == "FALSE" %}
+                                    {% else %}
+                                        <button class="btn btn-success btn-md" style="margin-top:5px;width:50%" type="submit">Assign</button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                            <div class="col-sm-1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Awaiting Customer Action -->
+        <div class="modal fade" id="sla" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Awaiting Customer response</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/sla/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <input class="hidden"  value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Awaiting Vendor Action -->
+        <div class="modal fade" id="slav" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Awaiting Vendor response</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/slav/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Change Status</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Change Priority -->
+        <div class="modal fade" id="priority" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Change Priority</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/change/priority/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                                    <input class="hidden" value="{{ticket.cls}}" id="ticket_class">
+                                    <input class="hidden" value="{{ticket.internalpriority}}" id="ticket_priority">
+                                    <label>Current Priority is <b>{{ticket.internalpriority}}</b> Change it to ?</label>
+                                    <select class="form-control" name="priority" required id="priority_data">
+                                        <option value="">-select-</option>
+                                        {% if ticket.cls == 'SR'%}
+                                            <option value="Urgent">Urgent</option>
+                                            <option value="Normal">Normal</option>
+                                            <option value="Purchase">Purchase</option>
+                                        {% elif ticket.cls == 'IN' or  ticket.cls == 'INC' or ticket.cls == 'PB' or ticket.cls == 'PBM' %}
+                                            <option value="Critical">Critical</option>
+                                            <option value="High">High</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Low">Low</option>
+                                        {% elif ticket.cls == 'CH' %}
+                                            <option value="Change">Change</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    {% if ticket.cls == 'IN' and ticket.internalpriority == 'Critical' %}
+                                        <label id="severity_data_txt">Current Severity is <b>{{ticket.impact | impact}}</b> Change it to ?</label>
+                                        <select class="form-control" name="impact" id="severity_data">
+                                            <option value="">-select-</option>
+                                            <option value="3">High</option>
+                                            <option value="2">Medium</option>
+                                            <option value="1">Low</option>
+                                        </select>
+                                    {% else %}
+                                        <label id="severity_data_txt">Current Severity is <b>{{ticket.impact | impact}}</b> Change it to ?</label>
+                                        <select class="form-control" name="impact" id="severity_data">
+                                          <option value="">-select-</option>
+                                        </select>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <br>
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-warning" style="float:right;width:50%" type="submit">Change Ticket Priority</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="email" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Send email related to this ticket</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-3">
+                               <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.user.email}}">Impacted User
+                            </div>
+                            <div class="col-sm-3">
+                               <input type="checkbox" name="email_fill" value="{{ticket.reportedby.user.email}}"> Reported User 
+                            </div>
+                            <div class="col-sm-5">
+                               <input type="checkbox" name="email_fill" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                            </div>
+                        </div>
+                        <form action="/ticket/email/{{ticket.id}}" class="form-horizontal" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <br>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">To:</label>
+                                <div class="col-sm-10">
+                                    <input type="email" multiple id="to" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                                </div>
+                                <div class="col-sm-1">
+                                    <input type="button" id="append_to" class="btn-info btn btn-sm pull-right" value="Add">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                                <div class="col-sm-10">
+                                    <input type="email" multiple id="cc_list" value="" name="cc_list" class="form-control" placeholder="Cc" >
+                                    <input type="hidden" multiple id="cclist_data" value="" name="cclist_data" class="form-control" placeholder="Cc" >
+                                </div>
+                                <div class="col-sm-1">
+                                    <input type="button" id="append_to_cc" class="btn-info btn btn-sm pull-right" value="Add">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                                <div class="col-sm-11">
+                                    <input  type="text" id="subject" name="subject" class="form-control" placeholder="Subject" value="{{ticket.summary}}" required>
+                                </div>
+                            </div>
+                            <label>Body:</label>
+                            <textarea type="text" id="body" name="body" style="max-width:100%" class="form-control textarea" placeholder="" rows="10" cols="20" required>{% if profile.signature %}{{profile.signature}}{% endif %}</textarea><br>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <label>Attach Here</label>
+                                    <input type="file" name="attachment_file" id="attachment_file"/>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="form-control" name="visibility" required>
+                                        <option value="TRUE">Internal Visbility</option>
+                                        <option value="FALSE">Enduser Visibility</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-success" style="width:100%" type="submit">Send Email</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="worklog_reply" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Send email related to this worklog</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                                <div class="col-sm-3">
+                                    <input type="hidden" name="work_log_id" id="work_log_id" />
+                                    {% if ticket.affectedperson.user.email %}
+                                        <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.user.email}}">
+                                    {% else %}
+                                        <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedemail}}">
+                                    {% endif %}
+                                    Impacted User
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="checkbox" name="email_fill_worklog" value="{{ticket.reportedby.user.email}}"> Reported User 
+                                </div>
+                                <div class="col-sm-5">
+                                    <input type="checkbox" name="email_fill_worklog" value="{{ticket.affectedperson.supervisor.email}}">Reporting Manager
+                                </div>
+                            </div>
+                            <form action="#" class="form-horizontal" method="POST" id="worklog_reply_form">
+                                {% csrf_token %}
+                                <br>
+                                <div class="form-group">
+                                    <label for="input-text" class="col-sm-1 control-label">To:</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" multiple id="to_worklog" name="to" style="width:70%;" class="form-control" placeholder="to" required>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <input type="button" id="append_to_work_log" class="btn-info btn btn-sm pull-right" value="Add">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-text" class="col-sm-1 control-label">CC:</label>
+                                    <div class="col-sm-11">
+                                    <input type="email" multiple id="worklog_cc_list" value="{{ticket.owner}}" name="cc_list" class="form-control" placeholder="Cc" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-text" class="col-sm-1 control-label">Subject:</label>
+                                <div class="col-sm-11">
+                                    <input  type="text" id="worklog_subject" name="subject" class="form-control" placeholder="Subject" value="{{ticket.summary}}" required>
+                                </div>
+                            </div>
+                            <label>Body:</label>
+                            <textarea  type="text" id="worklog_body" name="body" style="max-width:100%" class="form-control" placeholder="" rows="10" cols="20" required id="worklog_body"></textarea><br>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <input type="file" name="attachment" id="worklog_attachment"/>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select class="form-control" name="visibility" required id="worklog_visibility">
+                                        <option value="TRUE">Internal Visbility</option>
+                                        <option value="FALSE">Enduser Visibility</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button class="btn btn-success" style="width:100%" type="button" onclick="create_work_log_history({{ticket.id}})">Send Email</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="reassign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Reassign Your Task</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/groupchange/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-6" >
+                                    <label>Select Domain</label>
+                                    <select class="form-control" style="margin-bottom:5px" id="re_workgroup" name="group" required>
+                                        <option value="{{ticket.group.id}}">-{{ticket.group}}-</option>
+                                        {% for group in groups %}
+                                            <option value="{{group.id}}"> {{group.workgroup}}</option>
+                                        {% endfor %}
+                                        <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                                    </select>
+                                </div>
+                                <div class="col-sm-6" >
+                                    <label>Select Sub-Domain</label>
+                                    <select class="form-control" style="margin-bottom:5px" name = "subgroup" id="re_subgroup" required>
+                                        <option value="{{ticket.subgroup.id}}"> -{{ticket.subgroup}}-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <label>Details</label>
+                            <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea>
+                            <br>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label>Add Work Hours (in minitues)</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="number" id="req1"  name="rtime" class="form-control" >
+                                </div>
+                            </div>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Assign</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="resolve" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Resolve ticket</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <form action="/ticket/knowledgebase/{{ticket.id}}" method="POST">
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            {% if ticket.cls == 'SR' or ticket.cls == 'CH'%}
+                                <label>Resolution</label>
+                                <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                                <br> 
+                            {% elif ticket.cls == 'IN' or ticket.cls == 'PB' %}
+                                <span class="text"><i  style=" font-size: 10pt;">Symptom</i></span>
+                                <textarea type="text" id = "autofill_symptom" name="symptom" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                                <span class="text"><i  style=" font-size: 10pt;">Cause</i></span>
+                                <textarea type="text" id = "autofill_cause" name="cause" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                                <span class="text"><i  style=" font-size: 10pt;">Resolution</i></span>
+                                <textarea type="text" id = "autofill_resolution" name="resolution" style="max-width:100%" class="form-control"  rows="4" cols="20" required></textarea><br>
+                                <br>  
+                                {% if ticket.cls == 'IN' %}
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <select class="form-control" style="margin-bottom:5px" name="resolution_code" required>
+                                                <option value="">Select Resolution Code</option>
+                                                <option value="FixCode">FixCode</option>
+                                                <option value="Network">Network</option>
+                                                <option value="Software">Software</option>
+                                                <option value="Undetermined">Undetermined</option>
+                                                <option value="Closed up">Closed up</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                {% endif %}   
+                                <br/>               
+                                <input type="checkbox" name="add_to_kb" ><i  style=" font-size: 10pt;">Mark as KB candidate for review</i><br>
+                            {% endif %}
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <label>Add Work Hours (in minitues)</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <input type="number" id="req2"  name="rtime" class="form-control" required>
+                                    </div>
+                                </div>
+                                <button class="btn btn-info" style="float:right;width:50%" type="submit">Resolve</button>
+                            </form>
+                        </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="kb_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Knowledge Base</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="box">
+                            <div class="box-body">
+                                <table class="table table-hover table-striped borderless fixed selectable" id="kb_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symptom</th>
+                                            <th>Cause</th>
+                                            <th>Resolution</th>
+                                            <th></th>
+                                        </tr> 
+                                    </thead>
+                                    <tbody>
+                                        {% for kb in kb_list %}
+                                            <tr>
+                                                <td>{{ kb.symptom }}</td>
+                                                <td>{{ kb.cause }}</td>
+                                                <td>{{ kb.resolution }}</td>
+                                                <td><label class="label label-info" onclick="fillValue();">Use</label></td>
+                                            </tr>  
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-success pull-right" data-dismiss="modal" aria-hidden="true" >Close</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border:0px">
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="close" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Close ticket</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/close/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-danger" style="float:right;width:50%" type="submit">Close Ticket</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="reopen" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Reopen Ticket</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/reopen/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <button class="btn btn-success" style="float:right;width:50%" type="submit">Reopen Ticket {{ticket.ticketid}}</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/ticket/cancel/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script type="text/javascript" src='/static/customer/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js'></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                if($("#workgroup").val()) {
+                    $.ajax({
+                    url:"/persongroupadmin/remove/subgroup",
+                        type:"POST",
+                        dataType:"json",
+                        data:{
+                            workgroupid : $("#workgroup").val(),
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success : function(data) {
+                            data = JSON.parse(data);
+                            for (var i in data){
+                                $("#subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                            }
+                        },
+                        error : function(xhr,errmsg,err) {
+                            alert(err);
+                        }
+                    });
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#workgroup").on('change',function(){
+                    $("#subgroup").empty();
+                    if($("#workgroup").text()!='-Group-'){
+                        $.ajax({
+                            url:"/persongroupadmin/remove/subgroup",
+                            type:"POST",
+                            dataType:"json",
+                            data:{
+                                workgroupid : this.value,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success : function(data) {
+                                data = JSON.parse(data);
+                                for (var i in data){
+                                    $("#subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                                }
+                            },
+                            error : function(xhr,errmsg,err) {
+                              alert(err);
+                            }
+                        });
+                      return false;
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#re_workgroup").on('change',function(){
+                    $("#re_subgroup").empty();
+                    if($("#re_workgroup").text()!='-Group-'){
+                        $.ajax({
+                            url:"/persongroupadmin/remove/subgroup",
+                            type:"POST",
+                            dataType:"json",
+                            data:{
+                                workgroupid : this.value,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success : function(data) {
+                                data = JSON.parse(data);
+                                for (var i in data){
+                                    $("#re_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                                }
+                            },
+                            error : function(xhr,errmsg,err) {
+                              alert(err);
+                            }
+                        });
+                      return false;
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#kb_table tbody").on("click", "tr", function(e){
+                    symptom = this.cells[0].innerHTML;
+                    cause = this.cells[1].innerHTML;
+                    resolution = this.cells[2].innerHTML;
+                    $("#autofill_symptom").val(symptom);
+                    $("#autofill_cause").val(cause);
+                    $("#autofill_resolution").val(resolution);
+                    $("#kb_modal").modal('hide');
+                    $("#resolve").modal('toggle');
+                });
+                $("#append_to").click(function(){
+                    console.log("clicked");
+                    mails = ''
+                    $('input[name="email_fill"]:checked').each(function(){
+                      if(this.value.length > 0){
+                        mails += this.value;
+                        mails+=','
+                      }
+                    });
+                    mails = mails.substring(0, mails.length - 1);
+                    $("#to").val(mails);
+                });
+                $("#append_to_cc").click(function(){
+                    mails = '';
+                    if ($("#cclist_data").val().length > 0) {
+                        mails = $("#cclist_data").val();
+                        mails = mails.substring(0, mails.length - 1);
+                    }
+                    cc_ids = $("#cclist_data").val().split(',');
+                    $('input[name="email_fill"]:checked').each(function(){
+                      
+                      if(this.value.length > 0){
+                        var index = cc_ids.indexOf(this.value);
+                        if (index < 0) {
+                          mails+=',';
+                          mails += this.value;
+                        }
+                      }
+                    });
+                    if (mails[mails.length - 1] == ',')
+                        mails = mails.substring(0, mails.length - 1);
+                    if (mails[0] == ',') {
+                        console.log(mails[0]);
+                        mails = mails.slice(1);
+                    }
+                    $("#cc_list").val(mails);
+                });
+                $("#append_to_work_log").click(function(){
+                    mails = ''
+                    $('input[name="email_fill_worklog"]:checked').each(function(){
+                        if(this.value.length > 0){
+                            mails += this.value;
+                            mails+=','
+                        }
+                    });
+                    mails = mails.substring(0, mails.length - 1);
+                    $("#to_worklog").val(mails);
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function email_cc_capturing(ticket_id){
+                $.ajax({
+                    url:"/ticket_email_cc/"+ticket_id+"/",
+                    type:"GET",
+                    dataType:"json",
+                    success : function(data){
+                      mails = data.cc_list.substring(0, data.cc_list.length - 1);
+                      $('#cclist_data').val(mails);
+                      $('#cc_list').val(mails);
+                    },
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            function create_work_log_history(ticket_id){
+                var form_data = new FormData();
+                var attachment_data = $('#worklog_attachment')[0].files[0];
+                var work_log_id = $('#work_log_id').val();
+                data_val = {
+                    'subject': $('#worklog_subject').val(),
+                    'body': $('#worklog_body').val(),
+                    'to_list': $('#to_worklog').val(),
+                    'cc_list': $('#worklog_cc_list').val(),
+                    'visibility': $('#worklog_visibility').val(),
+                    'ticket_id': ticket_id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }
+                var fd = new FormData();
+                fd.append('attachment_data', attachment_data)
+                for(var key in data_val){
+                    fd.append(key, data_val[key]); 
+                }
+                $.ajax({
+                    url:"/ticket/worklog_reply/"+work_log_id+"/",
+                    type:"POST",
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        if (data.ticket_id)
+                          document.location.href = "/ticket/stat/"+data.ticket_id;
+                        else
+                          document.location.href = "/";
+                    }
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#body').wysihtml5({
+                    "color": true,
+                    "link": false,
+                    "image": false,
+                    "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"]
+                });
+                $('#worklog_body').wysihtml5({
+                    "color": true,
+                    "link": false,
+                    "image": false,
+                    "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"],
+                });
+            })
+        </script>
+        <script type="text/javascript">
+            $("#task_table").dataTable();
+        </script>
+        <script>
+            $(document).ready(function(){
+                $(".hidden").hide();
+                $("#view").addClass("active");
+                $("#open").addClass("open");
+                $('#severity').hide();
+                $('#kb_table').dataTable({
+                  "bLengthChange": false,
+                  "bInfo": false,
+                });
+                // non_block
+                $("#task_block").hide()
+            });
+        </script>
+        <script type="text/javascript">
+            function show_taskblock(){
+                $("#non_block").hide();
+                $("#task_block").show();
+                // $("#task_data_block").show();
+                $("#task_data_block").hide();
+            }
+            function hide_taskblock(){
+                $("#non_block").show();
+                $("#task_block").hide();
+                $("#task_data_block").hide();
+            }
+            function create_new_task(){
+                $("#task_data_block").show();
+            }
+            function exit_task_creation(){
+                $("#task_data_block").hide();  
+            }
+        </script>
+        <script type="text/javascript">
+          function fetch_worklog_history(worklog_id){
+            $('#work_log_id').val(worklog_id);
+             $.ajax({
+                url:"/ticket/worklog_reply/"+worklog_id+"/",
+                type:"GET",
+                dataType:"json",
+                success : function(data){
+                  remark = data.signature+'\n ________________________________________<br/>'+data.remark;
+                  $('#worklog_body').data("wysihtml5").editor.setValue(remark)
+                  $('#worklog_cc_list').val(data.cc_list);
+                },
+              });
+            }
+        </script>
+        <script>
+            $(document).ready(function(){
+                $("#ticket_customer").on('change',function(){
+                    $("#cat_name option:gt(0)").remove().end();
+                    $("#workgroup option:gt(0)").remove().end();
+                    $("#subgroup option:gt(0)").remove().end();
+                    if($("#ticket_customer :selected").text()!='-Select-'){
+                        $.ajax({
+                            url:"/ticket/incident/customer",
+                            type:"POST",
+                            dataType:"json",
+                            data:{
+                                groupid : this.value,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            success : function(data) {
+                                var customerid = data.customer;
+                                data = JSON.parse(data['group_list']);
+                                $('#ticket_cust').val(customerid);
+                                var cust_id = $('#ticket_cust').val();
+                                var ticket_type = $('#ticket_typee').val();
+                                if (cust_id == 'MLB' && ticket_type == 'SR' ){
+                                    $('.approval_required').show();
+                                } else {
+                                    $('.approval_required').hide();
+                                }
+                                for (var i in data){
+                                    $("#workgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}))
+                                }
+                            },
+                                error : function(xhr,errmsg,err) {
+                                console.log(err);
+                            }
+                        });
+                        $.ajax({
+                            url :"/category/enduser",
+                            type:"POST",
+                            dataype:"json",
+                            data:{custid: $('#ticket_customer').val(),
+                                csrfmiddlewaretoken:'{{csrf_token}}'},
+                            success:function(data){            
+                                cat_list = JSON.parse(data);
+                                for (var i in cat_list){
+                                    $("#cat_name").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                                } 
+                            },
+                            error: function(xhr,errmsg,err){
+                                console.log(xhr);
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#ticket_typee").on('change',function(){
+                    var cust_id = $('#ticket_cust').val();
+                    var ticket_type = $('#ticket_typee').val();
+                    if (cust_id == 'MLB' && ticket_type == 'SR' ){
+                      $('.approval_required').show();
+                    } else {
+                      $('.approval_required').hide();
+                    }
+                    $('#internal_priority option:gt(0)').remove().end();
+                    if (ticket_type != 'IN'){
+                        $('#severity').hide();
+                        $('#severity').prop('required',false);
+                        $('#severity_dt').hide();
+                        $('#severity option:gt(0)').remove().end();
+                    }
+                    if (ticket_type == 'IN' || ticket_type == 'PB'){
+                        $("#internal_priority").append($('<option>', {value:'Critical',text:'Critical'})) ;
+                        $("#internal_priority").append($('<option>', {value:'High',text:'High'})) ;
+                        $("#internal_priority").append($('<option>', {value:'Medium',text:'Medium'})) ;
+                        $("#internal_priority").append($('<option>', {value:'Low',text:'Low'})) ;
+                    } else if (ticket_type == 'SR'){
+                        $('#internal_priority').append($('<option>', {value:'Urgent',text:'Urgent'}));
+                        $('#internal_priority').append($('<option>', {value:'Normal',text:'Normal'}));
+                        $('#internal_priority').append($('<option>', {value:'Purchase',text:'Purchase'}));
+                    } else if (ticket_type == 'CH') {
+                        $('#internal_priority').append($('<option>', {value:'Change',text:'Change'}));
+                    }
+                });
+            });
+        </script>
+        <script>
+            $(document).ready(function(){
+                $("#view").addClass("active");
+                $("#open").addClass("open");
+                $('#severity').hide();
+                $('#severity_dt').hide();
+                $('.approval_required').hide();
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                load_subcategory_list();
+            });
+        </script>
+        <script type="text/javascript">
+            function load_subcategory_list(){
+                if ($('#cat_name').val()) {
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{catty: $('#cat_name').val() ,
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            $("#sub_cat_name option:gt(0)").remove();
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#sub_cat_name").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            } 
+                        },
+                        error: function(xhr,errmsg,err){
+                        }       
+                    });
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            function change_priority() {
+                var ticket_type = $('#ticket_class').val();
+                var priority = $('#ticket_priority').val();
+                if (ticket_type == 'IN' && priority == 'Critical'){
+                    $('#severity_data').show();
+                    $('#severity_data_txt').show();
+                    $('#severity_data').prop('required',true);
+                    $("#severity_data").append($('<option>', {value:'3',text:'S1'})) ;
+                    $("#severity_data").append($('<option>', {value:'2',text:'S2'})) ;
+                    $("#severity_data").append($('<option>', {value:'1',text:'S3'})) ;
+                } else {
+                    $('#severity_data option:gt(0)').remove().end();
+                    $('#severity_data').hide();
+                    $('#severity_data').prop('required',false);
+                    $('#severity_data_txt').hide();
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#priority_data").on('change',function(){
+                    var ticket_type = $('#ticket_class').val();
+                    var internal_priority = $('#priority_data').val();
+                    $('#severity_data option:gt(0)').remove().end();
+                    if (ticket_type == 'IN' && internal_priority == 'Critical'){
+                        $('#severity_data').show();
+                        $('#severity_data_txt').show();
+                        $('#severity_data').prop('required',true);
+                        $("#severity_data").append($('<option>', {value:'3',text:'S1'})) ;
+                        $("#severity_data").append($('<option>', {value:'2',text:'S2'})) ;
+                        $("#severity_data").append($('<option>', {value:'1',text:'S3'})) ;
+                    } else {
+                        $('#severity_data option:gt(0)').remove().end();
+                        $('#severity_data').hide();
+                        $('#severity_data').prop('required',false);
+                        $('#severity_data_txt').hide();
+                    }
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $("#desc_text").hide();
+            $("#desc, #btnSelect").click(function() {
+                Select();
+            });
+            function Select() {
+                $("#desc_text").val($("#desc").html()).show();
+                $("#desc").hide();
+                $("#desc_text").focus()[0].select();
+            }
+            function Deselect() {
+                $("#desc").html($("#desc_text").val()).show();
+                $("#desc_text").hide();
+            }
+            $("#desc_text").blur(function() {
+                Deselect();
+            });
+            $("#btnDeselect").click(function() {
+                Deselect();
+            });
+        </script>
+        <script>
+            function show_html_version(type_id, type_name){
+                window.open("/ticket/summary/"+type_id+"/?type_name="+type_name, "show_html_dats" , "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+            }
+        </script>
+        <script type="text/javascript">
+            function checking_approval(){
+              var res = document.getElementById('is_approval_req');
+              if (res.checked){
+                $('.sr_approval_required').hide();
+                $('#re_workgroup').prop('required',false);
+                $('#re_subgroup').prop('required',false);
+                $('#internal_priority').prop('required',false);
+                $('#cat_name').prop('required',false);
+                $('#sub_cat_name').prop('required',false);
+              } else {
+                $('.sr_approval_required').show();
+                $('#re_workgroup').prop('required',false);
+                $('#re_subgroup').prop('required',false);
+                $('#internal_priority').prop('required',false);
+                $('#cat_name').prop('required',false);
+                $('#sub_cat_name').prop('required',false);
+              }
+            }
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#internal_priority").on('change',function(){
+                    var ticket_type = $('#ticket_typee').val();
+                    if (!ticket_type) {
+                      var ticket_type = $('#ticketclass').val();
+                    }
+                    var internal_priority = $('#internal_priority').val();
+                    $('#severity option:gt(0)').remove().end();
+                    if (ticket_type == 'IN' && internal_priority == 'Critical'){
+                        $('#severity').show();
+                        $('#severity_dt').show();
+                        $("#severity").append($('<option>', {value:'3',text:'S1'})) ;
+                        $("#severity").append($('<option>', {value:'2',text:'S2'})) ;
+                        $("#severity").append($('<option>', {value:'1',text:'S3'})) ;
+                    } else {
+                        $('#severity option:gt(0)').remove().end();
+                        $('#severity').hide();
+                        $('#severity').prop('required',false);
+                        $('#severity_dt').hide();
+                    }
+                });
+            });
+        </script>
+<!-- 
+        <script>
+            $("#forval").hide();
+            $("#onchanger").click(function(){
+                $("#forval").show();
+            });
+        </script>
+         -->
+        <script>
+            $("#all").addClass("active")
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('table[id=kb_table] tr').click(function(){
+                    symptom = this.cells[0].innerHTML;
+                    cause = this.cells[1].innerHTML;
+                    resolution = this.cells[2].innerHTML;
+                    $("#autofill_symptom").val(symptom);
+                    $("#autofill_cause").val(cause);
+                    $("#autofill_resolution").val(resolution);
+                });
+                $("#append_to").click(function(){
+                    mails = ''
+                    $('input[name="email_fill"]:checked').each(function(){
+                        if(this.value.length > 0){
+                            mails += this.value;
+                            mails+=','
+                        }
+                    });
+                    mails = mails.substring(0, mails.length - 1);
+                    $("#to").val(mails);
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            $('table[id=kb_table] tr').click(function(){
+                symptom = this.cells[1].innerHTML;
+                cause = this.cells[2].innerHTML;
+                resolution = this.cells[3].innerHTML;
+                $("#autofill_symptom").val(symptom);
+                $("#autofill_cause").val(cause);
+                $("#autofill_resolution").val(resolution);
+            });
+            $("#append_to").click(function(){
+                mails = ''
+                $('input[name="email_fill"]:checked').each(function(){
+                    if(this.value.length > 0){
+                        mails += this.value;
+                        mails+=','
+                    }
+                });
+                mails = mails.substring(0, mails.length - 1);
+                $("#to").val(mails);
+            });
+            $("#append_cc").click(function(){
+                mails = '';
+                if ($("#cclist_data").val().length > 0) {
+                    mails = $("#cclist_data").val();
+                    mails = mails.substring(0, mails.length - 1);
+                    console.log(mails)
+                }
+                cc_ids = $("#cclist_data").val().split(',');
+                $('input[name="email_fill"]:checked').each(function(){
+                    if(this.value.length > 0){
+                        var index = cc_ids.indexOf(this.value);
+                        if (index < 0) {
+                            mails+=',';
+                            mails += this.value;
+                        }
+                    }
+                });
+                if (mails[mails.length - 1] == ',')
+                    mails = mails.substring(0, mails.length - 1);
+                $("#cc_list").val(mails);
+            });
+        </script>
+<!-- 
+        <script>
+            function showUsers(ticketid){
+                $.ajax({
+                    url:"/list/workgp/members/",
+                    type:"POST",
+                    dataType:"json",
+                    async:true,
+                    data:{
+                      'ticketid':ticketid,
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    type: "POST",
+                    success : function(data){
+                      $('#field1 tr').slice(1).remove();
+                      i=0;
+                      for (var i in data){
+                        $tr = $('<tr>');
+                        $tr.append($('<td>').html(data[i].user__first_name)).
+                        append($('<td>').html(data[i].user__last_name)).
+                        append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id));
+                        $("#field1").append($tr);
+                      }
+                    },
+                });
+                $("#user1").modal('show');
+            }
+            $(document).ready(function(){
+                $("#view").addClass("active");
+                $("#open").addClass("open");
+                $('#severity').hide();
+                $('#severity_dt').hide();
+                $('.approval_required').hide();
+            });
+        </script>
+         -->
+    </body>
+</html>

@@ -1,0 +1,485 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+.dataTables_length{
+  margin-left:0px; 
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Asset Management  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Item Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-8">
+
+<div class="panel panel-primary">
+          
+                <!--Panel heading-->
+                <div class="panel-heading">
+                  <div class="panel-control">
+          
+                    <!--Nav tabs-->
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#Details" aria-expanded="true">Basic Details</a>
+                      </li>
+                      <li class=""><a data-toggle="tab" href="#Configurations" aria-expanded="false">Relationships</a>
+                      </li>
+                      <!-- <li class=""><a data-toggle="tab" href="#Request" aria-expanded="false">Request</a> -->
+                      </li>
+                      <li class=""><a data-toggle="tab" href="#Activities" aria-expanded="false">Activities</a>
+                      </li>
+                        {% if hardwares %}
+                      <li class=""><a data-toggle="tab" href="#Hardware" aria-expanded="false">Hardware Details</a>
+                      </li>
+                        {% endif %}
+                        {% if softwares %}
+                      <li class=""><a data-toggle="tab" href="#Software" aria-expanded="false">Softwares Installed</a>
+                      </li>
+                        {% endif %}
+                    </ul>
+          
+                  </div>
+                  <h3 class="panel-title">{{stock.model_name}}</h3>
+                </div>
+          
+                <!--Panel body-->
+                <div class="panel-body">
+          
+                  <!--Tabs content-->
+                  <div class="tab-content">
+
+                    <div id="Details" class="tab-pane fade active in">
+                      <h4 class="text-thin">Basic Details</h4>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Model Name :</dt>
+                              <dd>{{stock.model_name}}</dd>
+                              <br>
+                              <dt>Domain :</dt>
+                              <dd>{{stock.cost_center}}</dd><br>
+                              <dt>Asset Tag :</dt>
+                              <dd>{{stock.tag}}</dd><br>
+                              <dt>Purchase Date :</dt>
+                              <dd>{{stock.purchase_date}}</dd><br>
+                              <dt>Depreciation :</dt>
+                              <dd>{% if stock.depreciation %} {{stock.depreciation}} {% else %} None {% endif %} </dd>
+                            </dl>
+                          </div>
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Serial Number :</dt>
+                              <dd>{{stock.serial_no}}</dd><br>
+                             <!--  <dt>Asset Status :</dt>
+                              <dd>{{status.is_available}}</dd><br> -->
+                              <dt>Last Audit :</dt>
+                              <dd>{{stock.last_audit}}</dd><br>
+                              <dt>Warranty Expiry :</dt>
+                              <dd>{{stock.warranty_expiry}}</dd><br>
+                              <dt>Cost :</dt>
+                              <dd>{{stock.purchased_cost}} {{stock.cost_center.currency}}</dd><br>
+                            </dl>
+                          </div>
+                        </div>
+                    </div>
+
+                    <div id="Configurations" class="tab-pane fade ">
+                    {% if relations %}
+                    <!-- <a id="delay" data-toggle="modal" data-target="#addrelation" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add relationship</a> -->
+                      <h4 class="text-thin">Relationships</h4>
+                        <div class="timeline">
+          
+
+
+
+                    <!-- Timeline header -->
+                    <div class="timeline-header">
+
+                    <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                      <div class="timeline-header-title bg-info">Add relationship</div></a>
+                    </div>
+                    {% for relation in relations %}
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                        </div>
+                        <div class="timeline-time">{{relation.installed_date}}</div>
+                      </div>
+
+                      <div class="timeline-label">
+                      <!-- <a style="float:right" href="/asset/stock/relation/remove/{{relation.id}}" class="icon-lg fa fa-trash-o  add-tooltip" data-placement="right" data-toggle="tooltip" data-original-title="delete relation"></a> -->
+                          <p class="text-semibold">{{relation.tag_name}} now related to {{relation.asset}} by {{relation.installed_user}}</p>
+
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                    {% else %}
+                     <a id="delay" data-toggle="modal" data-target="#addrelation" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add relationship</a>
+                    {% endif %}
+                    </div>
+
+                    <div id="Request" class="tab-pane fade">
+                      <h4 class="text-thin">We are working hard on making this awesome, Page Under Construction!</h4>
+
+
+                    </div>
+
+
+
+                    <div id="Hardware" class="tab-pane fade">
+                      <h4 class="text-thin">Hardware Details</h4>
+                      <!-- {{hardwares}} -->
+                       {% for hardware in hardwares %}
+                         <div class="row">
+                              <div class="col-sm-6">
+                                <dl class="dl-horizontal">
+                                  <dt>Hardware Name:</dt>
+                                  <dd>{{hardware.NAME}}</dd><br>
+                                  <dt>Operating System:</dt>
+                                  <dd>{{hardware.OSNAME}}</dd><br>
+                                  <dt>Processor:</dt>
+                                  <dd>{{hardware.PROCESSORT}}</dd><br>
+                                  <dt>Os Version:</dt>
+                                  <dd>{{hardware.OSCOMMENTS}}</dd><br>
+                                </dl>
+                              </div>
+                              <div class="col-sm-6">
+                                <dl class="dl-horizontal">
+                                  <dt>System Architecture:</dt>
+                                  <dd>{{hardware.ARCH}}</dd><br>
+                                  <dt>IP address:</dt>
+                                  <dd>{{hardware.IPSRC}}</dd><br>
+                                  <dt>User Id:</dt>
+                                  <dd>{{hardware.USERID}}</dd><br>
+                                  <dt>Memory:</dt>
+                                  <dd>{{hardware.MEMORY}}</dd><br>
+                                  <dt>Last Update:</dt>
+                                  <dd>{{hardware.LASTDATE}}</dd><br>
+                                </dl>
+                              </div>
+                            </div>
+                       {% endfor %}
+                    </div>
+
+
+                    <div id="Software" class="tab-pane fade">
+                      <h4 class="text-thin">Softwares Installed</h4>
+                        <br><br>
+                        <table class="table table-striped" id="table_id"  class="display" >
+                          <thead>
+                            <tr>
+                              <th>Software Name</th>
+                              <th>Version</th>
+                              <th>Last Changed</th>
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for software in softwares %}
+                          <tr>
+                            <td class="grey">{{software.NAME}}</td>
+                            <td class="grey">{{software.VERSION}}</td>
+                            <td class="grey">{{software.INSTALLDATE}}</td>
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>
+                    </div>
+
+
+
+
+                    <div id="Activities" class="tab-pane fade">
+                      <h4 class="text-thin">Asset activity</h4>
+                        <div class="timeline">
+                        <div class="timeline-header">
+                          <div class="timeline-header-title bg-info">Now</div>
+                        </div>
+                        {% for activity in stockhistorys %}
+                        <div class="timeline-entry">
+                          <div class="timeline-stat">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-time">{{activity.date}}</div>
+                          </div>
+                          <div class="timeline-label">
+                            <p>{{activity.remark}} {{activity.tag}} by {{activity.user}}</p>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+                </div>
+
+
+                <div class="col-sm-4">
+                  <div id="spr_0" class="panel panel-default plain profile-widget">
+                                <div class="panel-body">
+                                    <div class="col-lg-4 col-md-4 col-sm-12">
+                                        {% if stock.qrcode %}
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive" id="profile_ad" src="/media/{{stock.qrcode}}" alt="qr">
+                                        </div>
+                                        {% else %}
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive"><li class="fa fa-users"></li>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-lg-8 col-md-8 col-sm-12">
+                                        <div class="profile-name" style="margin-top: 15px;font-size: 22px;margin-bottom: 10px;">
+                                            {{stock.model_name}}
+                                            <br>
+                                            {% if stock.available == True %}
+                                            <span class="label label-success">
+                                            InStock
+                                            </span>
+                                            <a href=""  data-toggle="modal" data-target="#addassignee" class="btn btn-info">Assign</a>
+                                            {% elif stock.available == False %}
+                                            <span class="label label-info">
+                                            In Use
+                                            </span>
+                                            <a href=""  data-toggle="modal" data-target="#addassignee" class="btn btn-info">Re-Assign</a>
+                                            {% else %}
+                                            <span class="label label-warning">
+                                            Under Purchase Process
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="profile-quote">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                      <div class="media" style="color: #767676;">
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                {% if stock.current_user %}
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="fa fa-paper-plane"></span>
+                                    <label class="clb">In Use</label>
+                                     {{stock.current_user}}
+                                </li>
+                                {% endif %}
+
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Purchased On :</label>
+                                     {{stock.purchase_date}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Warranty: </label>
+                                    {{ stock.warranty_expiry }}
+                                </li>
+
+                            </ul>
+                            
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+  <div class="modal fade" id="addrelation" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New Relationship</h4>
+        </div>
+        <form action="/asset/stock/relation/{{stock.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Select tag</label>
+              <select name="type" class="form-control" id="tag" required="true">
+                <option value="">-select-</option>
+                  {% for tag in tags %}
+                <option value="{{tag.id}}">{{tag.item_type}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label>Select asset</label>
+              <select name="asset2" class="form-control" id="taggroup" required>
+                <option value="">-select-</option>
+              </select>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <label>relation</label>
+              <input type="text" name="soft" class="form-control">
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Add Relationship</button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="modal fade" id="addassignee" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Assign Asset</h4>
+        </div>
+        <form action="/asset/stock/assign/{{stock.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Select User</label>
+          <select name="person" requried="true" class="form-control" id="user">
+            <option>-select-</option>
+            {% for user in users %}
+            <option value="{{user.id}}">{{user}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success assignform" type="submit">Assign</button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+{% include "asset/addtostock.html" %}
+      
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable();
+    });
+
+    $(".assignform").click(function(){
+        val = $("#user").val();
+        if((val=='-select-') || (val=='')){
+          $("#tag").attr('requried',true);
+          return false;
+        }else{
+          $("#tag").attr('requried',false);
+          return true;
+        }
+    });
+
+    </script>
+    <script>
+
+       $('#tag').on('change', function(){
+        var tagid = $('#tag').val();
+
+        $.ajax({
+          url :"/asset/tag/ajax/",
+          type:"POST",
+          dataype:"json",
+          data:{asset: tagid,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){            
+             $("#taggroup option:gt(0)").remove().end();
+            cat_list = JSON.parse(data);
+            for (var i in cat_list){
+              $("#taggroup").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['model_name']}));
+
+            } 
+           },
+           error: function(xhr,errmsg,err){
+            console.log(xhr);
+           }       
+        });
+        return false;
+      });
+
+     </script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+ 
+
+    </body>
+</html>

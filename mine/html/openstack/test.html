@@ -1,0 +1,121 @@
+<div id="largeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add account</h4>
+            </div>
+
+            <div class="modal-body">
+
+              <div class="col-xs-12">
+                  <div class="box box-solid" style="padding:6px">
+                      <div class="box-body">
+                          <div class="row">
+                              <div class="col-md-3 col-sm-3">
+                                  <!-- BOXES are complex enough to move the .box-header around.
+                                       This is an example of having the box header within the box body -->
+                                  <div class="box-header">
+
+                                  </div>
+                                  <!-- compose message btn -->
+                                  <a data-target="#" data-toggle="modal" class="btn btn-block btn-primary" style="color:white"><i class="fa fa-cloud"></i> Choose Your Cloud</a>
+                                  <!-- Navigation - folders-->
+
+                                  <div style="margin-top: 15px;">
+                                      <ul class="nav nav-pills nav-stacked">
+                                          <li class="header">Private Cloud</li>
+                                          <li class="active">
+                                              <a href="#">
+                                                  <img src="/static/img/openstack.png" class="img-circle" width="18"> 
+                                                  <span style="color:black">Openstack</span>
+                                              </a>
+                                          </li>
+                                          <li>
+                                              <a href="#">
+                                                  <img src="/static/img/cloudstack.jpeg" class="img-circle" width="18"> 
+                                                  <span style="color:black">Cloudstack</span>
+                                              </a>
+                                          </li>
+                                     </ul>
+                                     <ul class="nav nav-pills nav-stacked">
+                                          <li class="header">Public Cloud</li>
+                                          <li>
+                                              <a href="#">
+                                                  <img src="/static/img/aws-ec2_server.jpg" class="img-circle" width="15">
+                                                  <span style="color:black"> Amazone Ec2</span>
+                                              </a>
+                                          </li>
+                                          <li>
+                                              <a href="#">
+                                                  <img src="/static/img/rackspace.png" class="img-circle" width="15">
+                                                  <span style="color:black">Racksspce</span>
+                                              </a>
+                                          </li>
+                                      </ul>
+                                  </div>
+                              </div><!-- /.col (LEFT) -->
+                              <div class="col-md-9 col-sm-9" style="margin-top:80px">
+                                    <span id = "openstack_error"></span>
+                                    <form method="post" class="form-horizontal style-form" id="openstack-form" action="{%url 'openstack_credential'%}">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 col-sm-4 control-label">Account Name :</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" name="name" class="form-control" id ="name" placeholder="Add Name for Your Account">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 col-sm-4 control-label">Keystone URL :</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" name="keystone" class="form-control" id ="keystone" placeholder="Add Openstack Url">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 col-sm-4 control-label">Username :</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" name="username" class="form-control" id ="username" placeholder="Add Openstack Username">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 col-sm-4 control-label">Password :</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" name="password" class="form-control" id ="password" placeholder="Add Openstack Password">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-4 col-sm-4 control-label">Tenant Name :</label>
+                                                <div class="col-sm-6">
+                                                    <input type="text" name="tenant" class="form-control" id ="tenant" placeholder="Add Openstack Project">
+                                                </div>
+                                            </div>
+
+                                         <div class="col-lg-6 main-chart">
+                                         </div>
+                                          <div class="col-lg-6 main-chart">
+  
+                                          </div>
+                                    
+                              </div><!-- /.col (RIGHT) -->
+                          </div><!-- /.row -->
+                      </div><!-- /.box-body -->
+                      <div class="box-footer clearfix">
+                          <div class="pull-right">
+                          </div>
+                      </div><!-- box-footer -->
+                  </div><!-- /.box -->
+              </div><!-- /.col (MAIN) -->
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit" id="form-submit">Sumbit</button>
+            </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+

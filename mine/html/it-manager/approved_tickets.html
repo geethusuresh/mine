@@ -1,0 +1,139 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px" id="it-manger-approval">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                {% if alert_message %}
+                    {% for alert in alert_message %}
+                        {% if profile.customer in alert.viewable_custs.all %}
+                        <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <div class="page-head" style="margin-top:10px">
+                    <h1>Approval Dashboard <small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Approval Dashboard</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-body">
+                            <div class="col-sm-5">
+                                <input type="text" id="start_date" name="start_date" placeholder="Start date" value="{{start_date}}" class="form-control">
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="text" id="end_date" name="end_date" placeholder="End date" value="{{end_date}}" class="form-control">
+                            </div>
+                            <div class="col-sm-2">
+                                <a href="#" onclick="get_date_filter_data()" class="btn btn-success" type="submit">Fetch Tickets</a>
+                            </div>
+                            <div class="col-sm-12 pad-all">
+                                <p class="alert alert-danger" id="report_error" style="display:none"></p>
+                            </div>
+                            <div class="col-sm-12">
+                                <h4 class="text-thin text-center">Approved Tickets</h4>
+                                <table class="table table-striped" id="table_1">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center"></th>
+                                            <th class="text-center">Ticket Id</th>
+                                            <th class="text-center">Ticket Summary</th>
+                                            <th class="text-center">Reported Date</th>
+                                            <th class="text-center">Priority</th>
+                                            <th class="text-center">Reporting Manager Approval</th>
+                                            <th class="text-center">Status</th>
+                                            <th class="text-center">Reported Person</th>
+                                            <th class="text-center"> Customer</th>
+                                            <th class="text-center">Ticket Belongs To</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for details in tickets %}
+                                            <tr>
+                                                <td class="text-center"><a data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/app/{{details.id}}">
+                                                    <i class="fa fa-edit "></i>
+                                                    </a>
+                                                </td>
+                                                <td class="text-center">{{details.ticketid }}</td>
+                                                <td class="text-center">{{ details.summary }}</td>
+                                                <td class="text-center"><span style="display:none;">{{details.reportdate.year}}{% if details.reportdate.month >= 10 %}{{details.reportdate.month}}{% else %}0{{details.reportdate.month}}{%endif%}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%} {{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                                                <td class="text-center">{{ details.reportedpriority }}</td>
+                                                <td class="text-center">
+                                                    {% for approval in details.approval_set.all %}
+                                                        {% if approval.approvaltype == 'MANAGER' %}
+                                                            {% if approval.approve %}
+                                                                Yes
+                                                            {% else %}
+                                                                No
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td class="text-center">{{ details.status | real:details.customer.id}}</td>
+                                                <td class="text-center">{{ details.reportedby }}</td>
+                                                <td class="text-center">{{ details.customer.customername }}</td>
+                                                <td class="text-center">{{ details.ticketattribute_set.all.0.additional_category|tic_categorize}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script>
+            $("#adash").addClass("active")
+            $(function() {
+                $( "#start_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+                $( "#end_date" ).datepicker({ dateFormat: "dd-mm-yy" });
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#table_1').DataTable({
+                    aaSorting:[[3,'desc']],
+                    "scrollX": true,
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function get_date_filter_data(){
+                var start_date = $('#start_date').datepicker('getDate');
+                var end_date   = $('#end_date').datepicker('getDate');
+                $('#report_error').hide();
+                if (start_date < end_date) {
+                    var days   = (end_date - start_date)/1000/60/60/24;
+                    if (days <= 60) {
+                        url = "/?approved=approved&start_date="+$('#start_date').val()+"&end_date="+$('#end_date').val();
+                        document.location.href = url;
+                    } else {
+                        $('#report_error').show();
+                        $('#report_error').text('Invalid dates, difference between start date and end date should be less than or equal to 60 days (2 months). ');
+                    }
+                } else {
+                    $('#report_error').show();
+                    $('#report_error').text('Invalid start and end date');
+                }
+            }
+        </script>
+    </body>
+</html>

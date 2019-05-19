@@ -1,0 +1,78 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Customers LDAP Details <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Customers LDAP Details</li>
+                </ol>
+            </div>
+            <div class="content">
+
+              <!--Start row -->
+                <div class="row">            
+                  <div class="col-sm-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Customers LDAP Details</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">                  
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th>Ldap Server IP</th>
+                                  <th>Ldap Username</th>
+                                  <th></th>                                                   
+                                </tr>
+                              </thead>
+                              <tbody>
+                               {% if ldap_details %}
+                                {% for details in ldap_details %}
+                                  <tr>
+                                    <td>{{ details.ldapserverip}}</td>                         
+                                    <td>{{ details.ldapusername}}</td>                 
+                                   <form name="frm_update_op" id="frm_update_op" action="/ldap_setting_op/" method="POST">{% csrf_token %}    
+                                    <td>     
+                                        <a href="/ldap_setting_op_update/{{details.id}}" class="btn btn-primary  active btn-sm" role="button">Edit</a>
+                                        <a href="javascript:void(0);" class="btn btn-danger  active btn-sm" role="button"  onclick="update_op('{{details.id}}','delete')">Delete</a>
+                                        <a href="/ldap_authentication/{{details.id}}" class="btn btn-info  active btn-sm" role="button" target="_blank">Test Run</a>
+                                        <input type="hidden" name="ldap_id" id="ldap_id" />
+                                        <input type="hidden" name="op_action" id="op_action" />
+                                    </td>                                    
+                                    </form>
+                                  </tr>
+                                {% endfor %}
+                                {% else %}
+                                   <tr>
+                                    <td colspan="3" style="text-align:center;">No Details found</td>
+                                  </tr>
+                                {% endif %}      
+                              </tbody>                         
+                            </table>                      
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}    
+    </body>
+</html>

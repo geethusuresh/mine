@@ -1,0 +1,170 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | My Team Tickets</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" id="view_sub_ticket">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Service Desk | <small>My Team Tickets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">My Team Tickets</li>
+                </ol>
+            </div>
+            {% include "components/msg_div.html" %}
+            <div class="content">
+              <!-- New Interface of subgroup tickets -->
+              <div class="panel">
+                  <div class="panel-body">
+                      <h3 class="text-thin text-center">My Team Tickets</h3>
+                      <table class="table table-striped table-hover" id="table_id" cellspacing="0" width="100%" >
+                        <thead>
+                          <tr>
+                            <th></th>
+                            <th>Ticket Id</th>
+                            <th>Ticket Summary</th>
+                            <th>Reported Date</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Domain</th>
+                            <th>Sub Domain</th>
+                            {% if is_egate_included %}
+                                <th>Carrier</th>
+                            {% endif %}
+                            <th>Ticket Age</th>
+                            <th>Affected Person</th>
+                            <th>Customer</th>
+                            <th>Owner</th>
+                            <th>Expected Resolution</th>
+                            <th>Work Hours( in minutes )</th>
+                            <th>LastUpdated</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                                <tr class="odd">
+                                {% if ticket.customer_wait_status %}
+                                    <td>
+                                        <a class="btn btn-sm {% if ticket.priority_flag == True %}btn-danger{% else %}{% if ticket.customer_wait_status == 'enduser_reply' %}btn-primary{% elif ticket.customer_wait_status == 'cust_wait' %}btn-warning{% endif %}{% endif %}" data-toggle="tooltip" data-placement="bottom" title="{% if ticket.customer_wait_status == 'enduser_reply' %} Enduser Replied {% elif ticket.customer_wait_status == 'cust_wait' %} Customer Wait {% endif %}" href="/ticket/stat/{{ticket.id}}">
+                                         <i class="fa fa-search-plus "> </i>
+                                        </a>
+                                    </td>
+                                {% else %}
+                                  {% if user.user.id == ticket.modifiedperson.user.id %}
+                                    <td>
+                                    {% if ticket.targetfinish.date < time.date %}
+                                        {% if ticket.priority_flag == True %}
+                                            <a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="Important" href="/ticket/stat/{{ticket.id}}">
+                                        {% else %}
+                                            <a class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit" href="/ticket/stat/{{ticket.id}}">
+                                        {% endif %}
+                                    {% else %}
+                                        {% if ticket.priority_flag == True %}
+                                            <a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="Important" href="/ticket/stat/{{ticket.id}}">
+                                        {% else %}
+                                            <a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit" href="/ticket/stat/{{ticket.id}}">
+                                        {% endif %}
+                                    {% endif %}
+                                        <i class="fa fa-search-plus "> </i>                                            
+                                    </a>
+                                    </td>
+                                    {% else %}
+                                    <td>
+                                        {% if ticket.priority_flag == True %}
+                                            <a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="Important" href="/ticket/stat/{{ticket.id}}">
+                                            <i class="fa fa-comment-o "> </i>        
+                                            </a>
+                                        {% else %}
+                                            <a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit" href="/ticket/stat/{{ticket.id}}">
+                                            <i class="fa fa-comment-o "> </i>        
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                {% endif %}
+                                  <td class="">
+                                      {% if ticket.affectedperson.id in vips %}
+                                          <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                                      {% endif %}{{ticket.ticketid}}</td>
+                                  <td class="">{{ticket.summary}}</td>
+                                  <td class=""><span style="display:none;">{{ticket.reportdate.year}}{% if ticket.reportdate.month >= 10 %}{{ticket.reportdate.month}}{% else %}0{{ticket.reportdate.month}}{%endif%}{% if ticket.reportdate.day >= 10 %}{{ticket.reportdate.day}}{% else %}0{{ticket.reportdate.day}}{%endif%}{{ticket.reportdate.time | time}}</span>{% tzone ticket.reportdate %}</td>
+                                  <td class="">{% if ticket.customer_priority %} {{ ticket.customer_priority.priority }} {% else %}{{ticket.internalpriority}} {% endif %}</td>
+                                  <td class="">{{ticket.status | real:ticket.customer.id}}</td>
+                                  <td class="">{{ticket.group}}</td>
+                                  <td class="">{{ticket.subgroup}}</td>
+                                  {% if is_egate_included %}
+                                      <td>{{ ticket.impacted_airline.name}}</td>
+                                  {% endif %}
+                                  <td>{{ ticket.id|ticket_age}}</td>
+                                  <td class="">{{ticket.affectedemail|lower}}</td>
+                                  <td class="">{{ticket.customer}}</td>
+                                  <td class="">{{ticket.owner}}</td>
+                                  <td class="">
+                                    {% if ticket.status == 'CLOSED' %}
+                                    Closed
+                                  {% elif ticket.status == 'RESOLVED' %}
+                                    Resolved
+                                  {% else %}
+                                     <span style="display:none;">{{ticket.targetfinish.year}}{{ticket.targetfinish.month}}{% if ticket.targetfinish.day >= 10 %}{{ticket.targetfinish.day}}{% else %}0{{ticket.targetfinish.day}}{%endif%}{{ticket.targetfinish.time | time}}</span>
+                                    {% tzone ticket.targetfinish %}
+                                  {% endif %}
+                                  </td>
+                                  <td>{{ ticket.id | work_hour}}</td>
+                                   <td>
+                                    <span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                                  {% tzone ticket.changedate %}
+                                  </td>
+
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                      </table>
+                  </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+      <script>
+    $("#service").addClass("active")
+            $("#subc").css({'display' : 'block'})
+            $("#sgtkt").addClass("active")
+     </script>
+     <script type="text/javascript">
+        $(document).ready(function() {
+          $('#table_id').DataTable({
+            aaSorting:[[3,'desc']],
+            "columnDefs": [
+                { "width": "10%", "targets": 1 },
+                { "width": "40%", "targets": 2 }
+            ],
+            "scrollX": true,
+          });
+        });
+      </script>
+    </body>
+</html>
+
+
+
+
+
+

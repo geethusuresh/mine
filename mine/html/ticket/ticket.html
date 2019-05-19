@@ -1,0 +1,552 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+            .dl-horizontal dt {
+                width:100px;
+            }
+            .dl-horizontal dt {
+                width: 150px;
+            }
+            .dl-horizontal dd {
+                margin-left: 110px;
+            }
+            .padding-md {
+                padding: 2px!important;
+            }
+            .timeline-centered .timeline-entry {
+                width: 78%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-time {
+                position: absolute;
+                left: -175px;
+                text-align: right;
+                /* padding: 0 10px; */
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            .timeline-centered:before {
+                background: #A5A2A2;
+                left: 22%;
+            }
+            .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label:after {
+                border-color: rgba(140, 126, 126, 0) #8C8787 transparent transparent;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/cust_header.html" %}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}      
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html" %}
+            {% else %}
+              {% include "side_bar/sidebar.html" %}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Ticket  <small>| Details</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Ticket Details</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="row">
+                        <div class="col-md-12" >
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <div class="panel-control">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a href="#basic1" role="tab" data-toggle="tab"> Details</a></li>
+                                            {% if attachments %}
+                                                <li><a href="#attachments" role="tab" data-toggle="tab"> Attachments</a></li>
+                                            {% endif %}
+                                            {% if tasks %}
+                                                <li><a href="#tasks" role="tab" data-toggle="tab"> Tasks</a></li>
+                                            {% endif %}
+                                            {% if ticket.ended_at %}
+                                                <li><a href="#new" role="tab" data-toggle="tab">Create new ticket related to closed ticket</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <h3 class="panel-title">{{ticket.ticketid}}</h3>
+                                </div>
+                                <div class="progress progress-striped  active progress-sm">
+                                    <div class="progress-bar progress-bar-{% if ticket.status == "NEW" %}success{% endif %}{% if ticket.status == "WAITAPPR" %}warning{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}info{% endif %}{% if ticket.status == "RESOLVED" %}info{% endif %}{% if ticket.status == "CLOSED" %}success{% endif %}{% if ticket.status == "CANCELLED" %}danger{% endif %}{% if ticket.status == "REJECTED" %}danger{% endif %}" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"  data-toggle="tooltip" data-original-title="{% if ticket.status == "NEW" %}5{% endif %}{% if ticket.status == "WAITAPPR" %}2{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}35{% endif %}{% if ticket.status == "RESOLVED" %}90{% endif %}{% if ticket.status == "CLOSED" %}100{% endif %}{% if ticket.status == "CANCELLED" %}100{% endif %}{% if ticket.status == "REJECTED" %}100{% endif %}%-{{ticket.status|real:ticket.customer.id}}" style="width:{% if ticket.status == "NEW" %}5{% endif %}{% if ticket.status == "WAITAPPR" %}2{% endif %}{% if ticket.status == "QUEUED" %}25{% endif %}{% if ticket.status == "INPROG" %}35{% endif %}{% if ticket.status == "RESOLVED" %}90{% endif %}{% if ticket.status == "CLOSED" %}100{% endif %}{% if ticket.status == "CANCELLED" %}100{% endif %}{% if ticket.status == "REJECTED" %}100{% endif %}%"></div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="basic1">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <div class="col-sm-8">
+                                                            <label>
+                                                                <strong>Summary:</strong>
+                                                            </label>
+                                                            {{ticket.summary}}
+                                                        </div>
+                                                        <div class="col-sm-4 "  style="border-left:1px solid black" >
+                                                            <label><strong>Ticket Status</strong></label>
+                                                            <label class="label label-success " style="font-size:14px" >{{ticket.status|real:ticket.customer.id}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <br>
+                                                    <div class="laval" style=" border-top: 1px solid #8399b2">
+                                                        <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-list"></l> Basic Details</p>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <ul class="list-group">
+                                                                <li class="list-group-item"><span class="pull-right">{{ ticket.affectedperson }}</span>Affected Person :</li>
+                                                                <li class="list-group-item"><span class="pull-right"> {{ ticket.affectedphone }}</span>Contact Number :</li>
+                                                                <li class="list-group-item"><span class="pull-right">{{ ticket.affectedemail }}</span>Contact email :</li>
+                                                                <li class="list-group-item"><span class="pull-right">{{ ticket.reportedby }}</span>Reported Person :</li>
+                                                                {% if ticket.category  %}
+                                                                    <li class="list-group-item"><span class="pull-right">{{ ticket.category }}</span>Ticket Category :</li>
+                                                                {% endif %}
+                                                                {% if ticket.reportedpriority  %}
+                                                                    <li class="list-group-item"><span class="pull-right">{{ ticket.reportedpriority }}</span>Ticket Priority :</li>
+                                                                {% endif %}
+                                                                {% if ticket.subgroup %}
+                                                                    <li class="list-group-item"><span class="pull-right">{{ticket.subgroup}}</span>Ownergroup :</li>
+                                                                {% endif %}
+                                                                <li class="list-group-item"><span class="pull-right">{{ ticket.source }}</span>Source :</li>
+                                                                {% if ticket.owner %}
+                                                                    <li class="list-group-item"><span class="pull-right">{{ ticket.owner }}</span>Ticket Owner :</li>
+                                                                {% endif %}
+                                                                <li class="list-group-item"><span class="pull-right">{% tzone ticket.creationdate %}</span>Ticket Created on :</li>
+                                                                <li class="list-group-item"><span class="pull-right">{% tzone ticket.reportdate %}</span>Reported on :</li>
+                                                                {% if ticket.targetfinish %}
+                                                                    <li class="list-group-item"><span class="pull-right">{% tzone ticket.targetfinish %}</span>Expected Resolution :</li>
+                                                                {% endif %}
+                                                                <li class="list-group-item"><span class="pull-right">{{ ticket.extrafield1 }}</span>Workstation :</li>
+                                                                <li class="list-group-item"><span class="pull-right">{% tzone ticket.changedate %}</span>Last Change :</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    {% if attributes %}
+                                                        {% for attribute in attributes %}
+                                                            <div class="laval" style=" border-top: 1px solid #8399b2">
+                                                                <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 70%;padding: 1%;margin-top:0px"><l class="fa fa-user"></l> Additional Info for Purchase</p>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-sm-12">
+                                                                    <ul class="list-group">
+                                                                        <li class="list-group-item"><span class="pull-right">{{ attribute.project }}</span>Project Name :</li>
+                                                                        <li class="list-group-item"><span class="pull-right"> {{ attribute.quantity }}</span>Quantity :</li>
+                                                                        <li class="list-group-item"><span class="pull-right">{{attribute.permanent_type }}</span>Request Type :</li>
+                                                                        <li class="list-group-item"><span class="pull-right">{{attribute.remark }}</span>Note :</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                    <div class="laval" style=" border-top: 1px solid #8399b2">
+                                                        <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-file-text"></l> Description</p>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <pre>{{ ticket.description |safe}}</pre>
+                                                        </div>
+                                                    </div>
+                                                    {% if resolved %}
+                                                        <div class="laval" style=" border-top: 1px solid #8399b2; margin-top:10px;">
+                                                            <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 50%;padding: 1%;margin-top:0px"><l class="fa fa-file-text"></l> Resolution Details</p>
+                                                        </div>
+                                                        {% for resolve in resolved %}
+                                                              <div class="row">
+                                                                  <div class="col-sm-12">
+                                                                      <ul class="list-group">
+                                                                          <li class="list-group-item"><span class="pull-right">{{ resolve.symptom }}</span>Symptom :</li>
+                                                                          <li class="list-group-item"><span class="pull-right"> {{ resolve.cause }}</span>Cause :</li>
+                                                                          <li class="list-group-item"><span class="pull-right">{{ resolve.resolution }}</span>Resolution :</li>
+                                                                      </ul>
+                                                                  </div>
+                                                                </div>
+                                                          {% endfor %}
+                                                    {% endif %} 
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="laval" style=" border-top: 1px solid #8399b2">
+                                                        <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-clock-o"></l> Worklog </p>
+                                                    </div>
+                                                    {% if ticket.ended_at %}
+                                                    {% else %}
+                                                        <div class="box" style="margin-bottom: 30px">
+                                                            <div class="box-body">
+                                                                <form action="/ticket/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                                                    <input type="text" value="enduser" class="hidden" name="enduser">
+                                                                    <textarea placeholder="Add Worklog"  name="remark" class="form-control" rows="4" required></textarea>
+                                                                    <input type="file" name="image" style="margin-top:5px" class="screenshot_image_upload_update">
+                                                                    <span class="error_message_for_upload_update" style="color:red;"></span>
+                                                                    <div class="box-footer clearfix">
+                                                                        <button class="pull-right btn btn-success" type="submit">Update <i class="fa fa-arrow-circle-right"></i></button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>  
+                                                    {% endif %}
+                                                    <div class="timeline">
+                                                        <div class="timeline-header">
+                                                            <div class="timeline-header-title bg-info">Now</div>
+                                                        </div>
+                                                        {% for act in activity %}
+                                                            <div class="timeline-entry">
+                                                                <div class="timeline-stat">
+                                                                    <div class="timeline-icon"></div>
+                                                                    <div class="timeline-time">{% tzone act.time %}</div>
+                                                                </div>
+                                                                <div class="timeline-label">
+                                                                    <p class="mar-no pad-btm pull-left"><span class="text-bold">{{act.owner }}</span>&nbsp;{{act.note}}
+                                                                    </p>
+                                                                    {% if act.remark %}
+                                                                        <br/><br/>
+                                                                         {% if act.ticket.affectedperson.user == user %}
+                                                                            {% if act.is_content_visible == True %}
+                                                                                <blockquote class="bq-sm bq-open">{{act.remark | safe}}</blockquote>
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            <blockquote class="bq-sm bq-open">{{act.remark |safe}}</blockquote>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                    {% if act.ticketattachments_set.all|length > 0 %}
+                                                                        <a class="btn btn-info pull-right" onclick="fetch_attachments({{act.id}})">View Attachments</a>
+                                                                    {% elif act.attachment %}
+                                                                        <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                    {% endif %}
+                                                                    <br/><br/><br/>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="att1">
+                                            <div class="row">
+                                                <div class="col-sm-3"></div>
+                                                <div class="col-sm-8">
+                                                    {% if ticket.ended_at %}
+                                                    {% else %}
+                                                        <div class="box" style="margin-bottom: 30px">
+                                                            <div class="box-body">
+                                                                <form action="/ticket/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                                                                    <input type="text" value="enduser" class="hidden" name="enduser">
+                                                                    <textarea placeholder="Add Worklog"  name="remark" class="form-control" rows="4" required></textarea>
+                                                                    <input type="file" name="image" style="margin-top:5px">
+                                                                    <div class="box-footer clearfix">
+                                                                        <button class="pull-right btn btn-success" type="submit">Update <i class="fa fa-arrow-circle-right"></i></button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>  
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-sm-1"></div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="tasks">
+                                            {% for task in tasks %}
+                                                {{task.taskid}}- {{task.task_name}} for {{task.tag}}
+                                                <hr>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="tab-pane" id="attachments">
+                                            <table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+                                                <thead>
+                                                    <tr role="row">
+                                                        <th >Uploaded by</th>
+                                                        <th> File name</th>
+                                                        <th >Time</th>
+                                                        <th >Actions</th>
+                                                    </tr>
+                                                </thead>         
+                                                <tbody >
+                                                    {% for act in attachments %}
+                                                        <tr class="odd">
+                                                            <td class="grey"><a  style="color:#555">{{act.uploader}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.attachname}}</a></td>
+                                                            <td class="grey"><a  style="color:#555">{{act.time|naturaltime}}</a></td>
+                                                            <td>
+                                                                <a class="btn btn-info btn-sm" href="/media/{{act.attachment}}"   download="{{attachments.docfile}}">
+                                                                    <i class="fa fa-download "></i>
+                                                                </a>
+                                                                <a class="btn btn-danger btn-sm" onclick="remove_attachments({{act.id}})" href="#" >
+                                                                    <i class="fa fa-trash-o "></i> 
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}         
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="tab-pane" id="new">
+                                            <form action="/closed_ref_ticket_create/{{ticket.id}}/" method="post" enctype="multipart/form-data">{% csrf_token %}
+                                                <ul class="nav nav-tabs" role="tablist">
+                                                    <li class="active"><a href="#relate1" role="tab" data-toggle="tab">Ticket Details</a></li>
+                                                </ul>
+                                                <br>
+                                                <div class="tab-content">
+                                                    <div class="tab-pane active" id="relate1">
+                                                        <label>Summary (Max 30 characters):</label>
+                                                        <input type="text" name="summ" id="ticket" class="form-control" placeholder="Summary (Max 30 characters)" value="Ref: {{ticket.ticketid}}-{{ticket.summary}}" required maxlength="50" readonly><br>
+                                                        <div id = "faqpopup">
+                                                        </div>
+                                                        <label>Description:</label>
+                                                        <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                                                        <div class="row">
+                                                            <div  class="col-sm-6">
+                                                                <label>Email:</label>
+                                                                <input type="email" name="email" class="form-control" placeholder="email"  value="{{profile.user.email}}" required >
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <label>Phone Number:</label> 
+                                                                <input type='tel' name="phone" class="form-control" placeholder="Contact Number *"  value="{{profile.phonenumber_set.all.0.primary}}" required>
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <div class="row">
+                                                            <div class="col-sm-4">
+                                                                <label>What is the impact of this issue</label>
+                                                                <select class="form-control" name="reportedpriority" id="impact" >
+                                                                    <option value="">What is the impact of this issue</option>
+                                                                    {% if ticket.cls == 'SR' %}
+                                                                        <option value="Urgent">Urgent</option>
+                                                                        <option value="Normal">Normal</option>
+                                                                        <option value="Purchase">Purchase</option>
+                                                                    {% elif ticket.cls == 'IN' %}
+                                                                        <option value="High">High</option>
+                                                                        <option value="Medium">Medium</option>
+                                                                        <option value="Low">Low</option>
+                                                                    {% endif %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <label>Select Category:</label>
+                                                                <select class="form-control" name="cat" id="">
+                                                                    <option value="{{ticket.category.id}}">{{ticket.category}}</option> 
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <label>Select Sub Category:</label>
+                                                                <select class="form-control" id="" name="subcat">
+                                                                    <option value="{{ticket.subcategory.id}}">{{ticket.subcategory}}</option>     
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        {% if attributes %}
+                                                            {% for attribute in attributes %}
+                                                                <div class="row">
+                                                                    <div class="col-sm-4">
+                                                                        <label>Quantity :</label>
+                                                                        <input type="number" min="0" name="quantity" value="{{attribute.quantity}}" required class="form-control">
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        <label>Project Name :</label>
+                                                                        <input type="text" name="pname" value="{{attribute.project}}" required class="form-control">
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        <label>Asset Request Type :</label>
+                                                                        <select name="rqtype"  class="selectpicker">
+                                                                            <option value="Permanent" {% if attribute.permanent_type == "Permanent"%} selected {% endif %}>Permanent</option>
+                                                                            <option value="Temporary" {% if attribute.permanent_type == "Temporary"%} selected {% endif %}>Temporary</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-sm-12">
+                                                                        <br/>
+                                                                        <label>Additional Information :</label>
+                                                                        <textarea class="form-control" name="extra" value="{{attribute.remark}}"></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <input class="hidden"  name="related" value="{{ticket.id}}">
+                                                        <input type="file" name="image" class="closed_image"><br>
+                                                        * max limit (10mb)
+                                                        <br/><span class="closed_image_error" style="color:red;"></span>
+                                                        <br/>
+                                                        <button id="delay" type="submit" class="btn btn-success btn-huge" style="float:right;width:120px">Submit</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        {% include "components/confirmation_box.html" %}
+        {% if ticket.customer.chat_messenger == True %}
+            {% include "components/converse.html" %}
+        {% endif %}
+        <script type="text/javascript">
+            $(document).ready(function(){ 
+                $('#imapct').hide();
+                $('#cat').on('change', function(){
+                    var catid = $('#cat').val();  //alert(catid);
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{catty: catid,
+                            csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            $("#sub_category1 option:gt(0)").remove();
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#sub_category1").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            console.log(xhr);
+                        }       
+                    });
+                    return false;
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function get_timestamp_value(str)
+            {
+                var res =str.split(" ");
+                var sec = res[0].split("-");
+                var t = res[1].split(":");
+                return Date.UTC(parseInt(sec[0]), parseInt(sec[1]), parseInt(sec[2]), parseInt(t[0]), parseInt(t[1]))
+            }
+        </script>
+        <script type="text/javascript">
+            $("#desc_text").hide();
+            $("#desc, #btnSelect").click(function() {
+              Select();
+            });
+            function Select() {
+              $("#desc_text").val($("#desc").html()).show();
+              $("#desc").hide();
+
+              $("#desc_text").focus()[0].select();
+            }
+
+            function Deselect() {
+              $("#desc").html($("#desc_text").val()).show();
+              $("#desc_text").hide();
+            }
+            $("#desc_text").blur(function() {
+              Deselect();
+            });
+
+            $("#btnDeselect").click(function() {
+              Deselect();
+            });
+        </script>
+        <!--IMPORTANT >>> validating file type and size(size allowed only less than 1mb)-->
+        <script>
+            (function ($, $win) {
+              'use strict';
+
+              $( document ).ready(function() {
+
+                $('.screenshot_image_upload_update').bind('change', function() {
+                  //this.files[0].size gets the size of your file.
+                  var ext = $('.screenshot_image_upload_update').val().split('.').pop().toLowerCase();
+                  //get upload file type
+                  var notAllowedFiles = ["exe", "rar", "dll"];
+                  var validFileStatus = 0;
+                  if(this.files[0].size>10000000){
+
+                    $(".error_message_for_upload_update").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.screenshot_image_upload_update').val("")
+                    validFileStatus = 1;
+                  }
+
+                  if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".error_message_for_upload_update").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.screenshot_image_upload_update').val("")
+                    validFileStatus = 1;
+                  }
+                  if(validFileStatus!=1){
+                      $(".error_message_for_upload_update").empty()
+                  }
+                });
+                $('.closed_image').bind('change', function() {
+                  //this.files[0].size gets the size of your file.
+                  var ext = $('.closed_image').val().split('.').pop().toLowerCase();
+                  //get upload file type
+                  var notAllowedFiles = ["exe", "rar", "dll"];
+                  var validFileStatus = 0;
+                  if(this.files[0].size>10000000){
+
+                    $(".closed_image_error").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.closed_image').val("")
+                    validFileStatus = 1;
+                  }
+
+                  if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".closed_image_error").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.closed_image').val("")
+                    validFileStatus = 1;
+                  }
+                  if(validFileStatus!=1){
+                      $(".closed_image_error").empty()
+                  }
+                });
+              });
+
+            }(jQuery, jQuery(window)));
+        </script>
+        <script type="text/javascript">
+            function remove_attachments(attachment_id) {
+                console.log("clicked")
+                $('#confirm_msg').html("<strong>Are you sure want to remove attachments?</strong>");
+                $('#confirm_type').val(attachment_id);
+                $('#confirm_box').modal('toggle');
+                return false;
+            }
+        </script>
+        <script type="text/javascript">
+            function submit_ok() {
+                if ($('#confirm_type').val()) {
+                    document.location.href = "/attachment/delete/"+$('#confirm_type').val();
+                }
+            }
+        </script>
+        <script>
+            function fetch_attachments(worklog_id) {
+                window.open("/worklog_attachments/"+worklog_id+"/", '"'+worklog_id+'"', "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+            }
+        </script>
+    </body>
+</html>
+
+
+
+

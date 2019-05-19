@@ -1,0 +1,43 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>LDAP Settings Test Results <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">LDAP Settings Test Results</li>
+                </ol>
+            </div>
+            <div class="content">
+               {% if status_text %}
+                {% if style_class == "alert-danger" %}
+                <div>Below error occured while trying to connect Ldap Server:</div>
+                {% endif %}
+                <div class="alert {{style_class}}" role="alert">{{ status_text }}</div>
+              {% endif %}
+
+              {% if total_records > 0 %}
+              <div>Total records found : {{total_records}}</div> 
+              {% endif %}  
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}    
+    </body>
+</html>

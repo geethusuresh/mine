@@ -1,0 +1,268 @@
+{% load zone %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="col-md-{% if ticket.customer.ticket_content_editable == True and ticket.owner == profile or 'Helpdesk_Dashboard' in request.session.logged_user_priv %}11{% else %}12{% endif %}">
+            <label><strong>Summary:</strong> </label>
+            {{ ticket.summary }}
+        </div>
+            {% if ticket.customer.ticket_content_editable == True and ticket.owner == profile or "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                <div class="col-md-1" style="padding-left:0px;">
+                    <a href="#" class="btn btn-success" data-toggle="modal" data-target="#edit_title" title="Edit Summary" data-placement="bottom"><i class="fa fa-edit" > </i></a>
+                </div>
+            {% endif %}
+    </div>
+    <div class="col-md-4" style="border-left:1px solid black" >
+        <h4>{{ ticket.ticketid }}</h4>
+        <label class="label label-success" style="font-size:14px" >{{ticket.status|real:ticket.customer.id}}</label>
+        <label><strong> Estimated Resolution time : </strong></label>
+        <label>{% tzone  ticket.targetfinish %}</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row pad-top">
+            <div class="col-sm-10">
+                <label><strong>Description:</strong>  </label>
+            </div>
+            <div class="col-sm-2"></div>
+        </div>
+        <div class="row pad-top pad-btm">
+            <div class="col-sm-6">
+                {% if ticket.html_description and ticket.html_description != "None" %}
+                    <a onclick="show_html_version({{ticket.id}}, 'ticket')" class="btn btn-info pad-all">View Html Version</a>
+                {% endif %}
+            </div>
+            <div class="col-sm-6">
+                {% if not user_profile.is_html_version or not ticket.html_description %}
+                    <button class="btn btn-info" style="float:right" id="btnSelect">Select Content</button>
+                {% endif %}
+                {% if ticket.customer.ticket_content_editable == True and ticket.owner == profile or "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                    <button class="btn btn-success" style="float:left" id="content_edit_button"><i class="fa fa-edit"></i> Edit Content</button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row pad-lft">
+            <div id="non_editabale_ticket_content">
+                {% if user_profile.is_html_version and ticket.html_description and ticket.html_description != "None" %}
+                    <iframe id="html_ticket_description" srcdoc="{{ticket.html_description}}" width="100%" height="600px" frameborder="1" scrolling="auto" onload='resizeIframe(this)'></iframe>
+                {% else %}
+                    <pre id="ticket_description" contenteditable="false">{{ ticket.description|safe }}</pre>
+                {% endif %}
+            </div>
+            {% if ticket.customer.ticket_content_editable %}
+                <div id="editable_ticket_content" style="display:none">
+                    <form action="/ticket/{{ticket.id}}/description/edit" method="POST"> {% csrf_token %}
+                        <textarea class="form-control "id="ticket_content_editor" name="ticket_description" rows="30">
+                            {% if ticket.html_description and ticket.html_description != "None"%}
+                                {{ ticket.html_description }}
+                            {% else %}
+                                {{ ticket.description }}
+                            {% endif %}
+                        </textarea>
+                        <div class="row pad-all">
+                            <input class="btn btn-success pad-all" style="float:right" type="submit" value="Submit">
+                        </div>
+                    </form>
+                </div>
+           {% endif %}
+        </div>
+                                  <!-- <pre id="desc"> {{ ticket.description|safe }}</pre> -->
+                                  <!-- <textarea id="desc_text" readonly="readonly" class="form-control" style="display:none;cursor:text;height:300px">{{ ticket.description|safe}}</textarea> -->
+    </div>
+                                  <!-- <iframe src="/ticket/summary/{{ticket.id}}/" width="675" height="400" style="border:1px solid #ccc;border-radius:4px"></iframe> -->
+</div>
+<hr/>
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel-body padding-md">
+            <dl class="dl-horizontal">
+                {% if zendesk_customer and ticket.source == "zendesk" %}
+                    <dt>Zendesk Id :</dt>
+                    <dd>{{ zendesk.zendesk_id }}</dd><br/>
+                {% endif %}
+                <dt>Impacted User :</dt>
+                <dd>{{ ticket.affectedperson }}</dd><br/>
+                <dt>Phone No :</dt>
+                <dd> {% if ticket.affectedphone %}{{ ticket.affectedphone }}{%else%} None {%endif%}</dd><br/>
+                <dt>User Email :</dt>
+                <dd>{{ ticket.affectedemail }}</dd><br/>
+                <dt>Submitted by:</dt>
+                <dd>{{ ticket.reportedby }}</dd><br/>
+                <dt>Worklocation: </dt>
+                <dd>{{ ticket.extrafield1 }}</dd><br/>
+                <dt>Created By :</dt>
+                <dd>{{ ticket.createdby }}</dd>
+            </dl>
+        </div>
+        <hr>
+    </div>
+    <div class="col-sm-6">
+        <div class="panel-body padding-md">
+            <dl class="dl-horizontal">
+                <dt>Category :</dt>
+                <dd>{{ ticket.category }}</dd><br/>
+                <dt>Subcategory :</dt>
+                <dd>{{ ticket.subcategory }}</dd><br/>
+                <dt>Domain :</dt>
+                <dd>{% if ticket.group %}{{ticket.group.workgroup}}{% else %}None{% endif %}</dd><br/>
+                <dt>Subdomain :</dt>
+                <dd>{% if ticket.subgroup %}{{ ticket.subgroup.subgroupname }}{% else %}None{% endif %}</dd><br/>
+                <dt>Source :</dt>
+                <dd>{{ ticket.source }}</dd><br/>
+                <dt>Assigned to :</dt>
+                <dd>{{ ticket.owner }}</dd>
+            </dl>
+        </div>
+        <hr>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="box-body padding-md">
+            <dl class="dl-horizontal">
+                <dt>Created Date :</dt>
+                <dd>{% tzone ticket.creationdate %}</dd><br/>
+                <dt>Reported Date :</dt>
+                <dd> {% tzone ticket.reportdate %}</dd><br/>
+                <dt>Affected Date :</dt>
+                <dd>{% tzone ticket.affecteddate %}</dd><br/>
+                <dt>Last Updated  :</dt>
+                <dd>{% tzone ticket.changedate %}</dd><br/>
+                <dt>Ticket Age :</dt>
+                <dd>{{ ticket_age }}</dd><br/>
+                <dt>Priority :</dt>
+                <dd>{% if ticket.customer_priority %}
+                    {{ ticket.customer_priority.priority }}
+                {% else %}
+                    {{ ticket.internalpriority}}
+                {% endif %}</dd>
+                {% if ticket.customer_ticket_no %}
+                    <br/>
+                    <dt>Customer Ticket :</dt>
+                    <dd>{{ ticket.customer_ticket_no }}</dd>
+                {% endif %}
+                {% if ticket.ticket_location %}
+                    <dt> Ticket Location: </dt>
+                    <dd>{{ ticket.ticket_location}} </dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="box-body padding-md">
+            <dl class="dl-horizontal">
+                <dt>Target Start :</dt>
+                <dd>{% tzone ticket.targetstart %}</dd><br/>
+                <dt>Target Finish:</dt>
+                <dd>{% tzone ticket.targetfinish %}</dd><br/>
+                <dt>Actual Start :</dt>
+                <dd> {% tzone ticket.actualstart %}</dd><br/>
+                <dt>Actual Finish :</dt>
+                <dd>{% tzone ticket.actualfinish %}</dd><br/>
+                <dt>SLA :</dt>
+                <dd>{{ ticket.sla }}</dd>
+                {% if ticket.impacted_airline %}<br/>
+                    <dt>Airline :</dt>
+                    <dd>{{ticket.impacted_airline.name }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+</div>
+{% if ticket.source == "Niksun" or ticket.source == "Redcanary" or ticket.source == "LEM" or ticket.source == "Varonis" or ticket.source == "Zixcorp" or ticket.source == "Isensor" %}
+    <div class="row">
+        <hr/>
+        <div class="col-md-6">
+            <dl class="dl-horizontal">
+                <dt>Tool URL:</dt>
+                {% if tool_url %}
+                    <dd>
+                        <a href="{{ tool_url }}" target="_blank" style="color:blue; vertical-align:top;">{{ tool_url|truncatechars:20 }} </a>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_toolurl"><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% else %}
+                    <dd>
+                        <span style="vertical-align:top;">None</span>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_toolurl"><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% endif %}
+                <dt>Hostname:</dt>
+                {% if security_host%}
+                    <dd>
+                        <span style="vertical-align:top;">{{ security_host }} </span>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_host" ><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% else %}
+                    <dd>
+                        <span style="vertical-align:top;">None</span>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_host"><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% endif %}
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <dl class="dl-horizontal">
+                <dt>IP Address:</dt>
+                {% if security_ip%}
+                    <dd>
+                        <span style="vertical-align:top;">{{ security_ip }}</span>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_ip" ><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% else %}
+                    <dd>
+                        <span style="vertical-align:top;">None </span>
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or "Resolver_Dashboard" in request.session.logged_user_priv and ticket.owner == profile %}
+                            <a data-toggle="modal" data-target="#edit_ip"><i class="fa fa-edit fa-2x" style="color:green;"></i></a>
+                        {% endif %}
+                    </dd><br/>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+{% endif %}
+<div>
+    {% if ticket.ticketattribute_set.all|length > 0 %}
+        <hr>
+        {% for attribute in ticket.ticketattribute_set.all %}
+            <div class="box-body padding-md">
+                <dl class="dl-horizontal">
+                    <dt>Project Name :</dt>
+                    <dd>{{ attribute.project }}</dd><br/>
+                    <dt>Quantity :</dt>
+                    <dd> {{ attribute.quantity }}</dd><br/>
+                    <dt>Note :</dt>
+                    <dd> {% if attribute.remark %} {{attribute.remark }} {% else %} None {% endif %}</dd><br/>
+                    <dt>Request Type :</dt>
+                    <dd> {{attribute.permanent_type }}</dd>
+                </dl>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <hr>
+    {% if ticket.knowledgebase_set.all|length > 0 %}
+        <div class="box-body padding-md">
+            {% for resolve in ticket.knowledgebase_set.all %}
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Symptom :</dt>
+                        <dd>{{ resolve.symptom }}</dd><br/>
+                        <dt>Cause :</dt>
+                        <dd> {{ resolve.cause}}</dd><br/>
+                        <dt>Resolution :</dt>
+                        <dd>{{ resolve.resolution }}</dd>
+                    </dl>
+                </div>
+            {% endfor %}
+            </div>
+    {% endif %}
+</div>

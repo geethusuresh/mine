@@ -1,0 +1,228 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Workgroup wise Performance Report</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+        .bs{
+            background-color: transparent;
+        }
+        .page {
+            width: 100%;
+            height: auto;
+        }
+        table.dataTable.no-footer {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable thead th, table.dataTable thead td {
+            border-bottom-color: #ddd;
+        }
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom-color: #ddd;
+        }
+        table.dataTable tbody th, table.dataTable tbody td {
+            padding-bottom: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 8px;
+        }
+        #tick_details.tbody th, #tick_details.dataTable tbody td{
+            padding: 15px;
+        }
+        .sortorder:after {
+          content: '\25b2' !important;
+        }
+        .sortorder.reverse:after {
+          content: '\25bc' !important;
+        }
+        [ng-cloak]
+        {
+          display: none !important;
+        }
+        table.scroll tbody {
+            height: 100px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed ng-cloak" style="font-size:13px" ng-controller="FetchReportsController" ng-init="init('{{csrf_token}}')" ng-cloak>
+        {% if "Managed_Service_Admin" in request.session.roles %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}
+        {% include "components/msg_div.html"%}
+        <div class="wrapper">
+            {% if "Managed_Service_Admin" in request.session.roles %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Reports | <small>Routine Tasks</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/reports/">Reports</a></li>
+                        <li class="active">Workgroup wise Performance Report</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <form method='POST' action='#'>
+                                        {% csrf_token %}
+                                        {{form.as_p }}
+                                        <button href="#" class="btn btn-success" type="submit" >Create Routine Task</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_routine" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Create Routine Task</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url "create_routine" %}">{% csrf_token %}
+                            <div class="row pad-all">
+                                {{ form.as_p }}
+                                <input type="submit" class="btn btn-success" value="Create Routine">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_schedule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Schedule Routine Task</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!-- <table class="table table-striped table-bordered dataTable dtr-inline">
+                            <thead>
+                                <tr>
+                                    
+                                    <th>Engineer</th>
+                                    <th>Workgroup</th>
+                                    <th>Response</th>
+                                    <th>Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="engineer in engineer_wise_data">
+                                    <td>[[ engineer.owner ]]</td>
+                                    <td>[[ engineer.workgroup ]]</td>
+                                    <td>[[ engineer.response ]]</td>
+                                    <td>[[ engineer.resolution ]]</td>
+                                </tr>
+                                <tr ng-show="engineer_wise_data.length==0">
+                                    <td colspan="4" class="text-center">No data to display</td>
+                                </tr>
+                            </tbody> -->
+                            <cron-selection output="myOutput" config="myConfig" init="serverData"></cron-selection>
+                        </table>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% comment %}
+            {% include "components/dashboard_footer.html"%}
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "components/sr_cust.html"%}
+            {% else %}
+                {% include "components/service_request.html"%}
+            {% endif %}
+        {% endcomment %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript">
+            $('#id_customer').on('change', function(){
+                $('#id_workgroup option:gt(0)').remove().end();
+                $('#id_subgroup option:gt(0)').remove().end();
+                var customer_id = $('#id_customer').val();
+                if (customer_id) {
+                    $.ajax({
+                        url: "/ticket/incident/customer",
+                        type:"POST",
+                        data: {
+                            groupid : customer_id,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function(data){
+                            var groups = JSON.parse(data['group_list']);
+                            for (var i in groups) {
+                                $('#id_workgroup').append($('<option>',
+                                    {
+                                        value:groups[i].pk,
+                                        text:groups[i].fields.workgroup
+                                    }
+                                ))
+                            }
+                        }
+                    })
+                }
+            });
+            $('#id_workgroup').on('change', function(){
+                $('#id_subgroup option:gt(0)').remove().end();
+                var workgroup_id = $('#id_workgroup').val();
+                if (workgroup_id) {
+                    $.ajax({
+                        url:"/ticket/incident/create",
+                        type:"POST",
+                        data: {
+                            workgroupid : workgroup_id,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function(data){
+                            var groups = JSON.parse(data);
+                            for (var i in groups) {
+                                $('#id_subgroup').append($('<option>',
+                                    {
+                                        value:groups[i].pk,
+                                        text:groups[i].fields.subgroupname
+                                    }
+                                ))
+                            }
+                        }
+                    })
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#report_table').dataTable({
+                    aaSorting: [[2, 'desc']],
+                    "bPaginate": false,
+                    "bFilter": false,
+                    "scrollX": true
+                });
+            })
+        </script>
+        <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+        {% include "components/angular_files.html" %}
+  </body>
+</html>

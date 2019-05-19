@@ -1,0 +1,53 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Service Catalog</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Service Catalog<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Service Catalog</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+              <div class="row">
+                {% for software in softwares %}
+                <div class="col-sm-4">
+                  <div class="fd-tile detail clean tile-green" style="height:160%">
+                    <div class="content"><h4 class="text-left">{{software.summary}}</h4><p>Desc</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-flag"></i></div>
+                    <a class="details" style="text-decoration: None;" href="/ticket/template/{{software.id}}"> Add Template to Create  Ticket <span><i class="fa fa-arrow-circle-right pull-right"></i></span></a>
+                  </div>
+                </div> 
+                {%endfor %}
+              </div>      
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    </body>
+</html>

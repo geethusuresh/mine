@@ -1,0 +1,76 @@
+{% extends "change_management/change_base.html" %}
+{% load static %}
+{% load zone %}
+
+{% block title_content %} Requests {% endblock title_content %}
+
+{% block page_head %} Change Management | <small>Requests</small> {% endblock page_head %}
+{% block bread_crumb %} <li class="active">Requests</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3 class="panel-title pull-left">Change Requests</h3>
+                    <a href="/rfc/create/" class="pull-right text-center pad-all btn btn-info" style="margin-top:10px; margin-right:10px"><i class="fa fa-plus" aria-hidden="true"></i> Create Change Request</a>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-stripped" id="change_reqs">
+                        <thead>
+                            <tr>
+                                <th>View/Edit</th>
+                                <th>Change ID</th>
+                                <th>Change Type</th>
+                                <th>Summary</th>
+                                <th>Owner</th>
+                                <th>Approved Status</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for change in change_requests %}
+                                <tr>
+                                    <td><a href="/rfc/details/{{change.id}}/" class="btn btn-success" > <i class="fa fa-search-plus"> </i> </a></td>
+                                    <td>{{change.change_id}}</td>
+                                    <td>{{change.change_type}}</td>
+                                    <td>{{change.summary}}</td>
+                                    <td>{{change.owner}}</td>
+                                    <td>
+                                        {% if change.is_approved == True %}
+                                            Approved
+                                        {% elif change.is_approved == False %}
+                                            Rejected
+                                        {% else %}
+                                            Not yet approved
+                                        {% endif %}</td>
+                                    <td>{{change.status}}</td>
+                                    <td><span class="display-none">{{change.created_date.year}}{{change.created_date.month}}{% if change.created_date.day >= 10 %}{{change.created_date.day}}{% else %}0{{change.created_date.day}}{%endif%} {{change.created_date.time | time}}</span>{% tzone change.created_date %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script>
+        $('#change_reqs').dataTable({
+            aaSorting: [[6, 'desc']]
+        });
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}
+

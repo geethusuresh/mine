@@ -1,0 +1,500 @@
+{% load humanize %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Events</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.js">
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+      .label-as-badge {
+          border-radius: 1em;
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+    
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+        {% include "components/cust_header.html"%}
+    {% else %}
+        {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Threat Management | <small>Active Events</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class=""><a href="/niksun/security/dashboard/">Threat Management</a></li>
+                    <li class=""><a href="/redcanary/dashboard/">Events</a></li>
+                    <li class="active">Active</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              {% if messages %}
+                <div class="row">
+                  <div class="col-sm-12">
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              <!-- <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                  <a class="btn btn-info pull-right" href="/security/dashboard">Dashboard</a>
+                </div>
+              </div> -->                      
+
+                  <!-- Active events tab -->                          
+                  <div class="row">
+                      <div class="col-sm-12">
+                        <div class="panel">
+                          <!-- <div class="panel-title" style="text-align:center">Attacking Data Analysis</div> -->
+                          <div class="panel-body">
+                            <!-- <span class="col-md-12 text-center"><h4>One Month</h4></span> -->                           
+                            <div class="row">
+                              <div class="col-sm-12" style="margin:0 0 14px 0px;">
+                                  <button onclick="create_security_ticket()" type="button" style="margin:0 10px 0 0;float:right;" class="btn btn-primary btn-sm">Create Ticket</button>
+
+                                  <button onclick="clear_event()" type="button" style="margin:0 10px 0 0;float:right;" class="btn btn-primary btn-sm">Clear Events</button>
+
+                                  <button type="button" onclick="return reloadWindow()" style="margin:0 10px 0 0;float:right;" class="btn btn-primary btn-sm">Refresh Events</button>
+                              </div>
+                            </div>
+
+                            <div class="row">
+                              <div class="col-sm-12" id="processing_ticket" style="display:none;margin: 10px 0 5px;text-align: center;">
+                                  <div class="alert alert-info" id="info_box">
+                                      Processing...
+                                  </div>
+                              </div>
+
+                              <div class="col-sm-12" id="success_box" style="display:none;margin: 10px 0 5px;
+                                text-align: center;">
+                                  <div class="alert alert-success fade in">                                
+                                      Ticket has been created successfully
+                                  </div>
+                              </div>
+
+                              <div class="col-sm-12" id="clear_box" style="display:none;margin: 10px 0 5px;
+                                text-align: center;">
+                                  <div class="alert alert-success fade in">                                
+                                      Event has been cleared successfully
+                                  </div>
+                              </div>
+
+                              <div class="col-sm-12" id="error_box" style="display:none;margin: 10px 0 5px;
+                                text-align: center;">
+                                  <div class="alert alert-danger">                                
+                                      Error occured while creating ticket
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="row">
+                              <div class="col-sm-12">
+                                <table class="table table-striped" id="table_id" class="display">
+                                      <thead>
+                                        <tr>
+                                          <th>Target IP</th>
+                                          <th>Event Data</th>
+                                          <th>Event Record Time</th>
+                                          <th>Source IP</th>
+                                          <th>Severity</th>
+                                          <th>ID</th>
+                                          <th>Ticket</th>                                             
+                                          <th>Action</th>
+                                        </tr>
+                                      </thead>   
+                                      <tbody>                                
+                                      </tbody>
+                                    </table>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+                         
+                <!--End Active events tab -->
+                    
+               
+
+                <!-- <div class="col-sm-2" style="margin-top:0px">  
+                    <div >
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="/create/api" ><i  ></i><span class="text" > Create API key </span></a>
+                    </div>
+                    
+              </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %} 
+    
+    
+
+    <!--Event Details Modal-->
+    <div class="modal fade" id="event_popup">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Event Details</h4>
+          </div>
+          <div class="modal-body">
+            <p>
+               <div class="row">
+                <div class="col-sm-12" id="event_summary_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+                <div class="col-sm-12" id="event_srcip_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+                <div class="col-sm-12" id="event_destip_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+                <div class="col-sm-12" id="event_time_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+                <div class="col-sm-12" id="event_altert_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+                 <div class="col-sm-12" id="event_ticket_pop" style="margin:0px 0px 7px 15px;">
+                </div>
+              </div>  
+            </p>
+          </div>         
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--End Event Details -->
+
+    <!--Clear Event Details Modal-->
+    <div class="modal fade" id="clear_event_popup">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Clear Event Confirmation</h4>
+          </div>
+          <form method="POST" id="frm_clear_event" action="/redcanary/security/clearevent" onsubmit="return clear_event_submit();">
+          {% csrf_token %}       
+            <div class="modal-body">
+                <div class="row">
+                  <div class="col-sm-12">
+                      Please write the reason for clear the event:
+                  </div>
+                  <div class="col-sm-12">
+                    <textarea rows="10" style="width:100%;" name="event_clear_message" id="event_clear_message" required></textarea>
+                  </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+              <input type="hidden" name="event_details" id="event_details" />     
+            </div>
+          </form>         
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--End Event Details -->
+
+    </body>
+</html>
+
+<script type="text/javascript">
+  // $('#table_id').dataTable({
+  //   'bLengthChange' : false
+  // });
+  var data_table;
+  var eventlist_checked = [];
+  var source_ip_selected = "";
+  var ticket_details = [];
+  var level_high = ['10','11','12']
+  var level_severe = ['13','14','15']
+  var level_medium = ['6','7','8','9']
+  var level_low = ['1','2','3','4','5']
+  // time = 1000*60*60*60
+  setInterval(function() {
+            window.location.reload();
+          }, 300000);
+  function reloadWindow(){
+    window.location.reload();
+  }
+  // setInter(window.location.reload(),300000);
+  $(document).ready(function(){
+        // if($("#table_id").hasClass('initialized')){
+        //   $('#table_id').dataTable().fnDestroy();
+        // }
+        // else{
+        //   $("#table_id").addClass('initialized');
+        // }
+        data_table = $('#table_id').DataTable({
+              "bLengthChange": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+              "processing": false,
+              // "searching": true,
+              "destroy": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/redcanary/security/activeeventsreal",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "aoColumns": [ null,null,null ,null ,null
+                ],
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                       { "": "fields.3" },
+                       { "": "fields.4" },
+                       { "": "fields.5" },
+                       { "": "fields.6" },
+                       { "": "fields.7" },                       
+                   ],
+              "createdRow": function ( row, data, index ) {
+                if(data[6]=="Not yet created"){                  
+                  $($('td', row).eq(6)).html("<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>");
+                }
+                else{
+                  $($('td', row).eq(6)).html('');
+                }
+              },
+              "columnDefs": [/*{
+                "targets": 7,
+                "data": null,
+                "defaultContent": "<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>"
+              },*/
+              {
+                "targets": 5,
+                "visible": false,
+                "searchable": false
+              },
+              {
+                "targets": 6,
+                "visible": true,
+                "searchable": true
+                },
+              {
+                "targets": 7,
+                "visible": true,
+                "searchable":false
+              },
+              ]               
+      });     
+      
+      $('#info_box').text('Processing....');
+      $('#processing_ticket').hide();
+      $('#success_box').hide(); 
+      $('#error_box').hide();
+      $('#clear_box').hide();
+      eventlist_checked = [];
+
+       
+  });
+
+  function insert_eventid(obj){
+        if($(obj).is(':checked')){
+            var data_values = data_table.row($(obj).closest('tr')).data();
+            var event_id = data_values[5];            
+            eventlist_checked.push(event_id);
+            var ticket_id = data_values[6];
+            if(ticket_id != "Not yet created"){
+              ticket_details.push(ticket_id);
+            } 
+        }
+        else{
+            var data_values = data_table.row($(obj).closest('tr')).data();
+            var event_id = data_values[5];
+            var index = eventlist_checked.indexOf(event_id);
+            if (index >= 0) {
+              eventlist_checked.splice(index, 1);
+            }
+            var ticket_id = data_values[6];
+            var ticket_index = ticket_details.indexOf(ticket_id);
+            if(ticket_index >= 0){
+              ticket_details.splice(ticket_index, 1);
+            }
+        }
+        //alert(ticket_details)
+    }
+
+    function create_security_ticket(){        
+        if(eventlist_checked.length > 0){
+          var eventlist = eventlist_checked.join();
+          $('#info_box').text('Processing....');
+          $('#processing_ticket').show();
+          $('#success_box').hide(); 
+          $('#error_box').hide();
+          $('#clear_box').hide();     
+          $.ajax({
+                  url:"/redcanary/security/eventsticket",
+                  type: "POST", 
+                  dataType:"json",
+                  data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    eventid: eventlist,                    
+                  },
+                  success: function(data){
+                    status = data.message;
+                    $('#processing_ticket').hide();
+                    if(status == "success"){                       
+                        $('#success_box').show();
+                        datatable_reload();
+                    }
+                    else if(status == "error"){
+                        $('#error_box').show();
+                    }                                                        
+                  },
+                  error: function(data){
+                     $('#processing_ticket').hide();
+                     $('#error_box').show();
+                     $('#clear_box').hide();
+                     $('#success_box').hide();                     
+                  }
+            });
+        }
+        else{
+            $('#info_box').text('Please select atleast one event');
+            $('#processing_ticket').show();
+            $('#success_box').hide(); 
+            $('#error_box').hide(); 
+            $('#clear_box').hide();             
+        }
+    }
+
+    function clear_event(){
+        if(eventlist_checked.length > 0){          
+          if(ticket_details.length == 0){            
+            $('#processing_ticket').hide();
+            $('#clear_event_popup').modal('show');            
+          }
+          else{
+              $('#info_box').text('Ticket already exist for some of the selected events. Not able to clear those events');
+
+              $('#processing_ticket').show();
+              $('#success_box').hide(); 
+              $('#error_box').hide(); 
+              $('#clear_box').hide();   
+          }
+        }
+        else{
+            $('#info_box').text('Please select atleast one event');
+            $('#processing_ticket').show();
+            $('#success_box').hide(); 
+            $('#error_box').hide();
+        }
+    }
+
+    function clear_event_submit(){
+        var eventlist = eventlist_checked.join();        
+        $('#event_details').val(eventlist);
+        return true;
+    }
+
+
+    function datatable_reload(){
+      // if($("#table_id").hasClass('initialized')){
+      //     $('#table_id').dataTable().fnDestroy();
+      //   }
+      //   else{
+      //     $("#table_id").addClass('initialized')
+      //   }
+        data_table = $('#table_id').DataTable({
+              "bLengthChange": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+              "processing": false,
+              // "searching": true,
+              "destroy": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/redcanary/security/activeeventsreal",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "aoColumns": [ null,null,null ,null ,null
+                ],
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                       { "": "fields.3" },
+                       { "": "fields.4" },
+                       { "": "fields.5" },
+                       { "": "fields.6" },
+                       { "": "fields.7" },                       
+                   ],
+
+              "createdRow": function ( row, data, index ) {
+                if(data[6]=="Not yet created"){                  
+                  $($('td', row).eq(6)).html("<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>");
+                }
+                else{
+                  $($('td', row).eq(6)).html('');
+                }
+              },
+
+              "columnDefs": [/*{
+                "targets": 7,
+                "data": null,
+                "defaultContent": "<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>"
+              },*/
+              {
+                "targets": 5,
+                "visible": false,
+                "searchable": false
+              },              
+              {
+                "targets": 6,
+                "visible": true,
+                "searchable": true
+                },
+              {
+                "targets": 7,
+                "visible": true,
+                "searchable":false
+              },              
+              ]               
+      });    
+      
+      eventlist_checked = []; 
+    } 
+
+    $("#red_event").addClass("active");
+    $("#sec_open").css('display', 'block');
+    $("#security").addClass("active");
+</script>

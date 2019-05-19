@@ -1,0 +1,213 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+<script type="text/javascript">
+  cloud_account_id = {{cloud_account_id}}
+</script>
+    <h1>
+        AWS Group List
+        <small>User Overview</small>
+    </h1>
+
+    <ol class="breadcrumb">
+      <li>
+        <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+      </li>
+        <!--     <li>
+        <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+
+      <li>
+        <a href="{% url 'iam_overview' cloud_account_id %}">IAM overview</a>
+      </li>
+
+
+
+      <li class="active">
+        <strong>AWS Group List</strong>
+      </li>
+    </ol>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+{% if sucess_msg %}
+  <div class="alert alert-success fade in">
+    <button class="close" data-dismiss="alert"><span>×</span></button>
+    <strong>New Group!</strong> You successfully created new group.
+  </div>
+{% endif %}
+
+
+<div ng-controller="Iam_Group_Controller" ng-init="init('{{csrf_token}}')">
+
+
+<div class="alert alert-success fade in alert-test" ng-show="response_status === 1" ng-style="response_status != 1 && {'display': 'none'}">
+  <button class="close" data-dismiss="alert"><span>×</span></button>
+  <strong>Well done!</strong> You successfully deleted the group.
+</div>
+
+
+<div class="alert alert-danger fade in alert-test" ng-show="response_status === 0" style="display:none" ng-style="response_status != 0 && {'display': 'none'}">
+  <button class="close" data-dismiss="alert"><span>×</span></button>
+  <strong>Oh snap!</strong> {[{response_message}]}.
+</div>
+
+  
+
+
+  <div class="panel">
+    <div class="panel-heading">
+      <div class="panel-control">
+
+      </div>
+      <h3 class="panel-title">Group List</h3>
+    </div>
+
+
+    <div class="row">
+      <div class="col-sm-6 table-toolbar-left">
+        <button id="iam-group-btn-addrow" class="btn btn-purple btn-labeled fa fa-plus">Add Group</button>
+        <div class="btn-group">
+          <button class="btn btn-default" ng-click='conform_delete_iam_groups()'><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="col-sm-6 table-toolbar-right">
+        <div class="form-group">
+          <input id="demo-input-search2" type="text" placeholder="Search" ng-model='group_sort.group_name' class="form-control" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <div class="pad-btm form-inline">
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Group Name</th>
+              <th>Group Id</th>
+              <th>Create Date</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr ng-repeat = "group_obj in iam_group_list | filter:group_sort">
+              <td>
+                 <input name="iam_group_check_box" type="checkbox" value="{[{group_obj.group_name}]}">
+              </td>
+              <td>{[{group_obj.group_name}]}</td>
+              <td>{[{group_obj.group_id}]}</td>
+              <td>{[{group_obj.create_date}]}</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div id="iam-drop-groups-conformation-modal" class="modal fade bs-example-modal-sm" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
+              <div class="bootbox-body" ng-show="iam_group_selcted">Are you sure to delete?</div>
+
+
+                <div class="alert alert-warning fade in" ng-if="!(iam_group_selcted)">
+                  Select any group first
+                </div>
+
+
+          </div>
+          <div class="modal-footer">
+            <button data-bb-handler="cancel" data-dismiss="modal"  type="button" class="btn btn-default">Cancel</button>
+            <button data-bb-handler="confirm" ng-click='delete_iam_groups()' type="button" class="btn btn-primary" ng-show="iam_group_selcted">OK</button>
+          </div>
+      </div>
+    </div><!-- /.MODAL -->
+  </div>
+
+
+
+
+
+</div>
+
+  <div id="iam-group-modal" class="modal fade bs-example-modal-lg" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title"> Create New Groups</h4>
+        </div><!-- MODAL HEADER-->
+        <div class="modal-body">
+
+            {% if error_msg %}
+
+              <div class="alert alert-danger fade in">
+                <button class="close" data-dismiss="alert"><span>×</span></button>
+                <strong>Oh snap!</strong> {{error_msg}}
+              </div>
+
+            {% endif %}
+            {% if sucess_msg %}
+              <div class="alert alert-success fade in">
+                <button class="close" data-dismiss="alert"><span>×</span></button>
+                <strong>New Group!</strong> You successfully created new group.
+              </div>
+            {% endif %}
+
+            <form method="post" class="form-horizontal style-form" action="{% url 'iam_group_list' cloud_account_id %}">{% csrf_token %}
+                <div id="demo-panel-w-alert" class="panel">
+                  <!--Panel heading-->
+                      <div class="panel-body">
+                          {{form.as_p}}
+                          <button id="demo-panel-alert2" class="btn btn-md btn-success pull-right">Create Group</button>
+                      </div>
+                </div>
+            </form>
+        </div><!-- MODAL body-->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.MODAL CONTENT -->
+    </div>
+  </div><!-- /.MODAL -->
+
+
+
+<script type="text/javascript">
+  
+
+$( document ).ready(function() {
+
+
+
+
+$( "#iam-group-btn-addrow").click(function(){
+  $("#iam-group-modal" ).modal('show');
+});
+
+
+$('#id_policy').select2();
+
+
+
+
+});
+
+{% if error_msg %}
+
+    $("#iam-group-modal" ).modal('show');
+
+{% endif %}
+
+setTimeout('$(".alert").hide()',1500);
+
+</script>
+{% endblock%}

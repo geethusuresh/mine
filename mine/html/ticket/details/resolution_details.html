@@ -1,0 +1,21 @@
+{% load zone %}
+<table class="table table-sorting table-striped table-hover datatable dataTable" cellpadding="0" cellspacing="0" width="100%" aria-describedby="visit-stat-table_info" style="width: 100%;">
+    <thead>
+        <tr role="row">
+            <th >Ticket</th>
+            <th >Engineer</th>
+            <th >Time taken in hours</th>
+            <th >Updated On</th>
+        </tr>
+    </thead>
+    <tbody >
+        {% for act in ticket.ticketresolution_set.all %}
+            <tr class="odd">
+                <td class="grey"><a  style="color:#555">{{act.ticket}}</a></td>
+                <td class="grey"><a  style="color:#555">{{act.user}}</a></td>
+                <td class="grey"><a  style="color:#555">{{act.time_taken|hour_cal}}</a></td>
+                <td class="grey"><a  style="color:#555">{% tzone act.last_activity %}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

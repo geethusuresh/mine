@@ -1,0 +1,32 @@
+<div class="col-sm-6">
+    <dl class="dl-horizontal">
+        <dt>Change Id :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.change_id}}</dd> <br/>
+        <dt>Summary :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.summary}}</dd><br/>
+        <dt>Category :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.category.name}}</dd><br/>
+        <dt>Subcategory :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.subcategory.name}}</dd><br/>
+        <dt>Owner :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.owner.user.email}}</dd>
+    </dl>
+</div>
+<div class="col-sm-6">
+    <dl class="dl-horizontal">
+        <dt>Group :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.group.workgroup}}</dd> <br/>
+        <dt>Subgroup :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.subgroup.subgroupname}}</dd><br      />
+        <dt>Created Date :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.created_date}}</dd><br/>
+        <dt>Start Date:</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.scheduled_start}}</dd><br/>
+        <dt>Finish Date :</dt>
+        <dd>{{ticket.changerequestrecord_set.all.0.scheduled_finish}}</dd>
+    </dl>
+</div>
+<div class="col-sm-12">
+    <label><strong>Description:</strong></label>
+    {{ticket.changerequestrecord_set.all.0.description}}
+</div>

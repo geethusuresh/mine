@@ -1,0 +1,151 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}            
+ <section class="content-header">
+        <h1>
+            {{data.name}}
+            <small>Layer Details</small>
+        </h1>
+<!-- -->
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+
+<div class="messages" id = "response_messages">
+
+</div>
+
+<div class="row">
+    <div class="col-xs-9">
+        <div class="row ">
+            <div class="col-md-11 " >
+                <div class="nav-tabs-custom">
+                    <div class="tabs" >
+                        <ul class="nav nav-tabs" id="myTab">
+                            <li><a href="#tabs-1" id="ui-id-1">General Settings</a></li>
+                            <li><a href="#tabs-2" id=" ">Recipes</a></li>
+                            <li><a href="#tabs-4" id=" ">Network</a></li>
+                            <li><a href="#tabs-3" id=" ">EBS Volumes</a></li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div id="tabs-1">
+                            <ul class="todo-list">
+                                {% for key, value in data.attributes.items %}
+                                    <li>
+                                        {{key}} : {{value}}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                        </div>
+                        <div id="tabs-2">
+                            <div class="row">
+                                <ul>
+                                Setup:
+                                    {% for each_recipe in data.recipes.Setup%}
+                                   <span class="label label-info" style="margin:1% !important;">
+                                        {{ each_recipe }}
+                                   </span>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="row">
+                                <ul>
+                                Configure :
+                                    {% for each_recipe in data.recipes.Configure %}
+                                   <span>
+                                        {{ each_recipe }}
+                                   </span>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="row">
+                                <ul>
+                                Deploy :
+                                    {% for each_recipe in data.recipes.Deploy %}
+                                   <span>
+                                        {{ each_recipe }}
+                                   </span>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="row">
+                                <ul>
+                                 Undeploy  :
+                                    {% for each_recipe in data.recipes.Undeploy %}
+                                   <span>
+                                        {{ each_recipe }}
+                                   </span>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="row">
+                                <ul>
+                                  Shutdown  :
+                                    {% for each_recipe in data.recipes.Shutdown %}
+                                   <span>
+                                        {{ each_recipe }}
+                                   </span>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="tabs-3">
+                                <div class="table">
+                                    <table class="table no-margin" id="node_table">
+                                        <thead>
+                                          <tr>
+                                            <th style="width: 50%;"><div>Key</div></th>
+                                            <th style="width: 50%;"><div>Value</div></th><th><div></div></th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat = "(key, value) in aws_instance_tag_details track by $index">
+                                              <td style="width: 50%;">{[{key}]}</td>
+                                              <td style="width: 50%;">{[{value}]}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div><!-- /.table-responsive -->
+                        </div>
+                        <div id="tabs-4">
+
+                            <section class="content">
+                                <div class="row">
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  $( document ).ready(function() {
+        jQuery('.tabs #myTab a').on('click', function(e)  {
+            var currentAttrValue = jQuery(this).attr('href');
+            // Show/Hide Tabs
+            jQuery('.tab-content ' + currentAttrValue).show().siblings().hide();
+            $(''+currentAttrValue+'').show()
+     
+            // Change/remove current tab to active
+            jQuery(this).parent('li').addClass('active').siblings().removeClass('active');
+     
+            e.preventDefault();
+        });
+        $('#ui-id-1').click();
+
+            setTimeout(function () {
+                $(".alert_div").hide();
+            }, 3000);
+
+  });
+</script>
+
+
+{% endblock%}

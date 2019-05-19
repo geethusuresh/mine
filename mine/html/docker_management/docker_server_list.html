@@ -1,0 +1,167 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+  <h1 class="text-thin">Docker Servers |<small>Servers Configured</small></h1>
+  <ol class="breadcrumb">
+    <li><a href="">Home</a></li>
+    <li class="active">Docker Servers</li>
+  </ol>
+{% endblock %}
+
+{% block basecontent %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-2 col-md-offset-10 pad-all">
+                <button type="button" class="btn btn-primary" style="width:100%" onclick="show_add_server_modal();">ADD DOCKER SERVER</button>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            {% if docker_server_list %}
+                {% for server in docker_server_list %}
+                <div class="col-md-3" style="height:200px;">
+                    <div class="box box-passing direct-chat">
+                        <div class="box-header">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img src="/static/docker_management/img/docker4.png" class="pad-all" style="width: 90%; height: 90%">
+                                </div>
+                                <div class="col-md-8">
+                                    <h4>{{server.name}}</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <p class="text-dark text-center">{{server.docker_url}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% if server.server_connection_status %}
+                        <div class="box-body" style="padding-left: 4px;">
+                            <div class="row">
+                                <div class="col-xs-4 text-center" style="border-right: 1px solid #2e6da4">
+                                  <p class="text-2x mar-no text-thin">{{server.application_count}}</p>
+                                  <p class="text-muted mar-no">Apps</p>
+                                </div><!-- ./col -->
+                                <div class="col-xs-4 text-center">
+                                  <p class="text-2x mar-no text-thin">{{server.container_count}}</p>
+                                  <p class="text-muted mar-no">Containers</p>
+                                </div><!-- ./col -->
+                                <div class="col-xs-4 text-center">
+                                  <p class="text-2x mar-no text-thin">{{server.image_count}}</p>
+                                  <p class="text-muted mar-no">Images</p>
+                                </div><!-- ./col -->
+                            </div>
+                        </div>
+                        {% else %}
+                            <div class="box-body" style="padding-left: 4px;">
+                                <div class="row text-center">
+                                    <p class="text-danger">Cannot Connect to Server!</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="box-footer" style="padding-bottom: 25px;">
+                            <div class="col-md-8">
+                                {% if server.server_connection_status %}
+                                <a title="View Applications" href="{% url 'list_application' server.id %}" class="small-box-footer box-shadow">More info&nbsp;<i class="fa fa-arrow-circle-right"></i></a>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <a class="edit_server_get_data" onclick="get_docker_server_data({{server.id}})" title="Edit" style="cursor:pointer;"><i class="fa fa-edit"></i></a>
+                            </div>
+                            <div class="col-md-2">
+                                <a onclick="delete_server({{server.id}})" title="Remove" style="cursor:pointer;"><i class="fa fa-trash-o"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <center><h4>No Docker Servers Found!!</h4></center>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="modal fade in" id="add_server" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add Docker Server</h4>
+          </div>
+          {% include 'docker_management/docker_server_create_form.html' %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="id_delete_server" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Delete Server</h4>
+          </div>
+          <div class="modal-body">
+            <h4>Are you sure you want to delete?</h4>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <a href="" id="id_confirm_delete_url"><button type="submit" class="btn btn-primary">Confirm</button></a>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="edit_server" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Edit Docker Server</h4>
+          </div>
+          <div id="edit_server_detail_div">
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+
+        function show_add_server_modal(){
+            $('#add_server').modal('show');
+            $('.form-control').val('');
+        }
+
+        function get_docker_server_data(server_id){
+            $('#edit_server').modal('show');
+            $('#edit_server_detail_div').empty();
+            $.ajax({
+                url: "server/" + server_id + "/update/",
+                type: 'get',
+                success: function(server_detail){
+                    $('#edit_server_detail_div').append(server_detail);
+                },
+                error: function(xhr,errmsg,err){
+
+                },
+            });
+        }
+
+        function delete_server(server_id){
+            $('#id_delete_server').modal('show');
+            $('#id_confirm_delete_url').attr('href', 'server/' + server_id + '/delete/')
+        }
+
+        $('.connection-type').change(function(){
+            var option = $('.connection-type').val();
+            if(option== 'S'){
+                $('.ssl_upload').show();
+            }
+            else{
+                $('.ssl_upload').hide();
+            }
+        });
+    </script>
+{% endblock %}

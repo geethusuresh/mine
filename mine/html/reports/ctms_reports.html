@@ -1,0 +1,153 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">     
+    <!--End High Charts -->
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>CTMS Reports  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="/reports/">Reports</li>
+                    <li class="active">CTMS Reports</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="panel panel-primary" style="font-size: 14px;font-weight: bold;margin: 10px 15px;padding: 5px 5px 5px 14px;text-align:center;">
+                    {{report_heading}} <br />
+                    Total Tickets Created: {{total_tickets_count}}
+                </div>
+              </div>
+
+              {% if ctms_ticketdetails %}
+               <!--Export Row -->   
+              <div class="row">
+                <div class="controls">
+                  <form action="/export_toexcel/" method="post" target="_blank">
+                      {% csrf_token %}
+                      <input type="submit" style="float:right;min-width:20%;margin-right:18px; margin-bottom: 10px;" class="btn btn-success" value="Export To Excel">
+                      <input type="hidden" name="export_type" id="export_type" value="ctms_report" />
+                  </form>
+                </div>          
+              </div>
+              <!--End export row -->
+              {% endif %}
+
+              <!--Start row -->
+              <div class="row">            
+                  <div class="col-sm-12">
+                    <div class="box">
+                      <div class="box-title">
+                        <h3>Tickets Details</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">                
+                                <table class="table table-striped table-bordered" id="report_table">
+                                  <thead>
+                                    <tr>
+                                      <th>Ticket No</th>
+                                      <th>Title</th>
+                                      <th>Source IP</th>
+                                      <th>Destination IP</th>
+                                      <th>Description</th>
+                                      <th>Resolution</th>
+                                      <th>Ticket Created Date</th>
+                                      <th>Last Updated</th>
+                                    </tr>
+                                  </thead> 
+                                  <tbody>
+                                  {% if ctms_ticketdetails %}
+                                  {% for ticket in ctms_ticketdetails %}
+                                  <tr>
+                                    <td>
+                                        {% if ticket.priority_flag == True %}
+                                            <a href="/ticket/{{ticket.ticketprim}}" class="btn btn-sm btn-danger" target="_blank">{{ticket.ticketid}}</a>
+                                        {% else %}
+                                            <a href="/ticket/{{ticket.ticketprim}}" class="btn btn-sm btn-success" target="_blank">{{ticket.ticketid}}</a>
+                                        {% endif %}
+                                      </td>
+                                      <td>{{ticket.title}}</td>
+                                      <td>{{ticket.sourceip}}</td>
+                                      <td>{{ticket.destinationip}}</td>
+                                      <td>
+                                        {{ticket.description}}
+                                      </td>
+                                      <td>        
+                                        {{ticket.ticket_resolution}}
+                                      </td>
+                                      <td><span style="display:none;">{{ticket.createddate.year}}{{ticket.createddate.month}}{% if ticket.createddate.month >= 10 %}{{ticket.createddate.month}}{% else %}0{{ticket.createddate.month}}{%endif%}{% if ticket.createddate.day >= 10 %}{{ticket.createddate.day}}{% else %}0{{ticket.createddate.day}}{%endif%} {{ticket.createddate.time | time}}</span>{% tzone ticket.createddate %}</td>
+                                      <td><span style="display:none;">{{ticket.changedate.year}}{% if ticket.changedate.month >= 10 %}{{ticket.changedate.month}}{% else %}0{{ticket.changedate.month}}{%endif%}{% if ticket.changedate.day >= 10 %}{{ticket.changedate.day}}{% else %}0{{ticket.changedate.day}}{%endif%}{{ticket.changedate.time | time}}</span>
+                          {% tzone ticket.changedate %}</td>
+                                    </tr>
+                                    {% endfor %}
+                                  {% endif %}                                 
+                                  </tbody>                         
+                                </table>                      
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!--End row -->              
+
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}
+      <script type="text/javascript">
+      $(document).ready(function(){
+        $('#report_table').dataTable({
+          aaSorting: [[2, 'desc']],
+          "bPaginate": true,
+          "bFilter": false,
+          "scrollX": true
+        });
+      })
+      </script>
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>        
+      {% include "components/dashboard_footer.html" %}
+      {% include "reports/reports_js.html" %}
+      {% include "components/service_request.html" %}
+    </body>
+</html>

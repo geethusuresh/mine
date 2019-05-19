@@ -1,0 +1,123 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | ITManager Pending</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Approval Detail | <small>ITManager Approvals</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">ITManager Pending Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title text-center">ITManager Pending Tickets</h3>
+                </div>
+                <div class="panel-body table-responsive no-padding">
+                  <table  class="table table-hover table-striped" id="pending_table_id">
+                     <thead>
+                          <th></th>
+                          <th>Ticket Id</th>
+                          <th>Ticket Summary</th>
+                          <th>Manager Approval</th>
+                          <th>Functional Head Approval</th>
+                          <th>Affected Person</th>
+                          <th>Customer</th>
+<!--                           <th>Reportdate</th> -->
+                          <th>Updated On</th>
+                        </thead>
+                        
+                        <tbody>
+                        {% for details in tickets %}
+                        <tr>
+                        {% if details.it_response == "Enduser" and details.modifiedperson == details.affectedperson %}
+                          <td><a class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="bottom" title="Enduser Replied"  href="/ticket/{{details.id}}">
+                              <i class="fa fa-info "> </i>                                            
+                              </a></td>
+                        {% elif details.it_response == "IT" %}
+                            <td><a data-toggle="tooltip" data-placement="bottom" title="Additional Information" class="btn btn-warning btn-sm" href="/ticket/{{details.id}}">
+                              <i class="fa fa-info "></i>                          
+                                            
+                            </a></td>
+                        {% elif details.it_response == "FH" %}
+                          <td><a data-toggle="tooltip" data-placement="bottom" title="Functionalhead Approval" class="btn btn-danger btn-sm" href="/ticket/{{details.id}}">
+                              <i class="fa fa-info "></i>                          
+                                            
+                            </a></td>
+                        {% else %}
+                          <td><a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit"  href="/ticket/{{details.id}}">
+                              <i class="fa fa-edit "> </i>                                            
+                              </a></td>
+                        {% endif %}
+                          <td>{{details.ticketid }}</td>
+                          <td>{{ details.summary }}</td>
+                          <td> {% if details.approval_set.all|length > 0 %}
+                                  {% for approval in details.approval_set.all %}
+                                    {% if approval.approvaltype == 'MANAGER' or approval.approver.user == details.affectedperson.supervisor %}
+                                        {% if approval.approve == True %}
+                                          Yes
+                                        {% elif approval.approve == False %}
+                                          No
+                                        {% else %}
+                                          Awaiting Approval
+                                        {% endif %}
+                                      {% endif %}
+                                  {% endfor %}
+                              {% else %}
+                                NA
+                              {% endif %} 
+                          </td>
+                          <td>{{details.id|fun_head_approval_status}}</td>
+                          <td>{{ details.affectedperson.user.email}}</td>
+                          <td> {{ details.customer }} </td>
+                          <!-- <td>{{ details.reportdate }}</td> -->
+                          <td><span style="display:none;">{{details.closedate.year}}{% if details.closedate.month >= 10 %}{{details.closedate.month}}{% else %}0{{details.closedate.month}}{%endif%}{% if details.closedate.day >= 10 %}{{details.closedate.day}}{% else %}0{{details.closedate.day}}{%endif%}{{details.closedate.time | time}}</span>{% tzone details.closedate %}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+
+                  </table>
+                </div>
+              </div>             
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+    <script type="text/javascript">
+        $('#approvals').addClass("active");
+        $('#main_approval_dash').addClass("active");
+        $('#approvals_sub_nav').css("display", "block");
+        $('#it-manager-pend').addClass("active");
+        $('#approvals').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $('#pending_table_id').DataTable({
+            aaSorting:[[1,'desc']]
+          });
+        });
+      </script>
+    </body>
+</html>

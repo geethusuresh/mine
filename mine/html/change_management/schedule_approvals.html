@@ -1,0 +1,23 @@
+{% load zone %}
+<table class="table table-striped" id="approval_tabl">
+    <thead>
+        <tr>
+            <th>View</th>
+            <th>Schedule ID</th>
+            <th>Change ID</th>
+            <th>Created Date</th>
+            <th>Domain</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for schedule_appr in schedule_approvals %}
+            <tr>
+                <td><a href="/rfc/schedule_details/{{schedule_appr.id}}/" class="btn btn-success" data-toggle="tooltip" data-original-title="View" data-placement="bottom"><i class="fa fa-edit"></i></a></td>
+                <td>{{schedule_appr.schedule_id}}</td>
+                <td><a href="/rfc/details/{{schedule_appr.change_req.id}}/" target="_blank" >{{schedule_appr.change_req.change_id}}</a></td>
+                <td>{% tzone schedule_appr.created_date %}</td>
+                <td>{{schedule_appr.group.workgroup}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

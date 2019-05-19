@@ -1,0 +1,352 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+
+
+        <div class="wrapper">
+           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Infrastructure | <small>Monitoring Analysis</small></h1>
+                <ol class="breadcrumb">                  
+                  <li>You are here:</li>
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/management/infrastructure">Datacenter</a></li>
+                  <li><a href="/management/host/{{host_id}}">Hosts</a></li>
+                  <li class="active">Monitoring Analysis</li>                   
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if op_status == 'success' %}
+            <div class="alert alert-success fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              Monitoring Items are successfully related to CI
+            </div>
+            {% elif op_status == 'failed'  %}
+            <div class="alert alert-danger fade in">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              Error occured while relating monitoring item with CI
+            </div>
+            {% endif %}
+
+            <div class="alert alert-danger fade in" id="error_message" style="display:none;">
+              <button class="close" data-dismiss="alert"><span>&times;</span></button>
+              <span id="message_sp_error"></span>
+            </div>
+
+             {% if monitoring_details %}
+              <div class="row">
+                <div class="col-sm-12">
+                <div class="panel">
+                  <div class="panel-heading">                    
+                    <h3 class="panel-title">Configuration Items Monitored</h3>
+                  </div>
+                <div id="alerter"></div>
+                <div class="panel-body">
+                  <div class="pad-btm form-inline">
+                    <div class="row">
+                      <div class="col-sm-6 table-toolbar-left">                        
+                      </div>
+                      <div class="col-sm-6 table-toolbar-right">
+                        <form method="POST" id="frm_monitoring" action="/management/host/stop_monitor/{{host_id}}">{% csrf_token %}
+                        <a href="#" onclick="manage_monitoring_items('stop')" class="btn btn-purple btn-labeled fa fa-plus">Stop Monitoring</a>
+                        <input type="hidden" name="monitoring_action" id="monitoring_action" value="" />                         
+                        <a href="#" onclick="manage_monitoring_items('relate')" class="btn btn-purple btn-labeled fa fa-plus">Relate Items</a>
+                        <div class="btn-group btn-group">
+                        </div>                                                
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>CI</th>                         
+                          <th>Host</th>
+                          <th>Monitoring Status</th>
+                          <th class="text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ci_item in monitoring_details %}
+                        <tr>
+                          <td><a class="btn-link" data-toggle="modal" data-target="#ci_{{ci_item.ci_id}}" href="#" style="font-weight:bold;">{{ci_item.ci_name}}</a></td>                          
+                          <td>{{ci_item.ci_hostip}}</td>
+                          <td>
+                          {% if ci_item.ci_monitoring_status == 0 %}
+                            <span style="color:green;font-weight:bold;">OK</span> (<span style="color:green;font-weight:bold;">{{ci_item.total_ok_items}}</span> / <span style="color:red;font-weight:bold;">{{ci_item.total_problem_items}}</span>)
+                          {% elif ci_item.ci_monitoring_status == 1  %}
+                             <span class="blink_me" style="color:red;font-weight:bold;">Problem</span>
+                             (<span style="color:green;font-weight:bold;">{{ci_item.total_ok_items}}</span> / <span style="color:red;font-weight:bold;">{{ci_item.total_problem_items}}</span>)
+                          {% else %}
+                              <span style="color:#ebaa4b;font-weight:bold;">Not Monitored</span>
+                          {% endif %}
+                          </td>
+                          <td class="text-right">  
+                            <input type="radio" name="ci_mod" id="ci_mod_{{ci_item.ci_id}}" value="{{ci_item.ci_id}}" />
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                     </form>
+                  </div>
+                </div>
+              </div>
+             {% else %}
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-header">
+                      <p class="panel-title"></p>
+                    </div>
+                    <div class="panel-body text-center">
+                      <div class="alert alert-danger" role="alert">                        
+                         Not able to find monitoring details
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+              
+            </div>
+          </div>
+        </div>
+
+
+{% include "asset/addtostock.html" %}
+
+{% for item_monitor in monitoring_details %}
+<div class="modal fade" id="ci_{{item_monitor.ci_id}}" tabindex="-1" role="dialog" aria-labelledby="Larges" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Monitoring Items</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">              
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Monitoring Status</th>                 
+                </tr>
+              </thead>
+              <tbody>                
+                {% if item_monitor.monitored_items  %}
+                  {% for monitoring_data in item_monitor.monitored_items %}
+                  <tr>
+                    <td>{{monitoring_data.item_name}}</td>                 
+                    <td>
+                    {% if monitoring_data.monitored_status == 0 %}
+                      <span style="color:green;font-weight:bold;">Ok</span>
+                    {% elif monitoring_data.monitored_status == 1  %}
+                       <span class="blink_me" style="color:red;font-weight:bold;">Problem</span>
+                    {% endif %}
+                    </td>                 
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                <tr><td colspan="5">No Monitoring Items found</td></tr>
+                {% endif %}                
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="modal fade" id="stop_confirm">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Confirm Monitoring</h4>
+      </div>
+      <div class="modal-body">
+        <p>Please select atleast one CI for stopping the monitoring services.</p>
+      </div>
+      <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>      
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+
+<script type="text/javascript">
+$("#tbl_monitor_list").DataTable();
+$("#asset").addClass("active");
+$(".close").click(function () { 
+    $("div").remove('.alert-wrap'); 
+  });
+
+function blinker() {
+    $('.blink_me').fadeOut(500);
+    $('.blink_me').fadeIn(500);
+}
+
+setInterval(blinker, 1000);
+
+function relate_ci_items(){
+  var itemids = ""    
+  if($('input[name="action_monitor[]"]').is(':checked')){    
+    $('input[name="action_monitor[]"]:checked').each(function(){
+        itemids = itemids + "," + $(this).val();
+    });
+    $('#itemids').val(itemids);
+    $('#ci_relation_area').show();
+    $('#ci_relation_message').hide();
+  }
+  else{
+    $('#ci_relation_area').hide();
+    $('#ci_relation_message').show();
+  }
+}
+
+function manage_monitoring_items(action){
+   if($('input[name="ci_mod"]').is(':checked')){
+    if(action == "stop"){
+      if(confirm('Do you want to stop monitoring service?')){
+        $('#monitoring_action').val('stop');
+        $('#frm_monitoring').attr("action","/management/host/stop_monitor/{{host_id}}");  
+        $('#frm_monitoring').submit(); 
+      }
+    }
+    else if(action == "relate"){
+      var ci_id = $('input[name="ci_mod"]:checked').val();      
+      $('#frm_monitoring').attr("action","/management/host/monitor_items/"+ci_id);  
+      $('#frm_monitoring').submit(); 
+    }
+  }
+  else{      
+     $('#message_sp_error').html('Please select one configuration item');
+     $('#error_message').show();
+  }
+}
+</script>
+
+<script type="text/javascript">
+{% for app in relation_list %}
+var {{app.names}} = graph.newNode  ({
+  // label: '{{app.names}}', image: {src: '/media/{{app.image}}', width:80}, 
+  label: '{{app.names}}', 
+  ondoubleclick: function() { location.href ='/dashboard/index/{{app.id}}'; }
+});
+{% endfor %}
+
+{% for app in relations %}
+graph.newEdge({{app.obj1.name}}, {{app.obj2.name}}, {color: '{{app.relation.color_code}}', label: '{{app.relation.name}}'});
+{% endfor %}
+</script>
+</body>
+</html>

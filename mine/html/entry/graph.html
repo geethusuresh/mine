@@ -1,0 +1,177 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+          .table .ng-scope{
+      text-align: center;
+    }
+    </style>
+
+    <style type="text/css">
+      [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+      display: none !important;
+      }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" ng-cloak ng-controller="realtimedata_dash">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+                     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+ 
+          {% if alert_message %}
+            {% for alert in alert_message %}
+               <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+            {% endfor %}
+          {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Real Time Events Map <small> </small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active"><a href="/dashboard/index/">Security Dashboard</a></li>
+                    <li><a href="/security/host/details/">Protection</a></li>
+                    <li><a href="/dashboard/index/host/{{host.id}}">Security Analysis</a></li>
+                    <li>Real Time Events Map</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <div class="panel">
+                      <div class="panel-heading">
+                        <div class="panel-title text-center"><l class="fa fa-globe"></l> Real Time Events Map</div>
+                      </div>
+                        <div class="panel-body">
+                          <div class="col-sm-9">
+                            <div id="canvas-container"></div>
+                          </div>
+                          <div class="col-sm-3">
+                            <table class="table" id="table_real_time_event" class="display" >
+                              <thead>
+                                <tr>
+                                  <th class="text-center">Country</th>
+                                  <th  class="">Count</th>
+                                </tr>
+                              </thead>   
+                              <tbody ng-repeat="result in agg" ng-if="agg.length">
+                              <tr>
+                                <td class="text-center">[[result.country]]</td>
+                                <td><span class="badge badge-danger">[[result.count]]</span></td>
+                              </tr>
+                            </tbody>
+                            <tbody ng-if="!agg.length">
+                              <tr>
+                                <td colspan="2">No Events!</td>
+                              </tr>
+                            </tbody>
+                            </div>
+                          </table>
+                          </div>                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <br>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+     <script >
+      var results = {{graphs|safe}};
+      var accountid = {{host.id}};
+      var agg = {{agg|safe}}
+     </script>
+    <script type="text/javascript" src="/static/map/d3.min.js"></script>
+    <script type="text/javascript" src="/static/map/topojson.min.js"></script>
+    <script type="text/javascript" src="/static/map/datamaps.world.min.js"></script>
+    
+        <script>
+
+
+          $("#sec_dash").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          $("#table_real_time_event").dataTable({
+            "bLengthChange": false,
+            "iDisplayLength": 5,
+            "bFilter": false,
+            "bInfo" : false
+          });
+
+          </script>
+
+    </body>
+    
+
+
+
+
+    
+
+</html>
+
+
+
+
+
+
+
+
+
+

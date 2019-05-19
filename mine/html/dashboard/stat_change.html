@@ -1,0 +1,256 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Oneconsole | Status</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+      <div class="container">
+        <div class="row">
+          <!-- logo -->
+          <div class="col-md-2 logo">
+            <h1 class="sr-only">OneConsole</h1>
+          </div>
+          <!-- end logo -->
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3">
+                <!-- search box -->
+                <!-- <div id="tour-searchbox" class="input-group searchbox">
+                  <input type="search" class="form-control" placeholder="enter keyword here...">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                  </span>
+                </div> -->
+                <!-- end search box -->
+              </div>
+              <div class="col-md-9">
+                <div class="top-bar-right">
+
+                  <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+                  <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /row -->
+      </div><!-- /container -->
+    </div>
+  <div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html"%}
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            <div class="row">
+
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Ticket</h2>
+                <em>Details</em>
+              </div>
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+
+              <div class="col-sm-8">
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Ticket Details</h3>
+                  {% if ticket.owner %}
+                  {{ticket.owner}}
+                  {% endif %}
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div class="row">
+                      <div class="col-md-8">
+                       {{ ticket.description }}
+                      </div>
+                      <div class="col-md-4" style="border-left-width: 1px;border-left-color: rgb(235, 214, 214);border-left-style: solid;"> 
+                        <p style="font-size:15px" style="float:left">Affected Person : {{ ticket.affectedperson }}</p>
+                        <p style="font-size:15px" style="float:right">Reported By : {{ ticket.reportedby }}</p>
+                        <p style="font-size:15px" style="float:left">Phone No : {{ ticket.affectedphone }}</p>
+                        <p style="font-size:15px" style="float:right">Email : {{ ticket.affectedemail }}</p>
+                      </div>
+                    </div>
+                    <hr>
+                  <div class="row">
+                  <div style="float:right;margin-right:10px">{{ticket.reportdate|naturaltime}}</div>
+                    
+                  </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i> Recent Activities</h3>
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      {% if activity %}
+                {% for act in activity %}
+                <span class="label label-success" >{{ act.owner }}</span> Changed Status to 
+                    <span class="label label-info" >{{ act.activity }}</span>
+                    {% if act.attachment %}
+                    <a href="/media/{{act.attachment}}"  style="float:right" download="{{act.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                    {% endif %}
+                    <div style="float:right">{{ act.time|naturaltime  }}</div>
+                  <p style="margin-top:5px;max-height: 100px;overflow: auto;">{{ act.remark|safe }}</p>
+                    
+                    
+                    <hr>
+                {% endfor %}
+                {% else %}
+                    No feeds. Please Sent Back a Remark to HelpDesk for more.
+                {% endif %}
+
+
+        
+</div>
+</div>
+</div>
+               
+
+
+
+              </div>
+
+              <div class="col-sm-4">
+                  <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Working Logs</h3>
+                    <div class="btn-group widget-header-toolbar">
+                      <a href="#" title="Focus" class="btn-borderless btn-focus"><i class="fa fa-eye"></i></a>
+                      <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                    </div>
+                  </div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                        <p style="font-size:16px">Change Status</p>
+                          <form action="/status/{{ticket.id}}" method="POST" enctype="multipart/form-data">{% csrf_token %}
+                            <select class="form-control" style="width:45%;float:left" name = "status">
+                            {% for group in groups %}
+                              <option value="{{group.workgroup}}"> {{group.workgroup}}</option>
+                              {% endfor %}
+                            </select> 
+                            <select class="form-control" style="width:45%;float:right;margin-bottom:5px" name = "">
+                              <option value=""> assigned</option>
+                              <option value=""> extended</option>
+                              <option value=""> closed</option>
+                            </select>
+
+                            
+                            <textarea type="text" name="remark" style="max-width:100%;margin-top:5px" class="form-control" placeholder="Description" rows="4" cols="20" required></textarea>
+                            
+                          <input id="image" type="file" class="" name="image" > <br>
+                          <button class="btn btn-success" style="width:100%;margin-top:5px;" type="submit">Change Status</button> 
+                          </form>
+                         <!--  <hr> -->
+                         <!--  <a href="/spam/{{ticket.id}}" class="btn btn-warning" style="float:left;margin-top:5px;width:49%">Spam</a> -->
+<!-- 
+                          <a href="/ticket/close/{{ticket.id}}" class="btn btn-danger" style="float:right;margin-top:5px;width:49%">Close Ticket</a>
+                          </div> -->
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+               <!-- END WIDGET WIZARD -->
+              </div><!-- /main-content -->
+            </div><!-- /main -->
+          </div>
+        </div>
+      </div>
+      {% include "components/service_request.html" %}
+  </body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

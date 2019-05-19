@@ -1,0 +1,266 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+<style type="text/css" src="/static/feeder/main.css"></style>
+<style type="text/css" src="/static/feeder/prism.css"></style>
+<link href="/static/feeder/jquery.mCustomScrollbar.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+    #nt-example1 li {
+color: #4E4E4E;
+background: #FFF none repeat scroll 0% 0%;
+overflow: hidden;
+height: 80px;
+padding: 10px;
+line-height: 30px;
+list-style: outside none none;
+font-size: 12px;
+text-align: left;
+border-bottom: 1px dotted #2C8162;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+ 
+{% if alert_message %}
+{% for alert in alert_message %}
+<div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+{% endfor %}
+{% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Threat Management |<small> Dashboard</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Threat Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <br><br>
+              <div class="row col-sm-12">
+                
+                <div class="col-md-6 col-lg-4">
+                <a href="/security/dashboard">
+                  <div class="panel">
+                    <div class="panel-body bg-success text-center">
+                      <l class="fa fa-dashboard fa-5x">
+                      </l>
+                      <p class="h2 text-thin">Security Events</p>
+                    </div>
+                    <div class="pad-all">
+                      <!-- <p class="text-muted">Host are  bla bla bla bla adipiscing elit, sed diam nonummy nibh. Lorem ipsum dolor sit amet.</p>
+                      <small class="text-muted"><em>Last Update : Des 12, 2014</em></small>
+                      <hr> -->
+                      <ul class="list-unstyled row text-center">
+                        <li class="col-xs-6">
+                          <span id="demo-gauge-text" class="text-2x">{{active_events_count}}</span>
+                          <p class="text-uppercase">
+                            <small>Active Events</small>
+                          </p>
+                        </li>
+                        <li class="col-xs-6">
+                          <span class="text-2x">{{all_events_count}}</span>
+                          <p class="text-uppercase">
+                            <small>All Events</small>
+                          </p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div></a>
+                </div>
+
+
+
+                <div class="col-md-6 col-lg-4">
+                  <a href="/security/host/details/">
+                  <div class="panel">
+                    <div class="panel-body bg-mint text-center">
+                      <l class="fa fa-lock fa-5x"></l>
+                      <p class="h2 text-thin">Protection Status</p>
+                    </div>
+                    <div class="pad-all">
+                     <!--  <p class="text-muted">Lorem ipsum dolor sit amet, consectetuer <a href="#" class="add-tooltip text-semibold" data-title="45%" data-original-title="" title="">adipiscing elit</a>, sed diam nonummy nibh. Lorem ipsum dolor sit amet.</p>
+                      <small class="text-muted"><em>Last Update : Des 12, 2014</em></small>
+                      <hr> -->
+                      <ul class="list-unstyled row text-center">
+                        <li class="col-xs-6">
+                          <span id="demo-gauge-text" class="text-2x">{{blocked_ips}}</span>
+                          <p class="text-uppercase">
+                            <small>Blocked IPs</small>
+                          </p>
+                        </li>
+                        <li class="col-xs-6">
+                          <span class="text-2x">{{black_count}}</span>
+                          <p class="text-uppercase">
+                            <small>Blacklisted</small>
+                          </p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div></a>
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+                 
+                  <div class="panel">
+                   <a href="/dashboard/realtime/map/customer/">
+                    <div class="panel-body bg-purple  text-center">
+                      <l class="fa fa-globe fa-5x"></l>
+                      <p class="h2 text-thin">Real Time Event Map</p>
+                    </div>
+                    
+                    <div class="pad-all" style="cursor:pointer; max-height:100px">
+                      <!-- <p class="text-muted text-center"><strong> Real time event index summary </strong></p> -->
+                      <!-- <hr> -->
+                      <ul class="list-unstyled row text-center">
+                        <li class="col-xs-4">
+                          <span id="demo-gauge-text" class="text-2x">{{levels.high}}</span>
+                          <p class="text-uppercase">
+                            <small>High</small>
+                          </p>
+                        </li>
+                        <li class="col-xs-4 ">
+                          <span class="text-2x">{{levels.medium}}</span>
+                          <p class="text-uppercase">
+                            <small>Medium</small>
+                          </p>
+                        </li>
+                        <li class="col-xs-4">
+                          <span class="text-2x ">{{levels.low}}</span>
+                          <p class="text-uppercase">
+                            <small>Low</small>
+                          </p>
+                        </li>
+
+                      </ul>
+                    </div>
+                    </a>
+                  </div>
+                  
+                </div>
+
+              </div>
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <p class="panel-title"><l class="fa fa-rss"></l>Threat Intel feeds</p>
+                    </div>
+                    <div class="panel-body text-center">
+                      <div id="nt-example1-container">
+                        <i class="fa fa-arrow-up" id="nt-example1-prev"></i>
+                            <ul id="nt-example1">
+                             {% for item in feed_list %}
+                              <li>
+                                <div class="row">
+                                  <div class="col-md-10">{{item.0}}</div>
+                                  <div class="col-md-2"><a href="{{item.1}}" target="_blank" class="btn btn-success">View Details</a></div>
+                                </div>
+                              </li>
+                              {% endfor %}
+                            </ul>
+                        </div>
+                        <i class="fa fa-arrow-down" id="nt-example1-next"></i>
+                    </div>
+                    
+                  </div>
+                 <!--  <div id="nt-example1-container">
+                    <i class="fa fa-arrow-up" id="nt-example1-prev"></i>
+                            <ul id="nt-example1">
+                                <li>Etiam imperdiet volutpat libero eu tristique. Aenean, rutrum felis in. <a href="#">Read more...</a></li>
+                                <li>Curabitur porttitor ante eget hendrerit adipiscing. Maecenas at magna. <a href="#">Read more...</a></li>
+                                <li>Praesent ornare nisl lorem, ut condimentum lectus gravida ut. <a href="#">Read more...</a></li>
+                                <li>Nunc ultrices tortor eu massa placerat posuere. Vivamus viverra sagittis. <a href="#">Read more...</a></li>
+                                <li>Morbi sodales tellus sit amet leo congue bibendum. Ut non mauris eu neque. <a href="#">Read more...</a></li>
+                                <li>In pharetra suscipit orci sed viverra. Praesent at sollicitudin tortor, id. <a href="#">Read more...</a> </li>
+                                <li>Maecenas nec ligula sed est suscipit aliquet sed eget ipsum, suspendisse. <a href="#">Read more...</a></li>
+                                <li>Onec bibendum consectetur diam, nec euismod urna venenatis eget.. <a href="#">Read more...</a> </li>
+                            </ul>
+                            <i class="fa fa-arrow-down" id="nt-example1-next"></i>
+                        </div> -->
+                    <!-- <div class="panel" style="text-aligin:center" id="scrolling_div" >
+                        <div class="panel-heading">
+                          <h4 class="text text-center text-warning"><i class="fa fa-rss"></i><l >Latest CVE RSS Feed</l></h4>
+                        </div>
+                        <marquee  behavior="scroll" direction="up" scrollamount="2" style="height:184px;">
+                          {% for item in feed_list %}
+                            <p class="text-primary">{{ item }}</p>
+                          {% endfor %}
+                        </marquee>
+                    </div> -->
+                </div>
+                <!-- <div id="feed"></div> -->
+            </div>
+          </div>
+        </div>
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script src="/static/feeder/prism.js"></script>
+    <script src="/static/feeder/jquery.mCustomScrollbar.min.js"></script>
+    <script type="text/javascript" src="/static/feeder/jquery.newsTicker.min.js"></script>
+    <script type="text/javascript">
+        /*$('a[href*=#]').click(function(e) {
+          var href = $.attr(this, 'href');
+          if (href != "#") {
+            $('html, body').animate({
+                scrollTop: $(href).offset().top - 81
+            }, 500);
+        }
+        else {
+          $('html, body').animate({
+                scrollTop: 0
+            }, 500);
+        }
+          return false;
+      });*/
+
+        $(window).load(function(){
+              $('code.language-javascript').mCustomScrollbar();
+          });
+            var nt_example1 = $('#nt-example1').newsTicker({
+                row_height: 80,
+                max_rows: 4,
+                duration: 4000,
+                prevButton: $('#nt-example1-prev'),
+                nextButton: $('#nt-example1-next')
+            });
+            $("#sec_dash").addClass("active");
+    </script>
+            
+          <script>
+            $("#sec_open").css('display','block');
+            $("#security").addClass("active");
+          </script>
+    </body>
+</html>

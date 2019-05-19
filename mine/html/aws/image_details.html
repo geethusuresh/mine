@@ -1,0 +1,19 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+ <section class="content-header">
+        <h1>
+            AWS Image List
+            <small>Image Overview</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="{% url 'aws_accounts_view' %}">AWS Home</a></li>
+            <li><a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a></li>
+            <li>aws image</li>
+        </ol>
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+
+{% endblock%}

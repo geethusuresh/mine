@@ -1,0 +1,84 @@
+{% load humanize %}
+{% load zone %}
+{% load request_tag %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Active Users</title>
+        {% include "components/css.html"%}
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Active Users  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Active Users</li>
+                </ol>
+            </div>
+            <div class="content">
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            {% if message.tags == 'success' %}
+                                <div class="alert alert-success" >{{ message|safe }}</div>
+                            {% else %}
+                                <div class="alert alert-danger" >{{ message|safe }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="row">
+                    <div class="col-sm-12" style="padding:30px">
+                        <div class="box">
+                            <div class="box-title">
+                                <h3>Users List</h3>
+                            </div>
+                            <div class="box-body table-responsive no-padding" >
+                                {% active_users in 30 minutes as user_list %}
+                                <table class="table table-striped" id="report_table" class="display">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Logged In</th>
+                                            <th>Logged Out</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in user_list %}
+                                            <tr>
+                                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                                <td>{{ user.username }}</td>
+                                                <td>{{ user.email}}</td>
+                                                {% if user.username %}
+                                                    <td>{% logged_data user.username %}</td>
+                                                    <td>{% logged_out_data user.username %}</td>
+                                                {% else %}
+                                                    <td></td>
+                                                    <td></td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        <script type="text/javascript">
+        $('#report_table').dataTable();
+        </script>
+    </body>
+</html>

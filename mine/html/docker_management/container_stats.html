@@ -1,0 +1,183 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+  <script type="text/javascript">
+    server_id = {{server_id}}
+    application_id = {{application_id}}
+    docker_container_id = '{{docker_container_id}}'
+  </script>
+
+  <h1 class="text-thin">
+      Statitics |
+    <small>CPU/Memory statitics of {{container_name}}</small>
+  </h1>
+
+  <ol class="breadcrumb">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+    <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+    <li><a href="{% url 'list_container' server_id application_id %}">{{application_name}}</a></li>
+    <li><a href="{% url 'detail_container' server_id application_id container_id %}">{{container_name}}</a></li>
+    <li class="active">Stats</li>
+  </ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+    <div class="col-md-12">
+
+    <div class="tab-base">
+      <!--Nav Tabs-->
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#demo-lft-tab-1" data-toggle="tab">CPU</a>
+        </li>
+        <li>
+          <a href="#demo-lft-tab-2" data-toggle="tab">Memory</a>
+        </li>
+      </ul>
+
+      <!--Tabs Content-->
+      <div class="tab-content">
+        <div class="tab-pane fade active in" id="demo-lft-tab-1">
+
+          <div class="chart">
+            <div id="cpu_stats" class="display_chart"  style="min-width: 50%; height: auto; margin: 0 auto;"></div>
+          </div>
+
+        </div>
+        <div class="tab-pane fade" id="demo-lft-tab-2">
+
+          <div class="chart">
+            <div id="memory_stats" class="display_chart"  style="min-width: 50%; height: auto; margin: 0 auto;"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript" charset="utf-8">
+
+  var chart1; // global
+  var chart2;
+  function requestData() {
+      $.ajax({
+          url: '/docker_management/server/' + server_id + '/container/' + docker_container_id + '/stats/',
+          type: 'GET',
+          success: function(point) {
+              point = JSON.parse(point)
+              var time_stamp = new Date(point.time_stamp).getTime();
+              point1 = [time_stamp, point.memory]
+              var series = chart1.series[0],
+                  shift = series.data.length > 20; // shift if the series is 
+                                                   // longer than 20
+
+              // add the point
+              chart1.series[0].addPoint(point1, true, shift);
+              point2 = [time_stamp, point.cpu]
+              var series2 = chart2.series[0],
+                  shift2 = series2.data.length > 20; // shift if the series is 
+              //                                      // longer than 20
+
+              // // add the point
+              chart2.series[0].addPoint(point2, true, shift2);
+              // call it again after one second
+              setTimeout(requestData, 1000);
+
+          },
+          cache: false
+      });
+  }
+
+  $(document).ready(function() {
+      chart1 = new Highcharts.Chart({
+          chart: {
+              renderTo: 'memory_stats',
+              defaultSeriesType: 'spline',
+              events: {
+              },
+              borderColor: '#A4A1A1',
+              borderWidth: 1,
+              type: 'line',
+              spacingTop: 50,
+              spacingRight: 50,
+              width: 1000
+          },
+          title: {
+              text: 'Memory statitics'
+          },
+          xAxis: {
+              type: 'datetime',
+              tickPixelInterval: 50,
+              maxZoom: 20 * 1000,
+              title: {
+                  text: 'Time(UTC)',
+                  margin: 30
+              }
+          },
+          yAxis: {
+              minPadding: 0.2,
+              maxPadding: 0.2,
+              title: {
+                  text: 'Memory usage(%)',
+                  margin: 30
+              }
+          },
+          series: [{
+              name: 'Memory Usage',
+              data: []
+          }]
+      });
+
+      chart2 = new Highcharts.Chart({
+          chart: {
+              renderTo: 'cpu_stats',
+              defaultSeriesType: 'spline',
+              events: {
+                  load: requestData
+              },
+              borderColor: '#A4A1A1',
+              borderWidth: 1,
+              type: 'line',
+              spacingTop: 50,
+              spacingRight: 50,
+              width: 1000
+          },
+          title: {
+              text: 'CPU statitics'
+          },
+          xAxis: {
+              type: 'datetime',
+              tickPixelInterval: 50,
+              maxZoom: 20 * 1000,
+              title: {
+                  text: 'Time(UTC)',
+                  margin: 30
+              }
+          },
+          yAxis: {
+              minPadding: 0.2,
+              maxPadding: 0.2,
+              title: {
+                  text: 'CPU usage(%)',
+                  margin: 30
+              }
+          },
+          series: [{
+              name: 'CPU Usage',
+              data: []
+          }]
+      });
+  });
+
+</script>
+
+{% endblock %}

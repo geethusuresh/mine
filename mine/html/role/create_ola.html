@@ -1,0 +1,254 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+   <style type="text/css">
+  /*.icheckbox_minimal, .iradio_minimal {    
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    background: url(minimal.png) no-repeat;
+    border: none;
+    cursor: pointer;
+  }*/
+</style>
+<link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Define OLA  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href=""></a> href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            <form  id="ola_form" name ="ola_form" method='post' action=''>
+              <div class="box">
+                <input type="text"  value="{{sla_commitment.id}}" name="c_id" id="c_id" style="display:none;"/>
+                <div class="box-title">
+                  <h3>SLA--{{ sla_item.name }}</h3>
+                </div>
+                <div class="box-body">
+                <fieldset>
+                  <div class="controls clearfix col-md-6 col-md-offset-3" > 
+                    Name:
+                    <input class="form-control" type="text" id="name" name="name" style="margin: 0 auto; text-align: left;width:300px"required placeholder="Name"></p>
+                    Description:
+                    <textarea class="form-control" type="text" id="ola_description" name="ola_description" required placeholder="Description" style="height:150px;"></textarea></p>
+                    Table:
+                    <select class="form-control" id="table" name="table" required disabled style="margin: 0 auto; text-align: left;width:300px" readonly>
+                      <option selected>Select Table</option>
+                      <option value="ticket" selected>Ticket</ option>
+                    </select></p>
+                    Condition:
+                    <input class="form-control" type="text" id="condition" name="condition" required placeholder="condition" style="margin: 0 auto; text-align: left;width:300px" value="{{ sla_commitment.sla.condition}}" readonly >
+                    <!-- <input class="form-control" type="text" id="title" name="title" required placeholder="Title">
+                    </p>
+                    <input class="form-control" type="text" id="department" name="department"required placeholder="Department">
+                    </p>
+                    <input class="form-control" type="text" id="location" name="location" required placeholder="Location"></p> -->
+                    
+                        </div>
+                      </table>
+                  </div>
+                </fieldset>     
+                </div>
+              </div>
+              <div class="box">
+                <div class="box-title">
+                  <span class="text"> Commitments</span>
+                  
+                </div>
+                <div class="box-body" id="commitments">
+                  <fieldset>
+                    <div id="commitment_div">
+                      <div  class="controls input-group" id="commitment_div_content" >
+                        <div class="row">
+                          <div class="col-md-3">
+                            {% if sla_commitment.slatype == "response_sla" %}
+                              <input type="checkbox" class="checkbox input-sm"  value="response_ola" name="checkbox[]" checked /><label >Response ola</label>
+                            {% else %}
+                              <input type="checkbox" class="checkbox input-sm"  value="response_ola" name="checkbox[]"  /><label >Response ola</label>
+                            {% endif %}
+                            <!-- Description: -->
+                            <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description" name="description"  placeholder="Description"></textarea>
+                          </div>
+                          {% if sla_commitment.slatype == "response_sla" %}
+                            <div class="col-md-3">
+                              Time:
+                              <input class="form-control input-sm" type="number" step="any" min="1"id="time" name="time"  placeholder="Time"  value="{{time}}">
+                            </div>
+                            <div class="col-md-3">
+                              Time Type:
+                              <select class="form-control input-sm" id="time_type" name="time_type" >
+                                <option  value="">Type</option>
+                                {% if t_type == "hour" %}
+                                  <!-- <option value="hour" selected>Hour</option> -->
+                                  <option value="minute">Minute</option>
+                                {% elif t_type == "minute" %}
+                                  <!-- <option value="hour" >Hour</option> -->
+                                  <option value="minute" selected>Minute</option>
+                                {% endif %}
+                              </select>
+                            </div>                      
+                          {% else %}
+                            <div class="col-md-3">
+                              Time:
+                              <input class="form-control input-sm" type="number" step="any" min="1"id="time" name="time"  placeholder="Time" >
+                            </div>
+                            <div class="col-md-3">
+                            Time Type:
+                              <select class="form-control input-sm" id="time_type" name="time_type"  >
+                                  <option selected value="">Type</option>
+                                  <!-- <option value="hour">Hour</option> -->
+                                  <option value="minute">Minute</option>
+                              </select>
+                            </div>
+                          {% endif %}
+                          <div class="col-md-3">
+                            
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-3">
+                            {% if sla_commitment.slatype == "resolution_sla" %}
+                              <input type="checkbox" class="checkbox input-sm"  value="resolution_ola" name="checkbox[]" checked /><label >Resolution ola</label>
+                            {% else %}
+                              <input type="checkbox" class="checkbox input-sm"  value="resolution_ola" name="checkbox[]" /><label >Resolution ola</label>
+                            {% endif %}
+                            <!-- Description: -->
+                            <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description" name="description"  placeholder="Description"></textarea>
+                          </div>
+                          
+                          {% if sla_commitment.slatype == "resolution_sla" %}
+                          <div class="col-md-3">
+                            Time:
+                            <input class="form-control input-sm" type="number" step="any" min="1"id="time" name="time"  placeholder="Time" >
+                          </div>
+                          <div class="col-md-3">
+                            Time Type:
+                            <select class="form-control input-sm" id="time_type" name="time_type" >
+                              <option  value="">Type</option>
+                              {% if t_type == "hour" %}
+                                  <!-- <option value="hour" selected>Hour</option> -->
+                                  <option value="minute">Minute</option>
+                              {% elif t_type == "minute" %}
+                                  <!-- <option value="hour" >Hour</option> -->
+                                  <option value="minute" selected>Minute</option>
+                              {% endif %}
+                            </select>
+                          </div>
+                          {% else %}
+                          <div class="col-md-3">
+                            Time:
+                            <input class="form-control input-sm" type="number" step="any" min="1"id="time" name="time"  placeholder="Time" >
+                          </div>
+                          <div class="col-md-3">
+                            Time Type:
+                            <select class="form-control input-sm" id="time_type" name="time_type" >
+                              <option selected value="">Type</option>
+                                  <!-- <option value="hour">Hour</option> -->
+                                  <option value="minute">Minute</option>
+                            </select>
+                          </div>
+                          {% endif %}
+                          <div class="col-md-3">
+                            <button class="btn btn-success" id="create" type="submit" >Create</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div> 
+                  </fieldset>
+                </div>
+                </form>  
+              </div>
+            
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+
+<script>
+// function validateftn(e){
+//   condition = $("#condition").val();
+//   $.ajax({
+//         url:"/ola/create/",
+//         type:"POST",
+//         dataType:"json",
+//         data:{
+//           ola_condition : condition,
+//           csrfmiddlewaretoken: '{{ csrf_token }}'
+//         },
+//         success : function(data) {
+//           if(data == "valid"){
+//               $("#valid").show();
+//           }
+//           else{
+//             $("#incorrect").show();
+//           }
+
+//         },
+//         error : function(xhr,errmsg,err) {
+//           //alert(err);
+//         }
+//       });
+//       return false;
+// }
+// function formValidate(event){
+//   condition = $("#condition").val();
+//   event.target.checkValidity();
+//   $.ajax({
+//         url:"/ola/create/",
+//         type:"POST",
+//         dataType:"json",
+//         data:{
+//           ola_condition : condition,
+//           csrfmiddlewaretoken: '{{ csrf_token }}'
+//         },
+//         success : function(data) {
+//           if(data == "valid"){
+//               $("#ola_form").submit();
+//           }
+//           else{
+//             $("#incorrect").show();
+//           }
+
+//         },
+//         error : function(xhr,errmsg,err) {
+//           //alert(err);
+//         }
+//       });
+//       return false;
+// }
+// function olaCreation(){
+//   window.open("/ola/create/");
+// }
+
+</script>
+</html>
+
+
+
+
+                         

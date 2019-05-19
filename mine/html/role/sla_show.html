@@ -1,0 +1,143 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>{{sla_item.name}}  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+              {% for message in messages %}
+              <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+              {% endfor %}
+            {% endif %}
+              <div class="box">
+                <div class="box-title">
+                  <h3>SLA</h3>
+                </div>
+                <div class="box-body">
+                
+                <div class="row">
+                  <div class="col-md-4 col-md-offset-4">
+                  Name
+                  <input class="form-control" type="text" id="name" name="name" required value="{{sla_item.name}}" readonly></p>
+                  <input class="form-control" type="hidden" id="sla_id" name="sla_id"  value="{{sla_item.id}}" readonly></p>
+                  Customer
+                  <select class="form-control" id="customer" name="customer" required  readonly disabled>
+                    {% for customer in customers %}
+                      {% if customer.id == sla_item.customer.id %}
+                        <option value="{{customer.id}}" selected>{{ customer.customername }}</option>
+                      {% else %}
+                        <option value="{{customer.id}}">{{ customer.customername }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select></p>
+                  Description
+                  <textarea class="form-control" id="sla_description" name="sla_description" required style="height:100px;" placeholder="Description" readonly>{{sla_item.description}}</textarea></p>
+                  Table
+                  <select class="form-control" id="table" name="table" required  readonly disabled>
+                    <option valu="">Select Table</option>
+                    <option value="ticket" selected>Ticket</option>
+                  </select></p>
+                  Condition
+                  <input class="form-control" type="text" id="condition" name="condition" required value="{{ sla_item.condition}}" readonly></p>
+                </div>
+                </div></div>
+              </div>
+              <div class="box">
+                <div class="box-title">
+                  <h3>Commitments</h3>
+                </div>
+                <div class="box-body">
+                  {% for sla_com in sla_item.sla_entries.all%}
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input type="number" id="commitment_ids" name="commitment_ids"  value="{{sla_com.id}}" style="display:none;" readonly="">
+                      Type
+                      <select class="form-control input-sm" id="sla_type" name="sla_type" required  readonly>
+                        {% if sla_com.slatype == "response_sla" %}
+                            <option value="response" selected>Response SLA</option>
+                            <option value="resolution">Resolution SLA</option>
+                        {% else %}
+                            <option value="response" >Response SLA</option>
+                            <option value="resolution" selected>Resolution SLA</option>
+                        {% endif %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                    Description
+                      <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description" name="description" required value="" readonly="">{{sla_com.description}}</textarea>
+                    </div>
+                    <div class="col-md-3">
+                    Time
+                      <input class="form-control input-sm" type="number" min="1"id="time" name="time" required value="{{sla_com.time_value}}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="row">
+                        <div class="col-md-8">
+                        Time Type
+                          <select class="form-control input-sm" id="time_type" name="time_type" required readonly disabled>
+                            {% if sla_com.time_type == "day"%}
+                              <option value="day" selected>Day</option>
+                              <option value="hour">Hour</option>
+                              <option value="minute">Minute</option>
+                            {% elif sla_com.time_type == "hour" %}
+                              <option value="day">Day</option>
+                              <option value="hour" selected>Hour</option>
+                               <option value="minute">Minute</option>
+                            {% elif sla_com.time_type == "minute" %}
+                                <option value="day">Day</option>
+                                <option value="hour">Hour</option>
+                                <option value="minute" selected>Minute</option>
+                            {% endif %}
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          {% if sla_com.id not in ola_ids %}
+                            <a href="/ola/create/{{sla_com.id}}">Define OLA</a>
+                          {% else %}
+                            <a href="/ola/view/{{sla_com.id}}" >View OLA</a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div><br>
+                   {% endfor %}
+                   <div class="row">
+                   <div class="col-md-3 col-md-offset-9">
+                      <a href="/sla/definitions" class="btn btn-success pull-right" type="submit">Done</a>
+                    </div>
+                  </div>
+                   
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+

@@ -1,0 +1,110 @@
+{% load zone %}
+<div class="row">
+    {% comment %}
+        <div class="col-sm-12">
+            <div class="col-sm-2" style="float:left">
+                <a href="/rfc/send_approval/{{rfc.id}}/" class="btn btn-success" style="margin-top:3px;width:100%;float:right;" {% if view_status == True and rfc.status == 'AUTH' and approvals_to_sent > 0 %} {% else %} disabled {% endif %}><i class="" ></i><span class="text" >Send Approvals</span></a>
+            </div>
+            <div class="col-sm-2" style="float:left">
+                <a href="/rfc/cancel_change/{{rfc.id}}/" class="btn btn-primary" style="float:left; margin-top:3px;"{% if view_status == True and rfc.status == 'AUTH' %} {% else%} disabled {% endif %} > Cancel Change </a>
+            </div>
+           <!--  <div class="col-sm-2" style="float:right">
+                <a href="#" class="btn btn-success" style="margin-top:3px;width:100%;float:right;" data-toggle="modal" data-target="#" ><i class="" ></i><span class="text" >View Schedules</span></a>
+            </div> -->
+        </div>
+    {% endcomment %}
+    <div class="col-md-12 row">
+        <div class="btn-group diff-btn">
+            <a href="/rfc/send_approval/{{rfc.id}}/" class="btn btn-default" {% if view_status == True and rfc.status == 'AUTH' and approvals_to_sent > 0 %} {% else %} disabled {% endif %}><i class="fa fa-paper-plane" aria-hidden="true"></i> Send Approvals </a>
+            <a href="/rfc/cancel_change/{{rfc.id}}/" class="btn btn-default" {% if view_status == True and rfc.status == 'AUTH' %} {% else%} disabled {% endif %} ><i class="fa fa-ban text-danger" aria-hidden="true"></i> Cancel Change </a>
+        </div>
+    </div>
+    <div class="col-sm-12" style="margin-top:10px">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a data-toggle="tab" href="#auth_approvals">
+                    <i class="fa fa-lg"></i> Approvals
+                </a>
+            </li>
+            <li>
+                <a data-toggle="tab" href="#authurize_review">
+                    <i class="fa fa-lg"></i> Review
+                </a>
+            </li>
+        </ul>
+        
+        <div class="tab-content" style="padding: 25px 20px;">
+            <div class="tab-pane fade in active" id="auth_approvals">
+                <h3 class="panel-title">Approvers</h3>
+                <table class="table table-stripped" id="auth_app">
+                    <thead>
+                        <tr>
+                            <th class="hidden"></th>
+                            <th>Approver Domain</th>
+                            <th>Approver Subdomain</th>
+                            <th>Created Date</th>
+                            <th>Level</th>
+                            <th>Approver</th>
+                            <th>Approved Date</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sch_appr in schedule_approvers %}
+                            <tr>
+                                <td class="hidden">{{sch_appr.id}}</td>
+                                <td>{{sch_appr.group}}</td>
+                                <td>{{sch_appr.subgroup}}</td>
+                                <td>{% tzone sch_appr.created_date %}</td>
+                                <td>{{sch_appr.approval_level}}</td>
+                                <td>{{sch_appr.approver}}</td>
+                                <td>{% tzone sch_appr.approved_date %}</td>
+                                <td>
+                                    {% if sch_appr.status == True %}
+                                        Approved
+                                    {% elif sch_appr.status == False %}
+                                        Rejected
+                                    {% else %}
+                                        Not yet approved
+                                    {% endif %}
+                                </td>
+                                <td>
+                                <a href="#" class="btn btn-success" data-toggle="modal" data-target="#schedule_approval_window" {% if rfc.status == 'AUTH' and sch_appr.subgroup in subdomain_list and sch_appr.status == None %} {% else %} disabled {% endif %}>Comments</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="authurize_review">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <div class="panel-title">Reviews</div>
+                            </div>
+                            <div class="panel-body" style="text-align:justify">
+                                {% if schedule_approver_results|length > 0 %}
+                                    {% for appr in schedule_approver_results%}
+                                        <!-- <div class="col-sm-4"> -->
+                                            <label style="font-size:14px; {% if appr.status == True %} color:green !important {% else %} color:red !important {% endif %}">
+                                                {% if appr.status == True %} Approved {% elif appr.status == False %} Rejected {% endif %} by {{ appr.approver }}
+                                            </label> <br/>
+                                            {{appr.approver_comments}} <hr/>
+                                        <!-- </div> -->
+                                    {% endfor%}
+                                {% else %}
+                                    No Reviews
+                                {% endif %}
+                                <div class="col-sm-12 pull-right pad-all">
+                                    <button class="btn btn-info" data-toggle="modal" data-target="#resubmit_change" {% if rfc.status == 'AUTH' %} {% else %} disabled {% endif %}> Resubmit Change</button>
+                                    <a href="/rfc/proceed_to_next_phase/{{rfc.id}}/" class="btn btn-success" {% if rfc.status == 'AUTH' and view_status == True %} {% else %} disabled {% endif %}> <i class="fa fa-arrow-right" aria-hidden="true"></i> Proceed to Next Phase</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,362 @@
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+
+<!--     <script src="/static/packages/bootstrap-wizard/jquery.bootstrap.wizard.min.js" type="text/javascript"></script>
+ -->
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+    <script src="/static/js/common.js" type="text/javascript"></script>
+    <!-- <script src="/static/packages/bootstrap-validator/bootstrapValidator.min.js" type="text/javascript"></script> -->
+
+    <script src="/static/customer/bootstrap-select.min.js" type="text/javascript"></script>
+    <script type="text/javascript" charset="utf8" src="/static/sorter/js/jquery.dataTables.js"></script>
+    <script src="/static/js/bootstrap-switch.min.js"></script>
+    <script src="/static/customer/js/materialize.js"></script>
+    <script type="text/javascript" src="/static/customer/moment.min.js"></script>
+    <script type="text/javascript" src='/static/customer/bootstrap-datetime.min.js'></script> 
+
+    <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+    <script type="text/javascript" src="/static/angular/controllers.js"></script>
+
+<!--     <script src= "/static/angular/angular.min.js"></script>
+    <script src= "/static/angular/angular-route.js"></script>
+    
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+ -->
+{% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles  or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv or "Customer_Dashborad" in request.session.logged_user_priv %}
+  {% include "components/sr_cust.html"%}
+{% endif %}
+
+{% include "components/customer_js.html"%}
+
+ <script>
+      $(".close").click(function () { 
+      $("div").remove('.alert-wrap'); 
+
+    }); 
+      </script>
+{% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+  <script>
+
+  $(document).ready(function() {
+
+        $.ajax({
+            url:"/notify/",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data){
+               $("#counter").append(data.length)
+               
+                for (var i in data){
+                  $li = $('<a href=""><i class="fa fa-users success">');
+                  $li.append(data[i].owner__user__username +" " + data[i].note+ "-" + data[i].ticket__ticketid).append($('<p class="hidden" id="tty">').html(data[i].ticket__id)).append($('<p class="hidden" id="type">').html(data[i].notify));
+                $("#noti").append($li);
+                $li.bind('click', manga_tholie);
+                  
+        
+                  
+              }
+            },
+          });
+        });
+
+    </script>
+    <script>
+        function manga_tholie(){
+          var x = ($(this).find('p:eq(0)').text())
+          var y = ($(this).find('p:eq(1)').text())
+          console.log(y);
+          if (y=='E'){
+              window.open("/ticket/"+ x);
+          }else{
+              window.open("/ticket/stat/"+ x);
+          }
+        }
+    </script>
+    {% elif  "Customer_Dashboard" in request.session.logged_user_priv %}
+    <script>
+    $(document).ready(function() {
+
+          $.ajax({
+              url:"/notify/",
+              type: "POST", 
+              dataType:"json",
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success: function(data){
+                // noti = JSON.parse(data);
+                 
+                 $("#counter").append(data.length)
+                  for (var i in data){
+                    $li = $('<a href=""><i class="fa fa-users success">');
+                    $li.append(owner__user__username+ " " +data[i].note+ "-" + data[i].ticket__ticketid).append($('<p class="hidden" id="tty">').html(data[i].ticket__id));
+                    
+                    $("#noti").append($li);
+                    $li.bind('click', manga_tholie);
+                }
+              },
+            });
+          });
+
+      </script>
+      <script>
+          function manga_tholie(){
+            var x = ($(this).find('p:eq(0)').text());
+            window.open("/customer/tickets/detail/"+ x);
+          }
+      </script>
+
+
+
+{% else %}
+ <script>
+  $(document).ready(function() {
+        $('.selectpicker').selectpicker({
+          style: 'btn-primary',
+          size: 15
+        });
+        $('.selectpicker2').selectpicker({
+          style: 'btn-default',
+          size: 15
+        });
+         $('.selectpicker3').selectpicker({
+          style: 'btn-default',
+          size: 15
+        });
+        $.ajax({
+            url:"/notify/",
+            type: "POST", 
+            dataType:"json",
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data){
+              // noti = JSON.parse(data);
+               // console.log(noti);
+
+               $("#counter").append(data.length)
+                for (var i in data){
+
+                  // console.log(data[i].ticket__ticketid);
+                  $li = $('<a><i class="fa fa-users success">');
+                  $li.append(data[i].owner__user__username +" " + data[i].note+"-" + data[i].ticket__ticketid ).append($('<p class="hidden" id="tty">').html(data[i].ticket__id));
+                  
+                  $("#noti").append($li);
+                  $li.bind('click', manga_tholi);
+
+              }
+            },
+          });
+        });
+        $("#ad_pic").hide()
+      $("#av_pic").hide()
+      $.ajax({
+      type: 'HEAD',
+      url: '/static/img/profile_pic/{{profile}}.jpg',
+      success: function() {
+        $("#ad_pic").show()
+      },  
+      error: function() {
+        $("#av_pic").show()
+      }
+});
+    </script>
+    <script>
+      function manga_tholi(){
+          var x = ($(this).find('p:eq(0)').text())
+          // alert(x)
+          window.open("/ticket/"+ x, "_self");
+        }
+    </script>
+  {% endif %}
+
+    <script type="text/javascript">
+
+    (function($) {
+    "use strict";
+      // number count
+      $('.timer').countTo();
+      
+
+      
+      // chat scroll
+      $('#chat-box').slimScroll({
+        height: '250px'
+      }); 
+      
+      // ToDo
+      $('#checkbox').on('ifChecked', function(event){
+        $('.check').addClass('through')
+      });
+      $('#checkbox').on('ifUnchecked', function(event){
+        $('.check').removeClass('through')
+      });
+
+    })(jQuery);
+    </script> 
+    <script>
+    $.ajax({
+        url: '/static/img/profile_pic/{{profile}}.jpg',
+        type: 'HEAD',
+        success: function () { 
+          $("#pickers").prepend('<img src="/static/img/profile_pic/{{profile}}.jpg" class="pull-left" id="ad_pic" alt="image">');
+         },
+        error: function () { 
+          $("#pickers").prepend('<img src="/static/img/photo.jpg" class="pull-left" id="ad_pic" alt="image">');
+         }
+    });
+    </script>
+    <script>
+    $(document).ready(function(){
+                $("#megamind").click(function(){
+                    var thisobj =  $(this);
+                    if(thisobj.hasClass("open"))
+                    {
+                        $(this).removeClass("open");
+                    }else
+                    {
+                        $(this).addClass("open");
+                    }
+                });
+            });
+    </script>
+
+    <script>
+    </script>
+
+     <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker').datetimepicker();
+                $('#datetimepicker1').datetimepicker();
+                $('#datatime').datetimepicker();
+                $('#datatime1').datetimepicker();
+            });
+        </script>
+<script type="text/javascript">
+    valid = false;
+    var pattern = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    x = 46;
+    
+    function checkvalidity(this1){
+      if (!pattern.test(this1.val())) {
+            $('#validate_ip').removeClass('text-success');
+            $('#validate_ip').addClass('text-danger');
+            $('#validate_ip').addClass('fa-times');
+            $('#validate_ip').text('Not Valid IP');
+            valid = false
+            while (this1.val().indexOf("..") !== -1) {
+                this1.val(this1.val().replace('..', '.'));
+            }
+            x = 46;
+        } else {
+            x = 0;
+            var lastChar = this1.val().substr(this1.val().length - 1);
+            if (lastChar == '.') {
+                this1.val(this1.val().slice(0, -1));
+            }
+            var ip = this1.val().split('.');
+            if (ip.length == 4) {
+                valid = true
+                $('#validate_ip').removeClass('text-danger');
+                $('#validate_ip').addClass('text-success');
+                $('#validate_ip').addClass('fa-check');
+                $('#validate_ip').text('Valid IP');
+            }
+        }
+    }
+    $('input[name="src_ip"]').keypress(function (e) {
+        if (e.which != 8 && e.which != 0 && e.which != x && (e.which < 48 || e.which > 57)) {
+            // console.log(e.which);
+            return false;
+        }
+    }).keyup(function () {
+        var this1 = $(this);
+        checkvalidity(this1);
+    });
+    function validateip(){
+      var this1 = $('input[name="src_ip"]');
+      checkvalidity(this1);
+      if (valid == true){
+        return true
+      }
+      else{
+        return false
+      }
+    }
+</script>
+
+{% if "Managed_service_category_view" in request.session.logged_user_priv %}
+    <script type="text/javascript">
+        $("#managed_cat option:gt(0)").remove().end();
+        $('#managed_sub_cat option:gt(0)').remove().end();
+        $.ajax({
+          url:"/managed_service_category_list/",
+          type:"GET",
+          dataType:"json",
+            data:{
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+              for (var i in data){
+                $("#managed_cat").append($('<option>', {value:data[i][0],text:data[i][1]}))
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              console.log(err);
+            }
+        });
+    </script>
+    <script type="text/javascript">
+      $('#managed_cat').on('change', function(){
+          $('#managed_sub_cat option:gt(0)').remove().end();
+          var cat_id = $('#managed_cat').val();
+          $.ajax({
+              url:"/managed_service_category_list/?sub_cat=True&cat="+cat_id,
+              type:"GET",
+              dataType:"json",
+                data:{
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success : function(data) {
+                  for (var i in data){
+                    $("#managed_sub_cat").append($('<option>', {value:data[i][0],text:data[i][1]}))
+                  }
+                },
+                error : function(xhr,errmsg,err) {
+                  console.log(err);
+                }
+            });
+      });
+  </script>
+
+{% endif %}
+
+{% include "oneconsole_help/modal_help.html" %}
+{% include "components/service_request.html" %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#modal_sidehelp').on('click', function(e){
+            e.preventDefault();
+            $.ajax({
+                url :$('#modal_sidehelp').prop('href'),
+                type:"GET",
+                dataype:"json",
+                success:function(data){
+                    // console.log(data)
+                    $('#oc_helpcontent').empty();
+                    $('#oc_helpcontent').append(data);
+                    $("#oneconsole_help").modal('show');
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,28 @@
+<div class="panel panel-primary">
+<div class="panel-heading">
+    <button type="button" class="close mar-rgt" data-dismiss="modal" aria-hidden="true" id="btn_helpclose">&times;</button>
+   {% if help %} <h4 class="panel-title" id="ModalLabel">{{ help.name }}</h4>{% else %} <h4 class="panel-title" id="ModalLabel">Oneconsole Help</h4>{% endif %}
+</div>
+</div>
+<div class="modal-body" id="oc_helpcontent">
+{% if help %}
+    <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.1);">{{ help.body|safe }}</div>
+    <br>
+{% else %}
+    <div style="text-align: center;" >
+        <p>No help content available.</p>
+    </div>
+{% endif %}
+</div>
+<div class="modal-footer" style="border:0px">
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#oc_helpcontent").find('img').each(function(index, obj){
+            $(obj).addClass("img-responsive");
+        });
+        // $('img').css({'width' : '100%'});
+		$('iframe').css({'width' : '100%'});
+    });
+</script>

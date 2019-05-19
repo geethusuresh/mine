@@ -1,0 +1,94 @@
+{% if "Resolver_Dashboard" in request.session.logged_user_priv %}
+    <div id="non_block">
+        {% if ticket.status == "RESOLVED" or ticket.status == "CLOSED" %}
+            <div class="custom-box palette-peter-river">
+                <h4>Ticket Resolved by</h4>
+                <p>{{ticket.resolver}}</p>
+                <i class="fa fa-info"></i>
+            </div>
+        {% elif ticket.status == "CANCELLED" %}
+            <div class="custom-box palette-alizarin">
+                <h4>Ticket Cancelled</h4>
+            </div>
+        {% else %}
+            {% if ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+                <div class="custom-box palette-wisteria">
+                    <h4>Currently</h4>
+                    <p>On Hold</p>
+                    <i class="fa fa-clock-o"></i>
+                </div>
+            {% else %}
+                {% if finish == "done" %}
+                    <div class="custom-box palette-alizarin">
+                        <h4>Time up</h4>
+                        <p>Sla Breached</p>
+                        <i class="fa fa-info"></i>
+                    </div>
+                {% elif finish == 'none' %}
+                    <div class="custom-box palette-nephritis">
+                        <h4>No SLA</h4>
+                        <p>Free to work</p>
+                        <i class="fa fa-magic"></i>
+                    </div>
+                {% else %}
+                    <div class="custom-box palette-peter-river">
+                        <h4  id="clock"></h4>
+                        <p>Time Left!</p>
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        {% if ticket.owner %}
+            {% if ticket.owner == profile %}
+                {% if ticket.ended_at %}
+                    <div class="col-lg-12" >
+                        <p><label class="label label-danger" >Ticket already Canced/Closed</label></p>
+                    </div>
+                {% else %}
+                    <div> </div>
+                    <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#email" onclick="email_cc_capturing({{ticket.id}})"><i class="" ></i><span class="text" > Send Email </span></a>
+                    {% if ticket.status == "INPROG" %}
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reassign"><i class="" ></i><span class="text" > Reassign </span></a>
+                        <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#resolve"><i class="" ></i><span class="text" > Resolve </span></a>
+                        <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#kb_modal"><i class="" ></i><span class="text" > Search KB </span></a>
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#sla"><span class="text" > Awaiting Customer Action</span></a>
+                        <a class="btn btn-success" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#slav" deactivate><span class="text" > Awaiting Vendor Action </span></a>
+                        <a class="btn btn-warning" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#priority" onclick="change_priority()"><i class="" ></i><span class="text" > Change Priority </span></a>
+                    {% endif %}
+                    {% if ticket.status == "INPROG" or ticket.status == "QUEUED" %}
+                        {% if ticket.isglobal %}
+                            <a href="/ticket/isglobal/{{ticket.id}}"  style="margin-top:3px;width:100%" class="btn btn-info">Remove global</a>
+                        {% else %}
+                            <a href="/ticket/isglobal/{{ticket.id}}" style="margin-top:3px;width:100%" class="btn btn-info">Make global</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if ticket.status == "RESOLVED" %}
+                        <div class="" >
+                            {% if ticket.cls != "PB" and ticket.is_task == False %}
+                                <a class="btn btn-danger" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#close"><i class="" ></i><span class="text" > Close Ticket </span></a>
+                            {% endif %}
+                            <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#reopen"><i class="" ></i><span class="text" > Reopen Ticket </span></a>
+                        </div>
+                    {% endif %}
+                    {% if ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+                        <div class="">
+                            <a class="btn btn-info" style="margin-top:3px;width:100%"  href="" data-toggle="modal" data-target="#inprog" ><i class="" ></i><span class="text" > In Progress</span></a>
+                        </div>
+                    {% endif %}
+                {%  endif %}
+            {% else %}
+                {% if ticket.status == "INPROG" or ticket.status == "CUSTAWAIT" or ticket.status == "VENDAWAIT" %}
+                    <a data-toggle="modal" class="btn btn-info" data-target="#ownership" style="width:100%">Take Ownership from {{ticket.owner}}</a>
+                    <a data-toggle="modal"  class="btn btn-info" data-target="#assign_subgroup" style="width:100%; margin-top:20px;">Assign to Subgroup Member</a>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <a data-toggle="modal"  class="btn btn-info" data-target="#ownership" style="width:100%">Take Ownership</a>
+            <a data-toggle="modal"  class="btn btn-info" data-target="#assign_subgroup" style="width:100%; margin-top:20px;">Assign to Subgroup Member</a>
+        {% endif %}
+    </div>
+    <div id="task_block" style="display:none">
+        <a data-toggle="modal"  class="btn btn-info" data-target="#create_task" style="width:100%; margin-top:20px;" onclick="create_new_task()">Create Task</a>
+    </div>
+{% endif %}

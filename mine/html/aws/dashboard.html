@@ -1,0 +1,266 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+<script type="text/javascript">
+        var cloud_account_id = {{ cloud_account_id }}
+</script>
+ <section class="content-header">
+        <h1>
+            AWS Dashboard
+            <small>System Information</small>
+        </h1>
+        <ol class="breadcrumb">
+            <a href="{% url 'aws_accounts_view' %}">Home</a>
+            <span> > </span>
+            <li>Dashboard</li>
+        </ol>
+</section>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+<div class="row" title="The data From {{strat_time}} To {{stop_time}}">
+    <div class="col-md-3 col-sm-6 col-xs-12">
+
+      <div class="info-box bg-green">
+        <div class="box-tools pull-right">
+            <span class="badge bg-green" title="Total memory usage (MB * Hours Used) for the project" data-toggle="tooltip" data-original-title=" Messages"><i class="fa fa-question-circle sm"></i></span>
+        </div>
+          <span class="info-box-icon"><i class="fa fa-database"></i></span>
+          <div class="info-box-content">
+              <span class="info-box-text">Memory MB Hours</span>
+              <span class="info-box-number">{{nova_usage.total_memory_mb_usage |floatformat:3}}</span>
+              <div class="progress">
+                <div style="width: 100%" class="progress-bar"></div>
+              </div>
+              <span class="progress-description">
+                  This Month Memory usage
+              </span>
+          </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->
+    </div><!-- /.col -->
+    <div class="col-md-3 col-sm-6 col-xs-12">
+      <div class="info-box bg-red">
+          <span class="info-box-icon"><i class="fa fa-tachometer"></i></span>
+          <div class="info-box-content">
+              <span class="info-box-text">VCPU Hours</span>
+              <span class="info-box-number">{{nova_usage.total_vcpus_usage |floatformat:3}}</span>
+              <div class="progress">
+                <div style="width: 100%" class="progress-bar"></div>
+              </div>
+              <span class="progress-description">
+                  This Month Vcpus Usage
+              </span>
+          </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->
+    </div><!-- /.col -->
+
+    <!-- fix for small devices only -->
+    <div class="col-md-3 col-sm-6 col-xs-12">
+      <div class="info-box bg-yellow">
+          <span class="info-box-icon"><i class="fa fa-clock-o"></i></span>
+          <div class="info-box-content">
+              <span class="info-box-text">Total Hours</span>
+              <span class="info-box-number">{{nova_usage.total_hours|floatformat:3}}</span>
+              <div class="progress">
+                <div style="width: 100%" class="progress-bar"></div>
+              </div>
+              <span class="progress-description">
+                  This Month Total Hours
+              </span>
+          </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->
+
+    </div><!-- /.col -->
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box bg-aqua">
+          <div class="box-tools pull-right">
+              <span class="badge bg-aqua" title="Total disk usage (GB * Hours Used) for the project" data-toggle="tooltip" data-original-title=" Messages"><i class="fa fa-question-circle sm"></i></span>
+          </div>
+          <span class="info-box-icon"><i class="fa fa-hdd-o"></i></span>
+          <div class="info-box-content">
+              <span class="info-box-text">Disk GB Hours</span>
+              <span class="info-box-number">{{nova_usage.total_local_gb_usage |floatformat:3}}</span>
+              <div class="progress">
+                <div style="width: 100%" class="progress-bar"></div>
+              </div>
+              <span class="progress-description">
+                  This Month local GB usage
+              </span>
+          </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->
+    </div><!-- /.col -->
+</div>
+
+
+<div ng-controller='AWSDashboardController'>
+
+<section class="content-header">
+
+<div class="row">
+    <div class="col-xs-9">
+
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box box-solid">
+            <div class="box-header">
+                    <i class="fa fa-bar-chart-o"></i>
+                    <h3 class="box-title">CPU Usage
+                    <small>Last Hour details(UTC)</small>
+                    </h3>
+            </div>
+            <div class="row">
+                  <canvas id="cpudetails_overall" width="700" height="300"></canvas>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+          <div class="box box-solid">
+                  <div class="box-header">
+                      <i class="fa fa-bar-chart-o"></i>
+                      <h3 class="box-title">Volume Read Write Bytes
+                      <small>Last Hour details(UTC)</small>
+                      </h3>
+                  </div>
+                  <div class="box-body">
+                      <div class="row">
+                          <div class="col-xs-10">
+                            <canvas id="volume_read_write_graph" width="700" height="300"></canvas>
+                          </div>
+                          <div class="col-xs-2">
+                            <ul class="chart-legend clearfix">
+                              <li><i class="fa fa-circle-o text-light-blue"></i> Read</li>
+                              <li><i class="fa fa-circle-o text-gray"></i> Write</li>
+                            </ul>
+                        </div>
+                      </div>
+                  </div>
+          </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+          <div class="box box-solid">
+                  <div class="box-header">
+                      <i class="fa fa-bar-chart-o"></i>
+                      <h3 class="box-title">Network Incoming and Outgoing(B/s)</h3>
+                  </div>
+                  <div class="box-body">
+                      <div class="row">
+                        <div class="col-xs-10">
+                          <canvas id="network_overall" width="650" height="300"></canvas>
+                        </div>
+                        <div class="col-xs-2">
+                            <ul class="chart-legend clearfix">
+                              <li><i class="fa fa-circle-o text-light-blue"></i> Incoming</li>
+                              <li><i class="fa fa-circle-o text-gray"></i> Outgoing</li>
+                            </ul>
+                        </div>
+                      </div>
+                  </div>
+          </div>
+
+    </div>
+</div>
+</div>
+
+
+    <div class="col-xs-3">
+          <div class="box ">
+                <div class="box-body">
+                <ul class="todo-list ui-sortable">
+                <li>
+                    <!-- drag handle -->
+                    <span class="handle ui-sortable-handle">
+                       <i class="fa fa-list"></i>
+
+                    </span>
+                    <!-- todo text -->
+                    <a href="{% url 'aws_node_list' cloud_account_id %}">
+
+                        <span> Node List</span>
+                    </a>
+                    <!-- Emphasis label -->
+                </li>
+                <li>
+                    <!-- drag handle -->
+                    <span class="handle ui-sortable-handle">
+                        <i class="fa fa-picture-o"></i>
+                    </span>
+                    <!-- todo text -->
+                    <a href="{%url 'aws_image_list' cloud_account_id %}">
+
+
+                        <span> Image List</span>
+                    </a>
+                    <!-- Emphasis label -->
+                </li>
+                <li>
+                    <span class="handle ui-sortable-handle">
+                      <i class="fa fa-usd"></i>
+                      <a href="{% url 'aws_billing' cloud_account_id %}">
+                            <span>Billing</span>
+                      </a>
+                </li>
+                <li>
+                    <span class="handle ui-sortable-handle">
+                      
+                      <a href="{% url 'aws_volume_list' cloud_account_id %}">
+                            <span>Volume List</span>
+                      </a>
+                </li>
+                </ul>
+                </div>
+          </div>
+    </div>
+  </div>
+</section>
+
+
+
+ </div><!-- ng-cotroller -->
+
+
+
+<script>
+   $( document ).ready(function() {
+        $(".dial").knob({
+
+        'readOnly':true,
+        'width':70,
+        'height':70
+
+        });
+
+      $('[data-toggle="tooltip"]').tooltip({
+          placement : 'top'
+      });
+
+
+  });
+/*
+  $( ".test-teg" ).click(function() {
+      $("#popup-tag").modal('show');
+  });*/
+
+</script>
+
+<style type="text/css">
+
+.fa-question-circle {
+  color: black;
+}
+
+
+</style>
+
+
+
+
+{% endblock%}

@@ -1,0 +1,127 @@
+{
+    "name": "flare",
+    "children": [{
+        "name": "analytics",
+        "children": [{
+            "name": "cluster",
+            "children": [{
+                "name": "AgglomerativeCluster",
+                "size": 3938
+            }, {
+                "name": "MergeEdge",
+                "size": 743
+            }]
+        },  {
+            "name": "optimization",
+            "children": [{
+                "name": "AspectRatioBanker",
+                "size": 7074
+            }]
+        }]
+    }, {
+        "name": "animate",
+        "children": [{
+            "name": "Easing",
+            "size": 17010
+        }, {
+            "name": "FunctionSequence",
+            "size": 5842
+        }, {
+            "name": "interpolate",
+            "children": [{
+                "name": "ArrayInterpolator",
+                "size": 1983
+            }, {
+                "name": "ColorInterpolator",
+                "size": 2047
+            }, {
+                "name": "RectangleInterpolator",
+                "size": 2042
+            }]
+        }, {
+            "name": "ISchedulable",
+            "size": 1041
+        },  {
+            "name": "Tween",
+            "size": 6006
+        }]
+    }, {
+        "name": "data",
+        "children": []
+    }, {
+        "name": "display",
+        "children": []
+    }, {
+        "name": "flex",
+        "children": []
+    }, {
+        "name": "physics",
+        "children": []
+    }, {
+        "name": "query",
+        "children": []
+    }, {
+        "name": "scale",
+        "children": []
+    }, {
+        "name": "util",
+        "children": []
+    }, {
+        "name": "vis",
+        "children": [{
+            "name": "axis",
+            "children": [{
+                "name": "Axes",
+                "size": 1302
+            },  {
+                "name": "CartesianAxes",
+                "size": 6703
+            }]
+        }, {
+            "name": "controls",
+            "children": [{
+                "name": "AnchorControl",
+                "size": 2138
+            },  {
+                "name": "TooltipControl",
+                "size": 8435
+            }]
+        }, {
+            "name": "data",
+            "children": [{
+                "name": "Data",
+                "size": 20544
+            }, {
+                "name": "TreeBuilder",
+                "size": 9930
+            }]
+        }, {
+            "name": "events",
+            "children": [{
+                "name": "DataEvent",
+                "size": 2313
+            }, {
+                "name": "SelectionEvent",
+                "size": 1880
+            }, {
+                "name": "TooltipEvent",
+                "size": 1701
+            }, {
+                "name": "VisualizationEvent",
+                "size": 1117
+            }]
+        }, {
+            "name": "legend",
+            "children": [{
+                "name": "Legend",
+                "size": 20859
+            }, {
+                "name": "LegendItem",
+                "size": 4614
+            }, {
+                "name": "LegendRange",
+                "size": 10530
+            }]
+        }]
+    }]
+}

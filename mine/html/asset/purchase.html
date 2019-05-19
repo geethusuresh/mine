@@ -1,0 +1,663 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Purchase Request Summary <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Purchase Request Summary </li>
+                </ol>
+            </div>
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-4">
+                  <div id="spr_0" class="panel panel-default plain profile-widget">
+                    <div class="panel-title">
+                      <p>Purchase Details</p>
+                    </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-4 col-md-4 col-sm-12">
+                                        <div class="profile-avatar">
+                                            <img class="img-responsive" id="profile_ad" src="/static/asset/cart.png" alt="qr">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-8 col-sm-12">
+                                        <div class="profile-name" style="margin-top: 15px;font-size: 22px;margin-bottom: 10px;">
+                                            {{purchase.purchaseid}}
+                                            <br>
+                                            {% if purchase.status.status_number == "P5" %}
+                                                <span class="label label-success">{{purchase.status}}</span>
+                                            {% else %}
+                                                <a href="/purchase/status/{{purchase.id}}" class="label label-success">
+                                                    {{purchase.status}}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        {% if purchase.delivery_date %}
+                                        
+                                        {% else %}
+                                            {% comment %}
+                                                {% if purchase.closed %}
+                                               
+                                                {% else %}
+
+                                                    <a href="" data-toggle="modal" data-target="#delivery" style="color:red">Item already delivered?</a>
+                                                {% endif %}
+                                            {% endcomment %}
+                                        {% endif %}
+                                        <div class="profile-quote">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                      <div class="media" style="color: #767676;">
+                        <div class="media-body" style="display: table-cell;vertical-align: top;">
+                            <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                {% if purchase.task %}
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon fa fa-ticket"></span>
+                                    <label class="clb">Ticket Related :</label>
+                                     {{purchase.task.ticket}}
+                                </li>
+                                {% endif %}
+                                {% if purchase.task %}
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Related Task :</label>
+                                    <a href="/task/panel/{{purchase.task.id}}" class="label label-info">
+                                     {{purchase.task.taskid}}</a>
+                                </li>
+                                {% endif %}
+                                <li class="ng-binding" style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-user"></span>
+                                    <label class="clb">Initiated By :</label>
+                                     {{purchase.user}}
+                                </li>
+                                <li style="padding: 10px;">
+                                    <span class="icon glyphicon glyphicon-envelope"></span>
+                                    <label class="clb">Initiated By: </label>
+                                    {{ purchase.created_date }}
+                                </li>
+                                 {% if cio %}
+                                  <li style="padding: 10px;">
+                                      <span class="fa fa-user-plus"></span>
+                                      <label class="clb">Approvals: </label>
+                                      <a href="/purchase/status/approval/{{purchase.id}}" class="label label-success">Click to View</a>
+                                  </li>
+                                  {% endif %}
+
+                            </ul>
+                            
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="col-sm-8">
+
+                <div class="panel panel-primary">
+          
+                <!--Panel heading-->
+                <div class="panel-heading">
+                  <div class="panel-control">
+          
+                    <!--Nav tabs-->
+                    <ul class="nav nav-tabs">
+                      
+                      {% if stock.serial_no %}
+                      <li class="active"><a data-toggle="tab" href="#detail" aria-expanded="true">Task Details</a>
+                      </li>
+                      {% else %}
+                      {% if purchase.delivery_date %}
+                      <li class="active"><a data-toggle="tab" href="#bditails" aria-expanded="true">Basic Details</a>
+                      </li>
+                      <li class=""><a data-toggle="tab" href="#Request" aria-expanded="false">Request</a>
+                      </li>
+                      {% else %}
+                      <li class="active"><a data-toggle="tab" href="#detail" aria-expanded="true">Task Details</a>
+                      </li>
+                      {% endif %}
+                      {% endif %}
+                      <!-- <li class=""><a data-toggle="tab" href="#costcenter" aria-expanded="false">CostCenter</a> -->
+                      </li>
+                      <li class=""><a data-toggle="tab" href="#Activities" aria-expanded="false">Activities</a>
+                      </li>
+                    </ul>
+          
+                  </div>
+                  <h3 class="panel-title">{{stock.model_name}}</h3>
+                </div>
+          
+                <!--Panel body-->
+                <div class="panel-body">
+          
+                  <!--Tabs content-->
+                  <div class="tab-content">
+                    {% if stock.serial_no %}
+
+
+                    <div id="detail" class="tab-pane fade active in">
+                      <h4 class="text-thin">Basic Details</h4>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Model Name :</dt>
+                              <dd>{{stock.model_name}}</dd>
+                              <br>
+                              <dt>Asset Tag :</dt>
+                              <dd>{{stock.tag}}</dd><br>
+                              <dt>Purchase Date :</dt>
+                              <dd>{{stock.purchase_date}}</dd><br>
+                              <dt>Deprecition :</dt>
+                              <dd>{{stock.depreciation}}</dd>
+                            </dl>
+                          </div>
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Serial Number :</dt>
+                              <dd>{{stock.serial_no}}</dd><br>
+                              <dt>Last Audit :</dt>
+                              <dd>{{stock.last_audit}}</dd><br>
+                              <dt>Warranty Expiry :</dt>
+                              <dd>{{stock.warranty_expiry}}</dd><br>
+                              <dt>Estimated Cost :</dt>
+                              <dd>{{stock.purchased_cost}} {{stock.cost_center.currency}}</dd><br>
+                            </dl>
+                          </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    {% if purchase.delivery_date %}
+                    <div id="bditails" class="tab-pane fade active in">
+                      <h4 class="text-thin">Basic Details</h4>
+                        <form action="/asset/purchase/update/{{purchase.id}}" method="POST"> 
+                        {% csrf_token %}
+                        
+
+                                        <div class="row">
+                    <div class="col-sm-6">
+                        <label>Model Name:</label>
+                        <input type="text" name="model" class="form-control" id="model" required maxlength="50">
+                        
+                    </div>
+                    <div class="col-sm-6">
+                        <label>Serial Number:</label>
+                        <input type="text" name="serial" class="form-control" id="serial" required maxlength="50">
+                        
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row">
+                    <div class=" col-sm-6">
+                      <label>Select item</label>
+                      <select class="form-control" name="item">
+                        <option value="{{purchase.tag.id}}">{{purchase.tag}}</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-6">
+                      <label>Asset details</label>
+                      <select class="form-control" name="availability">
+                        <option value="1">InStock</option>
+                      </select>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="row">
+                    <div class=" col-sm-6">
+                      <label>Select Manufacturer</label>
+                      <select class="form-control" name="manu" required>
+                        <option value="" disabled selected>Choose your option</option>
+                        {% for manufacturer in manufacturers %}
+                        <option value="{{manufacturer.id}}">{{manufacturer.manufacturer}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class=" col-sm-6">
+                      <label>Select Vendor</label>
+                      <select class="form-control" name="vendor" required>
+                        <option value="{{quote.vendor.id}}">{{quote.vendor.name}}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <br><hr>
+                  <h5>Warranty Details</h5>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <label>Warranty Expiry</label>
+                        <input type="text" name="w_year" class="form-control" id="datatime" required>
+                    </div>
+                    <div class="col-sm-6">
+                      <label>Purchase on:</label>
+                      <input type="text" name="purchase_date" class="form-control" id="datatime1" required>
+                    </div>
+                  </div>
+                  <hr>
+                  <h5>Cost Details</h5>
+                  <div class="row">
+                    <div class="col-sm-4">
+                      <label>Cost Center:</label>
+                      <select class="form-control" name="costcenter" required>
+                          
+                        <option value="{{purchase.cost_center.id}}">{{purchase.cost_center.name}}</option>
+                          
+                      </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <label>Cost:</label>
+                      {% if quote %}
+
+                      <input type="number" name="cost" value="{{quote.item_cost}}" class="form-control" readonly>
+                      {% else %}
+                      <input type="number" name="cost" value="" class="form-control" required>
+                      {% endif %}
+                    </div>
+                    <div class="col-sm-4">
+                      <label>Depreciation Type:</label>
+                      <input type="text" name="depre" class="form-control">
+                    </div>
+                  </div>
+
+
+
+                  <hr>
+                      <input type="text" class="hidden" name="stock" value="{{purchase.stock.id}}">
+                      <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Update</button>
+                      </form>
+                    </div>
+
+                    {% else %}
+
+                    <div id="detail" class="tab-pane fade active in">
+                      <h4 class="text-thin">Basic Details</h4>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Model Name :</dt>
+                              <dd>{{stock.model_name}}</dd>
+                              <br>
+<!--                               <dt>Asset Tag :</dt>
+                              <dd>{{stock.tag}}</dd><br>
+                              <dt>Purchase Date :</dt>
+                              <dd>{{stock.purchase_date}}</dd><br>
+                              <dt>Deprecition :</dt>
+                              <dd>{{stock.depreciation}}</dd> -->
+                            </dl>
+                          </div>
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+<!--                               <dt>Serial Number :</dt>
+                              <dd>{{stock.serial_no}}</dd><br>
+                              <dt>Last Audit :</dt>
+                              <dd>{{stock.last_audit}}</dd><br>
+                              <dt>Warranty Expiry :</dt>
+                              <dd>{{stock.warranty_expiry}}</dd><br>
+                              <dt>Cost :</dt>
+                              <dd>${{stock.purchase_cost}}</dd><br> -->
+                            </dl>
+                          </div>
+                        </div>
+                    </div>
+                    
+                    {% endif %}
+
+                    {% endif %}
+
+                    <div id="costcenter" class="tab-pane">
+                      <h4 class="text-thin">Approval Details</h4>
+                      {% for approval in approvals %}
+                      
+
+                      <div class="panel">
+                        <div class="panel-cover" style="min-height:50px"></div>
+                        <div class="panel-media">
+                          <img src="/static/img/profile_pic/{{approval.approver}}.jpg" class="panel-media-img img-circle img-border-light" alt="Profile Picture">
+                          <div class="row">
+                            <div class="col-lg-7">
+                              <a href="#" class="btn-link">{{approval.approver}}</a>
+                              <p class="text-muted mar-btm">{{purchase.cost_center}} Manager</p>
+                            </div>
+                            <div class="col-lg-5 text-lg-right">
+                              <button class="btn btn-sm btn-info">
+                              {% if approval.status == False %}
+                              Rejected
+                              {% elif approval.status == True %}
+                              Approved
+                              {% else %}
+                              Pending
+                              {% endif %}
+                              </button>
+                             
+                            </div>
+                          </div>
+                        </div>
+                        {% if approval.remark %}
+                        <div class="panel-body">
+                          <h4>Remark</h4>
+                          <p>{{approval.remark}}</p>
+                        </div>
+                        {% endif %}
+                      </div>
+
+
+                      {% endfor %}
+                    </div>
+
+
+
+
+
+
+
+
+
+
+                    <div id="Configurations" class="tab-pane fade ">
+                    {% if relations %}
+                    <!-- <a id="delay" data-toggle="modal" data-target="#addrelation" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add relationship</a> -->
+                      <h4 class="text-thin">Relationships</h4>
+                        <div class="timeline">
+          
+
+
+
+                    <!-- Timeline header -->
+                    <div class="timeline-header">
+
+                    <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                      <div class="timeline-header-title bg-info">Add relationship</div></a>
+                    </div>
+                    {% for relation in relations %}
+                    <div class="timeline-entry">
+                      <div class="timeline-stat">
+                        <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                        </div>
+                        <div class="timeline-time">{{relation.installed_date}}</div>
+                      </div>
+
+                      <div class="timeline-label">
+                      <a style="float:right" href="/asset/stock/relation/remove/{{relation.id}}" class="icon-lg fa fa-trash-o  add-tooltip" data-placement="right" data-toggle="tooltip" data-original-title="delete relation"></a>
+                          <p class="text-semibold">{{relation.tag_name}} now related to {{relation.asset}} by {{relation.installed_user}}</p>
+
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                    {% else %}
+                     <a id="delay" data-toggle="modal" data-target="#addrelation" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Add relationship</a>
+                    {% endif %}
+                    </div>
+
+                    <div id="Request" class="tab-pane fade">
+                      <h4 class="text-thin">Request Details</h4>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Request ID :</dt>
+                              <dd>{{stock.model_name}}</dd><br>
+                              <dt>Affected Person :</dt>
+                              <dd>{{task.ticket.affectedperson}} </dd><br>
+                              <dt>Given date :</dt>
+                              <dd>{{stock.tag}}</dd>
+                            </dl>
+                          </div>
+                          <div class="col-sm-6">
+                            <dl class="dl-horizontal">
+                              <dt>Assosiated Ticket ID :</dt>
+                              <dd>{{stock.serial_no}}</dd><br>
+                              <dt>Alotted By :</dt>
+                              <dd>{% if status.available %} {{status.available}} {% else %} None {%  endif %}</dd><br>
+                              <dt>Take Back :</dt>
+                              <dd>{{stock.last_audit}}</dd>
+                            </dl>
+                          </div>
+                        </div>
+
+                    </div>
+
+                    <div id="Activities" class="tab-pane fade">
+                      <h4 class="text-thin">Asset activity</h4>
+                        <div class="timeline">
+                        <div class="timeline-header">
+                          <div class="timeline-header-title bg-info">Now</div>
+                        </div>
+                        {% for activity in stockhistorys %}
+                        <div class="timeline-entry">
+                          <div class="timeline-stat">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-time">{{activity.date}}</div>
+                          </div>
+                          <div class="timeline-label">
+                            <p>{{activity.user}} - {{activity.remark}} {{activity.tag}}</p>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+                </div>
+
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+  <div class="modal fade" id="addrelation" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Add New Relationship</h4>
+        </div>
+        <form action="/asset/stock/relation/{{stock.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Select tag</label>
+              <select name="type" class="form-control" id="tag">
+                  {% for tag in tags %}
+                <option value="{{tag.id}}">{{tag.item_type}}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label>Select asset</label>
+              <select name="asset2" class="form-control" id="taggroup">
+                <option>-select-</option>
+              </select>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <label>relation</label>
+              <input type="text" name="soft" class="form-control">
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Add Relationship</button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="modal fade" id="addassignee" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Assign Asset</h4>
+        </div>
+        <form action="/asset/stock/assign/{{stock.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          <label>Select User</label>
+          <select name="person" requried class="form-control">
+            <option>-select-</option>
+            {% for user in users %}
+            <option value="{{user.id}}">{{user}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Assign</button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div class="modal fade" id="delivery" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        </div>
+        <form action="/asset/stock/delivery/{{purchase.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body" style="min-height: 75px;">
+          <p>Please confirm item delivery</p>
+          <div class="row pull-right" style="margin-bottom:0px">
+          <a class="btn btn-danger" href="/purchase/dismiss/{{purchase.id}}" >No, Item Miss Matched</a>
+          <button class="btn btn-success" style="float:right;" type="submit">Yes, Its delivered</button>
+        </div>
+        </div>
+        
+        <div class="modal-footer" style="border:0px">
+        <p class="pull-right">Note: Item MissMatch Will close Purchase Request</p>
+        </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+{% include "asset/addtostock.html" %}
+
+      
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+
+
+<script>
+
+       $('#tag').on('change', function(){
+        var tagid = $('#tag').val();
+
+        $.ajax({
+          url :"/asset/tag/ajax/",
+          type:"POST",
+          dataype:"json",
+          data:{asset: tagid,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){            
+             $("#taggroup option:gt(0)").remove().end();
+            cat_list = JSON.parse(data);
+            for (var i in cat_list){
+              $("#taggroup").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['model_name']}));
+
+            } 
+           },
+           error: function(xhr,errmsg,err){
+            console.log(xhr);
+           }       
+        });
+        return false;
+      });
+
+     </script>
+    <script>
+    $("#table_id").DataTable();
+    $("#processing").addClass("active");
+    </script>
+
+    </body>
+</html>

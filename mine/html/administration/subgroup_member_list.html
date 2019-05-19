@@ -1,0 +1,73 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Group Members</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1>{{subgroup.subgroupname}} Members <small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Administration</li>
+                        <li class="active">Sub Group Members</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <form id="" method="POST" action="" enctype="multipart/form-data">{% csrf_token %}
+                        <div class="box">
+                            {% if members|length > 0 %}
+    							<table class="table table-striped" id="group_id">
+                                    <thead>
+        								<tr>
+        									<th> Name</th>
+        									<th> Group</th>
+                                            <th> Status </th>
+        								</tr>
+                                    </thead>
+                                    <tbody>
+        								{% for member in members %}
+        									<tr>
+        										<td><a href="{% url 'person_details' profile_id=member.person.id %}">{{ member.person.user.first_name }}</a></td>
+        										<td>{{ member.subgroup.subgroupname }}</td>
+        										<td>{% if member.active %} Active {% else %} Not Active {% endif %} </td>
+        									</tr>
+        								{% endfor %}
+                                    </tbody>
+    							</table>
+                            {% else %}
+                                <div class="box-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            No Members
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+        {% include "components/service_request.html"%}
+		{% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#group_id').DataTable({
+                    aaSorting: [[0, 'asc']],
+                    
+                });
+            });
+        </script>
+	</body>
+</html>

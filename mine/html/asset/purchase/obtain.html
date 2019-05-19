@@ -1,0 +1,244 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+     <style>
+.list-info li label {
+    width: 100px;
+}
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Purchase Request Summary <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Purchase Request Summary</li>
+                </ol>
+            </div>
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-12">
+                    <div class="wz-heading">
+          
+                    <!--Progress bar-->
+                    <div class="progress progress-sm progress-light-base">
+                      <div class="progress-bar progress-bar-primary" style="width: 50%; margin: -1px 12.5%;"></div>
+                    </div>
+          
+                    <!--Nav-->
+                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+                    <ul class="wz-nav-off  wz-steps">
+                      <li class="col-xs-3">
+                        <a data-toggle="tab" href="#demo-cir-tab1" title="" class="add-tooltip" aria-expanded="false" data-original-title="Vendor Selection">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-mint">
+                            <i class="wz-icon fa fa-info fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3 ">
+                        <a data-toggle="tab" href="#demo-cir-tab2" title="" class="add-tooltip" data-original-title="Obtain Quotes" aria-expanded="true">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+                            <i class="wz-icon fa fa-user fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3 active">
+                        <a data-toggle="tab" href="#demo-cir-tab3" title="" class="add-tooltip" data-original-title="Place Order">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+                            <i class="wz-icon fa fa-home fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="col-xs-3">
+                        <a data-toggle="tab" href="#demo-cir-tab4" title="" class="add-tooltip" data-original-title="Delivered">
+                          <span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+                            <i class="wz-icon fa fa-heart fa-2x"></i>
+                            <i class="wz-icon-done fa fa-check fa-2x"></i>
+                          </span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+
+
+                </div>
+
+              </div>  
+
+
+              <hr>
+
+              <div class="row"> 
+                <div class="col-sm-12">
+                    
+                    <div class="col-sm-12">
+                      <div class="panel">
+                        <div class="panel-heading">
+                          <p class="panel-title">Please Update Quote Response</p>
+                        </div>
+                        <div class="panel-body">
+                        {% for quote in quotes %}
+                        
+                        {% if forloop.first %}
+                        <div class="row">
+                          <div class="col-sm-4">
+                            <dl class="dl-horizontal">
+                              <dt>Quote Title :</dt>
+                              <dd>{{quote.title}}</dd><br>
+                              <dt>Requested Person :</dt>
+                              <dd>{{quote.requested_user}}</dd><br>
+                              <dt>Cost Estimation :</dt>
+                              <dd>{{purchase.estimate}} {{purchase.cost_center.currency}}</dd><br>
+                              <dt>Requested Date :</dt>
+                              <dd>{% tzone quote.requested_date %}</dd><br>
+                            </dl>
+                          </div>
+                          <div class="col-sm-8">
+                            <dt>Description:</dt>
+                            <pre>{{quote.description}}</pre>
+                          </div>
+                        </div>
+
+                        
+                        {% endif %}
+                        {% endfor %}
+                        <hr>
+                         <div class="row">
+                         <form action="/purchase/status/vendor/obtain/update/" method="POST">{% csrf_token %}
+                         <input type="hidden" name="quotesid" value="{% for i in quotes %}{{ i.id }}{% if not forloop.last %},{% endif %} {% endfor %}">
+                      {% for quote in quotes %}
+                       
+                          <div class="col-sm-6" style="border-left:1px solid rgba(0,0,0,0.1);">
+                          {% comment %}
+                            {% if quote.remark %}
+                              <div class="col-sm-8">
+                                <label>Quote Amount From {{quote.vendor}}:</label>
+                                <input type="number" class="form-control" value="{{quote.item_cost}}" disabled>
+                              </div>
+                              <div class="col-sm-4">
+                                <label>Currency</label>
+                                <p disabled>{{quote.currency}}</p>
+                              </div>
+                              <br>
+                              <div class="col-sm-12">
+                                <label>Remark :</label>
+                                <textarea class="form-control" rows="4" disabled>{{quote.remark}}</textarea>
+                              </div>
+                            </div>
+                            {% else %}
+                            {% endcomment %}
+                              
+                              <br>
+                                <div class="col-sm-8">
+                                  <label>Quote Amount From {{quote.vendor}}:</label>
+                                  <input type="number" name="cost_{{quote.id}}" class="form-control cost_{{quote.id}}" value="{{quote.item_cost}}" required min="0">
+                                </div>
+                                <div class="col-sm-4">
+                                  <label>Currency</label>
+                                  <select name="currency_{{quote.id}}" class="form-control currency_{{quote.id}}" requried="true">
+                                    <option value="">-select-</option>
+                                    <option value="{{purchase.cost_center.currency.id}}" selected="">{{purchase.cost_center.currency}}</option>
+                                   <!--  {% for cur in currency %}
+                                    <option value="{{cur.id}}">{{cur.currency}}</option>
+                                    {% endfor %} -->
+                                  </select>
+                                </div>
+                                <br>
+                                <div class="col-sm-12">
+                                  <label>Remark :</label>
+                                  <textarea class="form-control remark_{{quote.id}}" name="remark_{{quote.id}}" rows="4" required></textarea>
+                                  <br>
+                                  <!-- <button class="btn btn-info pull-right">Update</button> -->
+                                  <br>
+                                </div>
+                              <!-- </form> -->
+                            </div>
+                            {#% endif %#}
+
+                            
+                            {% endfor %}
+                          </div>
+                          <div>
+                              <button class="btn btn-info pull-right" > Update </button>
+                          </div>
+                          </form>
+                        </div>
+                        
+                        
+                        
+                        </div>
+                      </div>
+                    </div>
+                
+                </div>
+              </div>  
+
+            </div>
+          </div>
+        </div>
+
+    {% if messages %}
+    <div id="floating-top-right" class="floating-container" style="margin-top:4%">
+    {% for message in messages %}
+      <div class="alert-wrap in animated jellyIn">
+        <div class="alert alert-success" role="alert">
+          <button class="close" type="button">
+          <i class="fa fa-times-circle"></i>
+          </button>
+          <div class="media">
+            <div class="media-body">
+              <h4 class="alert-title"></h4>
+              <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+
+          {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+
+    </script>
+        
+
+
+
+
+    </body>
+</html>

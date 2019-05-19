@@ -1,0 +1,133 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Approval History</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Approval Detail | <small>Approval History</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Approval History</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+
+                <div class="row">
+                  <div class="col-sm-12" style="padding:30px">
+                    <div class="box">
+                      <div class="box-title">
+                          <h3>Tickets</h3>
+                      </div>
+                      <div class="box-body table-responsive no-padding">
+                        <table class="table table-striped" id="table_id" class="display" >
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Ticket Id</th>
+                              <th>Ticket Summary</th>
+                              <th>Reported Date</th>
+                              <th>Priority</th>
+                              <th >Status</th>
+                              <th>Affected Person</th>
+                              <th>Approval Status</th>
+                              
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for ticket in approval %}
+                          <tr>
+                            <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/ticket/{{ticket.ticket__id}}">
+                              <i class="fa fa-edit "></i>       
+                            </a></td>
+                            <td class="grey">{{ticket.ticket__ticketid}}</td>
+                            <td class="grey">{{ticket.ticket__summary}}</td>
+                            <td class="grey"><span style="display:none;">{{ticket.ticket__creationdate.year}}{% if ticket.ticket__creationdate.month >= 10 %}{{ticket.ticket__creationdate.month}}{% else %}0{{ticket.ticket__creationdate.month}}{%endif%}{% if ticket.ticket__creationdate.day >= 10 %}{{ticket.ticket__creationdate.day}}{% else %}0{{ticket.ticket__creationdate.day}}{%endif%}{{ticket__ticket.creationdate.time | time}}</span>{% tzone ticket.ticket__creationdate %}</td>
+
+                            <td class="grey" >{{ticket.ticket__internalpriority}}</td>
+                            <td class="grey">{{ticket.ticket__status | real:ticket.ticket__customer__id}}</td>
+                            <td class="grey">{{ticket.ticket__affectedperson__user__first_name}}
+                            </td>
+                            <td class="grey">
+                              {% if ticket.approve == True %}
+                                <span class="label label-success">Approved</span> 
+                              {% elif ticket.approve == False %}
+                                <span class="label label-danger">Decline</span> 
+                              {% else %}
+                                <span class="label label-default"> Awaiting Approval</span>
+                              {% endif %}             
+                            </td>
+                            
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>        
+                      </div>
+                    </div>
+                  </div>
+
+
+          
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html"%}
+    {% include "components/sr_cust.html"%}
+    <script type="text/javascript">
+        $('#approvals').addClass("active");
+        $('#main_approval_dash').addClass("active");
+        $('#approvals_sub_nav').css("display", "block");
+        $('#approval_his').addClass("active");
+        $('#approvals').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable({
+        aaSorting:[[3,'desc']]
+      });
+    })
+    </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+

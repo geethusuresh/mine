@@ -1,0 +1,176 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Faq Details</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Edit FAQ <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Edit Faq Details</li>
+                </ol>
+            </div>
+
+         
+             <div class="content">
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <form id = "" method = "POST" action = "" enctype="multipart/form-data">
+              <div class="box">
+                <div class="box-title">
+                  <h4>Edit Faq Details</h4>
+                </div>
+                <div class="box-body">
+                <div class="row">
+                <div class="col-sm-6"> 
+                  <label style = "font-weight: bold" for = "cust" >Select Customer</label>
+                  <select class="form-control" id="faq_customer" name="customer" required>
+                    <option value ="">--Select Customer--</option>
+                    {% for cust in customers %} 
+                     <option value="{{ cust.id }}" {% if cust.id == curr_cust %} selected="selected" {% endif %}>{{ cust.customername }}</option>
+                    {% endfor %}
+                  </select> <br>
+            
+                  <label style = "font-weight: bold" for = "cat" >Select Category</label>               
+                  <select class="form-control" id="category" name="category" required>
+                    <option value ="">--Select--</option>
+                    {% for category in category_list %} 
+                     <option value="{{ category.id }}" {% if category.id == curr_cat %} selected="selected" {% endif %}>{{ category.category }}</option>
+                    {% endfor %}
+                  </select> <br>
+                  
+                  <label style = "font-weight: bold" for = "subcat" >Select Subcategory</label>
+                  <select class="form-control" id = "subcategory" name="subcategory" >
+                    <option value="">--Select--</option>
+                    {% for subcategory in subcategory_list %} 
+                     <option value="{{ subcategory.id }}" {% if subcategory.id == curr_subcat %} selected="selected" {% endif %}>{{ subcategory.subcategory }}</option>
+                    {% endfor %}
+                  </select> <br>
+
+                  <label style = "font-weight: bold" for = "faqcat" >Question</label> 
+                  <textarea class="form-control" name = "question" required>{{details.faqquestion}}</textarea><br>
+                </div>
+
+                <div class="col-sm-6"> 
+                  <label style = "font-weight: bold" for = "faqcat" >Answer</label> 
+                  <textarea class="form-control" name = "answer" required>{{details.faqanswer}}</textarea><br>
+                  
+                  <label style = "font-weight: bold" for = "faqcat">Upload File</label>
+                  <input type ="file" id = "faqupload" name= "faqupload" accept="application/pdf,image/*" value = "" >              
+                  <input type ="hidden" name= "oldupload" id="oldupload" value="{{ details.faqattachment }}">  
+                  {% if details.faqattachment%}
+                    <a href="/media/{{ details.faqattachment }}" target = "_blank" ><img src = "/static/img/pdf.png "/>{{ details.faqtitle }}</a>
+                  {% endif %}
+                  <br>
+                  <label style = "font-weight: bold" for = "faqcat" >Document Title</label> 
+                   <input type ="text" id="faqtitle" name = "faqtitle" class="form-control" placeholder="Please enter a title for the document" value = "{{details.faqtitle}}"><br>
+
+                   <label style = "font-weight: bold" for = "faqcat" >Faq Tag</label> 
+                   <input type ="text" id="faqkeyword" name = "faqkeyword" class="form-control" placeholder="Please enter comma seperated keywords" title="Enter comma seperated keywords" value = "{{details.faqkeyword}}" required><br>
+
+                    <button class="btn btn-success " type="submit">Edit </button> 
+                 </div>
+              </div>     
+                </div>
+              </div>
+                           
+                </form>  
+              </div>
+            
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script type="text/javascript">
+
+    function get_faq_category(){
+      item = $('#faq_customer').val(); 
+      $("#category option:gt(0)").remove();
+      $("#subcategory option:gt(0)").remove();
+      $.ajax({
+         url:"/faq/add",
+         type:"POST",
+         data:{customer_id:item, 
+               csrfmiddlewaretoken: '{{ csrf_token }}'},
+         success: function(data){
+          data = JSON.parse(data);
+          for (var i in data){
+            $("#category").append($('<option>', {value:data[i].pk, text:data[i].fields['category']}));
+          } 
+         },
+         error: function(xhr,errmsg,err){
+          alert(xhr);
+         }
+      });
+    }
+    $(document).ready(function(){
+
+    $('#faq_customer').change(function(){
+      get_faq_category();
+    });
+
+    $('#category').on('change',function(){
+      get_faq_subcategory();
+    });
+
+
+    function get_faq_subcategory(){
+      item = $('#category').val(); 
+      $.ajax({
+         url:"/faq/add",
+         type:"POST",
+         data:{categoryid:item, 
+               csrfmiddlewaretoken: '{{ csrf_token }}'},
+         success: function(data){
+          // alert('success');
+          $("#subcategory option:gt(0)").remove();
+          data = JSON.parse(data);
+          for (var i in data){
+            
+            // $("#subcategory").append($('<option>', {value:data[i].pk, text:data[i].fields['subcategory']}));
+            $("#subcategory").append($('<option>', {value:data[i].pk, text:data[i].fields['subcategory']}));
+          } 
+          console.log(data);
+         },
+         error: function(xhr,errmsg,err){
+          alert(xhr);
+         }
+      });
+    }
+
+    });
+
+    </script> 
+</html>
+
+       
+                    
+

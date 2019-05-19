@@ -1,0 +1,137 @@
+
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+            <h1>
+                Identity and Access Management
+                <small>User Management</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+                </li>
+            <!--     <li>
+                   <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+                </li> -->
+                <li class="active">
+                    <strong>Identity and Access Management</strong>
+                </li>
+            </ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+{% if error_msg%}
+
+
+<div class="alert alert-warning alert-dismissable">
+      <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+      <h4><i class="icon fa fa-warning"></i> Alert!</h4>
+      <p> {{error_msg}}</p>
+</div>
+
+
+{% else %}
+
+<div class="row">
+
+	<!--Large tile (Visit Today)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<div class="col-sm-6 col-md-4">
+		<div class="panel panel-dark panel-colorful">
+			<div class="panel-body text-center">
+				<p class="text-uppercase mar-btm text-sm">Users</p>
+				<i class="fa fa-user-plus fa-5x"></i>
+				<hr>
+				<p class="h2 text-thin">{{iam_details.Users}}</p>
+				<small><a href="{% url 'iam_user_list' cloud_account_id %}"><span class="text-semibold">Details</span></a></small>
+			</div>
+		</div>
+	</div>
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--End large tile (Visit Today)-->
+
+
+	<!--Large tile (Comments)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<div class="col-sm-6 col-md-4">
+		<div class="panel panel-danger panel-colorful">
+			<div class="panel-body text-center">
+				<p class="text-uppercase mar-btm text-sm">Roles</p>
+				<i class="fa fa-th-large fa-5x"></i>
+				<hr>
+				<p class="h2 text-thin">{{iam_details.Roles}}</p>
+				<small><a href="{% url 'iam_role_list' cloud_account_id %}"><span class="text-semibold">Details</span></a></small>
+			</div>
+		</div>
+	</div>
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--Large tile (Comments)-->
+
+
+	<!--Large tile (New orders)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<div class="col-sm-12 col-md-4">
+		<div class="panel panel-mint panel-colorful">
+			<div class="panel-body text-center">
+				<p class="text-uppercase mar-btm text-sm">Groups</p>
+				<i class="fa fa-users fa-5x"></i>
+				<hr>
+				<p class="h2 text-thin">{{iam_details.Groups}}</p>
+				<small><a href="{% url 'iam_group_list' cloud_account_id %}"><span class="text-semibold">Details</span></a></small>
+			</div>
+		</div>
+	</div>
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--End Large tile (New orders)-->
+
+</div>
+
+<div class="row">
+
+	<!--Large tile (Visit Today)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<div class="col-sm-6 col-md-2">
+	</div>
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--End large tile (Visit Today)-->
+
+
+	<!--Large tile (Comments)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!-- 	<div class="col-sm-6 col-md-4">
+		<div class="panel panel-info panel-colorful">
+			<div class="panel-body text-center">
+				<p class="text-uppercase mar-btm text-sm">Policies</p>
+				<i class="fa fa-leanpub fa-5x"></i>
+				<hr>
+				<p class="h2 text-thin">{{iam_details.Policies}}</p>
+				<small><span class="text-semibold"><i class="fa fa-unlock-alt fa-fw"></i> 154</span> Unapproved comments</small>
+			</div>
+		</div>
+	</div> -->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--Large tile (Comments)-->
+
+
+	<!--Large tile (New orders)-->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!-- 	<div class="col-sm-12 col-md-4">
+		<div class="panel panel-success panel-colorful">
+			<div class="panel-body text-center">
+				<p class="text-uppercase mar-btm text-sm">Providers</p>
+				<i class="fa fa-shopping-cart fa-5x"></i>
+				<hr>
+				<p class="h2 text-thin">{{iam_details.Policies}}</p>
+				<small><span class="text-semibold"><i class="fa fa-shopping-cart fa-fw"></i> 954</span> Sales in this month</small>
+			</div>
+		</div>
+	</div> -->
+	<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<!--End Large tile (New orders)-->
+
+</div>
+
+{% endif %}
+
+{% endblock %}

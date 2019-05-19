@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/dist/themes/default/style.min.css" />
+        <title>Oneconsole | Add Choice</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/survey/choices/">Choices</a></li>
+                        <li class="active">Add Choice</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                {% if message.tags == 'success' %}
+                                    <div class="alert alert-success" >{{ message|safe }}</div>
+                                {% else %}
+                                    <div class="alert alert-danger" >{{ message|safe }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Add Choice</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-10">
+                                    <form id="add_choice" method="POST" action="/survey/add_choice/" name="add_choice">
+                                        {% csrf_token %}
+                                        <div class="col-sm-12">
+                                            <label class="col-sm-2 control-label">Choice Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="choice_name" placeholder="Enter the Choice" required/>
+                                            </div>
+                                            <br/><br/>
+                                            <label class="col-sm-2 control-label" style="margin-top:10px">Choice Point</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" class="form-control" name="point" placeholder="Enter the Choice Point" required min="0"/>
+                                            </div>
+                                            <br/><br/>
+                                            <button type="submit" id="submit_button" class="btn btn-success pull-right">Create</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_choices').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

@@ -1,0 +1,74 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+
+    <script>
+    // $(document).ready(function(){
+    //     $("#faq").addClass("active");
+    // });
+    </script>    
+</head>
+
+
+<body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wrapper">
+         {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Faq Result  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Faq Result</li>
+                </ol>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="widget">                  
+        <div id="" class="wizard">  -->
+        <div class="content">
+          <div class="row">
+            <div class="">
+              <div class="box" style="width:80%; margin-left:18%;" > 
+                <div class="box-title">            
+                    <h3>Faq Details</h3>
+                </div>
+                <div class="box-body">
+                  <table class="table" id ="tbldetails">                   
+                      <thead><tr>
+                        <th>{{ faq_list.faqquestion }}</th>                          
+                        </tr>
+                      </thead>                        
+                      <tbody><tr>
+                        <td>{{ faq_list.faqanswer }}</td> </tr>
+                        <tr>                    
+                        <td>
+                        {% if faq_list.faqattachment %} 
+                        <a href="/media/{{faq_list.faqattachment}}" target="_blank" /><img src = "/static/img/pdf.png ">{{ faq_list.faqtitle }}</a>
+                        {% endif %}                          
+                        </td></tr>
+                      </tbody>                        
+                  </table>
+                   {% include "components/footer.html"%}
+                   {% include "components/service_request.html"%}
+              </div>
+            </div>
+          </div>        
+        </div>           
+</body>
+
+   
+                           
+                
+
+
+    

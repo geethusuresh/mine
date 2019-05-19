@@ -1,0 +1,342 @@
+{% load zone %}
+<script type="text/javascript" charset="utf8" src="/static/countdown/jquery.countdown.js"></script>
+<script src="/static/wysihtml5/lib/js/wysihtml5-0.3.0.js"></script>
+<script src="/static/wysihtml5/bootstrap-wysihtml5.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        $('#body').wysihtml5({
+            "color": true,
+            "link": false,
+            "image": false,
+            "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"]
+        });
+        $('#worklog_body').wysihtml5({
+            "color": true,
+            "link": false,
+            "image": false,
+            "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"],
+        });
+    })
+</script>
+<script>
+    $(document).ready(function(){
+        $(".hidden").hide();
+        $("#view").addClass("active");
+        $("#open").addClass("open");
+        $('#severity').hide();
+        $('#kb_table').dataTable({
+            "bLengthChange": false,
+            "bInfo": false,
+        });
+        // non_block
+        $("#task_block").hide();
+        $("#priority_data").on('change',function(){
+            var ticket_type = $('#ticket_class').val();
+            var internal_priority = $('#priority_data').val();
+            $('#severity_data option:gt(0)').remove().end();
+            if (ticket_type == 'IN' && internal_priority == 'Critical'){
+                $('#severity_data').show();
+                $('#severity_data_txt').show();
+                $('#severity_data').prop('required',true);
+                $("#severity_data").append($('<option>', {value:'3',text:'S1'})) ;
+                $("#severity_data").append($('<option>', {value:'2',text:'S2'})) ;
+                $("#severity_data").append($('<option>', {value:'1',text:'S3'})) ;
+            } else {
+                $('#severity_data option:gt(0)').remove().end();
+                $('#severity_data').hide();
+                $('#severity_data').prop('required',false);
+                $('#severity_data_txt').hide();
+            }
+        });
+    });
+</script>
+ <script type="text/javascript">
+    function create_new_task(){
+        $("#task_data_block").show();
+    }
+    function exit_task_creation(){
+        $("#task_data_block").hide();  
+    }
+</script>
+<script type="text/javascript">
+    $('.show_task_block').on('click', function() {
+        $("#non_block").hide();
+        $("#task_block").show();
+        // $("#task_data_block").show();
+        $("#task_data_block").hide();
+    });
+    $('.show_non_task_block').on('click', function() {
+        $("#non_block").show();
+        $("#task_block").hide();
+        $("#task_data_block").hide();
+    });
+</script>
+<script type="text/javascript">
+    $("#btnSelect").click(function() {
+        $('#ticket_description').SelectContent();
+    });
+    jQuery.fn.SelectContent = function(){
+        var doc = document
+            , element = this[0]
+            , range, selection
+        ;
+        if (doc.body.createTextRange) {
+            range = document.body.createTextRange();
+            range.moveToElementText(element);
+            range.select();
+        } else if (window.getSelection) {
+            selection = window.getSelection();
+            range = document.createRange();
+            range.selectNodeContents(element);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    };
+</script>
+<script>
+    function show_html_version(type_id, type_name){
+        window.open("/ticket/summary/"+type_id+"/?type_name="+type_name, "show_html_dats" , "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400").focus();
+    }
+</script>
+<script>
+    $("#clock").countdown("{% counter ticket.targetfinish %}", function(event) {
+        $(this).text(
+            event.strftime('%D days %H:%M:%S')
+        );
+    });
+</script>
+<script type="text/javascript">
+    function subgroup_vals(workgroup_id) {
+        $.ajax({
+            url:"/persongroupadmin/remove/subgroup",
+            type:"POST",
+            dataType:"json",
+            data:{
+                workgroupid : workgroup_id,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success : function(data) {
+                data = JSON.parse(data);
+                for (var i in data){
+                    $("#re_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                }
+            },
+            error : function(xhr,errmsg,err) {
+                alert(err);
+            }
+        });
+    }
+
+</script>
+<!-- not needed actually -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        if($("#re_workgroup").val()) {
+            subgroup_vals($("#re_workgroup").val())
+        }
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#re_workgroup").on('change',function(){
+            $("#re_subgroup option:gt(0)").remove();
+            if($("#re_workgroup").text()!='--Select--'){
+                subgroup_vals($("#re_workgroup").val())
+            }
+        });
+        $("#kb_table tbody").on("click", "tr", function(e){
+            symptom = this.cells[0].innerHTML;
+            cause = this.cells[1].innerHTML;
+            resolution = this.cells[2].innerHTML;
+            $("#autofill_symptom").val(symptom);
+            $("#autofill_cause").val(cause);
+            $("#autofill_resolution").val(resolution);
+            $("#kb_modal").modal('hide');
+            $("#resolve").modal('toggle');
+        });
+    });
+</script>
+<script type="text/javascript">
+    function change_priority() {
+        var ticket_type = $('#ticket_class').val();
+        var priority = $('#ticket_priority').val();
+        if (ticket_type == 'IN' && priority == 'Critical'){
+            $('#severity_data').show();
+            $('#severity_data_txt').show();
+            $('#severity_data').prop('required',true);
+            $("#severity_data").append($('<option>', {value:'3',text:'S1'})) ;
+            $("#severity_data").append($('<option>', {value:'2',text:'S2'})) ;
+            $("#severity_data").append($('<option>', {value:'1',text:'S3'})) ;
+        } else {
+            $('#severity_data option:gt(0)').remove().end();
+            $('#severity_data').hide();
+            $('#severity_data').prop('required',false);
+            $('#severity_data_txt').hide();
+        }
+    }
+    function relate_search_bind(){
+        var x = ($(this).find('td:eq(1)').text());
+        $("#relate").val(x);
+    }
+</script>
+<script>
+    $("#search").click(function(){
+        $.ajax({
+            url:"/search/ticket/",
+            type:"POST",
+            dataType:"json",
+            data:{
+                'ticket' : $("#relate").val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            type: "POST",
+            success : function(data){
+                i=0;
+                $('#fielder tr').slice(1).remove();
+                for (var i in data){
+                    $tr = $('<tr>');
+                    $tr.append($('<td><input type="checkbox">')).append($('<td>').html(data[i].ticketid)).
+                    append($('<td>').html(data[i].status)).
+                    append($('<td>').html(data[i].isglobal)).append($('<td class="hidden">').html(data[i].id));
+                    $(".trhide").hide();
+                    $("#fielder").append($tr);
+                    $tr.bind('click', relate_search_bind);
+              }
+            },
+        });
+    });
+</script>
+<script>
+    $("#append_to_work_log").click(function(){
+        mails = ''
+        $('input[name="email_fill_worklog"]:checked').each(function(){
+          if(this.value.length > 0){
+            mails += this.value;
+            mails+=','
+          }
+        });
+        mails = mails.substring(0, mails.length - 1);
+        $("#to_worklog").val(mails);
+      });
+</script>
+<script type="text/javascript">
+    function create_work_log_history(ticket_id){
+        var form_data = new FormData();
+        var attachment_data = $('#worklog_attachment')[0].files[0];
+        var work_log_id = $('#work_log_id').val();
+        data_val = {
+          'subject': $('#worklog_subject').val(),
+          'body': $('#worklog_body').val(),
+          'to_list': $('#to_worklog').val(),
+          'cc_list': $('#worklog_cc_list').val(),
+          'visibility': $('#worklog_visibility').val(),
+          'ticket_id': ticket_id,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        var fd = new FormData();
+        fd.append('attachment_data', attachment_data)
+        for(var key in data_val){
+            fd.append(key, data_val[key]); 
+        }
+        $.ajax({
+            url:"/ticket/worklog_reply/"+work_log_id+"/",
+            type:"POST",
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                if (data.ticket_id)
+                    document.location.href = "/ticket/stat/"+data.ticket_id;
+                else
+                    document.location.href = "/";
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    function fetch_worklog_history(worklog_id){
+        $('#work_log_id').val(worklog_id);
+        $.ajax({
+            url:"/ticket/worklog_reply/"+worklog_id+"/",
+            type:"GET",
+            dataType:"json",
+            success : function(data){
+                remark = data.signature+'\n ________________________________________<br/>'+data.remark;
+                $('#worklog_body').data("wysihtml5").editor.setValue(remark)
+                $('#worklog_cc_list').val(data.cc_list);
+            },
+        });
+    }
+</script>
+<script>
+    (function ($, $win) {
+      'use strict';
+        $( document ).ready(function() {
+            var notAllowedFiles = ["exe", "rar", "dll"];
+            var validFileStatus = 0;
+            $('.worklog_image').bind('change', function() {
+                var ext = $('.worklog_image').val().split('.').pop().toLowerCase();
+                if(this.files[0].size>10000000){
+                    $(".worklog_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.worklog_image').val("")
+                    validFileStatus = 1;
+                }
+                if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".worklog_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.worklog_image').val("")
+                    validFileStatus = 1;
+                }
+                if(validFileStatus!=1){
+                    $(".worklog_error_msg").empty()
+                }
+            });
+            $('.worklog_reply_image').bind('change', function() {
+                var ext = $('.worklog_reply_image').val().split('.').pop().toLowerCase();
+                if(this.files[0].size>10000000){
+                    $(".worklog_reply_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.worklog_reply_image').val("")
+                    validFileStatus = 1;
+                }
+                if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".worklog_reply_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.worklog_reply_image').val("")
+                    validFileStatus = 1;
+                }
+                if(validFileStatus!=1){
+                    $(".worklog_reply_error_msg").empty()
+                }
+            });
+            $('.send_mail_image').bind('change', function() {
+                var ext = $('.send_mail_image').val().split('.').pop().toLowerCase();
+                if(this.files[0].size>10000000){
+                    $(".send_mail_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.send_mail_image').val("")
+                    validFileStatus = 1;
+                }
+                if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".send_mail_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.send_mail_image').val("")
+                    validFileStatus = 1;
+                }
+                if(validFileStatus!=1){
+                    $(".send_mail_error_msg").empty()
+                }
+            });
+        });
+    }(jQuery, jQuery(window)));
+</script>
+
+<!-- Edit Description -->
+<script type="text/javascript">
+    $('#content_edit_button').on('click', function(){
+        $('#non_editabale_ticket_content').toggle();
+        $('#editable_ticket_content').toggle();
+    });
+    var content_editor = $('#ticket_content_editor').wysihtml5({
+        "color": true,
+        "link": false,
+        "image": false,
+        "stylesheets": ["/static/customer/css/bootstrap-wysihtml5/wysiwyg-color.css"],
+    });
+</script>

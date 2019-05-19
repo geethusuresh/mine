@@ -1,0 +1,181 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+<script type="text/javascript">
+  server_id = {{server_id}}
+</script>
+<h1 class="text-thin">
+    Search Template |
+  <small>Search for application templates</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li class="active">Search Template</li>
+</ol>
+{% endblock %}
+
+{% block basecontent %}
+  <div class="row">
+
+  <div class="col-md-12">
+    <div class="col-md-12">
+      <div class="alert alert-success" id="status_alert_success" style="display:none">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <center id="status_message_success"></center>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-body">
+        <p><h5>Search for already saved application templates.</h5></p>
+          <div class="row">
+            <div class="col-md-10">
+              <input class="form-control" type="text" id="id_search_keyword" name="search_keyword" placeholder="template name" style="width:100%" required>
+            </div>
+            <div class="col-md-2">
+              <button id="id_search_button" type="button" class="btn btn-success"><i class="fa fa-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="id_search_result_div">
+      {% include 'docker_management/docker_compose_template_search_result.html' %}
+    </div>
+
+  </div>
+
+
+  <div class="modal fade" id="run_template_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Run Template</h4>
+        </div>
+        <form id="form_run_docker_compose_template" method="POST" >
+        {% csrf_token %}
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label col-md-4">Name of Application:</label>
+                    <div class="col-md-8">
+                        {{form.name}}
+                    </div>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="form-group">
+                    <label class="control-label col-md-4">Description:</label>
+                    <div class="col-sm-8">
+                      {{form.description}}
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Run Template</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="delete_template_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title text-danger" id="myModalLabel"><i class="icon fa fa-warning"></i>Delete Template</h4>
+        </div>
+        <div class="modal-body">
+          <h4>Are you sure you want to delete?</h4>
+          <input type="hidden" id="template_id_to_delete">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <a id="confirm_delete_template" class="btn btn-primary">Confirm</a>
+          </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  $("#id_search_keyword").keyup(function(event){
+    if(event.keyCode == 13){
+        keyword = $('#id_search_keyword').val();
+        search_docker_compose_template(keyword);
+    }
+  });
+
+  $(document).ready(function(){
+    setTimeout(function () {
+      $("#status_alert_success").hide();
+    }, 3000);
+    search_docker_compose_template('ALL');
+  });
+
+  $('#id_search_button').click(function() {
+    keyword = $('#id_search_keyword').val();
+    search_docker_compose_template(keyword);
+  });
+
+  function search_docker_compose_template(keyword){
+    $('#id_search_result_div').empty();
+    $.ajax({
+      url: '/docker_management/server/' + server_id + '/template/search/',
+      type: 'get',
+      data: {'keyword': keyword},
+      datatype: 'json',
+      success: function(search_result){
+        $('#id_search_result_div').append(search_result);
+      },
+      error: function(xhr,errmsg,err){
+
+      },
+    });
+  }
+
+  function show_run_template_modal(template_id){
+    $('#run_template_modal').modal('show');
+    $('#template_id').val(template_id);
+    $('#form_run_docker_compose_template').attr('action', '/docker_management/server/' + server_id + '/template/' + template_id + '/run/');
+  }
+
+  function show_delete_template_modal(template_id){
+    $('#delete_template_modal').modal('show');
+    $('#template_id_to_delete').val(template_id);
+  }
+
+  $('#confirm_delete_template').click(function(){
+    template_id = $('#template_id_to_delete').val();
+    $.ajax({
+      url: '/docker_management/server/' + server_id + '/template/' + template_id + '/delete/',
+      type: 'get',
+      success: function(message){
+        search_docker_compose_template('ALL');
+        $('#status_message_success').empty();
+        $('#status_alert_success').show();
+        $('#status_message_success').append(message);
+        $('#delete_template_modal').modal('hide');
+      },
+      error: function(xhr,errmsg,err){
+      },
+    });
+  });
+</script>
+
+{% endblock %}

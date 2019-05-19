@@ -1,0 +1,310 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/customer/bootstrap-datetime.min.css">
+        <style>
+            .list-info li label {
+                width: 100px;
+            }
+            .clb{
+              display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+            }
+        </style>
+        <script type="text/javascript" src="/static/customer/Chart.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/cust_header.html"%}
+        {% else %}
+            {% include "components/header.html"%}
+        {% endif %}}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Support Hours | <small>Dashboard</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">SupportHours</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div class="col-sm-12">
+                                <div class="col-sm-8">
+                                    <p class="panel-title">Usage details {% if subgroup %} - {{subgroup.subgroupname}} {% endif %}</p>
+                                </div>
+                                {% if package and package.is_subgroup_wise %}
+                                    <div class="col-sm-4">
+                                        <select name="subgroup" class="form-control" id="sudomain_wise">
+                                            <option value=""> All </option>
+                                            {% for sub_group in package.subgroups.all %}
+                                                <option value="{{ sub_group.subgroup.id }}" {% if subgroup == sub_group.subgroup%} selected {% endif %}>{{ sub_group.subgroup.subgroupname }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-12">
+                                <hr>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            {% if package %}
+                                <div class="row">
+                                    <div class="col-sm-2">
+                                        <div id="percent-container"></div>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <br>
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Package Hours :</dt>
+                                                <dd>{% if subdomain_choosed %} {{ package_hours|hour_cal }} {% else %}{{ package.package.hours|hour_cal }} {% endif %}</dd><br>
+                                                <dt>Subscribed on :</dt>
+                                                <dd>{{package.subscribed_date}}</dd><br>
+                                                <dt>Package Name :</dt>
+                                                <dd>{{ package.package }}</dd>
+                                            </dl>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Remaining Hours :</dt>
+                                                <dd>{% if subdomain_choosed %} {{ remain_hours|hour_cal }} {% else %} {{package.remaining|hour_cal}} {% endif %}</dd><br>
+                                                <dt>Validity :</dt>
+                                                <dd>{{package.ending_date}}</dd><br>
+                                                <dt>Subscribed on :</dt>
+                                                <dd>{{ package.subscribed_date }}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="h4">Usage History {% if subgroup %} - {{subgroup.subgroupname}} {% endif %}</span>
+                                <hr> 
+                            {% endif %}
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="panel panel-info panel-colorful" style="background-color: #3498db;color: white;">
+                                        <div class="panel-body text-center">
+                                            <p class="text-uppercase mar-btm text-sm">Today</p>
+                                            <i class="fa fa-ticket fa-3x">{{count_day}}</i>
+                                            <hr>
+                                            <p class="h4 text-thin">{{total_day|hour_cal}}</p>
+                                            <!-- <small><span class="text-semibold"></span>Hours</small> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="panel panel-success panel-colorful" style="background-color: #5cb85c;color: white;">
+                                        <div class="panel-body text-center">
+                                            <p class="text-uppercase mar-btm text-sm">This Week</p>
+                                            <i class="fa fa-ticket fa-3x">{{count_week}}</i>
+                                            <hr>
+                                            <p class="h4 text-thin">{{total_week|hour_cal}}</p>
+                                            <!-- <small><span class="text-semibold"></span>Hours</small> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="panel panel-success panel-colorful" style="background-color: #f0ad4e;color: white;">
+                                        <div class="panel-body text-center">
+                                            <p class="text-uppercase mar-btm text-sm">This Month</p>
+                                            <i class="fa fa-ticket fa-3x">{{count_month}}</i>
+                                            <hr>
+                                            <p class="h4 text-thin">{{total_month|hour_cal}}</p>
+                                            <!-- <small><span class="text-semibold"></span>Hours</small> -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="panel panel-primary panel-colorful" style="background-color: #428bca;color: white;">
+                                        <div class="panel-body text-center">
+                                            <p class="text-uppercase mar-btm text-sm">Last Month</p>
+                                            <i class="fa fa-ticket fa-3x">{{count_past_month}}</i>
+                                            <hr>
+                                            <p class="h4 text-thin">{{past_total|hour_cal}}</p>
+                                            <!-- <small><span class="text-semibold"></span>Hours</small> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="panel panel-default plain profile-widget">
+                            <h4 class="text-center pad-top">Customize Your Search</h4><br>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <form action="/ticket/workhours/{{profile.customer.id}}{% if subdomain_choosed %}?domain={{subgroup.id}} {% endif %}" method="POST">{% csrf_token %}
+                                        {% if subdomain_choosed %}
+                                            <input type="hidden" name="domain" value="{{ subgroup.id }}">
+                                        {% endif %}
+                                        <div class="col-sm-5">
+                                            <label>From Date:</label>
+                                            <input type="text" name="from" class="form-control" id="datepicker"  data-date-format="yyyy/mm/dd" required>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <label>To Date:</label>
+                                            <input type="text" name="to" class="form-control"  id="datepicker1"  data-date-format="yyyy/mm/dd" required>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <button type="submit" class="btn btn-success" style="margin-top:10%">Get Details</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                {% if result == "value" %}
+                                    {% if all_tickets %}
+                                        <hr>
+                                        <div class="row">
+                                            <h4 class="text-center">Ticket Matching Results</h4><br>
+                                            <div class="col-sm-3"></div>
+                                            <div class="col-sm-6">
+                                                <div class="panel panel-info " style="background-color: #3498db;color: white;">
+                                                    <div class="panel-body text-center">
+                                                        <div class="col-sm-6 text-center">
+                                                            <p class="text-uppercase mar-btm text-sm">Total Number of tickets</p>
+                                                            <i class="fa fa-ticket fa-5x">{{count_all}}</i>
+                                                        </div>
+                                                        <div class="col-sm-6 text-centered">
+                                                            <p class="h2 text-thin">{{time_spend|hour_cal}}</p>
+                                                            <!-- <small><span class="text-semibold"></span>Hours</small> -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3"></div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <form action="{% url 'support_hour_export_excel' %}" method="post">{% csrf_token %}
+                                                <input type="hidden" value="{{ tickets_data}}" name="tickets_data">
+                                                <input type="hidden" value="{{ report_headers}}" name="report_headers">
+                                                <button type="submit" class="btn btn-success pull-right" >Export to Excel </button>
+                                            </form>
+                                        </div>
+                                        <table class="table table-striped" id="table_id">
+                                            <thead>
+                                                <tr>
+                                                    <!-- <th></th> -->
+                                                    <th>Ticket Id</th>
+                                                    <th>Ticket Summary</th>
+                                                    <th>Created Date</th>
+                                                    <th>Closed Date</th>
+                                                    <th>Hours Spend</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>   
+                                            <tbody>
+                                                {% for ticket in all_tickets %}
+                                                    <tr>
+                                                        <!--                             <td><a  data-toggle="tooltip" data-placement="bottom" title="View/Edit" class="btn btn-success btn-sm" href="/customer/tickets/detail/{{ticket.ticket.id}}">
+                                                        <i class="fa fa-edit "></i>                   
+                                                        </a></td> -->
+                                                        <td class="grey" >{{ticket.ticket__ticketid}}</td>
+                                                        <td class="grey" >{{ticket.ticket__summary}}</td>
+                                                        <td class="grey" >
+                                                            <span style="display:none;">{{ticket.ticket__creationdate.year}}{% if ticket.ticket__creationdate.month >= 10 %}{{ticket.ticket__creationdate.month}}{% else %}0{{ticket.ticket__creationdate.month}}{%endif%}{% if ticket.ticket__creationdate.day >= 10 %}{{ticket.ticket__creationdate.day}}{% else %}0{{ticket.ticket__creationdate.day}}{%endif%}{{ticket.ticket__creationdate.time | time}}</span>
+                                                            {% tzone ticket.ticket__creationdate %}
+
+                                                        </td>
+                                                        <td class="grey">{% tzone ticket.ticket__closedate %}</td>
+                                                        <td class="grey" >{{ ticket.total|hour_cal}}</td>
+                                                        <td class="grey">{{ticket.ticket__status | real:ticket.ticket__customer__id}}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <hr><br>
+                                        <div class="row">
+                                            <div class="col-sm-4"></div>
+                                            <div class="col-sm-4">
+                                                <alert class="alert alert-danger text-center" >No results Found, Try another filter</alert>
+                                                <br>
+                                            </div>
+                                            <div class="col-sm-4"></div>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="/static/customer/ProgressBar.min.js"></script>
+        <script>
+            var startColor = '#FC5B3F';
+            var endColor = '#6FD57F';
+            var circle = new ProgressBar.Circle('#percent-container', {
+                {% if per > 50 %}
+                    color: '#5cb85c',
+                {% elif per > 30 %}
+                    color: '#5cb85c',
+                {% elif per > 10 %}
+                    color: '#5cb85c',
+                {% else %}
+                    color: '#d9534f',
+                {% endif %}      
+                strokeWidth: 4,
+                trailWidth: 1,
+                duration: 1500,
+                text: {
+                    value: '0'
+                },
+                step: function(state, bar) {
+                    bar.setText((bar.value() * 100).toFixed(1)+ "% Left");
+                }
+            });
+            circle.animate(({{per}}/100), function() {})
+        </script>
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/customer_footer.html"%}
+        {% else %}
+            {% include "components/footer.html"%}
+            {% include "components/service_request.html"%}
+        {% endif %}
+        <script>
+            $("#profile").addClass("active")
+            $('#datepicker').datepicker({
+                format: 'yyyy/mm/dd',
+            })
+            $('#datepicker1').datepicker({
+                format: 'yyyy/mm/dd',
+            });
+        </script>
+        <script type="text/javascript">
+            $('#sudomain_wise').on('change', function(){
+                if ($('#sudomain_wise').val() == "") {
+                    document.location.href = "/ticket/workhours/{{profile.customer.id}}"
+                } else {
+                    document.location.href = "/ticket/workhours/{{profile.customer.id}}?domain="+$('#sudomain_wise').val()
+                }
+            })
+        </script>
+        <script type="text/javascript">
+            $('#service').addClass("active");
+            $('#subm_a').addClass("active");
+            $('#subm').css("display", "block");
+            $('#support_hr').addClass("active");
+            $('#service').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>
+

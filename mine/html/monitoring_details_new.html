@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Monitoring Details</title>    
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/dashboard/css/bootstrap.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="/static/dashboard/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+    <!-- Timeline CSS -->
+    <link href="/static/dashboard/css/plugins/timeline.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/dashboard/css/sb-admin-2.css" rel="stylesheet">
+    <!-- Morris Charts CSS -->
+    <link href="/static/dashboard/css/plugins/morris.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="/static/dashboard/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+     <!-- jQuery Version 1.11.0 -->
+    <script src="/static/dashboard/js/jquery-1.11.0.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/static/dashboard/js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="/static/dashboard/js/plugins/metisMenu/metisMenu.min.js"></script>
+    <!-- Morris Charts JavaScript -->
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="/static/dashboard/js/sb-admin-2.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript">
+    function item_details(item_id){
+        $('#trigger_item_details').val(item_id);
+        $('#frm_item_details').submit();
+    }
+
+    function check_application_change(){
+        $('#application_selection').val('applications_selected');
+        $('#frm_application_item').submit();
+    }
+
+    function timeintervel_duration(duration){
+        $('#timeinterval').val(duration);
+        $('#frm_timeinterval').submit();
+    }
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/monitor_dashboard/">Monitoring Details</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">                        
+                        <li class="divider"></li>
+                        <li><a href="/logout/"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">                        
+                        <li>
+                            <a  href="/"><i class="fa fa-home fa-fw"></i>
+                            &nbsp;Home</a>
+                        </li>
+                        <li>
+                        <a href="/monitor_dashboard/"><i class="fa fa-dashboard fa-fw"></i>
+                            &nbsp;Monitoring Dashboard</a>
+                        </li>
+                        <li>
+                            <a  href="/monitor_details/"><i class="fa fa-list fa-fw"></i>
+                            &nbsp;Monitoring Details</a>
+                        </li>                       
+                        <li>
+                            <a href="/logout/"><i class="fa fa-sign-out fa-fw"></i>&nbsp;Logout</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper"> 
+        <!-- /.row -->
+            
+        <!-- /.row -->
+            <div class="row">
+                <form name="frm_application_item" id="frm_application_item" action="/monitor_details/" method="POST">{% csrf_token %} 
+                 <div class="col-lg-4">
+                    <div class="panel panel-default" style="margin-top:16px;">
+                        <div class="panel-heading">
+                            <i class="fa fa-bell fa-fw"></i>Applications
+                        </div>
+                        <div class="panel-body">                                                   
+                            <select class="form-control" name="application" id="application" onchange="check_application_change();">
+                                 <option value="" style="font-weight:bold;">
+                                 Please select any applications</option>      
+                                  {% for appitem in appdetails %}
+                                  {% if appitem.applicationid in selected_application %}           
+                                  <option value="{{appitem.applicationid}}" selected="selected">
+                                  {{appitem.name}}
+                                  </option>
+                                  {% else %}            
+                                  <option value="{{appitem.applicationid}}">{{appitem.name}}</option>
+                                  {% endif %}
+                                  {% endfor %}
+                            </select>                           
+                        </div>
+                    </div>                 
+                 </div>                
+
+                  <div class="col-lg-4" {% if items %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                    <div class="panel panel-default" style="margin-top:16px;">
+                        <div class="panel-heading">
+                            <i class="fa fa-bell fa-fw"></i>Items
+                        </div>
+                        <div class="panel-body">                                                   
+                           <select multiple class="form-control" name="application_item" id="application_item" style="height: 80px;">
+                              <option style="font-weight:bold;" disabled>Please select any item</option>      
+                              {% for itemdetail in items %}
+                              {% if itemdetail.itemid in selected_items %}
+                              <option value="{{itemdetail.itemid}}" selected="selected">{{itemdetail.name}}</option>
+                              {% else %}
+                               <option value="{{itemdetail.itemid}}">{{itemdetail.name}}</option>
+                              {% endif %}
+                              {% endfor %}
+                            </select>               
+                        </div>
+                    </div>
+                     <div class="panel panel-default" style="margin-top:16px;border:0px;">
+                        <div class="panel-body" style="text-align:right;border:0px;">
+                <input type="submit" name="btn_chart_details" id="btn_chart_details" value="submit" style="border: 1px solid #555;color:#555;height:34px;width:100px;" />          
+                        </div>
+                    </div>                   
+                 </div>
+            <input type="hidden" name="target_action" id="target_action" value="3" />
+            <input type="hidden" name="application_selection" id="application_selection" value="" />
+            </form>
+            </div>        
+        <!-- /.row -->
+        {% if target_action == "2" %} 
+             <div class="row">               
+                    <div class="col-lg-12">
+                        <div style="font-size:14px;">
+                         Monitoring Intervals:
+                        </div>
+                        <div style="float:left;">
+                            <form name="frm_timeinterval" id="frm_timeinterval" method="POST" action="/duration_analysis/">{% csrf_token %}  
+                                <ul class="pagination" style="text-align:left;">
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(1);">1Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(2);">2Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(3);">3Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(6);">6Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(12);">12Hr</a></li> 
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(24);">1D</a></li>                
+                                </ul>
+                            <input type="hidden" name="timeinterval" id="timeinterval" value="" />
+                            <input type="hidden" name="itemdetails" id="itemdetails" value="{{items_submitted}}"/>
+                            </form>
+                        </div>                
+                    </div>         
+                </div>        
+                    {% if graph_empty_check > 0 %}
+                    {% if monitored_values %}      
+                    {% for monitored_item in monitored_values %}
+                    {% if monitored_item.x_axis %}
+                    <div class="row">
+                    <div class="col-lg-12">     
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                            {{monitored_item.item_name}} - Last One hour monitored data                         
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                        <div id="container_{{forloop.counter}}"></div>                           
+                             <script type="text/javascript">     
+                              $(function () {
+                                  $('#container_{{forloop.counter}}').highcharts({
+                                      chart: {
+                                        /*type: 'line'*/
+                                        type: 'line',
+                                        height: 250
+                                      },
+                                      title: {
+                                          text: "{{monitored_item.item_name}}",
+                                          x: -20 //center
+                                      },                                      
+                                      xAxis: {
+                                          categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],
+                                          labels: {
+                                            rotation: -90,                                  
+                                          },
+                                          type: 'datetime',
+                                          title: {
+                                              text: 'Monitored Time'
+                                          }
+                                      },
+                                      yAxis: {
+                                          title: {
+                                              text: ''
+                                          },
+                                          plotLines: [{
+                                              value: 0,
+                                              width: 1,
+                                              color: '#808080'
+                                          }]
+                                      },
+                                      tooltip: {
+                                          valueSuffix: ''
+                                      },
+                                      legend: {
+                                          layout: 'vertical',
+                                          align: 'right',
+                                          verticalAlign: 'middle',
+                                          borderWidth: 0,
+                                          labelFormatter: function() {                     
+                                                  return '';                      
+                                          }
+                                      },
+                                      series: [{
+                                          name:'Monitored Data',                                  
+                                          data: [{% for y_item in monitored_item.y_axis %} {{y_item}}, {% endfor %}],
+                                          marker: {
+                                            enabled: false
+                                            },
+                                      }],
+
+                                       exporting: {
+                                        enabled: true,
+                                        chartOptions: {                
+                                      xAxis: [{categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],            
+                                            labels: {
+                                                style: {
+                                                    fontSize: '6px',                            
+                                                },
+                                                rotation: -90,
+                                            }
+                                        }]
+                                    }
+                                }
+                                  });
+                              });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                     </div>
+                    <!-- /.col-lg-8 -->                
+                    <!-- /.col-lg-4 -->
+                     </div>    
+                     {% endif %}
+                    {% endfor %}
+                    {% else %}
+                     <div class="row">
+                     <div class="col-lg-12">
+                     <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found. Please select any application and found out the monitored items
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div>
+                    <!-- /.col-lg-8 -->                
+                    <!-- /.col-lg-4 -->
+                     </div>                  
+                    {% endif %}
+
+                    {% else %}
+                    <div class="row">
+                     <div class="col-lg-12">
+                     <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found. Please select any application and found out the monitored items
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div>
+                    <!-- /.col-lg-8 -->                
+                    <!-- /.col-lg-4 -->
+                     </div>
+                    <!-- /.row -->       
+                    {% endif %}   
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->
+                
+        {% elif target_action == "3" %}
+                <div class="row">               
+                    <div class="col-lg-12">
+                        <div style="font-size:14px;">
+                         Monitoring Intervals:
+                        </div>
+                        <div style="float:left;">
+                            <form name="frm_timeinterval" id="frm_timeinterval" method="POST" action="/duration_analysis/">{% csrf_token %}  
+                                <ul class="pagination" style="text-align:left;">
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(1);">1Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(2);">2Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(3);">3Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(6);">6Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(12);">12Hr</a></li> 
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(24);">1D</a></li>                
+                                </ul>
+                            <input type="hidden" name="timeinterval" id="timeinterval" value="" />
+                            <input type="hidden" name="itemdetails" id="itemdetails" value="{{items_submitted}}"/>
+                             <input type="hidden" name="applicationdetails" id="applicationdetails" value="{{application_submitted}}"/>
+                            </form>
+                        </div>                
+                    </div>         
+                </div>        
+        
+                    {% if monitored_values %}      
+                    {% for monitored_item in monitored_values %}
+                    {% if monitored_item.x_axis %}
+                     <div class="row">
+                     <div class="col-lg-12">     
+                     <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                            {{monitored_item.item_name}} 
+                            {% if selected_interval != "0" %}
+                               - Last {{selected_interval}} Hr Analysis
+                            {% else %}
+                             - Last 1 Hr Analysis
+                            {% endif %}                           
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                        <div id="container_{{forloop.counter}}"></div>                           
+                             <script type="text/javascript">     
+                              $(function () {
+                                  $('#container_{{forloop.counter}}').highcharts({
+                                      chart: {
+                                        /*type: 'line'*/
+                                        type: 'line',
+                                        height: 250
+                                      },
+                                      title: {
+                                          text: "{{monitored_item.item_name}}",
+                                          x: -20 //center
+                                      },                                      
+                                      xAxis: {
+                                          categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],
+                                          labels: {
+                                            rotation: -90,                                  
+                                          },
+                                          type: 'datetime',
+                                          title: {
+                                              text: 'Monitored Time'
+                                          }
+                                      },
+                                      yAxis: {
+                                          title: {
+                                              text: ''
+                                          },
+                                          plotLines: [{
+                                              value: 0,
+                                              width: 1,
+                                              color: '#808080'
+                                          }]
+                                      },
+                                      tooltip: {
+                                          valueSuffix: ''
+                                      },
+                                      legend: {
+                                          layout: 'vertical',
+                                          align: 'right',
+                                          verticalAlign: 'middle',
+                                          borderWidth: 0,
+                                          labelFormatter: function() {                     
+                                                  return '';                      
+                                          }
+                                      },
+                                      series: [{
+                                          name:'Monitored Data',                                  
+                                          data: [{% for y_item in monitored_item.y_axis %} {{y_item}}, {% endfor %}],
+                                          marker: {
+                                            enabled: false
+                                            },
+                                      }],
+
+                                       exporting: {
+                                        enabled: true,
+                                        chartOptions: {                
+                                      xAxis: [{categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],            
+                                            labels: {
+                                                style: {
+                                                    fontSize: '6px',                            
+                                                },
+                                                rotation: -90,
+                                            }
+                                        }]
+                                    }
+                                }
+                                  });
+                              });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div>
+                    </div>
+                     {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="row">
+                    <div class="col-lg-12"> 
+                     <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found. Please select any application and found out the monitored items
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div> 
+                     </div>                 
+                    {% endif %}   
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->                    
+                    <!-- /.panel -->
+                
+                <!-- /.col-lg-8 -->                
+                <!-- /.col-lg-4 -->
+        
+         {% else %}
+          <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> 
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                         <div class="alert alert-danger" role="alert">
+                            No monitored data found. Please select any application and found out the monitored items
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>   
+            </div>
+        </div>
+        {% endif %}
+     </div>   
+    </div>
+    <!-- /#wrapper -->
+</body>
+
+</html>

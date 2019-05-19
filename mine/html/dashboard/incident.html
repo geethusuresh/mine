@@ -1,0 +1,1307 @@
+  {% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Incident</title>
+    {% include "components/css.html"%}
+    <style>
+.dl-horizontal dd {
+margin-left: 120px;
+}
+
+.dl-horizontal dt {
+width: 100px;
+
+}
+    </style>
+    <link rel="stylesheet" href="/static/customer/css/datepicker/datepicker.css" />
+    <style>
+
+    </style>
+    <link rel="stylesheet" href="/static/customer/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Create Ticket<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Create Ticket </li>
+                </ol>
+            </div>
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-success" style="margin-left: 10%;margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="content">
+              <div class="box">
+                <div class="box-title">
+                  <h3>Create Ticket</h3>
+                  <a href="#" id="choose_template" style="float:right" data-toggle="modal" data-target="#templates" class="fa btn btn-success" onclick="fetch_templates()">Choose Template</a>
+                  <a href="#" style="float:right" id="exit_template" class="fa btn btn-danger" onclick="exit_templates()">Exit</a>
+                </div>
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <div id="error_data" style="display:none">
+                        <div class="alert alert-danger media fade in">
+                            Manager for the selected user is not configured yet. Select another user as affected user. Contact Administrator to fix this issue.
+                          </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-8">
+                    <br>
+                      <div class="row">
+
+                        <form action="/ticket/incident/create" method="post" enctype="multipart/form-data" onsubmit="return change_select_box_disabled()">
+                      {% csrf_token %}
+                        <div class="col-md-6">
+                          <div class="input-field col s6">
+                            <input id="summ" type="text" name="summ" class="validate"  maxlength="50" required >
+                            <label for="summ">Summary (Max 50 characters) *</label>
+                          </div>
+                          <!-- <label><strong>Summary(Max 50 Characters):</strong></label>
+                          <input type="text" name="summ" id="ticket" class="form-control" placeholder="Summary *" required maxlength="50">   -->                  
+                        </div>
+                        <div class="col-md-3"  >
+                        <label class="labelz">Select Customer *</label>
+                         <select class="form-controls" name="customer" style="" id="customer_data" required >
+                          <option value="">-Select-</option>
+                          {% for customer in customers %}
+                          <option value="{{customer.customer.id}}">{{customer.customer}}</option>
+                          {% endfor %}
+                        </select>
+                        <input type="hidden" id="customer_customer_id"/>
+                        </div>
+                        <div class="col-md-3"  >
+                        <label class="labelz">Ticket Type *</label>
+                         <select class="form-controls" name="type" style="" required id="ticket_type">
+                          <option value="">-Ticket Type-</option>
+                          <option value="SR">Service Request</option>
+                          <option value="IN">Incident</option>
+                          <option value="PB">Problem</option>
+                          <option value="CH">Change</option>
+                        </select>
+
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br>
+                          <div class="input-field col s12">
+                            <textarea id="dec" name="dec" class="materialize-textarea" required></textarea>
+                            <label for="dec">Description *</label>
+                          </div>
+                         <!--  <label><strong>Description:</strong>  </label>
+                          <textarea type="text" name="dec" style="max-width:100%;margin-top:5px" class="form-control" placeholder="{{ ticket.description }}" rows="8" cols="20" required></textarea>  -->
+                          </div>
+                      </div>
+                      <!-- <hr> -->
+                      <br>
+                      <div class="row">
+                        <div class="col-md-6"> 
+                          <div class="basic-info">
+<!--                             <p class="data-row">
+
+                              <span class="data-name"><label><strong>Created By:</strong></label></span>
+                              <span class="data-value"><input type="text" name="createdby" id="ticket" class="form-control" placeholder="Created By" required readonly value="{{profile.user.username}}" >  </span>
+                            </p> -->
+                            <p class="data-row">
+                              <span class="data-name"><label class="labelz">Ticket Category *</span>
+                              <span class="data-value">                           
+                              <select  class="form-controls" style="padding:2px;width:100%" id = "cat_full_list" name="category" required>
+                              <option value="">-Select-</option>
+                              </select></span>
+                            </p>
+                            <br>
+                            <p class="data-row">
+                            <!-- <span class="data-name"><label><strong>Reported By:</strong></span> -->
+                              <div class="row">
+                                <div class="col-sm-11">
+                                  <div class="input-field col s6">
+                                <input type="text" name="reportedby" id="rep" class="validate"  maxlength="50" required>
+                                <label for="rep">Reported User *</label>
+                              </div>
+                               <span class="data-value"><input type="text" style="display:none" id="hide_reportedby" name="hide_reportedby" class="form-control"></span>
+
+
+                                 <!--  <span class="data-value"><input type="text" name="reportedby" id="rep" class="form-control" placeholder="Reported By" required></span>
+                                  
+                                  <span class="data-value"><input type="text" style="display:none" id="hide_reportedby" name="hide_reportedby" class="form-control"></span> -->
+
+                                </div>
+                                <div class="col-sm-1" id="users_div" style="margin-top: 6px;margin-left: inherit;">
+                                  <a href=""data-toggle="modal" data-target="#user" class="fa fa-search"></a>
+                                </div>
+                              </div>
+                              
+
+                              
+                            </p>
+                            <div class="names">
+                            <p class="data-row">
+                              <div class="input-field col s6">
+                                <input id="autofill_first" type="text" class="validate"  maxlength="50" >
+                                <label class="active">First Name</label>
+                              </div>
+<!--                               <span class="data-name"><label><strong>First Name :</strong></span>
+                              <span class="data-value"> <input type="text" name="" id="autofill_first" class="form-control" placeholder="First Name " value="{{profile.user.firstname}}" readonly=""></span> -->
+                            </p>
+                            <p class="data-row">
+                              <div class="input-field col s6">
+                                <input id="autofill_last" type="text" class="validate" >
+                                <label for="autofill_last" class="active">Last Name</label>
+                              </div>
+
+                             <!--  <span class="data-name"><label><strong>Last Name :</strong></span>
+                              <span class="data-value"> <input type="text" name="" id="autofill_last" class="form-control" placeholder="Last Name"  value="{{profile.user.lastname}}" readonly=""></span> -->
+                            </p>
+                           </div>
+                            <p class="data-row">
+                              <div class="input-field col s6">
+                                <input id="rphone" type="text" name="rphone" class="validate"  required>
+                                <label for="rphone">Reported Users's Phone No * </label>
+                              </div>
+                              <!-- <span class="data-name"><label><strong>Phone No :</strong></span>
+                              <span class="data-value"> <input type="tel" name="rphone" id="autofillp1" class="form-control" placeholder="Phone No" required></span> -->
+                            </p>
+                            <p class="data-row">
+                              <div class="input-field col s6">
+                                <input id="autofill_email" type="email" name="reported_email" class="validate"   required>
+                                <label for="autofill_email" class="active">Reported Users's Email *</label>
+                              </div>
+                              <!-- <span class="data-name"><label><strong>Email :</strong></span>
+
+                              <span class="data-value"><input type="email" name="reported_email" id="autofill_email" class="form-control" placeholder="Email" required></span> -->
+                            </p>
+                           
+                          </div>
+                          <!-- <hr> -->
+                        </div>
+
+                        <div class="col-sm-6">
+                          <div class="basic-info">
+                            <p class="data-row">
+                              <span class="data-name"><label class="labelz">Ticket Subcategory *</span>
+                              <span class="data-value"><select  class="form-controls" class="" style="padding:2px;width:100%" id="sub_category_incident" name="subcat" required>
+                            <option value="">-Select-</option>
+                          </select></span>
+                            </p>
+                            <br>
+                            <p class="data-row">
+                              <!-- <span class="data-name"><label><strong>Impacted User:</strong></span> -->
+                              <div class="row">
+                                <div class="col-sm-11">
+                                  <div class="input-field col s6">
+                                    <input id="affectedby" type="text" name="affectedby" class="validate" required>
+                                    <label for="affectedby" class="active">Impacted User *</label>
+                                  </div>
+                                  <!-- <span class="data-value"><input type="text" name="affectedby" id="affectedby" class="form-control" placeholder="Impacted User" required></span> -->
+                                  <span class="data-value"><input type="text" style="display:none" id="hidden_affectedby" name="hidden_affected"  class="form-control" placeholder="Affectedby"></span>
+                                </div>
+                                <div class="col-sm-1" id="user1_div" style="margin-top: 6px;margin-left: inherit;">
+                                  <a href=""data-toggle="modal" data-target="#user1" class="fa fa-search"></a>
+                                </div>
+                              </div>
+                              
+
+                            </p>
+                            <div class="names">
+                             <p class="data-row">
+                              <div class="input-field col s6">
+                                <input id="autofillf" type="text" class="validate" >
+                                <label for="autofillf" class="active">First Name</label>
+                              </div>
+
+                              <!-- <span class="data-name"><label><strong>First Name :</strong></span>
+                              <span class="data-value"> <input type="text" name="" id="autofillf"  class="form-control" placeholder="First Name " readonly=""></span> -->
+                            </p>
+                            <p class="data-row">
+
+                              <div class="input-field col s6">
+                                <input id="autofill" type="text" class="validate" >
+                                <label for="autofill" class="active">Last Name</label>
+                              </div>
+
+                              <!-- <span class="data-name"><label><strong>Last Name :</strong></span>
+                              <span class="data-value"> <input type="text" name="" id="autofill"  class="form-control" placeholder="Last Name" readonly=""></span> -->
+                            </p>
+                            </div>
+                              <p class="data-row">
+                                <div class="input-field col s12">
+                                  <input id="aphone" name="aphone" class="validate" type="text" required>
+                                  <label for="aphone">Impacted Users's Phone No *</label>
+                                </div>
+                              <!-- <span class="data-name"><label><strong>Phone No :</strong></span>
+                              <span class="data-value"> <input type="tel" name="aphone" id="autofillp"  class="form-control" placeholder="Impacted Person's phone No" required></span> -->
+                            </p>
+                            <p class="data-row">
+                              <div class="input-field col s12">
+                                <input id="autofille" name="aemail" class="validate" type="email" required>
+                                <label for="autofille" class="active">Impacted User's Email *</label>
+                              </div>
+                              <!-- <span class="data-name"><label><strong>Email:</strong></span> -->
+
+                             <!--  <span class="data-value"><input type="email" name="aemail" id="autofille" class="form-control" placeholder="Email" required></span> -->
+                            </p>
+                           
+                          </div>
+                          <div class="row">
+                          <div class="col-sm-6">
+                            <p class="data-row">
+
+                            <div class="input-field col s6">
+                              <input id="worklocation" type="text" name="worklocation" class="validate"   required>
+                              <label for="worklocation">Work Location *</label>
+                            </div>
+                              <!-- <span class="data-name"><label><strong>Work Location:</strong></span>
+
+                              <span class="data-value"><input type="text" name="worklocation" class="form-control" placeholder="Work Location" required></span> -->
+                            </p>
+                          </div>
+                          <div class="col-sm-6">
+                            <p class="data-row">
+
+                              <div class="input-field col s6">
+                                <input id="workstation" type="text" name="workstation" class="validate"  maxlength="50" required>
+                                <label for="workstation">Work Station *</label>
+                              </div>
+
+                             <!--  <span class="data-name"><label><strong>Work Station:</strong></span>
+
+                              <span class="data-value"><input type="text" name="workstation" class="form-control" placeholder="Work Station" required></span> -->
+                            </p>
+                          </div>  
+                        </div>
+                          <!-- <hr> -->
+                        </div>
+
+                      </div>
+                      <input id="id_image" type="file" class="" name="image" multiple>
+                    </div>
+                    <div class="col-sm-4">
+                    <div class="box-body padding-md">
+                      <dl class="dl-horizontal">
+                        <!-- <dt>Domain :</dt> -->
+                        <!-- <dd> -->
+                        <label class="labelz">Domain *</label>
+                        <select class="form-controls"  style="padding:2px;width:100%" id = "workgroup" name="group"   required>
+                          <option value="">-Select Domain-</option>
+                        </select>
+                        <!-- </dd> -->
+                        <br>
+                        <!-- <dt>Sub Domain:</dt> -->
+                        <!-- <dd> -->
+                          <label class="labelz">Sub Domain *</label>
+                          <select  class="form-controls" style="padding:2px;width:100%" name = "subgroup" id="subgroup" required>
+                              <option value="">-Select Sub Domain-</option>
+                            </select>
+                        <!-- </dd> -->
+                        <br>
+                        <!-- <dt>Priority :</dt> -->
+                        <!-- <dd> -->
+                          <label class="labelz">Priority *</label>
+                          <select  class="form-controls" style="padding:2px;width:100%" id="priority" name="internalpriority" required>
+                              <option value="">-Choose-</option>
+                            </select>
+                        <!-- </dd> -->
+
+                        <br>
+                        <div  id="severity_dt">
+                          
+                        
+                       <!--  <dt>Severity :</dt>
+
+                        <dd> -->
+                          <label class="labelz">Severity</label>
+                          <select  class="form-controls" style="padding:2px;width:100%" name="impact" required id="severity">
+                              <option value="">-Choose-</option>
+                            
+                            </select>
+                        <!-- </dd><br> -->
+                        </div>
+                        
+                        <!-- </div> -->
+                        
+                                                
+
+                        <!-- <dt>Urgency :</dt>
+                        <dd> -->
+<!--                           <select  class="hidden" style="padding:2px;width:100%" id = "" name="urgency" >
+                              <option value="">-Choose-</option>
+                              <option value="3">High</option>
+                              <option value="2">Medium </option>
+                              <option value="1">Low </option>
+                              
+                            </select>
+                        </dd>
+ -->
+                        <!-- <dt>Source :</dt>
+                        <dd> -->
+                          <label class="labelz">Source *</label>
+                          <select  class="form-controls" style="padding:2px;width:100%" id = "" name="source" required>
+                              <option value="">-Select-</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Email">Email</option>
+                                <option value="Walk-in">Walk-in</option>
+                              </select>
+                        <!-- </dd> -->
+                        
+                        <div id="is_approval">
+                        <br>
+                          <p>
+
+                            <input type="checkbox"  name="is_approval" id="test5" />
+                            <label class="labelz" for="test5">Approval Required</label>
+                          </p>
+                        </div>
+                        {% if 'Helpdesk_Dashboard' in request.session.logged_user_priv %}
+                            <div>
+                              <br/>
+                              <p>
+                                <input type="checkbox" name="first_call_resolution" id="first_call_resolution"/>
+                                <label class="labelz" for="first_call_resolution">First Call Resolution</label>
+                              </p>
+                            </div>
+                        {% endif %}
+                        <!-- <dt>Approval </dt>
+                        <dt>Requried:</dt>
+                        <dd>
+                          <input type="checkbox" name="is_approval">
+                        </dd> -->
+                        <div id="showme">
+                          <p class="data-row">
+
+                                <div class="input-field col s6">
+                                  <input id="quantity" type="number" name="quantity" class="validate"  maxlength="50" >
+                                  <label for="quantity">Quantity</label>
+                                </div>
+
+                          </p>
+
+                          <p class="data-row">
+
+                                <div class="input-field col s6">
+                                  <input id="pname" type="text" name="pname" class="validate"  maxlength="50" >
+                                  <label for="pname">Project Name</label>
+                                </div>
+
+                          </p>
+
+                          <p class="data-row">
+
+                               <!--  <div class="input-field col s6">
+                                  <input id="rtype" type="text" name="rtype" class="validate"  maxlength="50" >
+                                  <label for="rtype">Asset Request Type</label>
+                                </div> -->
+                                <label class="labelz">Asset Request Type</label>
+                                <select  class="form-controls" style="padding:2px;width:100%" id = "" name="rtype" requried>
+                                    <option value="">-Select-</option>
+                                      <option value="Temporary">Temporary</option>
+                                      <option value="Permanent">Permanent</option>
+                                    </select>
+
+                          </p>
+                        </div>
+                        <!-- <br> -->
+<!--                         <dt>Ticket Category :</dt>
+                        <dd>
+                          <select  class="form-control" style="padding:2px;width:100%" id = "cat" name="category" requried>
+                              <option value="">-Select-</option>
+                              </select>
+                        </dd>
+                        <br> -->
+                       <!--  <dt>Ticket Subcategory :</dt>
+                        <dd>
+                          <select  class="form-control" class="" style="padding:2px;width:100%" id="sub_category1" name="subcat" required>
+                            <option value="">-Select-</option>
+                          </select>
+                        </dd>
+                        <br> -->
+                        <!-- <dt>SLA :</dt>
+                        <dd>
+                          <select  class="form-control" class="" style="padding:2px;width:100%" id="" name="sla" required>
+
+                                <option value="">-Select SLA Category-</option>
+                                {% for sla in sla_cat %}
+                                <option value="{{sla.id}}">{{sla.name}}</option>
+                                {% endfor %}                                                                
+                              </select>
+                        </dd> -->
+                      </dl>
+                    </div>
+
+
+                            <button class="btn waves-effect waves-light btn-info " style="float:right" type="submit" id="create_ticket_btn">Create Ticket</button>
+                    </div>
+                  </div>
+                   </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+    <div class="modal fade" id="category_list" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4>Categories</h4>
+              </div>
+              <div class="modal-body">
+                  <div id="jstree">
+                    <!-- in this example the tree is populated from inline HTML -->
+                    <ul>
+                      {% for root in root_list %}
+                        <li>{{root.name}}
+                          <ul>
+                            {% for child in child_list %}
+                              {% if child.parent == root.id %}
+                              <li>{{ child.name }}</li>
+                              {% endif %}
+                            {% endfor %}
+                          </ul>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                  
+              </div>
+            </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+          </div><!-- /.modal-content -->
+    </div>
+          
+
+        <div class="modal fade" id="user" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Search Users</h4>
+              </div>
+              <div class="modal-body">
+             
+              
+                <table class="table" id="field">
+                  <thead>
+                    <th></th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th></th>
+                  </thead>
+
+
+                </table>
+                <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="templates" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog" style="width: 65%;">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Ticket Templates</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table" id="customer_templates">
+                  <thead>
+                    <th style="display:none">Id</th>
+                    <th>Summary</th>
+                    <th>Ticket Type</th>
+                    <th>Domain</th>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Priority</th>
+                    <th>Customer</th>
+                    <th style="display:none">customerID</th>
+                    <th style="display:none">domainID</th>
+                    <th style="display:none">subdomainID</th>
+                    <th style="display:none">catID</th>
+                    <th style="display:none">sub_catID</th>
+                    <th style="display:none">desc</th>
+                    <th style="display:none">severity</th>
+                    <th style="display:none">subgroupname</th>
+                    <th style="display:none">cust_customerID</th>
+                    <th style="display:none">report_id</th>
+                    <th style="display:none">impact_id</th>
+                    <th style="display:none">report_fn</th>
+                    <th style="display:none">report_ln</th>
+                    <th style="display:none">report_ph</th>
+                    <th style="display:none">report_email</th>
+                    <th style="display:none">impact_fn</th>
+                    <th style="display:none">impact_ln</th>
+                    <th style="display:none">impact_ph</th>
+                    <th style="display:none">impact_email</th>
+                    <th>&nbsp;</th>
+                  </thead>
+                </table>
+                <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div class="modal fade" id="user1" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalLabel">Search Users</h4>
+              </div>
+              <div class="modal-body">
+             
+              
+                <table class="table" id="field1">
+                  <thead>
+                    <th></th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th></th>
+                    <th></th>
+                  </thead>
+
+
+                </table>
+                <button type="button" class="btn btn-success" style="float:right" data-dismiss="modal" >Update</button>
+              </div>
+              <div class="modal-footer" style="border:0px">
+              
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+
+<!-- datetime -->
+
+<link href="/static/customer/date/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/static/customer/date/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/customer/date/js/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+<script type="text/javascript">
+    $('.form_datetime').datetimepicker({
+        //language:  'fr',
+        weekStart: 1,
+        todayBtn:  1,
+    autoclose: 1,
+    todayHighlight: 1,
+    startView: 2,
+    forceParse: 0,
+        showMeridian: 1
+    });
+  
+</script>
+
+
+<!-- end of datetime -->
+
+
+     <script src="/static/customer/js/plugins/datepicker/datepicker.js" type="text/javascript"></script>
+
+
+    <script>
+    $(function() {
+      $( "#enter_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+      $( "#report_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+      $('.datepicker-input').datepicker();
+      $("#showme").hide();
+
+    });
+    
+  </script>
+      <script type="text/javascript">
+        function check_user_existence_supervisor() {
+          var user_id = $('#hidden_affectedby').val();
+          $("#create_ticket_btn").show();
+          $("#error_data").hide();
+          if (document.getElementById("test5").checked && user_id ) {
+              $.ajax({
+                  url:"/check_user_supervisor/"+user_id+"/",
+                  type:"get",
+                  success : function(data) {
+                    if (data.result == "failed") {
+                      $("#error_data").show();
+                      $("#create_ticket_btn").hide();
+                    } else {
+                      $("#error_data").hide();
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+          }
+        }
+    </script>
+<script>
+  $(document).ready(function(){
+    $('#exit_template').hide();
+    $('#error_data').hide();
+    $(".names").hide();
+          $("#customer_data").on('change',function(){
+            $('#customer_customer_id').val('');
+            var ticket_type = $('#ticket_type').val();
+            var customerid = $('#customer_customer_id').val();
+            if (ticket_type == 'SR' && customerid == 'MLB'){
+                $('#is_approval').show();
+            } else {
+                $('#is_approval').hide();
+            }
+            $("#cat_full_list option:gt(0)").remove().end();
+            $("#workgroup option:gt(0)").remove().end();
+            $('#sub_category_incident option:gt(0)').remove().end();
+            $('#subgroup option:gt(0)').remove().end();
+            if($("#customer_data :selected").text()!='-Select-'){
+              $.ajax({
+                url:"/ticket/incident/customer",
+                type:"POST",
+                dataType:"json",
+                  data:{
+                    groupid : this.value,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                  },
+                  success : function(data) {
+                    $('#customer_customer_id').val(data['customer']);
+                    data = JSON.parse(data['group_list']);
+                    var ticket_type = $('#ticket_type').val();
+                    var customerid = $('#customer_customer_id').val();
+                    if (ticket_type == 'SR' && customerid == 'MLB'){
+                        $('#is_approval').show();
+                    } else {
+                        $('#is_approval').hide();
+                    }
+                    for (var i in data){
+                      $("#workgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.workgroup}))
+                    }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    console.log(err);
+                  }
+              });
+              // return false;
+              $.ajax({
+                url :"/category/enduser",
+                type:"POST",
+                dataype:"json",
+                data:{custid: this.value,
+                      csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){            
+                   cat_list = JSON.parse(data);
+                  for (var i in cat_list){
+                    
+                    $("#cat_full_list").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+                  } 
+                 },
+                 error: function(xhr,errmsg,err){
+                  console.log(xhr);
+                 }       
+              });
+              return false;
+            }
+            
+          });
+        });
+
+    </script>
+
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+          $('#is_approval').hide();
+
+          $("#workgroup").on('change',function(){
+            $("#subgroup option:gt(0)").remove().end();
+            if($("#workgroup :selected").text()!='-Select Group-'){
+              $.ajax({
+                url:"/ticket/incident/create",
+                type:"POST",
+                dataType:"json",
+                data:{
+                  workgroupid : this.value,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success : function(data) {
+                  data = JSON.parse(data);
+                  for (var i in data){
+                    $("#subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                  }
+                },
+                error : function(xhr,errmsg,err) {
+                  console.log(err);
+                }
+              });
+              return false;
+            }
+          });
+      });
+    </script>
+    <script>
+  $(document).ready(function() {
+      $("#users_div").click(function(){
+        $.ajax({
+            url:"/search/user/",
+            type:"POST",
+            dataType:"json",
+            data:{
+              'user' : $("#rep").val(),
+              'customerid':$("#customer_data").val(),
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            type: "POST",
+            success : function(data){
+              i=0;
+              $('#field tr').slice(1).remove();
+              for (var i in data){
+                $tr = $('<tr>');
+                $tr.append($('<td><input type="radio" name="usr_block">')).append($('<td>').html(data[i].user__first_name)).
+                append($('<td>').html(data[i].user__last_name)).
+                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id)).append($('<td class="hidden">').html(data[i].primary));
+                // var e =$('<tr><td">'+data[i].user__first_name+'</td><td>'+data[i].user__last_name+'</td><td>'+data[i].user__email+'</td></tr>')
+                $(".trhide").hide();
+                $(".names").show();
+                $("#field").append($tr);
+                $tr.bind('click', manga_andi);
+              }
+            },
+          });
+        });
+    });
+   </script>
+  //      <script>
+  $(document).ready(function() {
+        $('#ticket_type').val('');
+        $('#customer_data').val('');
+      $("#inci").addClass("active");
+      $('#severity').hide();
+      $('#severity_dt').hide();
+      $("#user1_div").click(function(){
+        $.ajax({
+            url:"/search/user/",
+            type:"POST",
+            dataType:"json",
+            data:{
+              'user' : $("#affectedby").val(),
+              'customerid':$("#customer_data").val(),
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            type: "POST",
+            success : function(data){
+              $('#field1 tr').slice(1).remove();
+              i=0;
+              for (var i in data){
+                $tr = $('<tr>');
+                $tr.append($('<td><input type="checkbox">')).append($('<td>').html(data[i].user__first_name)).
+                append($('<td>').html(data[i].user__last_name)).
+                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id));
+                // var e =$('<tr><td">'+data[i].user__first_name+'</td><td>'+data[i].user__last_name+'</td><td>'+data[i].user__email+'</td></tr>')
+                
+                $("#field1").append($tr);
+                $(".trhide").hide();
+                $tr.bind('click', manga_andi2);
+              }
+            },
+          });
+        });
+    });
+   </script>
+   <script>
+
+   </script>
+   <script>
+  function manga_andi2(){
+    var x = ($(this).find('td:eq(1)').text());
+    var y = ($(this).find('td:eq(2)').text());
+    var z = ($(this).find('td:eq(3)').text());
+    var i = ($(this).find('td:eq(4)').text());
+    var primary_phone = ($(this).find('td:eq(5)').text());
+    // user = this.cells .innerText;
+    // var y = document.getElementById(td).innerText;
+    // var cells = target.getElementsByTagName("td")
+    // console.log(user)
+    // cause = this.cells[2].innerHTML;
+    // resolution = this.cells[3].innerHTML;
+    $("#affectedby").val(x);
+    $("#hidden_affectedby").val(i);
+    $("#autofillf").val(x);
+    $("#autofill").val(y);
+    $("#autofille").val(z);
+    // $("#autofill_phone").val("9995200974");
+
+    // console.log(symptom);
+    // console.log(cause);
+    // $('#kb_modal').modal('hide');
+    check_user_existence_supervisor();
+  }
+  </script>
+  <script>
+  function manga_andi(){
+    var x = ($(this).find('td:eq(1)').text());
+    var y = ($(this).find('td:eq(2)').text());
+    var z = ($(this).find('td:eq(3)').text());
+    var i = ($(this).find('td:eq(4)').text());
+    var j = ($(this).find('td:eq(5)').text());
+    // user = this.cells .innerText;
+    // var y = document.getElementById(td).innerText;
+    // var cells = target.getElementsByTagName("td")
+    // console.log(user)
+    // cause = this.cells[2].innerHTML;
+    // resolution = this.cells[3].innerHTML;
+    $("#rep").val(x);
+    $("#hide_reportedby").val(i);
+    $("#autofill_first").val(x);
+    $("#autofill_last").val(y);
+    $("#autofill_email").val(z);
+    $("#affectedby").val(x);
+    $("#hidden_affectedby").val(i);
+    $("#autofillf").val(x);
+    $("#autofill").val(y);
+    $("#autofille").val(z);
+    $("#autofillp1").val(j);
+    $("#autofillp").val(j);
+    $("#aphone").val(j);
+    $("#rphone").val(j);
+    var label_summ = $("label[for=rep]").addClass("active");
+    var label_summ = $("label[for=rphone]").addClass("active");
+    var label_summ = $("label[for=autofill_email]").addClass("active");
+    var label_summ = $("label[for=affectedby]").addClass("active");
+    var label_summ = $("label[for=aphone]").addClass("active");
+    var label_summ = $("label[for=autofille]").addClass("active");
+    // $("#autofill_phone").val("9995200974");
+
+    // console.log(symptom);
+    // console.log(cause);
+    // $('#kb_modal').modal('hide');
+    check_user_existence_supervisor();
+  }
+  </script>
+   <script>
+
+     $("#inci").addClass("active")
+       $('#cat_full_list').on('change', function(){
+        var catid = $('#cat_full_list').val(); 
+        $.ajax({
+          url :"/category/enduser",
+          type:"POST",
+          dataype:"json",
+          data:{catty: catid,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){            
+             $("#sub_category_incident option:gt(0)").remove();
+             cat_list = JSON.parse(data);
+            for (var i in cat_list){
+              
+              $("#sub_category_incident").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+            } 
+           },
+           error: function(xhr,errmsg,err){
+            console.log(xhr);
+           }       
+        });
+        return false;
+      });
+
+     </script>
+     <script type="text/javascript">
+        $(document).ready(function(){
+            $("#ticket_type").on('change',function(){
+                var ticket_type = $('#ticket_type').val();
+                $('#priority option:gt(0)').remove().end();
+                var customerid = $('#customer_customer_id').val();
+                if (ticket_type == 'SR' && customerid == 'MLB'){
+                    $('#is_approval').show();
+                } else {
+                    $('#is_approval').hide();
+                }
+                if (ticket_type != 'IN'){
+                    $('#severity').hide();
+                    $('#severity').prop('required',false);
+                    $('#severity_dt').hide();
+                    $('#severity option:gt(0)').remove().end();
+                }
+                if (ticket_type == 'IN' || ticket_type == 'PB'){
+                    $("#priority").append($('<option>', {value:'Critical',text:'Critical'})) ;
+                    $("#priority").append($('<option>', {value:'High',text:'High'})) ;
+                    $("#priority").append($('<option>', {value:'Medium',text:'Medium'})) ;
+                    $("#priority").append($('<option>', {value:'Low',text:'Low'})) ;
+                } else if (ticket_type == 'SR'){
+                    $('#priority').append($('<option>', {value:'Urgent',text:'Urgent'}));
+                    $('#priority').append($('<option>', {value:'Normal',text:'Normal'}));
+                    $('#priority').append($('<option>', {value:'Purchase',text:'Purchase'}));
+                } else if (ticket_type == 'CH') {
+                    $('#priority').append($('<option>', {value:'Change',text:'Change'}));
+                }
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#priority").on('change',function(){
+                var ticket_type = $('#ticket_type').val();
+                var priority = $('#priority').val();
+                $('#severity option:gt(0)').remove().end();
+                if (ticket_type == 'IN' && priority == 'Critical'){
+                    $('#severity').show();
+                    $('#severity').prop('required',true);
+                    $('#severity_dt').show();
+
+                    $("#severity").append($('<option>', {value:'3',text:'S1'})) ;
+                    $("#severity").append($('<option>', {value:'2',text:'S2'})) ;
+                    $("#severity").append($('<option>', {value:'1',text:'S3'})) ;
+                } else {
+                    $('#severity').hide();
+                    $('#severity').prop('required',false);
+                    $('#severity_dt').hide();
+                    $('#severity option:gt(0)').remove().end();
+                }
+                
+            });
+        });
+    </script>
+    <script>
+  $('#test5').change(function() {
+          if($(this).is(":checked")) {
+              $("#showme").show();
+          }
+          else{
+            $("#showme").hide();
+          }
+          check_user_existence_supervisor();
+      });
+    </script>
+
+    <script>
+       // $("#ticket_type").on('change',function(){
+       //      var type = $('#ticket_type').val();
+       //      if(type == 'SR'){
+
+       //            $('#is_approval').show();
+       //            // $('#approval').prop('required',true);
+       //          }else{
+       //            $('#is_approval').hide();
+       //            // $('#approval').prop('required',false);
+       //          }
+       //      });
+    </script>
+    <script> 
+      function fetch_templates() {
+        $('#customer_templates').DataTable().destroy()
+        $('#customer_templates').dataTable( {
+                "processing": true,
+                "ajax": {
+                    "processing": true,
+                    "url": "/fetch_templates/",
+                    "dataSrc": ""
+                },
+                "bLengthChange": false,
+                "columns": [
+                    { "": "fields.id",sClass: "hidden" },
+                    { "": "fields.summary" },
+                    { "": "fields.ticket_type" },
+                    { "": "fields.domain" },
+                    { "": "fields.category" },
+                    { "": "fields.sub_category" },
+                    { "": "fields.priority" },
+                    { "": "fields.customer" },
+                    { "": "fields.custid",sClass: "hidden" },
+                    { "": "fields.domainid",sClass: "hidden" },
+                    { "": "fields.subdomainid",sClass: "hidden" },
+                    { "": "fields.catid",sClass: "hidden" },
+                    { "": "fields.sub_catid",sClass: "hidden" },
+                    { "": "fields.desc",sClass: "hidden" },
+                    { "": "fields.severity",sClass: "hidden" },
+                    { "": "fields.subgroupname",sClass: "hidden" },
+                    { "": "fields.cust_custid",sClass: "hidden" },
+                    { "": "fields.report_id",sClass: "hidden" },
+                    { "": "fields.impactid",sClass: "hidden" },
+                    { "": "fields.report_fn",sClass: "hidden" },
+                    { "": "fields.report_ln",sClass: "hidden" },
+                    { "": "fields.report_ph",sClass: "hidden" },
+                    { "": "fields.report_email",sClass: "hidden" },
+                    { "": "fields.impact_fn",sClass: "hidden" },
+                    { "": "fields.impact_ln",sClass: "hidden" },
+                    { "": "fields.impact_ph",sClass: "hidden" },
+                    { "": "fields.impact_email",sClass: "hidden" },
+                    { "": "","bSortable": false, },
+                ],
+                "columnDefs": [ {
+                    "targets": 27,
+                    "data": null,
+                    "defaultContent": "<input type='radio' name='template_tic'>"
+                }]
+            });
+      }
+    </script>
+    <script>
+    function exit_templates(){
+      $("#rep").prop('readonly', false);
+      $('#autofill_first').prop('readonly', false);
+      $('#autofill_last').prop('readonly', false);
+      $('#rphone').prop('readonly', false);
+      $("#autofill_email").prop('readonly', false);
+      $("#affectedby").prop('readonly', false);
+      $("#autofillf").prop('readonly', false);
+      $("#autofill").prop('readonly', false);
+      $("#aphone").prop('readonly', false);
+      $("#autofille").prop('readonly', false);
+      $('#choose_template').show();
+      $('#exit_template').hide();
+      $('#customer_data').val('');
+      $('#customer_data').prop('disabled', false);
+      $('#summ').prop('readonly', false);
+      $('#summ').val('');
+      var label_summ = $("label[for=summ]").removeClass("active");
+      $('#dec').val('');
+      $('#dec').prop('readonly', false);
+      var label_dec = $("label[for=dec]").removeClass("active");
+      $('#ticket_type').val('');
+      $('#ticket_type').prop('disabled', false);
+      $('#workgroup option:gt(0)').remove().end();
+      $('#workgroup').prop('disabled', false);
+      $('#subgroup option:gt(0)').remove().end();
+      $('#subgroup').prop('disabled', false);
+      $('#cat_full_list option:gt(0)').remove().end();
+      $('#cat_full_list').prop('disabled', false);
+      $('#sub_category_incident option:gt(0)').remove().end();
+      $('#sub_category_incident').prop('disabled', false);
+      $('#priority option:gt(0)').remove().end();
+      $('#priority').prop('disabled', false);
+      $('#severity').hide();
+      $('#severity').prop('required',false);
+      $('#severity_dt').hide();
+      $('#severity option:gt(0)').remove().end();
+      $('#autofille').val('');
+      $('#autofillf').val('');
+      $('#affectedby').val('');
+      $('#rep').val('');
+      $('#autofill_first').val('');
+      $('#autofill_last').val('');
+      $('#rphone').val('');
+      $('#autofill_email').val('');
+      $('#aphone').val('');
+      $('#autofill').val('');
+    }
+    </script>
+    <script>
+      function change_select_box_disabled() {
+        $('#customer_data').prop('disabled', false);
+        $('#severity').prop('disabled', false);
+        $('#priority').prop('disabled', false);
+        $('#workgroup').prop('disabled', false);
+        $('#subgroup').prop('disabled', false);
+        $('#cat_full_list').prop('disabled', false);
+        $('#sub_category_incident').prop('disabled', false);
+        $('#ticket_type').prop('disabled', false);
+      }
+    </script>
+
+   <!--  <script>
+        document.getElementById("customer_data").onchange = function(){
+        var cst_mar = document.getElementById("customer_data").value;
+
+        if (cst_mar == '1')
+        {
+
+        var summ = document.getElementById("summ");
+        if (summ.value.trim().length > 0)
+        {
+            var postdata = summ.value;
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'auto_category' %}",
+                data:{
+                  csrfmiddlewaretoken: '{{ csrf_token }}', summary: summ.value
+                },
+                success: function(status){
+                    status = JSON.parse(status)
+                if (status['category'])
+                {
+                    document.getElementById("cat_full_list").value = status['category'];
+                    $("#cat_full_list").trigger("change");
+                }
+                }
+
+        });
+        }
+        }
+        };
+
+    </script> -->
+
+      <script type="text/javascript">
+          $('#customer_templates').on('click', 'td', function(e) {
+                var th = $(this).closest('table').find('th').eq(this.cellIndex);
+                if (th.html() == "&nbsp;") {
+                    $('#choose_template').hide();
+                    $('#exit_template').show();
+                    var ticket_summ = ($(this).parent('tr').find('td:eq(1)').text());
+                    var ticket_type = ($(this).parent('tr').find('td:eq(2)').text());
+                    var domain_name = ($(this).parent('tr').find('td:eq(3)').text());
+                    var cat_name = ($(this).parent('tr').find('td:eq(4)').text());
+                    var subcat_name = ($(this).parent('tr').find('td:eq(5)').text());
+                    var priority_val = ($(this).parent('tr').find('td:eq(6)').text());
+                    var customername = ($(this).parent('tr').find('td:eq(7)').text());
+                    var customerid = ($(this).parent('tr').find('td:eq(8)').text());
+                    var domainid = ($(this).parent('tr').find('td:eq(9)').text());
+                    var subdomainid = ($(this).parent('tr').find('td:eq(10)').text());
+                    var cat_id = ($(this).parent('tr').find('td:eq(11)').text());
+                    var subcat_id = ($(this).parent('tr').find('td:eq(12)').text());
+                    var tic_desc = ($(this).parent('tr').find('td:eq(13)').text());
+                    var severity_val = ($(this).parent('tr').find('td:eq(14)').text());
+                    var subdomain_name = ($(this).parent('tr').find('td:eq(15)').text());
+                    var customerid_val = ($(this).parent('tr').find('td:eq(16)').text());
+                    var reported_user_id = ($(this).parent('tr').find('td:eq(17)').text());
+                    var impacted_user_id = ($(this).parent('tr').find('td:eq(18)').text());
+                    var report_person_first_name = ($(this).parent('tr').find('td:eq(19)').text());
+                    var report_person_last_name = ($(this).parent('tr').find('td:eq(20)').text());
+                    var report_person_ph = ($(this).parent('tr').find('td:eq(21)').text());
+                    var report_person_email = ($(this).parent('tr').find('td:eq(22)').text());
+                    var impact_person_first_name = ($(this).parent('tr').find('td:eq(23)').text());
+                    var impact_person_last_name = ($(this).parent('tr').find('td:eq(24)').text());
+                    var impact_person_ph = ($(this).parent('tr').find('td:eq(25)').text());
+                    var impact_person_email = ($(this).parent('tr').find('td:eq(26)').text());
+                    $('#customer_data').val(customerid);
+                    $('#customer_data').prop('disabled', true);
+                    $('#customer_data').value = customerid;
+                    $('#summ').val(ticket_summ);
+                    var label_summ = $("label[for=summ]").addClass("active");
+                    $('#dec').val(tic_desc);
+                    var label_dec = $("label[for=dec]").addClass("active");
+                    $('#ticket_type').val(ticket_type);
+                    $('#ticket_type').prop('disabled', true);
+                    $('#workgroup').append($('<option>', {value: domainid,text: domain_name}));
+                    $('#workgroup').val(domainid);
+                    $('#workgroup').prop('disabled', true);
+                    $('#subgroup').append($('<option>', {value: subdomainid,text: subdomain_name}));
+                    $('#subgroup').val(subdomainid);
+                    $('#subgroup').prop('disabled', true);
+                    $('#cat_full_list').append($('<option>', {value: cat_id,text: cat_name}));
+                    $('#cat_full_list').val(cat_id);
+                    $('#cat_full_list').prop('disabled', true);
+                    $('#sub_category_incident').append($('<option>', {value: subcat_id,text: subcat_name}));
+                    $('#sub_category_incident').val(subcat_id);
+                    $('#sub_category_incident').prop('disabled', true);
+                    $('#priority').append($('<option>', {value: priority_val,text: priority_val}));
+                    $('#priority').val(priority_val);
+                    $('#priority').prop('disabled', true);
+                    if (ticket_type == 'SR' && customerid_val == 'MLB'){
+                        $('#is_approval').show();
+                    } else {
+                        $('#is_approval').hide();
+                    }
+                    if (severity_val){
+                      $('#severity').show();
+                      $('#severity').prop('required',true);
+                      $('#severity_dt').show();
+                      $("#severity").append($('<option>', {value:'3',text:'S1'})) ;
+                      $("#severity").append($('<option>', {value:'2',text:'S2'})) ;
+                      $("#severity").append($('<option>', {value:'1',text:'S3'})) ;
+                      $('#severity').val(severity_val);
+                      $('#severity').prop('disabled', true);
+                    } else {
+                      $('#severity').hide();
+                      $('#severity').prop('required',false);
+                      $('#severity_dt').hide();
+                      $('#severity option:gt(0)').remove().end();
+                    }
+                    // checking for the reported and impacted user details
+                    $(".names").show();
+                    var label_summ = $("label[for=rep]").addClass("active");
+                    var label_summ = $("label[for=rphone]").addClass("active");
+                    var label_summ = $("label[for=autofill_email]").addClass("active");
+                    var label_summ = $("label[for=affectedby]").addClass("active");
+                    var label_summ = $("label[for=aphone]").addClass("active");
+                    var label_summ = $("label[for=autofille]").addClass("active");
+                    if (reported_user_id){
+                      $('#autofill_first').show();
+                      $('#autofill_last').show();
+                      $("#rep").val(report_person_first_name);
+                      $("#rep").prop('readonly', true);
+                      $('#autofill_first').val(report_person_first_name);
+                      $('#autofill_first').prop('readonly', true);
+                      $('#autofill_last').val(report_person_last_name);
+                      $('#autofill_last').prop('readonly', true);
+                      $('#rphone').val(report_person_ph);
+                      $('#rphone').prop('readonly', true);
+                      $("#autofill_email").val(report_person_email);
+                      $("#autofill_email").prop('readonly', true);
+                      $("#hide_reportedby").val(reported_user_id);
+                    } else {
+                      $("#rep").val("");
+                      $('#autofill_first').val("");
+                      $('#autofill_last').val("");
+                      $('#rphone').val("");
+                      $("#autofill_email").val("");
+                      $("#hide_reportedby").val("");
+
+                      $("#rep").prop('readonly', false);
+                      $('#autofill_first').prop('readonly', false);
+                      $('#autofill_last').prop('readonly', false);
+                      $('#rphone').prop('readonly', false);
+                      $("#autofill_email").prop('readonly', false);
+                    }
+                    if (impacted_user_id){
+                      $("#autofillf").show();
+                      $("#autofill").show();
+                      $("#affectedby").val(impact_person_first_name);
+                      $("#autofillf").val(impact_person_first_name);
+                      $("#autofill").val(impact_person_last_name);
+                      $("#aphone").val(impact_person_ph);
+                      $("#autofille").val(impact_person_email);
+                      $("#hidden_affectedby").val(impacted_user_id);
+                      $("#affectedby").prop('readonly', true);
+                      $("#autofillf").prop('readonly', true);
+                      $("#autofill").prop('readonly', true);
+                      $("#aphone").prop('readonly', true);
+                      $("#autofille").prop('readonly', true);
+                    } else {
+                      $("#affectedby").val("");
+                      $("#autofillf").val("");
+                      $("#autofill").val("");
+                      $("#aphone").val("");
+                      $("#autofille").val("");
+                      $("#hidden_affectedby").val("");
+                      $("#affectedby").prop('readonly', false);
+                      $("#autofillf").prop('readonly', false);
+                      $("#autofill").prop('readonly', false);
+                      $("#aphone").prop('readonly', false);
+                      $("#autofille").prop('readonly', false);
+                    }
+                    check_user_existence_supervisor()
+                }
+          });
+    </script>
+    </body>
+</html>

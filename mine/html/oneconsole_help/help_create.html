@@ -1,0 +1,95 @@
+{% extends 'oneconsole_help/base.html' %}
+{% load staticfiles %}
+{% block header %}
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    {% include "components/header.html"%}
+    <script src="http://summernote.org/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <link href="http://summernote.org/bower_components/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://summernote.org/bower_components/summernote/dist/summernote.css">
+    <script type="text/javascript" src="http://summernote.org/bower_components/summernote/dist/summernote.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_body').summernote({
+            height: 300
+        });
+    });
+    </script>
+    <link rel="stylesheet" type="text/css" href="{% static 'oneconsole_help/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'oneconsole_help/css/style.css' %}" />
+{% endblock %}
+
+{% block body_tags %}class="form_page"{% endblock body_tags %}
+
+{% block content %}
+<form action="{% url 'help:help_add' %}" method="post">{% csrf_token %}
+    <div class="form_row">
+        <div class="half_width margin_right has-error">
+            <label class="{% if form.url.errors %}text-danger{% endif %}">Url:</label>
+            <div class="field">
+                {{ form.url }}
+            </div>
+        </div>
+
+        <div class="half_width">
+            <label class="{% if form.name.errors %}text-danger{% endif %}">Tittle:</label>
+            <div class="field">
+                {{ form.name }}
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="form_row">
+        <label class="{% if form.privileges.errors %}text-danger{% endif %}">Privilege:</label>
+        <div class="pad-ver">
+            {% for checkbox in form.privileges %}
+                <label class="checkbox-inline">{{ checkbox.tag }}{{ checkbox.choice_label }}</label>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <div class="form_row">
+        <label class="{% if form.body.errors %}text-danger{% endif %}">Description:</label>
+        <div class="field">
+            {{ form.body }}
+        </div>
+    </div>
+    <div class="help_btn">
+        <input class="btn btn-info" type="submit" value="Create" />
+    </div>
+    <a class="btn btn-info" href="{% url 'help:help_list' %}">Cancel</a>
+</form>
+{% endblock %}
+{% block footer %}
+{% include "oneconsole_help/modal_help.html" %}
+{% include "components/service_request.html" %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#modal_sidehelp').on('click', function(e){
+            e.preventDefault();
+            $.ajax({
+                url :$('#modal_sidehelp').prop('href'),
+                type:"GET",
+                dataype:"json",
+                success:function(data){
+                    // console.log(data)
+                    $('#oc_helpcontent').empty();
+                    $('#oc_helpcontent').append(data);
+                    $("#oneconsole_help").modal('show');
+                }
+            });
+        });
+    });
+</script>
+<script type="text/javascript">
+    $(".close").click(function(){
+        $(".alert").hide();
+    });
+</script>
+<script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+<script src="/static/customer/js/custom.js" type="text/javascript"></script>
+<script src="/static/js/common.js" type="text/javascript"></script>
+{% endblock %}

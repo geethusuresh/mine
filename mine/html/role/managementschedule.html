@@ -1,0 +1,578 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      /*margin-top: 10px;*/
+      }
+    </style>
+    <link href="/static/select2/select2.css" rel="stylesheet" />
+    <link href="/static/select2/select2-2.css" rel="stylesheet" />
+    <style type="text/css">
+      #s2id_groupSelect, .select2-input, .select2-container, .select2-search-field, .select2-choices {
+          width: 180px;
+        }
+        .popover{
+            width:700px;
+            max-width: none;    
+        }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+        {% else %}
+          {% include "components/header.html"%}
+        {% endif %}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+
+          {% if alert_message %}
+          {% for alert in alert_message %}
+            {% if profile.customer in alert.viewable_custs.all %}
+              <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+            {% endif %}
+          {% endfor %}
+          {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Management Command |<small> Schedule</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Management Commands</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="">
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="panel">
+                       <div class="panel-heading">
+                         <p class="panel-title text-center"><strong>Create New Task</strong></p>
+                       </div>
+                        <div class="panel-body table-responsive">
+                          <form class="form" method="post" action="" >{%csrf_token%}      
+                            <div class="form-group">
+                                <select class="form-control" id="app_name" name="app_name" required>
+                                  <option value="">Select App</option>
+                                    <option value="0">Manual Script</option>
+                                  {% for name in app_names %}
+                                    <option>{{ name }}</option>
+                                  {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select class="form-control" id="command" name="command" required>
+                                  <option value="">Select Command</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select class="form-control" id="schedule" name="schedule" required>
+                                  <option value="">Select Schedule</option>
+                                  <option value="1">Interval</option>
+                                  <option value="2">CronTab</option>
+                                </select>
+                            </div>
+                            <div id="interval" style="display:none">
+                              <div class="form-group">
+                                  <label for="p_value" class="text"><h5>Period Vlaue:</h5></label>
+                                  <input type="text" class="form-control" placeholder="eg:'3' (for every 3 period type)" id="p_value" name="p_value">
+                              </div><br>
+                              <div class="form-group"> 
+                                  <label for="p_type" class="text"><h5>Period Type:</h5></label>
+                                  <select class="form-control" id="p_type" name="p_type">
+                                    <option value="">Select Period type</option>
+                                    <option value="days">Days</option>
+                                    <option value="hours">Hours</option>
+                                    <option value="minutes">Minutes</option>
+                                    <option value="seconds">Seconds</option>
+                                    <!-- <option value="microseconds">Microseconds</option> -->
+                                  </select>
+                              </div>
+                            </div>
+                            <div id="crontab" style="display:none">
+                              <div class="form-group">
+                                  <label for="cron_min" class="text"><h5>Minute:</h5></label>
+                                  <input type="text" class="" placeholder="eg:’*/15’ (for every quarter)" id="cron_min" name="cron_min">
+                              </div>
+                              <div class="form-group">
+                                  <label for="cron_hour" class="text"><h5>Hour:</h5></label>
+                                  <input type="text" class="" placeholder="eg:’*/3’ (for every three hours)" id="cron_hour" name="cron_hour">
+                              </div><br>
+                              <div class="form-group">
+                                  <label for="crondofw" class="text"><h5>Day of Week:</h5></label>
+                                  <!-- <input type="text" class="form-control" placeholder="Day of Week" id="crondofw" name="crondofw" required> -->
+                                  <select class="crondofw" id="crondofw" name="crondofw[]" multiple="multiple" style="width:100%;">
+                                    <option value="0">Sun</option>
+                                    <option value="1">Mon</option>
+                                    <option value="2">Tue</option>
+                                    <option value="3">Wed</option>
+                                    <option value="4">Thu</option>
+                                    <option value="5">Fri</option>
+                                    <option value="6">Sat</option>
+                                  </select>
+                              </div><br>
+                              <div class="form-group">
+                              <label for="cron_dofm" class="text"><h5>Day of Month:</h5></label>
+                                  <input type="text" class="" placeholder="eg:2-30/3’ (for every even numbered day)" id="cron_dofm" name="cron_dofm" >
+                              </div>
+                              <div class="form-group">
+                                <label for="cron_mofy" class="text"><h5>Month of Year:</h5></label>
+                                  <input type="text" class="" placeholder="eg:’*/3’(for the first month of every quarter)" id="cron_mofy" name="cron_mofy" >
+                                <p class="text text-danger"><strong>* Required timezone is UTC</strong></p>
+                              </div>
+                            </div>
+                            <button type="submit" class="btn btn-success ">Create</button>
+                            <i class="glyphicon glyphicon-question-sign pull-right" id="help" style="font-size: 20px;display:none;"></i>
+                          </form>
+                        </div>
+                      </div>
+                  </div>
+                  <div class="col-md-9">
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#home">Tasks</a></li>
+                      <li><a data-toggle="tab" href="#menu1">Scripts</a></li>
+                    </ul>
+
+                    <div class="tab-content">
+                      <div id="home" class="tab-pane fade in active">
+                        <div class="panel">
+                          <div class="panel-heading">
+                             <p class="panel-title text-center"><strong>All Tasks</strong></p>
+                           </div>
+                          <div class="panel-body table-responsive ">
+                             <table class="table table-hover " id="table_index">
+                                <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Period</th>
+                                    <th>Last Execution Time</th>
+                                    <th>Actions</th>
+                                </tr> 
+                                </thead>
+                                <tbody>
+                                  {% for task in periodic_tasks %}
+                                  <tr >
+                                    <td>{{ task.name }}</td>
+                                    <td>{% if task.interval %}
+                                          {{ task.interval }}
+                                        {% else %}
+                                          {{ task.crontab }}
+                                        {% endif %}
+                                    </td>
+                                    {% if task.managementcommands_set.all %}
+                                      {% for entry in task.managementcommands_set.all %}
+                                        <td>
+                                            <span style="display:none;">{{entry.last_execution_time.year}}{% if entry.last_execution_time.month >= 10 %}{{entry.last_execution_time.month}}{% else %}0{{entry.last_execution_time.month}}{%endif%}{% if entry.last_execution_time.day >= 10 %}{{entry.last_execution_time.day}}{% else %}0{{entry.last_execution_time.day}}{%endif%}{{entry.last_execution_time.time | time}}</span>
+                                            {% tzone entry.last_execution_time %}</td>
+                                        <!-- <td>{{ entry.last_execution_time }}</td> -->
+                                      {% endfor %}
+                                    {% else %}
+                                      <td></td>
+                                    {% endif %}
+                                    <td>{% if not task.enabled %}
+                                          <i data-toggle="popover" title="Resume Task" onclick="return resume('{{task.id}}')" class="fa btn btn-sm btn-success fa-play" id="resume"></i>
+                                        {% else %}
+                                          <i data-toggle="popover" title="Pause Task" onclick="return pause('{{task.id}}')" class="fa btn btn-sm btn-success fa-pause"></i>
+                                        {% endif %}
+                                        {% if task.interval %}
+                                          <i data-toggle="popover" title="Change Schedule" onclick="return changeTime('{{task.id}}','{{ task.interval}}','interval')" class="fa btn btn-sm btn-warning fa-edit"></i>
+                                        {% else %}
+                                          <i data-toggle="popover" title="Change Schedule" onclick="return changeTime('{{task.id}}','{{ task.crontab}}','crontab')" class="fa btn btn-sm btn-warning fa-edit"></i>
+                                        {% endif %}
+                                        <i data-toggle="popover" title="Delete Task" onclick="return taskDelete('{{task.id}}')" class="fa btn btn-sm btn-danger fa-trash"></i>
+                                        <a href="/management/task/status/{{task.id}}"><i data-toggle="popover" title="Execution Status" class="fa btn btn-sm btn-info fa-building-o"></i></a>
+                                    </td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="menu1" class="tab-pane fade">
+                        <div class="panel">
+                          <div class="panel-heading">
+                             <p class="panel-title text-center"><strong>Scripts</strong></p>
+                           </div>
+                          <div class="panel-body table-responsive ">
+                             <table class="table table-hover " id="script_table">
+                                <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Last Execution Time</th>
+                                    <th>Created By</th>
+                                    <th>Actions</th>
+                                </tr> 
+                                </thead>
+                                <tbody>
+                                  {% for script in manual_scripts %}
+                                  <tr >
+                                    <td>{{ script.script }}</td>
+                                    <td>{{ script.last_execution }}</td>
+                                    <td>{{ script.user }}</td>
+                                    <td><i data-toggle="popover" title="Run Script" onclick="return runScript('{{script.id}}')" class="fa btn btn-sm btn-success fa-play" id="resume"></i>
+                                        <i data-toggle="popover" title="Edit Script" onclick="return changeScript('{{script.id}}')" class="fa btn btn-sm btn-warning fa-edit"></i>
+                                        <i data-toggle="popover" title="Delete Script" onclick="return deleteScript('{{script.id}}')" class="fa btn btn-sm btn-danger fa-trash"></i>
+                                        <a href="/management/script/status/{{script.id}}"><i data-toggle="popover" title="Execution Status" class="fa btn btn-sm btn-info fa-building-o"></i></a>
+                                    </td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+
+    <div class="modal fade" id="change_period" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="/schedule/change/time" class="form-inline form">{% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<!-- 
+            <h4 class="modal-title" id="ModalLabel">Change Allowing Time</h4>
+          </div>  
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="period_value text">Enter Value</label>
+              <input type="number" class="form-control" placeholder="enter period" id="period_value" name="period_value" required>
+            </div>
+            <div class="form-group seldiv">
+              <label for="period_type text">Enter Type</label>
+              <select class="form-control" id="period_type" name="period_type" required>
+                <option value="">Select Period type</option>
+                <option value="days">Days</option>
+                <option value="hours">Hours</option>
+                <option value="minutes">Minutes</option>
+                <option value="seconds">Seconds</option>
+              </select>
+            <h4 class="modal-title" id="ModalLabel">Change Interval</h4>
+ -->
+            <h4 class="modal-title" id="ModalLabel">Change Schedule</h4>
+
+          </div>  
+          <div class="modal-body">
+            <div id="change_interval_div" style="display:none">
+              <div class="form-group">
+                <label for="period_value text">Enter Value</label>
+                <input type="number" class="form-control" placeholder="enter period" id="period_value" name="period_value">
+              </div>
+              <div class="form-group seldiv">
+                <label for="period_type text">Enter Type</label>
+                <select id="period_type" name="period_type" class="form-control">
+                  <option>Select Period type</option>
+                  <option value="days">Days</option>
+                  <option value="hours">Hours</option>
+                  <option value="minutes">Minutes</option>
+                  <option value="seconds">Seconds</option>
+                  <!-- <option value="microseconds">Microseconds</option> -->
+                </select>
+              </div>
+            </div>
+            <div id='change_cron_div' style="display:none">
+              <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-8">
+                  <div class="row">
+                    <div class="form-group">
+                        <label for="cron_min" class="text"><h5>Minute:</h5></label>
+                        <input type="text" class="form-control" placeholder="eg:’*/15’ (for every quarter)" id="cron_min1" name="cron_min1" class="form-control">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                        <label for="cron_hour" class="text"><h5>Hour:</h5></label>
+                        <input type="text" placeholder="eg:’*/3’ (for every three hours)" id="cron_hour1" name="cron_hour1" class="form-control">
+                    </div>
+                  </div><br>
+                  <div class="row ">
+                    <div class="form-group">
+                        <label for="crondofw" class="text"><h5>Day of Week:</h5></label>
+                        <select class="form-control" id="crondofw1" name="crondofw1[]" multiple="multiple" style="width:100%;">
+                          <option value="0">Sun</option>
+                          <option value="1">Mon</option>
+                          <option value="2">Tue</option>
+                          <option value="3">Wed</option>
+                          <option value="4">Thu</option>
+                          <option value="5">Fri</option>
+                          <option value="6">Sat</option>
+                        </select>
+                    </div>
+                  </div><br>
+                  <div class="row">
+                    <div class="form-group">
+                        <label for="cron_dofm" class="text"><h5>Day of Month:</h5></label>
+                        <input type="text" class="form-control" placeholder="eg:2-30/3’ (for every even numbered day)" id="cron_dofm1" name="cron_dofm1" >
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group">
+                        <label for="cron_mofy" class="text"><h5>Month of Year:</h5></label>
+                        <input type="text" class="form-control" placeholder="eg:’*/3’(for the first month of every quarter)" id="cron_mofy1" name="cron_mofy1" >
+                    </div>
+                  </div>
+                  <p class="text text-danger"><strong>* Required timezone is UTC</strong></p>
+                </div>
+              </div>
+              
+            </div>
+            <input type="text" class="hidden" placeholder="enter period" id="taskid" name="taskid">
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Submit</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+
+
+    <!-- manual script model -->
+    <div class="modal fade" id="manual_script_modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="/schedule/create/script" class="form-inline">{% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Create Script</h4>
+          </div>  
+          <div class="modal-body">
+            <div class="form-group">
+                <label for="script" class="text"><h5>File:</h5></label>
+                <input type="text" class="" placeholder="Input Filename" id="script" name="script" style="width:500px;" required>
+            </div>
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Create Script</button>
+            <!-- <button type="submit" value="submit" class="btn btn-success pull-right" style="margin-right:5px;"  >Run Script</button> -->
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- change script -->
+    <div class="modal fade" id="change_script" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="/schedule/change/script" class="form-inline">{% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Create Script</h4>
+          </div>  
+          <div class="modal-body">
+            <input type="text" style="display:none;" id="script_id" name="script_id">
+            <div class="form-group">
+                <label for="script" class="text"><h5>Script:</h5></label>
+                <input type="text" class="" placeholder="Enter Script" id="script" name="script" style="width:500px;" required>
+            </div>
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Change Script</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/static/select2/select2.min.js"></script>
+    <script type="text/javascript">
+      $("#table_index").dataTable({
+        'bLengthChange':false
+      })
+      $("#script_table").dataTable({
+        'bLengthChange':false
+      })
+      $('.crondofw').select2({
+        placeholder: "Select Day of Week"
+      });
+      $('#crondofw1').select2({
+        placeholder: "Select Day of Week"
+      });
+      $("#app_name").change(function(){
+        text = $( "#app_name option:selected" ).text()
+        if (text == 'Manual Script'){
+          $("#manual_script_modal").modal('show')
+        }
+        else if ($(this).val()!='0'){
+          $.ajax({
+              url:"/management/schedule/",
+              type:"POST",
+              dataType:"json",
+              data:{
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                'command_name':this.value,
+                'app_name':$("#app_name").value
+              },
+              success : function(data) {
+                  $('#command').find('option').remove().end()
+                  $("#command").append(new Option("Select Command",""))
+                  for(var i in data){
+                    $("#command").append(new Option(data[i],data[i]))
+                  }
+                }
+            });
+        }
+      })
+      
+      function pause(taskid){
+        if (confirm('Are You Sure?')){
+          window.location = '/schedule/pause/task/'+taskid
+        }
+        else{
+          return
+        }
+      }
+      function resume(taskid){
+        if (confirm('Are You Sure?')){
+          window.location = '/schedule/resume/task/'+taskid
+        }
+        else{
+          return
+        }
+      }
+      function taskDelete(taskid){
+        if (confirm('Are You Sure?')){
+          window.location = '/schedule/delete/task/'+taskid
+        }
+        else{
+          return
+        }
+      }
+
+      // function changeTime(taskid,interval){
+      //   console.log(interval.split(" "))
+      //   time = interval.split(" ")[1]
+      //   type = interval.split(" ")[2]
+      //   type = type.charAt(0).toUpperCase() + type.slice(1);
+      //   $("#period_value").val(time)
+
+      //   $('#period_type option:contains("'+type+'")').prop('selected', true)
+      //   $("#change_period").modal('show')
+      //   $("#taskid").val(taskid)
+      // }
+
+      function changeTime(taskid,interval,type){
+        if(type == 'interval'){
+          console.log('interval',interval)
+          time = interval.split(" ")[0]
+          type = interval.split(" ")[1]
+          type = type.charAt(0).toUpperCase() + type.slice(1);
+          console.log("type",type);
+          $("#period_value").val(time)
+          // $("#period_type").val(type)
+          $('#period_type option:contains("'+type+'")').prop('selected', true)
+          $("#change_interval_div").show()
+          $("#change_cron_div").hide()
+          $("#period_value").prop('required',true)
+          $("#period_type").prop('required',true)
+          $("#cron_min1").prop('required',false)
+          $("#cron_hour1").prop('required',false)
+        }
+        else if(type == 'crontab'){
+          $("#change_interval_div").hide()
+          $("#change_cron_div").show()
+          $("#period_value").prop('required',false)
+          $("#period_type").prop('required',false)
+          $("#cron_min1").prop('required',true)
+          $("#cron_hour1").prop('required',false)
+          
+        }
+        $("#change_period").modal('show')
+        $("#taskid").val(taskid)  
+        
+      }
+      $("#schedule").change(function(){
+        if ($(this).val() == 1){
+          $("#p_value").prop('required',true)
+          $("#p_type").prop('required',true)
+          $("#cron_min").prop('required',false)
+          $("#cron_hour").prop('required',false)
+          $("#crontab").hide();
+          $("#interval").show();
+          $("#help").hide()
+        }
+        else if ($(this).val() == 2){
+          $("#cron_min").prop('required',true)
+          $("#cron_hour").prop('required',false)
+          $("#p_value").prop('required',false)
+          $("#p_type").prop('required',false)
+          $("#interval").hide();
+          $("#crontab").show();
+          $("#help").show()
+          $('#help').popover({title: "<table class='table' id='table_index'>"+
+                                  "<thead><tr><th>Example</th><th>Meaning</th></tr></thead><tbody>"+
+                                  "<tr><td>crontab()</td><td>Execute every minute.</td></tr>"+
+                                  "<tr><td>crontab(minute=0, hour=0)</td><td>Execute daily at midnight.</td></tr>"+
+                                  "<tr><td>crontab(minute=0, hour='*/3')</td><td>Execute every three hours: midnight, 3am, 6am, 9am, noon, 3pm, 6pm, 9pm.</td></tr>"+
+                                  "<tr><td>crontab(minute=0,hour='0,3,6,9,12,15,18,21')</td><td>Same as previous.</td></tr>"+
+                                  "<tr><td>crontab(minute='*/10',hour='3,17,22', day_of_week='thu,fri')</td><td>Execute every ten minutes, but only between 3-4 am, 5-6 pm and 10-11 pm on Thursdays or Fridays.</td></tr>"+
+                                  "<tr><td>crontab(minute=0, hour='*/2,*/3')</td><td>Execute every even hour, and every hour divisible by three. This means: at every hour except: 1am, 5am, 7am, 11am, 1pm, 5pm, 7pm, 11pm</td></tr>"+
+                                  "<tr><td>crontab(minute=0, hour='*/5')</td><td>Execute hour divisible by 5. This means that it is triggered at 3pm, not 5pm (since 3pm equals the 24-hour clock value of “15”, which is divisible by 5).</td></tr>"+
+                                  "<tr><td>crontab(minute=0, hour='*/3,8-17')</td><td>Execute every hour divisible by 3, and every hour during office hours (8am-5pm).</td></tr>"+
+                                  "<tr><td>crontab(0, 0, day_of_month='2')</td><td>Execute on the second day of every month.</td></tr>"+
+                                  "<tr><td>crontab(0, 0,day_of_month='1-7,15-21')</td><td>Execute on the first and third weeks of the month.</td></tr></tbody</table>", html: true, placement: "right"});
+        }
+      });
+      $('#manual_script_modal').on('hidden.bs.modal', function () {
+          $("#app_name option:first").attr('selected','selected');          
+      });
+      function runScript(script_id){
+        if (confirm('Are You Sure?')){
+          window.location = '/schedule/run/script/'+script_id
+        }
+        else{
+          return
+        }
+      }
+      function deleteScript(script_id){
+       if (confirm('Are You Sure?')){
+          window.location = '/schedule/delete/script/'+script_id
+        }
+        else{
+          return
+        }
+      }
+      function changeScript(script_id){
+        console.log("change script"+script_id)
+        $("#script_id").val(script_id)
+        $("#change_script").modal('show')
+      }
+    </script>
+</html>

@@ -1,0 +1,148 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+        select {
+display: inline;
+}
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+
+        <div class="wrapper">
+        {% if "asset_management" in request.session.logged_user_priv %}
+        
+       
+          {% include "side_bar/asset_sidebar.html"%}
+        {% endif %}
+        
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Individual Server Asset<small>List</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Asset Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="panel">
+                    <div class="panel-title">
+                      <span class="panel-heading"><strong>Server Details</strong></span>
+                      <!-- <a href="" data-toggle="modal" data-target="#addstock">
+                      <small class="label label-success pull-right">Add Stock</small></a> -->
+                      <a class="btn btn-info pull-right" href="{% url 'createserverasset' %}">ADD SERVER ASSET</a>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                    <table class="table table-striped" id="table_id"  >
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Serial Number</th>
+                              <th>Model Name</th>
+                              <th>Manufacturer</th>
+                              <th>Tag</th>
+                              <th>Cost Center</th>
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for stock in stocks %}
+                          <tr>
+                            <td class="grey">
+                              <a class="btn btn-success btn-sm" href="/asset/stock/{{stock.id}}">
+                                <i class="fa fa-search-plus "></i>  
+                              </a>
+                            </td>
+                            <td class="grey">{{stock.serial_no}}</td>
+                            <td class="grey">{{stock.model_name}}</td>
+                            <td class="grey" >{{stock.manufacturer}}</td>
+                            <td class="grey">{{stock.tag}}</td>
+                            <td class="grey">{{stock.cost_center}}</td>
+                            
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>        
+                    </div>
+                  </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+    {% include "asset/addtostock.html" %}
+    {% include "components/footer.html"%}
+    <script>
+    $("#table_id").DataTable();
+    $("#server_menu").addClass("active");
+    </script>
+    </body>
+</html>

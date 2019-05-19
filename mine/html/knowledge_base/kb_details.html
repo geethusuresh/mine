@@ -1,0 +1,196 @@
+{% load humanize %}
+{% load zone %}
+{% load pagination %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style type="text/css">
+            table.dataTable.no-footer {
+                border-bottom-color: #ddd;
+            }
+            table.dataTable thead th, table.dataTable thead td {
+                border-bottom-color: #ddd;
+            }
+            .dataTables_wrapper.no-footer .dataTables_scrollBody {
+                border-bottom-color: #ddd;
+            }   
+      </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Knowledge Base <small> | Details</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/knowledge_base/view/">Knowledge Base Home</a></li>
+                        <li class="active"> Knowledge Base Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title"> Knowledge Base Details</h3>
+                                </div>
+                                <div class="panel-body">
+                                    {% if kb.is_approved == None %}
+                                        <div class="col-sm-12 pad-all">
+                                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#approve_box">Approve / Reject</a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-sm-12">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Symptom:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.symptom}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Cause:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.cause}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Resolution:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.resolution}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Customer:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.customer.customername}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Submitted By:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.submited_person}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Approved By:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.approver}}</p>
+                                                </div>
+                                            </div>
+                                             <div class="form-group">
+                                                <label class="col-sm-3 control-label"> Status:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{% if kb.is_approved == True %} Approved {% elif kb.is_approved == False %} Rejected {% else %} Not Reviewed {% endif %}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Global View:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{% if kb.glob == True %} Yes {% elif kb.glob == False %} No {% else %} None {% endif %}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Created Date:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{% tzone kb.created_date %}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Reviewed Date:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{% tzone kb.reviewed_date %}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Approved Date:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{% tzone kb.approved_date %}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Visits:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.visits}}</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Remarks:</label>
+                                                <div class="col-sm-9">
+                                                    <p class="pad-all" style="padding-top: 5px;">{{kb.remarks_by_approver}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="approve_box" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Approval Review</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/knowledge_base/review_approval/{{kb.id}}/" method="POST">{% csrf_token %}
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control" name="approval_status" required>
+                                    <option value="">--Select Approval Status--</option>
+                                    <option value="true">Approve</option>
+                                    <option value="false">Reject</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea class="form-control" name="remarks" placeholder="Please add your comments here" rows="4" cols="20"></textarea>
+                            </div>
+                            <!-- <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Remarks " rows="4" cols="20" required></textarea> -->
+                            <button class="btn btn-success" style="float:right;width:25%" type="submit">Submit Review</button>
+                        </form>
+                  </div>
+                  <div class="modal-footer" style="border:0px">
+                  
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    </body>
+</html>

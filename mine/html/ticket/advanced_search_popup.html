@@ -1,0 +1,405 @@
+<div class="modal fade" id="advanced_search" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" style="width:60%;">
+            <div class="modal-content">
+              <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Advanced Search</h4>
+              </div>
+              <div class="modal-body">
+              <form action="/advanced/search/" method="POST"> 
+              <div class="col-sm-4">   
+                    Ticketid:<br><input class="form-control centered" type="text" id="ticketid" name="ticketid" style="width:140px" ></p>
+                    Status:<br><input class="form-control centered" type="text" id="status" name="status"  style="width:140px" ></p>
+                    category:<br><input class="form-control centered" type="text" id="category" name="category" style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#category_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    reportedby:<br><input class="form-control centered" type="text" id="reportedby" name="reportedby" style="width:140px" ><a  href="" style="" data-toggle="modal" data-target="#reported_by_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    affectedperson:<br><input class="form-control centered" type="text" id="affectedperson" name="affectedperson" style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#affected_person_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    
+              </div>
+              <div class="col-sm-4">
+                    owner:<br><input class="form-control centered" type="text" id="owner" name="owner" style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#owner_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    servicegroup:<br><input class="form-control centered" type="text" id="servicegroup" name="servicegroup" style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#service_group_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    group:<br><input class="form-control centered" type="text" id="group" name="group"  style="width:140px"><a   href="" style="" data-toggle="modal" data-target="#group_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    subgroup:<br><input class="form-control centered" type="text" id="subgroup" name="subgroup" style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#subgroup_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    customer:<br><input class="form-control centered" type="text" id="customer" name="customer"  style="width:140px" ><a   href="" style="" data-toggle="modal" data-target="#customer_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    
+
+              </div>
+              
+              <div class="col-sm-4">
+                    createdby:<br><input class="form-control centered" type="text" id="createdby" name="createdby" style="width:140px"  ><a   href="" style="" data-toggle="modal" data-target="#created_by_popup"><i class="glyphicon glyphicon-search" ></i></a></p>
+                    location:<br><input class="form-control centered" type="text" id="location" name="location" style="width:140px" ></p>
+                    assetnum:<br><input class="form-control centered" type="text" id="assetnum" name="assetnum" style="width:140px" ></p>
+                    reportedpriority:<br>
+                    <select class="form-control" style="margin-bottom:5px" id = "reportedpriority" name="reportedpriority" style="width:140px">
+                    <option value="">--Select--</option>
+                    <option value="High"> High</option>
+                    <option value="Medium"> Medium </option>
+                    <option value="Low"> Low </option>                    
+                  </select>
+                    internalprioirty:<br>
+                    <select class="form-control" style="margin-bottom:5px" id = "internalpriority" name="internalpriority">
+                    <option value="">--Select--</option>
+                    <option value="High"> High</option>
+                    <option value="Medium"> Medium </option>
+                    <option value="Low"> Low </option>                    
+                  </select>
+
+
+              </div>
+              
+                    
+              </div>
+            
+              <div class="modal-footer" style="border:0px">
+              <button class="btn btn-info" style="float:right;" type="submit">Find</button>
+              </form>
+              </div>
+              </div>
+          </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="category_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog" style="width:60%;">
+            <div class="modal-content">
+              <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4>Category</h4>
+              </div>
+              <div class="modal-body">
+              
+                <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Description</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for category in categories %}
+            <tr>
+              <td><input type="radio" name="category_popup"  onclick="populateValue('category','{{ category.name }}')"></td>
+              <td>{{ category.name }}</td>
+              <td>{{ category.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+              
+              </div>
+            
+              <div class="modal-footer" style="border:0px">
+              <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+              </form>
+              </div>
+              </div>
+          </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="reported_by_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Persons</h4>
+          </div>
+          <div class="modal-body">
+                <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Customer</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for person in persons %}
+            <tr>
+              <td><input type="radio" name="person1" onclick="populateValue('reportedby','{{ person.user.username }}')"></td>
+              <td>{{ person.user.username }}</td>
+              <td>{{ person.department}}</td>
+              <td>{{ person.location }}</td>
+              <td>{{ person.customer.customername }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+          
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="affected_person_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Persons</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Customer</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for person in persons %}
+            <tr>
+              <td><input type="radio" name="person2" onclick="populateValue('affectedperson','{{ person.user.username }}')"></td>
+              <td>{{ person.user.username }}</td>
+              <td>{{ person.department}}</td>
+              <td>{{ person.location }}</td>
+              <td>{{ person.customer.customername }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+          
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="owner_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Persons</h4>
+          </div>
+          <div class="modal-body">
+      
+          <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Customer</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for person in persons %}
+            <tr>
+              <td><input type="radio" name="person3" onclick="populateValue('owner','{{ person.user.username }}')"></td>
+              <td>{{ person.user.username }}</td>
+              <td>{{ person.department}}</td>
+              <td>{{ person.location }}</td>
+              <td>{{ person.customer.customername }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="service_group_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Workgroups</h4>
+          </div>
+          <div class="modal-body">
+           <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Description</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for workgroup in workgroups %}
+            <tr>
+              <td><input type="radio" name="workgroup1" onclick="populateValue('servicegroup','{{ workgroup.workgroup }}')"></td>
+              <td>{{ workgroup.workgroup }}</td>
+              <td>{{ workgroup.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+          
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="group_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Workgroups</h4>
+          </div>
+          <div class="modal-body">
+          <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Description</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for workgroup in workgroups %}
+            <tr>
+              <td><input type="radio" name="workgroup2" onclick="populateValue('group','{{ workgroup.workgroup }}')"></td>
+              <td>{{ workgroup.workgroup }}</td>
+              <td>{{ workgroup.description }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+          
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="subgroup_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Subgroups</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Select</th>
+              <th>Name</th>
+              <th>Description</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for subgroup in subgroups %}
+            <tr>
+              <td><input type="radio" name="subgroup_popup" onclick="populateValue('subgroup','{{ subgroup.subgroupname}}')"></td>
+              <td>{{ subgroup.subgroupname }}</td>
+              <td>{{ subgroup.subgroupname }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+          
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="customer_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Customers</h4>
+          </div>
+          <div class="modal-body">
+      
+          <table class="table table-hover borderless fixed" id="example">
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Name</th>
+                <th>Description</th>
+              </tr> 
+            </thead>
+            <tbody>
+            {% for customer in customers %}
+              <tr>
+                <td><input type="radio" name="customer_popup" onclick="populateValue('customer','{{ customer.customername }}')"></td>
+                <td>{{ customer.customername }}</td>
+                <td>{{ customer.description }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<div class="modal fade" id="created_by_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+      <div class="modal-dialog" style="width:60%;">
+        <div class="modal-content">
+          <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4>Persons</h4>
+          </div>
+          <div class="modal-body">
+      
+          <table class="table table-hover borderless fixed" id="example">
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Location</th>
+              <th>Customer</th>
+            </tr> 
+            </thead>
+            <tbody>
+            {% for person in persons %}
+            <tr>
+              <td><input type="radio" name="person4" onclick="populateValue('createdby','{{ person.user.username }}')"></td>
+              <td>{{ person.user.username }}</td>
+              <td>{{ person.department}}</td>
+              <td>{{ person.location }}</td>
+              <td>{{ person.customer.customername }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          </table>
+                
+          </div>
+        
+          <div class="modal-footer" style="border:0px">
+          <button class="btn btn-info" class="close" data-dismiss="modal" aria-hidden="true" style="float:right;" type="submit">Select</button>
+          </div>
+          </div>
+      </div><!-- /.modal-content -->
+</div>
+<script type="text/javascript">
+function populateValue(str,row){
+  $("#"+str+"").val(row);
+}
+</script>

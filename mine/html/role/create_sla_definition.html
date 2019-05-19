@@ -1,0 +1,249 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+   <style type="text/css">
+  .icheckbox_minimal, .iradio_minimal {    
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    background: url(minimal.png) no-repeat;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+<link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Define SLA  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            <form  id="sla_form" name ="sla_form" method='post' action='' onSubmit="return formValidate();">
+              <div class="box">
+                <div class="box-title">
+                  <h4>SLA</h4>
+                </div>
+                <div class="box-body">
+                <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                  <input class="form-control" type="text" id="name" name="name" required placeholder="Name"></p>
+                    <select class="form-control" id="customer" name="customer" required >
+                      <option value="">Select Customer</option>
+                        {% for customer in customers %}
+                          <option value="{{customer.id}}">{{ customer.customername }}</option>
+                        {% endfor %}
+                    </select></p>
+                    <textarea class="form-control" id="sla_description" name="sla_description" required placeholder="Description" style="height:100px;"></textarea></p>
+                    <select class="form-control" id="table" name="table" required  required>
+                      <option value="">Select Table</option>
+                      <option value="ticket" selected>Ticket</option>
+                      <option value="task">Task</option>
+                    </select></p>
+                    <textarea class="form-control" id="condition" name="condition" required placeholder="condition" style="height:100px"></textarea>
+                      <span class="errormsg" id="incorrect" style="color:red;display:none;">Format Incorrect</span>
+                      <span class="errormsg" id="valid" style="color:green;display:none;">Valid</span>
+                    <button class="btn-link" type="button" onclick="validateftn();return false;">Validate</button></p>
+                </div>
+                <div class="col-md-4">
+                  <button class="btn btn-success pull-right" id="create" type="submit" style="margin-top: 341px;" >Create
+                </div>
+              </div>     
+                </div>
+              </div>
+              <div class="box">
+                <div class="box-title">
+                  <span class="text"> Commitments</span>
+                  <button type="button" class="btn btn-info pull-right" id="resolution_btn">add resolution SLA</button>
+                  <button type="button" class="btn btn-info pull-right" style="margin-right:20px;" id="response_btn">add response SLA</button>
+                </div>
+                <div class="box-body" id="commitments">
+                  <div class="row" style="display:none;" id="resolution_div">
+                  <input type="checkbox" value="resolution_sla" name="checkbox[]" id="resolution_check" style="display:none; ">
+                  <input type="text" value="resolution_sla" name="sla_type" style="display:none;">
+                    <div class="col-md-2">
+                      <label class="label label-info">Resolution SLA</label>
+                    </div>
+                    <div class="col-md-3">
+                      <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description1" name="description"  placeholder="Description"></textarea>
+                    </div>
+                    <div class="col-md-2">
+                      <input class="form-control input-sm" type="number" min="1"id="time1" name="time"  placeholder="Time" >
+                    </div>
+                    <div class="col-md-2">
+                      <select class="form-control input-sm" id="time_type1" name="time_type" >
+                        <option selected value="">Type</option>
+                            <option value="minute">Minute</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-top:5px;display:none;" id="response_div">
+                  <input type="checkbox" value="response_sla" name="checkbox[]" id="response_check" style="display:none;">
+                  <input type="text" value="response_sla" name="sla_type" style="display:none;">
+                    <div class="col-md-2">
+                      <label class="label label-info">Response SLA</label>
+                    </div>
+                    <div class="col-md-3">
+                      <textarea rows="4" cols="50" class="form-control input-sm" type="text" id="description2" name="description"  placeholder="Description"></textarea>
+                    </div>
+                    <div class="col-md-2">
+                      <input class="form-control input-sm" type="number" min="1"id="time2" name="time"  placeholder="Time">
+                    </div>
+                    <div class="col-md-2">
+                      <select class="form-control input-sm" id="time_type2" name="time_type" >
+                        <option selected value="">Type</option>
+                            <option value="minute">Minute</option>
+                      </select>
+                      
+                    </div>
+                  </div>
+                </div>
+                </form>  
+              </div>
+            
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    <script>
+      // $(document).ready(function(){
+        $('#sla_form').submit(function(e) {
+            if(($("#resolution_check").prop("checked") == true) || ($("#response_check").prop("checked") == true)){
+              return true;
+            }
+            else{
+              alert("Minimum one commitment is required");
+              return false;
+            }
+          return false;
+        });
+        $("#resolution_btn").click(function(){
+          $("#resolution_div").show();
+          $("#resolution_check").prop("checked",true);
+          //$("#resolution_check").hide();
+          $('#description1').prop('required',true);
+          $('#time1').prop('required',true);
+          $('#time_type1').prop('required',true);
+        });
+        $("#response_btn").click(function(){
+          $("#response_div").show();
+          $("#response_check").prop("checked",true);
+          $('#description2').prop('required',true);
+          $('#time2').prop('required',true);
+          $('#time_type2').prop('required',true);
+        });
+        // $("#create").click(function(){
+        //   e.preventDefault();
+        //   if($("#resolution_check").prop("checked") == true || $("#response_check").prop("checked") == true){
+        //     $("#sla_form").validate();
+        //     $("#sla_form").submit();
+        //   }
+        //   else{
+        //     $("#sla_form").checkValidity();
+        //     alert("Minimum one commitment is required");
+        //   }
+        // })
+      submit = 0;
+      function validateftn(e){
+        condition = $("#condition").val();
+        $.ajax({
+              url:"/sla/create/",
+              type:"POST",
+              dataType:"json",
+              data:{
+                sla_condition : condition,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success : function(data) {
+                if(data == "valid"){
+                    $("#incorrect").hide();
+                    $("#valid").show();
+                }
+                else{
+                  $("#valid").hide();
+                  $("#incorrect").show();
+                }
+
+              },
+              error : function(xhr,errmsg,err) {
+                //alert(err);
+              }
+            });
+            return false;
+      }
+      function incsubmit(){
+        submit = 1;
+        return 1;
+      }
+      function decsubmit(){
+        submit = 0;
+        return 0;
+      }
+      function formValidate(event){
+        condition = $("#condition").val();
+        $.ajax({
+              url:"/sla/create/",
+              type:"POST",
+              async: false,
+              dataType:"json",
+              data:{
+                sla_condition : condition,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success : function(data) {
+                if(data == "valid"){
+                  incsubmit();
+                  
+                  
+                }
+                else{
+                  $("#valid").hide();
+                  $("#incorrect").show();
+                  decsubmit();
+                }
+
+              },
+              error : function(xhr,errmsg,err) {
+                //alert(err);
+              }
+            });
+        if(submit==1){
+          return true;
+        }
+        else{
+          return false;
+        }
+      }
+    // });
+
+
+    </script>
+</html>
+
+       
+                    
+

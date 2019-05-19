@@ -1,0 +1,173 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/general/">General Settings</a></li>
+                        <li class="active">Copy Email Templates</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Copy Email Template</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form method="post" action="/admin_settings/assign_template/">{% csrf_token %}
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Copy From :</dt>
+                                                <dd>
+                                                    <select class="form-control" id="assign_from" name="assign_from" required>
+                                                        <option value="">-Select Copy From-</option>
+                                                        {% for cust in customers %}
+                                                            <option value="{{cust.id}}">{{cust.customername}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </dd><br/>
+                                                
+                                            </dl>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <dl class="dl-horizontal">
+                                                <dt>Copy To :</dt>
+                                                <dd>
+                                                    <select class="form-control" id="assign_to" name="assign_to" required>
+                                                        <option value="">-Select Copy To-</option>
+                                                        {% for cust in customers %}
+                                                            <option value="{{cust.id}}">{{cust.customername}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </dd>
+                                                <dt>&nbsp;</dt>
+                                                <dd>
+                                                    <input type="hidden" id="checked_list_data" name="template_ids">
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="col-sm-9">
+                                                <table class="table table-stripped" id="template_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="display:none">ID</th>
+                                                            <th>Name</th>
+                                                            <th>Subject</th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                            <div class="col-sm-3" style="margin-bottom:5px;">
+                                                <div class="newtoolbar">
+                                                    <div class="table-toolbar-left">
+                                                        <button type="submit" class="btn btn-info btn-labeled fa fa-times" style="margin-right:5px;">Assign Templates</button>
+                                                        <a href="/a">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+        <script type="text/javascript" src="/static/js/form-validation.js"></script>
+        <script type="text/javascript">
+            $('#assign_from').on('change', function(e) {
+                $('#template_table').DataTable().destroy()
+                if ($(this).val()) {
+                    $('#template_table').dataTable({
+                        "processing": true,
+                        "ajax": {
+                            "processing": true,
+                            "url": "/admin_settings/customers/"+$(this).val()+"/email_templates/",
+                            "dataSrc": ""
+                        },
+                        "columns": [
+                            { "": "id", sClass:"hidden"},
+                            { "": "name" },
+                            { "": "subject"},
+                            { "": "", "bSortable": false, },
+                        ],
+                        "columnDefs": [ {
+                            "targets": 3,
+                            "data": "null",
+                            "defaultContent": "<input type='checkbox' name='checkbox_mem' class='form-control select' value='member' style='height:auto'>"
+                        }]
+                    });
+                } else {
+                    var tableObjTbody = $("#template_table  > tbody");
+                    tableObjTbody.remove();
+                    $("#template_table").DataTable();
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $('#template_table').on('click','td' , function(e){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                if (th.html() == ""){
+                    var checked_list = [];
+                    var rows = $('#template_table').dataTable().fnGetNodes();
+                    for(var i=0; i < rows.length; i++) {
+                        if ($(rows[i]).find('td:eq(0)').text()) {
+                            if ($(rows[i]).find('.select')[0].checked){
+                                checked_list.push($(rows[i]).find('td:eq(0)').text());
+                            }
+                        }
+                    }
+                    $('#checked_list_data').val(checked_list);
+                    console.log(checked_list);
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#template_table").DataTable();
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,210 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+        <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/admin_settings/admin_dashboard/">Admin Dashboard</a></li>
+                        <li><a href="/admin_settings/customers/all/">Customers</a></li>
+                        <li><a href="/admin_settings/customers/{{ customer.id }}/">Customer Details</a></li>
+                        <li class="active">Support Team</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title col-sm-3">Existing Support Team</h3>
+                                    <div class="col-sm-9">
+                                        <a href="#" data-target="#create_support_team" data-toggle="modal" class="btn btn-success pull-right col-sm-3 pad-all">Add Support Team</a>
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <input type="hidden" id="customer_id" value="{{ customer.id }}">
+                                    <form action="/admin_settings/remove/support_team/{{customer.id}}/" method="post" id="form_id">{% csrf_token %}
+                                        {% for suprt_team in existing_support_team %}
+                                            {% if suprt_team.team_members.all|length > 0 %}
+                                                <div class="col-sm-6">
+                                                    <div class="panel panel-bordered-primary">
+                                                        <div class="panel-heading">
+                                                            <h4 class="text-center text-thin panel-title">
+                                                                {{ suprt_team.team_name }}
+                                                            </h4>
+                                                        </div>
+                                                        <div class="panel-body">
+                                                            <button type="button" class="btn btn-danger remov"> Remove <input type="hidden" value="{{suprt_team.supported_team_role.id }}"></button>
+                                                            <table class="table table-stripped" class="member_lists">
+                                                                <thead>
+                                                                    <tr><th></th><th></th></tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for membr in suprt_team.team_members.all %}
+                                                                        <tr>
+                                                                            <td>{{ membr.user.email }}</td>
+                                                                            <td><input type="checkbox" name="remov_memb" value="{{ membr.id }}"></td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_support_team" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel"> Support Team </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/admin_settings/assign_support_team/{{customer.id}}/">{% csrf_token %}
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">Customers</label>
+                                <div class="col-lg-7">
+                                    <select class="form-control" name="frm_cust" id="supported_customer" required>
+                                        <option value="">--Select--</option>
+                                        {% for cust in customers %}
+                                            <option value="{{ cust.id}}">{{ cust.customername }}</option>
+                                        {% endfor %}
+                                    </select><br/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">Roles</label>
+                                <div class="col-lg-7">
+                                    <select class="form-control" name="role_id" id="supported_roles" required>
+                                        <option value="">--Select--</option>
+                                    </select><br/>
+                                </div>
+                            </div>
+                            <label class="col-lg-3 control-label">Members</label>
+                            <div class="col-lg-8">
+                                <select class="form-control" id="members_list" name="member_dat" multiple style="height:200px" required>
+                                    <option value="">--Select Members--</option>
+                                </select>
+                            </div>
+                            <br/>
+                            <button type="submit" class="btn btn-success btn-labelled fa fa-times pull-right"> Assign </button>
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="confirmation_box" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-center text-thin" style="font-size:16px"><strong>Do you want to remove the support members?</strong></p>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                        <button type="button"  class="btn btn-danger text-center" data-dismiss="modal" >Cancel</button>
+                        <button type="button"  class="btn btn-success text-center" onclick="submit_ok()">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.bootstrap.wizard.min.js"></script>
+        <script type="text/javascript" src="/static/js/form-wizard.js"></script>
+        <script src="/static/customer/js/plugins/bootstrapValidator/bootstrapValidator.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            $('#supported_roles').on('change', function() {
+                $("#members_list option:gt(0)").remove().end();
+                var role_id = $('#supported_roles').val();
+                if($('#supported_roles').text() != '--Select--') {
+                    $.ajax({
+                        url :"/admin_settings/assign_support_team/{{customer.id}}/?role_id="+role_id,
+                        type:"GET",
+                        success:function(data){
+                            $("#members_list option:gt(0)").remove();
+                            members_list_dat = data;
+                            for (var i in members_list_dat){
+                                $("#members_list").append($('<option>', {value:members_list_dat[i].person__id, text:members_list_dat[i].person__user__email}));
+                            } 
+                        },
+                        error: function(xhr,errmsg,err){
+                            // console.log(xhr);
+                        }
+                    })
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            $('.member_lists').dataTable({bFilter: false, bInfo: false, bPaginate: false});
+        </script>
+        <script type="text/javascript">
+            $('#supported_customer').on('change', function() {
+                var cust_id = $('#supported_customer').val();
+                $("#supported_roles option:gt(0)").remove().end();
+                $("#members_list option:gt(0)").remove().end();
+                $.ajax({
+                    url :"/admin_settings/assign_support_team/{{customer.id}}/?cust_id="+cust_id,
+                    type:"GET",
+                    success:function(data){
+                        $("#supported_roles option:gt(0)").remove();
+                        role_list = data;
+                        for (var i in role_list){
+                            $("#supported_roles").append($('<option>', {value:role_list[i].id, text:role_list[i].rolename}));
+                        } 
+                    },
+                    error: function(xhr,errmsg,err){
+                        console.log(xhr);
+                    }       
+                });
+            });
+        </script>
+        <script type="text/javascript">
+            function submit_ok(){
+                $( "#form_id" ).submit();
+            }
+        </script>
+        <script type="text/javascript">
+            $('.remov').on('click', function(e){
+                var role_id = $(this).find('input').val();
+                var customer_id = $('#customer_id').val();
+                $( "#form_id" ).attr("action", "/admin_settings/remove/support_team/"+customer_id+"/"+role_id+"/")
+                $('#confirmation_box').modal('toggle');
+            });
+        </script>
+    </body>
+</html>

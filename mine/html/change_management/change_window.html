@@ -1,0 +1,392 @@
+{% extends "change_management/change_base.html" %}
+{% load static %}
+{% load zone %}
+
+{% block title_content %} Change Window {% endblock title_content %}
+
+{% block page_head %} Change Management | <small>Change Window</small> {% endblock page_head %}
+
+{% block bread_crumb %} <li class="active">Change Window</li> {% endblock bread_crumb %}
+{% block body_content %}
+    <div class="col-sm-12 change-manage-details change-window">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="panel-control">
+                </div>
+                <h3 class="panel-title">{{change_req.change_id}} - Change Window</h3>
+                <input type="hidden" name="userid" value="{{user.email}}" id="user_email_data"/>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <div class="panel-title" style="font-size:15px; overflow:auto">
+                                        <span class="pull-left">Scheduled Tasks - {{change_req.change_id}}</span>
+                                        <a href="#" data-toggle="modal" data-target="#resched" class="btn btn-info" {% if change_req.status == 'SCHED' %} {% else %} disabled {% endif %}>Reschedule</a>
+                                    </div>
+                                </div>
+                                <table class="table table-stripped datatab" id="schedu_task_lis">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Task ID</th>
+                                            <th>Scheduled Start</th>
+                                            <th>Scheduled Finish</th>
+                                            <th class="hidden">Id</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sched_tsk in change_req.changerequesttask_set.all %}
+                                            <tr>
+                                                <td>
+                                                    <a href="/task/details/{{sched_tsk.task.id}}/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success btn-sm" data-original-title="View/Edit" target="_blank"><i class="fa fa-edit "> </i></a>
+                                                </td>
+                                                <td>{{sched_tsk.task.taskid}}</td>
+                                                <td>{% tzone sched_tsk.task.scheduled_start %}</td>
+                                                <td>{% tzone sched_tsk.task.scheduled_finish %}</td>
+                                                <td class="hidden">{{sched_tsk.task.id}}</td>
+                                                <td><a href="#" data-toggle="modal" data-target="#resched_task" class="btn btn-success btn-sm" {% if change_req.status == 'SCHED' %} {% else %} disabled {% endif %} >Reschedule</a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" >
+                                    <div class="panel-title" style="font-size:15px">
+                                    Basic Details - {{change_req.change_id}}</div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <dl class="dl-horizontal">
+                                            <dt><label><strong>Description :</strong></label></dt>
+                                            <dd>{{change_req.description}}</dd>
+                                            <dt><label><strong>Risk :</strong></label></dt>
+                                            <dd>{{change_req.risk}}</dd>
+                                            <dt><label><strong>CI :</strong></label></dt>
+                                            <dd>{{change_req.ci}}</dd>
+                                            <dt><label><strong>Scheduled Start :</strong></label></dt>
+                                            <dd>{% tzone change_req.scheduled_start %}</dd>
+                                            <dt><label><strong>Scheduled Finish :</strong></label></dt>
+                                            <dd>{% tzone change_req.scheduled_finish %}</dd>
+                                            <dt><label><strong>Failure Probability :</strong></label></dt>
+                                            <dd>{{change_req.failure_probability}}</dd>
+                                            <dt><label><strong>Reason :</strong></label></dt>
+                                            <dd>{{change_req.reason}}</dd>
+                                            <dt><label><strong>Change Type :</strong></label></dt>
+                                            <dd>{{change_req.change_type}}</dd>
+                                            <dt><label><strong>Source :</strong></label></dt>
+                                            <dd>{{change_req.source}}</dd>
+                                            <dt><label><strong>Priority :</strong></label></dt>
+                                            <dd>{{change_req.priority}}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% for other_change in other_changes %}
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <div class="panel-title" style="font-size:15px">
+                                        <span class="pull-left"> {{other_change.change_id}}</span>
+                                        {% if other_change in change_conflicts %}
+                                            <a href="/rfc/remove_conflict/{{change_req.id}}/{{other_change.id}}/" class="btn btn-info" {% if change_req.status == 'SCHED' %} {% else %} disabled {% endif %}>Proceed</a>
+                                        {% else %}
+                                            <a href="/rfc/add_conflict/{{change_req.id}}/{{other_change.id}}/" class="btn btn-info" {% if change_req.status == 'SCHED' %} {% else %} disabled {% endif %}>Approve</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-sm-6" style="margin-top:10px">
+                                        <table class="table table-striped datatab">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Task ID</th>
+                                                    <th>Scheduled Start</th>
+                                                    <th>Scheduled Finish</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for o_task in other_change.changerequesttask_set.all %}
+                                                    <tr>
+                                                        <td>
+                                                        <a href="/task/details/{{o_task.task.id}}/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success btn-sm" data-original-title="View/Edit" target="_blank"><i class="fa fa-edit "> </i></a>
+                                                        </td>
+                                                        <td>{{o_task.task.taskid}}</td>
+                                                        <td>{% tzone o_task.task.scheduled_start %}</td>
+                                                        <td>{% tzone o_task.task.scheduled_finish %}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table><br/>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <dl class="dl-horizontal" style="margin-top:10px;">
+                                            <dt><label><strong>Description :</strong></label></dt>
+                                            <dd>{{other_change.description}}</dd>
+                                            <dt><label><strong>Risk :</strong></label></dt>
+                                            <dd>{{other_change.risk}}</dd>
+                                            <dt><label><strong>CI :</strong></label></dt>
+                                            <dd>{{other_change.ci}}</dd>
+                                            <dt><label><strong> Urgency :</strong></label></dt>
+                                            <dd>{{other_change.urgency}}</dd>
+                                            <dt><label><strong>Impact :</strong></label></dt>
+                                            <dd>{{other_change.impact}}</dd>
+                                            <dt><label><strong>Failure Probability :</strong></label></dt>
+                                            <dd>{{other_change.failure_probability}}</dd>
+                                            <dt><label><strong>Reason :</strong></label></dt>
+                                            <dd>{{other_change.reason}}</dd>
+                                            <dt><label><strong>Change Type :</strong></label></dt>
+                                            <dd>{{other_change.change_type}}</dd>
+                                            <dt><label><strong>Source :</strong></label></dt>
+                                            <dd>{{other_change.source}}</dd>
+                                            <dt><label><strong>Priority :</strong></label></dt>
+                                            <dd>{{other_change.priority}}</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block modal_content %}
+    <div class="modal fade" id="resched" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="ModalLabel">Change Scheduled Date </h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/rfc/re_schedule/{{change_req.id}}/">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label><strong>Old Scheduled Start</strong></label>
+                                <input type="text" class="form-control" value="{% tzone change_req.scheduled_start %}" readonly/><br/>
+                                <label><strong>New Scheduled Start</strong></label>
+                                <div class='input-group date' id='re_dt_picker1'>
+                                    <input type='text' class="form-control"  id="schedu_start" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <input type="hidden" name="scheduled_start" id="new_sched_start"/>
+                                <label><strong>Old Scheduled Finish</strong></label>
+                                <input type="text" class="form-control" value="{% tzone change_req.scheduled_finish %}" readonly /><br/>
+                                <div id="blink_date_conflict" class="label label-danger text-center"> SCHEDULED FINISH should be greater than SCHEDULED START</div><br/>
+                                <label><strong>New Scheduled Finish</strong></label>
+                                <div class='input-group date' id='re_dt_picker2'>
+                                    <input type='text' class="form-control"  id="schedu_finish" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <input type="hidden" name="scheduled_finish" id="new_sched_finish" />
+                                <button id="re_submit" class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="resched_task" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="ModalLabel">Change Scheduled Date </h4>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="" id="task_resched">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label class="label label-success" ><strong>Change Start : </strong>{% tzone change_req.scheduled_start %}</label><br/>
+                                <p id="sched_star" class="display-none">{{ change_req.scheduled_start|date:'m/d/Y H:i' }}</p><br/>
+                                <label><strong>Old Scheduled Start</strong></label>
+                                <input type="text" class="form-control" value="" readonly id="old_task_sched_start" /><br/>
+                                <div id="blink_start" class="label label-danger text-center"> Please check the SCHEDULED START</div><br/>
+                                <label><strong>New Scheduled Start</strong></label>
+                                <div class='input-group date' id='task_re_sched_start'>
+                                    <input type='text' class="form-control" id="tsk_sched_start_old" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <input type="hidden" id="task_new_sched_start" name="scheduled_start" />
+                                <label class="label label-success" ><strong>Change Finish : </strong>{% tzone change_req.scheduled_finish %}</label><br/>
+                                <p id="sched_fini" class="display-none">{{ change_req.scheduled_finish|date:'m/d/Y H:i' }}</p>
+                                <label><strong>Old Scheduled Finish</strong></label>
+                                <input type="text" class="form-control" value="" readonly id="old_task_sched_fini"/><br/>
+                                <div id="blink_finish" class="label label-danger"> Please check the SCHEDULED FINISH</div> <br/>
+                                <label><strong>New Scheduled Finish</strong></label>
+                                <div class='input-group date' id='task_re_sched_fini'>
+                                    <input type='text' class="form-control" id="tsk_sched_finish_old" required/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div><br/>
+                                <div id="blink_task_date_conflict" class="label label-danger">Please check the Schedule start and Finish date</div><br/>
+                                <input type="hidden" id="task_new_sched_finish" name="scheduled_finish" />
+                                <button id="task_submit" class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock modal_content %}
+{% block footer_content %}
+    <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+    <script src="/static/customer/moment.min.js"></script>
+    <script type="text/javascript">
+        function check_scheduled_date() {
+            start = new Date($('#new_sched_start').val());
+            finish = new Date($('#new_sched_finish').val());
+            if (finish <= start) {
+                $("#blink_date_conflict").show();
+                $('#re_submit').attr('disabled', 'true');
+            } else {
+                $("#blink_date_conflict").hide();
+                $('#re_submit').removeAttr('disabled');
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        function task_reschedule() {
+            val_1 = new Date($('#task_new_sched_start').val());
+            val_2 = new Date($('#task_new_sched_finish').val());
+            sched_1 = new Date($('#sched_star').text());
+            sched_2 = new Date($('#sched_fini').text());
+            console.log(val_2);
+            console.log(sched_2);
+            var check_eligibility = false;
+            if (val_1) {
+                if (val_1 >= sched_1 && val_1 <= sched_2){
+                    check_eligibility = true;
+                    $("#blink_start").hide();
+                    $('#task_submit').removeAttr('disabled');
+                } else {
+                    $("#blink_start").show();
+                    $('#task_submit').attr('disabled');
+                }
+            }
+            if ($('#task_new_sched_finish').val().length > 0){
+                if (val_2 >= sched_1 && val_2 <= sched_2){
+                    check_eligibility = true;
+                    $("#blink_finish").hide();
+                    $('#task_submit').removeAttr('disabled');
+                } else {
+                    $("#blink_finish").show();
+                    $('#task_submit').attr('disabled');
+                }
+            }
+            if (val_1 && val_2) {
+                if (val_2 <= val_1 && check_eligibility == true){
+                    $("#blink_task_date_conflict").show();
+                    $('#task_submit').attr('disabled', 'true');
+                } else {
+                    $("#blink_task_date_conflict").hide();
+                    $('#task_submit').removeAttr('disabled');
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#blink_date_conflict').hide();
+            $("#blink_start").hide();
+            $("#blink_finish").hide();
+            $("#blink_task_date_conflict").hide();
+        })
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $('#re_dt_picker1').datetimepicker()
+            .on('change.dp', function(e){
+                $('#new_sched_start').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function(){
+                $('#new_sched_start').val(moment($("#schedu_start").val()).utc().format('MM/DD/YYYY hh:mm a'));
+                check_scheduled_date();
+            })
+        });
+        $(function () {
+            $('#re_dt_picker2').datetimepicker()
+            .on('change.dp', function(e){
+                $('#new_sched_finish').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function(){
+                $('#new_sched_finish').val(moment($("#schedu_finish").val()).utc().format('MM/DD/YYYY hh:mm a'));
+                check_scheduled_date();
+            })
+        });
+        $(function(){
+            $('#task_re_sched_start').datetimepicker()
+            .on('change.dp', function (e) {
+                $('#task_new_sched_start').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function (){
+                $('#task_new_sched_start').val(moment($('#tsk_sched_start_old').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                task_reschedule();
+            });
+        });
+        $(function(){
+            $('#task_re_sched_fini').datetimepicker()
+            .on('change.dp', function (e) {
+                $('#task_new_sched_finish').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+            })
+            .change(function (){
+                $('#task_new_sched_finish').val(moment($('#tsk_sched_finish_old').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                task_reschedule();
+            });
+        })
+    </script>
+    <script>
+        $(document).ready(function(){
+            $('table.datatab').DataTable({
+                "bFilter": false,
+                "bPaginate": false,
+                "bAutoWidth": false,
+            });
+        });
+    </script>
+    <script>
+        $('#schedu_task_lis tbody').on( 'click', 'td', function () {
+            var a_tag = $(this).find('a').html();
+            if (a_tag == 'Reschedule'){
+                var sched_start = $(this).prev().prev().prev().html();
+                var sched_finish = $(this).prev().prev().html();
+                var id_val = $(this).prev().html();
+                $('#old_task_sched_start').val(sched_start);
+                $('#old_task_sched_fini').val(sched_finish);
+                var url_val = '/rfc/task/reschedule/'+id_val+'/';
+                $('#task_resched').attr('action', url_val);
+            }
+        })
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

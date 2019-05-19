@@ -1,0 +1,188 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Servicedesk Approvals</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+    <body class="fixed" style="font-size:13px" id="view_sub_ticket">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Approval Details | <small>Servicedesk Approvals</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Servicedesk Approvals</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center">Pending Approvals</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped table-hover borderless" id="table_id" cellspacing="0" width="100%" >
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Ticket Id</th>
+                                        <th>Ticket Summary</th>
+                                        <th>Created Date</th>
+                                        <th>Affected Person</th>
+                                        <th>Customer</th>
+                                        <th>Approval</th>
+                                        <th>History</th>
+                                    </tr>
+                                </thead>
+                                <tbody >
+                                    {% for approval in pending_approvals %}
+                                        <tr>
+                                            <td>
+                                                <a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit" href="/ticket/status/edit/{{ approval.ticket.id}}">
+                                                    <i class="fa fa-edit"> </i>
+                                                </a>
+                                            </td>
+                                            <td>{{ approval.ticket.ticketid}}</td>
+                                            <td>{{ approval.ticket.summary}}</td>
+                                            <td><span style="display:none;">{{ approval.ticket.creationdate.year}}{{ approval.ticket.creationdate.month}}{% if  approval.ticket.creationdate.day >= 10 %}{{ approval.ticket.creationdate.day}}{% else %}0{{ approval.ticket.creationdate.day}}{%endif%}{{ approval.ticket.creationdate.time | time}}</span>{% tzone  approval.ticket.creationdate %}</td>
+                                            <td>{{ approval.ticket.affectedemail}}</td>
+                                            <td>{{ approval.ticket.customer.customername}}</td>
+                                            <td><a href="#" class="btn btn-warning" onclick="get_modal('{{ approval.id }}')">Approval</a></td>
+                                            <td><a href="#" class="btn btn-pink" onclick="view_approval_history('{{ approval.id }}');" data-toggle"tooltip" data-placement="Approval History"> <i class="fa fa-search-plus"> </i></a></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="add_manager_approval" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Manager Approval</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="#" id="approval_process" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row pad-all">
+                                <div class="form-group">
+                                    <label class="control-label">Remark</label>
+                                    <textarea name="remark" required class="form-control"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Approval Status</label>
+                                    <select name="status" required class="form-control">
+                                        <option value="">--Select Approval Status--</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="file" name="approval_attachment" required>
+                                </div>
+                                <input type="submit" class="btn btn-success" value="Save" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="approval_history" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Approval History</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row pad-all">
+                            <table id="hist_table">
+                                <thead>
+                                    <tr>
+                                        <th>Approver</th>
+                                        <th>Status</th>
+                                        <th>Approved Date</th>
+                                        <th>Approval Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        {% include "components/msg_div.html" %}
+        <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+        <script>
+            $("#approvals").addClass("active");
+            $("#approvals_sub_nav").css({'display' : 'block'});
+            $("#sd_apprpval").addClass("active");
+        </script>
+        <script type="text/javascript">
+                $(document).ready(function() {
+                    $('#table_id').DataTable({
+                        aaSorting:[[3,'desc']],
+                        "scrollX": true,
+                    });
+                });
+        </script>
+        <script type="text/javascript">
+            function get_modal(approval_id){
+                $('#approval_process').attr('action', '/add_approval/'+approval_id+"/");
+                $('#add_manager_approval').modal('show');
+            }
+        </script>
+        <script type="text/javascript">
+            function view_approval_history(approval_id) {
+                $('#hist_table').dataTable( {
+                    "processing": true,
+                    "serverSide": false,
+                    // "searching": true,
+                    "bPaginate": false,
+                    "bInfo": false,
+                    "bDestroy": true,
+                    "bScrollCollapse": true,
+                    "bFilter": false,
+                    "language": {
+                        "emptyTable": "No Approval History Available"
+                    },
+                    "ajax": {
+                        "processing": true,
+                        "url": '/add_approval/'+approval_id+'/',
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "": "fields.approver" , "bSortable": false, },
+                        { "": "fields.status" , "bSortable": false, },
+                        { "": "fields.date" , "bSortable": false, },
+                        { "": "fields.type" , "bSortable": false, },
+                    ],
+                });
+                $('#approval_history').modal('show');
+            }
+        </script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap');
+            }); 
+        </script>
+    </body>
+</html>

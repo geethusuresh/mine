@@ -1,0 +1,352 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datetimepicker.min.css">
+    
+     <style>
+/*.list-info li label {
+    width: 100px;
+}*/
+.clb{
+  display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+}
+
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Asset Management  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Item Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div id="spr_0" class="panel panel-default plain profile-widget">
+                                <div class="panel-heading">
+                                  <p class="panel-title">Manage Purchase Order</p>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-3 col-md-6 col-sm-12">
+                                        <div class="media" style="color: #767676;">
+                                            <div class="panel-title">
+                                              <p class="panel-header">Purchase Order details</p>
+                                            </div>
+                                              <div class="media-body" style="display: table-cell;vertical-align: top;">
+                                                  <ul class="list-unstyled list-info" style="padding-left: 0px;list-style: outside none none;">
+                                                      <li class="ng-binding" style="padding: 10px;">
+                                                          <span class="icon glyphicon glyphicon-user"></span>
+                                                          <label class="clb">Purchase ID :</label>
+                                                           {{purchase.purchaseid}}
+                                                      </li>
+                                                      <li style="padding: 10px;">
+                                                          <span class="icon glyphicon glyphicon-envelope"></span>
+                                                          <label class="clb">Stock ID: </label>
+                                                          {{ stock.stockid }}
+                                                      </li>
+                                                      <li class="ng-binding" style="padding: 10px;">
+                                                          <span class="icon glyphicon glyphicon-user"></span>
+                                                          <label class="clb">Manufacturer :</label>
+                                                          {% if c_manu %} {{c_manu}} {% else %} None {% endif %}
+                                                      </li>
+                                                      <li style="padding: 10px;">
+                                                          <span class="icon glyphicon glyphicon-envelope"></span>
+                                                          <label class="clb">Vendor : </label>
+                                                          {{ stock.vendor }}
+                                                      </li>
+                                                      <li class="ng-binding" style="padding: 10px;">
+                                                          <span class="icon glyphicon glyphicon-user"></span>
+                                                          <label class="clb">Purchased On :</label>
+                                                           {{stock.purchase_date}}
+                                                      </li>
+                                                  </ul>
+                                                  
+                                              </div>
+                                          </div>
+                                        
+                                    </div>
+                                    <div class="col-lg-9 col-md-6 col-sm-12">
+                                       
+                                    <div class="panel">
+                                      <div class="panel-header">
+                                        
+                                      </div>
+                                      <div class="panel-body">
+                                      {% if prid.purchase.delivery_date %}
+                                      {% if prid.stock.serial_no %}
+
+
+                                      <dl class="dl-horizontal">
+                                        {% if prid.task %}
+                                        <dt>Task :</dt>
+                                        <dd><a href="/task/panel/{{prid.task.id}}" class="label label-success">Go To Task Details</a> </dd>
+                                        {% endif %}
+                                        <br>
+                                        <dt>Stock ID :</dt>
+                                        <dd><a href="/asset/stock/{{prid.stock.id}}" class="label label-success">Go To stock Details</a></dd><br>
+                                        <dt>Asset Tag :</dt>
+                                        <dd>{{prid.stock.tag}}</dd><br>
+                                        
+                                        <dt>Depresiation :</dt>
+                                        <dd>{{stock.depreciation}}</dd>
+                                      </dl>
+
+
+                                      {% else %}
+                                    <form action="/asset/purchase_relation/update/{{prid.id}}" method="POST"> 
+                                          {% csrf_token %}
+                                          
+
+                                                          <div class="row">
+                                      <div class="col-sm-6">
+                                          <label>Model Name:</label>
+                                          <input type="text" name="model" class="form-control" id="model" required maxlength="50" requried>
+                                          
+                                      </div>
+                                      <div class="col-sm-6">
+                                          <label>Serial Number:</label>
+                                          <input type="text" name="serial" class="form-control" id="serial" required maxlength="50"requried>
+                                          
+                                      </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                      <div class=" col-sm-6">
+                                        <label>Select item</label>
+                                        <select class="form-control" name="item" required>
+                                            {% if  prid.task.tag %}
+                                          <option value="{{prid.task.tag.id}}">{{prid.task.tag}}</option>
+                                            {% else %}
+                                            {% for tag in tags %}
+                                            <option value="{{tag.id}}">{{tag.item_type}}</option>
+                                            {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                      </div>
+                                      <div class="col-sm-6">
+                                        <label>Asset details</label>
+                                        <select class="form-control" name="availability">
+                                          <option value="1">InStock</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                      <div class=" col-sm-6">
+                                        <label>Select Manufacturer</label>
+                                        <select class="form-control" name="manu" required>
+                                          <option disabled selected value="">-select-</option>
+                                          {% for man in manufacturers %}
+                                          <option value="{{man.id}}">{{man}}</option>
+                                          {% endfor %}
+
+                                        </select>
+                                      </div>
+                                      <div class=" col-sm-6">
+                                        <label>Select Vendor</label>
+                                        <select class="form-control" name="vendor" required>
+                                          <option value="{{quote.vendor.id}}">{{quote.vendor.name}}</option>
+
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <br><hr>
+                                    <h5>Warranty Details</h5>
+                                    <div class="row">
+                                      <div class="col-sm-6">
+                                        <label>Warranty Expiry</label>
+                                          <input type="text" name="w_year" class="form-control" id="datatime" required>
+                                      </div>
+                                      <div class="col-sm-6">
+                                        <label>Purchase on:</label>
+                                        <input type="text" name="purchase_date" class="form-control" id="datatime1" required>
+                                      </div>
+                                    </div>
+                                    <hr>
+                                    <h5>Cost Details</h5>
+                                    <div class="row">
+                                      <div class="col-sm-4">
+                                        <label>Cost Center:</label>
+                                        <select class="form-control" name="costcenter" required>
+                                            {% if prid.task.cost_center %}
+                                          <option value="{{prid.task.cost_center.id}}">{{prid.task.cost_center.name}}</option>
+                                              {% else %}
+                                              {% for cost in costcenters %}
+                                              <option value="{{ cost.id }}">{{ cost.name}}</option>
+                                              {% endfor %}
+
+                                              {% endif %}
+                                            
+                                        </select>
+                                      </div>
+                                      <div class="col-sm-4">
+                                        <label>Cost:</label>
+                                        {% if quote %}
+                                        <input type="number" name="item_cost" value="{{quote.item_cost}}" class="form-control" readonly>
+                                        {% else %}
+                                        <input type="number" name="item_cost" value="{{quote.item_cost}}" class="form-control" required>
+                                        {% endif %}
+                                      </div>
+                                      <div class="col-sm-4">
+                                        <label>Depreciation Type:</label>
+                                        <input type="text" name="depre" class="form-control" required>
+                                      </div>
+                                    </div>
+
+
+
+                                    <hr>
+                                        <input type="text" class="hidden" name="stock" value="{{prid.purchase.stock.id}}">
+                                        <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Update</button>
+                                        </form>
+
+
+
+
+                                        {% endif %}
+                                      {% else %}
+
+                                      {% if prid.task %}
+                                      Already assigned to task- {{prid.task.taskid}}
+                                      {% else %}
+                                        <div>
+                                          <form action="/asset/purchase/task/{{purchase.id}}/{{prid.id}}" method="POST">{% csrf_token %}
+                                          <p>Select Task to assign with from</p>
+                                          <select name="task" class="form-control" required>
+                                            <option value="" disabled selected>-select a task-</option>
+                                            {% for task in tasks %}
+                                            <option value="{{task.id}}">{{task.taskid}}</option>
+                                            {% endfor %}
+                                          </select>
+                                          <br>
+                                          <button class="btn btn-info" type="submit">Relate to Stock</button>
+                                          </form>
+                                        </div>
+                                        <p class="text-center panel-title">or</p>
+                                        <div>
+                                        <form action="/asset/task/create/{{prid.id}}" method="POST">{% csrf_token %}
+                                          <label>Create a new Task and assign it with it, please specify need of this task</label>
+                                          <input type="text" name="summary" class="form-control" required>
+                                          <div class="row">
+                                            <div class="col-sm-4">
+                                              <label>Select Cost Center</label>
+                                              <select class="form-control" name="costcenter" required>
+                                                <option value="" disabled selected>-choose cost center-</option>
+                                                {% for cost in costcenters %}
+                                                <option value="{{cost.id}}">{{cost.name}}</option>
+                                                {% endfor %}
+                                              </select>
+                                            </div>
+                                            <div class="col-sm-4">
+                                              <label>Enter TicketID</label>
+                                              <input type="text" name="ticket" requried class="form-control">
+                                            </div>
+                                            <div class="col-sm-4">
+                                              <label>Select Tag</label>
+                                              <select class="form-control" name="tag" required>
+                                                <option value="" disabled selected>-choose a tag-</option>
+                                                {% for tag in tags %}
+                                                <option value="{{tag.id}}">{{tag.item_type}}</option>
+                                                {% endfor %}
+                                              </select>
+                                            </div>
+
+                                          </div>
+                                           <br>
+                                            <button class="pull-right btn btn-success" type="submit">Add and relate with the stock</button>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+                                        {% endif %}
+
+                                      </div>
+                                    </div>
+                                             
+
+
+                                       
+                                       
+                                    </div>
+                                </div>
+                                <div class="panel-footer" style="background-color:#FFF;">
+                                  <div class="row" style="margin-right:10px; margin-left:10px">
+                                    <a class="btn btn-success" href="/asset/purchase/{{purchase.id}}">Go Back</a>
+                                   <!--  <div class="pull-right">
+                                      <a href="/asset/stock/" class="btn btn-info btn-lg" style="">Update</a>
+                                    </div> -->
+                                    
+                                  </div>
+                                  
+                                </div>
+                            </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+
+              {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      }); 
+    </script>
+
+
+
+    </body>
+</html>

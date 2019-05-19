@@ -1,0 +1,81 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Oneconsole - Live Attacks</title>
+		<link rel="stylesheet" type="text/css" href="/static/attackmap/ipmap.css">
+    	<link rel="stylesheet" type="text/css" href="/static/attackmap/flags.css">
+    	<link rel="stylesheet" type="text/css" href="/static/attackmap/fonts.css">
+	</head>
+
+	<body class="f16">
+		<div id="loading">
+			<h1>Loading...</h1>
+		</div>
+		<div id="content">			
+			<div id="info"></div>
+			
+			<div class="info-controls">
+				<div class="gray-bg information info-btn">					
+				</div>
+				<div data-paused="false" class="gray-bg controls">					
+				</div>
+			</div>		
+		</div>
+
+		<div id="drawer">
+			<!-- <div id="nav-bottom-corner"></div> -->
+			<div id="drawer-content" class="blue-bg">
+				<div id="drawer-inner">
+					<div id="drawer-left">
+					</div>
+
+					<div id="legend-container">
+						<div id="particle-legend">
+							<h4><span class="icon-open"></span><p>Each particle represents an attack</p></h4>
+							<p id="particle-legend-content"></p>
+						</div>
+						<div id="origin-legend">
+							<h4><span class="icon-open"></span> <p>Attack origins are grouped into clusters</p></h4>
+							<p>
+								<span class="icon-one"></span>
+								<span class="icon-ten"></span>
+								<span class="icon-twohundred"></span>
+							</p>
+						</div>
+						<div id="country-legend">
+							<h4><span class="icon-open"></span> <p>Countries are shaded in as they're attacked</p></h4>
+							<p>
+								<span class="icon-one" style="color: #1e1e1e;"></span>
+								<span class="icon-five" style="color: #1e2637;"></span>
+								<span class="icon-twentyfive" style="color: #1e2e50;"></span>
+								<span class="icon-onehundred" style="color: #1e3565;"></span>
+								<span class="icon-fivehundred" style="color: #1e3d7e;"></span>								
+							</p>
+						</div>						
+					</div>
+
+					
+				</div>
+			</div>
+		</div>
+		<div id="message-panel" class="data box">
+			<div class="table-header gray-bg">
+				<h3>Message Dialog</h3>
+			</div>
+			<div id="message-container" class="black-solid table-container">
+				<span id="message-text"></span>
+				<button id="close-button" class="gray-bg" onclick="hideMessage();">Close</button>
+			</div>
+		</div>
+
+		<img id="unknown-icon" src="/static/attackmap/images/unknown-poly.png" />
+
+		<script type="text/javascript" src="/static/attackmap/d3.v3.min.js"></script>
+		<script type="text/javascript" src="/static/attackmap/queue.v1.min.js"></script>
+		<script type="text/javascript" src="/static/attackmap/topojson.v1.min.js"></script>
+		<script type="text/javascript" src="/static/attackmap/ipmap.js"></script>
+		<script type="text/javascript" src="/static/attackmap/presentations.js"></script>
+	</body>
+</html>
+

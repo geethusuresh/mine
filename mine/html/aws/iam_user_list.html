@@ -1,0 +1,73 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+<script type="text/javascript">
+  cloud_account_id = {{cloud_account_id}}
+</script>
+    <h1>
+        AWS User List
+        <small>User Overview</small>
+    </h1>
+
+    <ol class="breadcrumb">
+      <li>
+        <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+      </li>
+
+      <li>
+        <a href="{% url 'iam_overview' cloud_account_id %}">IAM overview</a>
+      </li>
+        <!--     <li>
+        <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+        </li> -->
+      <li class="active">
+        <strong>AWS User List</strong>
+      </li>
+    </ol>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+
+
+
+
+
+<div class="panel">
+  <div class="panel-heading">
+    <div class="panel-control">
+
+    </div>
+    <h3 class="panel-title">Member</h3>
+  </div>
+
+  <div class="panel-body">
+    <div class="pad-btm form-inline">
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>ARN</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {% for user_obj in user_list%}
+          <tr>
+            <td>{{user_obj.user_name}}</td>
+            <td>{{user_obj.arn}}</td>
+            <td>{{user_obj.create_date}}</td>
+            <td>
+              <a class="btn btn-xs btn-default add-tooltip" data-toggle="tooltip" href="{% url 'iam_user_details' cloud_account_id  user_obj.user_name %}" data-original-title="Edit" data-container="body"><i class="fa fa-pencil"></i></a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock%}

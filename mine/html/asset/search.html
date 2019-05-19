@@ -1,0 +1,125 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+  {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/monitoring_header.html"%}
+  {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+    {% include "components/asset_header.html"%}
+  {% else %}
+    {% include "components/asset_header.html"%}
+  {% endif %}
+
+        <div class="wrapper" style="background-color:red;">
+        {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin"> Search | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Search</li>
+                </ol>
+            </div>
+
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <div class="alert alert-danger" style="margin-right: 10%;" >{{ message|safe }}</div>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            <div class="content">
+              
+
+              <div class="row">
+                <form action="/asset/search/" method="post">{% csrf_token %}
+                  <div class="col-sm-1">
+                    
+                  </div>
+                  <div class="col-sm-7">
+                    <input type="text" name="serial" id="" class="form-control" placeholder="Serial Number"  required maxlength="10">
+                  </div>
+                  <div class="col-sm-4">
+                    <button id="delay" type="submit" class="btn btn-success btn-huge" style="width:120px">Search</button>
+                  </div>
+                </form>
+              </div><br>
+
+
+              <div class="box">
+                <div class="box-title">
+                  <h3>Search Result</h3>
+                </div>
+                <div class="box-body table-responsive no-padding">
+                  <table class="table table-striped" id="table_id">
+                          <thead>
+                            <tr>
+                              <th>Serial Number</th>
+                              <th>Model Name</th>
+                              <th>Manufacturer</th>
+                              <th>Tag</th>
+                              <th>Cost Center</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for serial in results %}
+                            <tr>
+                              <td>
+
+                              <a href="/asset/stock/{{serial.id}}">{{ serial.serial_no }}</a>
+                              
+                              </td>
+                              <td>{{ serial.model_name }}</td>
+                              <td>{{ serial.manufacturer }}</td>
+                              <td>{{ serial.tag }}</td>
+                              <td>{{ serial.cost_center}}</td>
+                            </tr>
+                            {% endfor %}
+
+                          </tbody>
+                        </table>           
+            </div>
+          </div>
+        </div>   </div>
+        </div>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+    {% else %}
+      {% include "components/footer.html"%}
+    {% endif %}
+    {% include "components/service_request.html"%}
+    {% include "asset/addtostock.html" %}
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_id').DataTable();
+    })
+    </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+

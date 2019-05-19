@@ -1,0 +1,749 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    
+    <style type="text/css">      
+      a {
+        color: #515151;
+        outline: 0 none;
+        text-decoration: none;
+      }
+
+      .tab-base .nav-tabs > li:not(.active) > a {
+            background-color: rgba(255, 255, 255, 0.35);
+            opacity: 0.7;
+            color: #515151;
+          transition: opacity 0s ease 0s, all 0.3s ease 0s;
+      }
+
+      .tab-base .nav-tabs > li:not(.active) > a:hover {
+            background-color: rgba(255, 255, 255, 0.55);
+            opacity: 0.7;
+            color: #515151;
+            border-color:#54abd9 #54abd9 transparent;
+          transition: opacity 0s ease 0s, all 0.3s ease 0s;
+      }
+
+
+      .onoffswitch {
+          position: relative; width: 60px;
+          -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+      }
+      .onoffswitch-checkbox {
+          display: none;
+      }
+      .onoffswitch-label {
+          display: block; overflow: hidden; cursor: pointer;
+          border: 2px solid #999999; border-radius: 20px;
+      }
+      .onoffswitch-inner {
+          display: block; width: 200%; margin-left: -100%;
+          transition: margin 0.3s ease-in 0s;
+      }
+      .onoffswitch-inner:before, .onoffswitch-inner:after {
+          display: block; float: left; width: 50%; height: 19px; padding: 0; line-height: 19px;
+          font-size: 10px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+          box-sizing: border-box;
+      }
+      .onoffswitch-inner:before {
+          content: "ON";
+          padding-left: 5px;
+          background-color: #34A7C1; color: #FFFFFF;
+      }
+      .onoffswitch-inner:after {
+          content: "OFF";
+          padding-right: 5px;
+          background-color: #EEEEEE; color: #999999;
+          text-align: right;
+      }
+      .onoffswitch-switch {
+          display: block; width: 15px; margin: 2px;
+          background: #FFFFFF;
+          position: absolute; top: 0; bottom: 0;
+          right: 37px;
+          border: 2px solid #999999; border-radius: 20px;
+          transition: all 0.3s ease-in 0s; 
+      }
+      .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+          margin-left: 0;
+      }
+      .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+          right: 0px; 
+      }
+      .onoffswitch-checked .onoffswitch-inner {
+          margin-left: 0;
+      }
+
+      .onoffswitch-checked .onoffswitch-switch {
+          right: 0px; 
+      }
+      .paging-nav {
+        text-align: right;
+        padding-top: 2px;
+      }
+      .paging-nav a {
+        margin: auto 1px;
+        text-decoration: none;
+        display: inline-block;
+        padding: 1px 7px;
+        background: #91b9e6;
+        color: white;
+        border-radius: 3px;
+      }
+      .paging-nav .selected-page {
+        background: #187ed5;
+        font-weight: bold;
+      }
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+
+{% if alert_message %}
+{% for alert in alert_message %}
+<div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+{% endfor %}
+{% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Threat Management |<small> Settings</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/dashboard/index/">Threat Management</a></li>
+                    <li class="active">Settings</li>
+                </ol>
+            </div>
+
+            <div class="content">
+            {% if messages %}
+                <ul >
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                  {% endif %}
+                {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="">
+                <div class="row">
+                  <div class="col-sm-8">
+
+              <div class="tab-base">
+                <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" href="#tags">Manual</a></li>
+                  <li><a data-toggle="tab" href="#manus">Automatic</a></li>
+                  <li><a data-toggle="tab" href="#rules">Rules</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div id="tags" class="tab-pane fade active in">
+                    <div class="panel">
+                      <div class="panel-heading">
+                        <div class="row">
+                          <div class="col-md-10">
+                            <h4 class="text-thin text-center">Permanently blocked Source Ips</h4>
+                          </div>
+                          <div class="col-md-2">
+                            <a class="btn btn-warning pull-right"data-toggle="modal" data-target="#block_ip"><i class="fa fa-plus"></i></a>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel-body">
+                         <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="permanent_table">
+                            <thead>
+                               <tr>
+                                  <th>Source Ip</th>
+                                  <th>Host Name</th>
+                                  <th>Host IP</th>
+                                  <th>Note</th>
+                                  <th>Action</th>
+                               </tr>
+                            </thead>
+                            <tbody>
+                              {% for x in permanent%}
+                                <tr>
+                                  <td>{{ x.ip }}</td>
+                                  <td>{{ x.host.name }}</td>
+                                  <td>{{ x.host.host }}</td>
+                                  <td>{{ x.note }}</td>
+                                  <td><a class=" btn btn-danger"  style="font-size: 80%;">
+                                      Remove
+                                    </a></td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+
+                         </table>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="manus" class="tab-pane fade">
+                    <div class="panel">
+                      <div class="panel-heading">
+                        <h4 class="text-thin text-center">Automatically blocked Source Ips</h4>
+                      </div>
+                      <div class="panel-body">
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-default " id="all">
+                                  <input name="year" value="2011" type="radio">All
+                                </label>
+                                <label class="btn btn-default " id="c_block">
+                                  <input name="year" value="2012" type="radio">Currently Blocked
+                                </label>
+                                <label class="btn btn-default " id="p_block">
+                                  <input name="year" value="2013"  type="radio">Previously Blocked
+                                </label>
+                            </div>
+                          </div>
+                        </div>
+                        <br><br>
+                        <div id="all_table">
+                           <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="automatic_all">
+                              <thead>
+                                 <tr>
+                                    <th>Source Ip</th>
+                                    <th>Host Name</th>
+                                    <th>Host IP</th>
+                                    <th>Status</th>
+                                    <th>Last Blocking Time</th>
+                                    <th>Last Allowing Time</th>
+                                    <!-- <th>Action</th> -->
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                  <!-- {% for x in auto%}
+                                    <tr>
+                                      <td>{{ x.ip }}</td>
+                                      <td>{{ x.host.name }}</td>
+                                      <td>{{ x.host.host }}</td>
+                                      <td>{{ x.status }}</td>
+                                      <td>{{ x.last_blocking_time }}</td>
+                                      <td>{{ x.last_allowing_time }}</td> -->
+                                      <!-- <td><a class=" btn btn-danger" href="/security/remove/autoblocked/{{x.id}}" style="font-size: 80%;">
+                                          Remove
+                                        </a></td>
+                                    </tr>
+                                  {% endfor %} -->
+                              </tbody>
+
+                           </table>
+                        </div>
+                        <div id="current_table" class="hidden">
+                           <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="automatic_current">
+                              <thead>
+                                 <tr>
+                                    <th>Source Ip</th>
+                                    <th>Host Name</th>
+                                    <th>Host IP</th>
+                                    <th>Status</th>
+                                    <th>Last Blocking Time</th>
+                                    <th>Last Allowing Time</th>
+                                    <!-- <th>Action</th> -->
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                  <!-- {% for x in auto%}
+                                    {% if x.status == 'blocked' %}
+                                      <tr>
+                                        <td>{{ x.ip }}</td>
+                                        <td>{{ x.host.name }}</td>
+                                        <td>{{ x.host.host }}</td>
+                                        <td>{{ x.status }}</td>
+                                        <td>{{ x.last_blocking_time }}</td>
+                                        <td>{{ x.last_allowing_time }}</td> -->
+                                        <!-- <td><a class=" btn btn-danger" href="/security/remove/autoblocked/{{x.id}}" style="font-size: 80%;">
+                                            Remove
+                                          </a></td> -->
+                                      <!-- </tr> -->
+                                    <!-- {% endif %}
+                                  {% endfor %} -->
+                              </tbody>
+
+                           </table>
+                        </div>
+                        <div id="previous_table" class="hidden">
+                           <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="automatic_previous">
+                              <thead>
+                                 <tr>
+                                    <th>Source Ip</th>
+                                    <th>Host Name</th>
+                                    <th>Host IP</th>
+                                    <th>Status</th>
+                                    <th>Last Blocking Time</th>
+                                    <th>Last Allowing Time</th>
+                                    <!-- <th>Action</th> -->
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                  <!-- {% for x in auto%}
+                                    {% if x.status == 'allowed' %}
+                                      <tr>
+                                        <td>{{ x.ip }}</td>
+                                        <td>{{ x.host.name }}</td>
+                                        <td>{{ x.host.host }}</td>
+                                        <td>{{ x.status }}</td>
+                                        <td>{{ x.last_blocking_time }}</td>
+                                        <td>{{ x.last_allowing_time }}</td> -->
+                                        <!-- <td><a class=" btn btn-danger" href="/security/remove/permanent/{{x.id}}" style="font-size: 80%;">
+                                            Remove
+                                          </a></td>
+                                      </tr>
+                                    {% endif %}
+                                  {% endfor %} -->
+                              </tbody>
+
+                           </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="rules" class="tab-pane fade">
+                    <div class="panel">
+                      <div class="panel-heading">
+                        <div class="row">
+                          <div class="col-md-10">
+                            <h4 class="text-thin text-center">Rules</h4>
+                          </div>
+                          <div class="col-md-2">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel-body">
+                        <div class="pagination-page"></div>
+                         <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="rules_table">
+                            <thead>
+                               <tr>
+                                  <th class="hidden"></th>
+                                  <th>Rule Number</th>
+                                  <th>Rule Name</th>
+                                  <th>Description</th>
+                                  <th>Prevention</th>
+                               </tr>
+                            </thead>
+                            <tbody>
+                              {% for x in rules%}
+                                <tr>
+                                  <td class="hidden">{{ x.id }}</td>
+                                  <td>{{ x.rule_id }}</td>
+                                  <td>{{ x.rule_name }}</td>
+                                  <td>{{ x.description }}</td>
+                                  <td><div class="onoffswitch {% if x.prevention %}  {% endif %}">
+                                        <input  type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch{{forloop.counter}}" {% if x.prevention %} checked {% endif %}>
+                                        <label class="onoffswitch-label" for="myonoffswitch{{forloop.counter}}">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                        </label>
+                                    </div></td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+
+                         </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                  </div>
+                  <div class="row col-md-4">
+                    <!-- <div class="row"> -->
+                      <div class="col-md-12">
+                        <div class="panel">
+                          <div class="panel-body bg-success text-center">
+                            <p class="h3">{{allowing_time}}</p>
+                            <p class="h4 text-thin">Auto Block Removal Time</p>
+                          </div>
+                          <div class="pad-all">
+                            <ul class="list-unstyled row text-center">
+                              <li class="col-xs-12">
+                                <p class="text-uppercase" data-toggle="modal" data-target="#change_time">
+                                  <i class="fa fa-edit"></i>
+                                  <small>Change Time</small>
+                                </p>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    <!-- </div> -->
+                    {% if current_p %}
+                    <!-- <div class="row"> -->
+                      <div class="col-md-12">
+                        <div class="panel" id="crr_process">
+                          <div class="panel-body bg-info text-center">
+                            <h4>Blocking Status</h4>
+                            <!-- <p class="h3">{{allowing_time}}</p>
+                            <p class="h4 text-thin">Auto Block Removal Time</p> -->
+                          </div>
+                          <div class="pad-all">
+                            <table class="table table-hover  no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="status_table">
+                              <thead>
+                                 <tr>
+                                    <th class="hidden"></th>
+                                    <th>Source Ip</th>
+                                    <th>Host</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                              </tbody>
+
+                           </table>
+                          </div>
+                        </div>
+                      </div>
+                    <!-- </div> -->
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/customer_footer.html"%}
+          {% else %}
+            {% include "components/footer.html"%}
+          {% endif %}
+    <div class="modal fade" id="change_time" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="/security/change/allow/time" class="form-inline">{% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Change Allowing Time</h4>
+          </div>  
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="time">Enter Value</label>
+              <input type="number" class="form-control" id="time" min="1" required name="time">
+            </div>
+            <div class="form-group">
+              <label for="type"><br></label>
+              <select required id="type" class="form-control" name="type">
+                <option value="">Select min/hr</option>
+                <option value="1">MIN</option>
+                <option value="0">HOUR</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Submit</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal fade" id="block_ip" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="/security/permanent/block" class="form-inline" id="block_form" onsubmit="return validateip()">{% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="ModalLabel">Source IP Permanent Blocking</h4>
+          </div>  
+          <div class="modal-body">
+            <div class="row">
+                <div class="form-group col-md-12">
+                  <label for="time">Enter Source IP:</label>
+                  <div class="row">
+                    <div class="col-md-9">
+                        <input type="text" class="form-control" required name="src_ip" id="src_ip">
+                    </div>
+                    <div class="col-md-3">
+                        <l id="validate_ip"></l>
+                    </div>
+                  </div>
+                </div><br><br>
+                <div class="form-group col-md-9">
+                  <label for="note">Note:</label>
+                  <textarea class="form-control" id="note" rows="4" name="note"></textarea>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="border:0px">
+            <button type="submit" value="submit" class="btn btn-success" style="float:right"  >Block</button>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+  </body>
+  <script src="/static/asset/bootstrap-select.min.js"></script>
+  <script src="/static/js/paging.js"></script>
+  
+  <script>
+
+    $(document).ready(function() {
+        $('#rules_table').paging({limit:5});
+    });
+
+    $("#control").addClass("active");
+    $("#sec_open").css('display','block');
+    $("#security").addClass("active");
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    function removePermanent(per_id){
+        if (confirm("Are you sure")){
+          window.location = '/security/remove/permanent/'+per_id
+        }
+      }
+      process_element = document.getElementById("crr_process")
+      console.log()
+    $(document).ready(function(){
+      $("#all").addClass('active')
+      $("#all").click(function(){
+        $("#all_table").removeClass('hidden')
+        $("#current_table").addClass('hidden')
+        $("#previous_table").addClass('hidden')
+      });
+      $("#c_block").click(function(){
+        $("#current_table").removeClass('hidden')
+        $("#all_table").addClass('hidden')
+        $("#previous_table").addClass('hidden')
+      });
+      $("#p_block").click(function(){
+        $("#previous_table").removeClass('hidden')
+        $("#all_table").addClass('hidden')
+        $("#current_table").addClass('hidden')
+      });
+      $("#permanent_table").DataTable({
+        "bLengthChange":false
+      });
+    })
+    // function ValidateIPaddress(ipaddress)
+    // {  
+    //   val = $("#src_ip").val()
+    //  if (/^(\d{0,3})\.(\d{0,3})\.(\d{0,3})\.(\d{0,3})$/.test(val))  
+    //   {  
+    //     return (true)  
+    //   }  
+    // alert("You have entered an invalid IP address!")  
+    // return (false)  
+    // }
+
+    data_table = ''
+      if (process_element){
+        function refreshProcess(){
+          if (data_table){
+            data_table.fnDestroy();
+            data_table.empty();
+            a = '<thead>'
+            a += '<tr><th class="hidden"></th><th>Source Ip</th><th>Host</th><th>Status</th><th></th></tr>'
+            a += '</thead>'
+            $("#status_table").append(a);
+          }
+            data_table = $('#status_table').DataTable({
+                  "bLengthChange": false,
+                  "bInfo": false,
+                  "bAutoWidth": false,
+                  "processing": false,
+                  // "searching": true,
+                   "ajax": {
+                       "processing": true,
+                       "url": "/security/get/current/processes",
+                       "dataType":"json",
+                       "type":"GET",
+                       "data":{
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                       },
+                       "dataSrc": ""
+                   },
+                   "aoColumns": [ { "bVisible":    false },null,null,null ,{ "mDataProp": null }],
+                   "columns": [
+                           { "": "fields.id" },
+                           { "": "fields.src_ip" },
+                           { "": "fields.host__host" },
+                           { "": "fields.status" },
+                           { "": null}
+                       ],
+                    "createdRow": function ( row, data, index ) {
+
+                      if ( (data[3] != 'initiated') && (data[3] != 'failed') ) {
+                          $('td', row).eq(3).html('<a href = "/security/status/data/removal/'+data[0]+'" class="label label-danger label-as-badge"><i class="fa fa-minus "></i></button>')
+                      }
+                      else{
+                          $('td', row).eq(3).html('') 
+                      }
+                  },
+                  // "columnDefs": [{
+                  //   "targets": -1,
+                  //   "data": null,
+                  //   "defaultContent": "<input type='checkbox' onclick='insert_eventid(this)' name='events_action[]'>"
+                  // },
+                  // {
+                  //   "targets": -3,
+                  //   "visible": false,
+                  //   "searchable": false
+                  //   },
+                  // {
+                  //   "targets": -4,
+                  //   "visible": false,
+                  //   "searchable": false
+                  //   },
+                  // ]       
+          });
+        }
+        // refreshProcess()
+        refreshProcess()
+        table = $("#status_table")
+        // setInterval(refreshProcess, 3000);
+      }
+      // $("#automatic_all").dataTable({
+      //   'bLengthChange':false,
+      //   "bInfo":false
+      // });
+      // $("#rules_table").dataTable({
+      //   'bLengthChange':false,
+      //   "bInfo":false
+      // });
+      // $("#automatic_previous").dataTable({
+      //   'bLengthChange':false,
+      //   "bInfo":false
+      // });
+
+      $('#automatic_previous').DataTable({
+                  "bLengthChange": false,
+                  "bInfo": false,
+                  "bAutoWidth": false,
+                  "processing": false,
+                  // "searching": true,
+                   "ajax": {
+                       "processing": true,
+                       "url": "/security/get/auto/previous/",
+                       "dataType":"json",
+                       "type":"GET",
+                       "data":{
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                       },
+                       "dataSrc": ""
+                   },
+                   "columns": [
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" }
+                       ],
+                        
+          });
+      $('#automatic_current').DataTable({
+                  "bLengthChange": false,
+                  "bInfo": false,
+                  "bAutoWidth": false,
+                  "processing": false,
+                  // "searching": true,
+                   "ajax": {
+                       "processing": true,
+                       "url": "/security/get/auto/current/",
+                       "dataType":"json",
+                       "type":"GET",
+                       "data":{
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                       },
+                       "dataSrc": ""
+                   },
+                   "columns": [
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" }
+                       ],
+                        
+          });
+      $('#automatic_all').DataTable({
+                  "bLengthChange": false,
+                  "bInfo": false,
+                  "bAutoWidth": false,
+                  "processing": false,
+                  // "searching": true,
+                   "ajax": {
+                       "processing": true,
+                       "url": "/security/get/auto/all/",
+                       "dataType":"json",
+                       "type":"GET",
+                       "data":{
+                          csrfmiddlewaretoken: '{{ csrf_token }}'
+                       },
+                       "dataSrc": ""
+                   },
+                   "columns": [
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" },
+                           { "": "" }
+                       ],
+                        
+          });
+
+    
+    $('.onoffswitch-label').click(function(){
+      tr = $(this).parent().parent().parent()
+      rule_no = tr.find('td:eq(0)').html()
+      // console.log(tr.find($(this).find("td.hidden").html()))
+      // console.log($(this).parent().parent().parent().first())
+      if(confirm('Are You Sure')){
+        $.ajax({
+          url:"/security/change/prevention/"+rule_no,
+          type:"POST",
+          dataType:"json",
+          data:{
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success : function(data1) {
+            $(this).parent().toggleClass('onoffswitch-checked');
+          },
+          // error : function(xhr,errmsg,err) {
+          //   alert(err);
+          // }
+        });
+        
+      }
+      else{
+        return false;
+      }
+    });
+    
+
+    </script>
+</html>

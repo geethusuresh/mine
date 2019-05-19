@@ -1,0 +1,92 @@
+{% extends "change_management/change_base.html" %}
+{% block title_content %} Change Report {% endblock title_content %}
+{% block page_head %} Change Management <small>| Status Reports </small>{% endblock page_head %}
+
+{% block bread_crumb %} <li class="active"> Status Reports </li>{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">Status Wise Reports</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <p class="text-center"><strong>Change Requests within the range {{start_date}} - {{end_date}} </strong></p>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div id="status_wise_report">
+                        
+                    </div>
+                    <div class="col-sm-12">
+                        <table class="table-table-striped">
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+{% block footer_content %}
+    <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+    <script src="/static/customer/moment.min.js"></script>
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script> 
+    <script>
+        $('#status_wise_report').highcharts({
+            chart: {
+                type: 'column',
+                backgroundColor:'#FFFFFF'
+            },
+            title: {
+                text: 'Status Wise Report'
+            },                                
+            xAxis: {
+                categories: {{x_val|safe}}
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: '(#) Change Requests'
+                }
+            },
+            tooltip: {
+                formatter: function() {
+                  return ''+
+                  this.x +': '+ this.y;
+                }
+            },                                 
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0,
+                    colorByPoint: true
+                },
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function (event) {
+                                console.log('status == ', this.category);
+                                window.open("/rfc/change_request_details/status/"+this.category+"/", "_blank", "toolbar=no, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
+                            }
+                        }
+                    }
+                }
+            },
+            series: [{
+                    name:"Status Wise Change Requests",
+                    data: {{y_val}}
+                }]
+            });
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        $('#change_report').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

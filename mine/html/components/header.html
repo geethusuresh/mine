@@ -1,0 +1,182 @@
+<header>
+    <a href="/" class="logo"><i class="fa fa-bolt"></i> <span style="font-family: marlabs">Oneconsole</span></a>
+    <nav class="navbar navbar-static-top">
+        <a href="#" class="navbar-btn sidebar-toggle">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </a>
+        <div class="navbar-header">
+            <form role="search" class="navbar-form" method="post" action="/psearch/">
+                <div class="input-group">
+                    <input type="text" style="height: 2.4em;" class="form-control" name="search" placeholder="Ticket Search..." required/>
+                    <span class="input-group-btn">
+                        <button type="submit" id="search-btn" class="btn"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+            </form>
+        </div>
+        <div class="navbar-right">
+            <ul class="nav navbar-top-links pull-right">
+                <li>
+                    {% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+                        <a href="#" data-toggle="modal" {% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles or "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %} onclick="fetch_impacted_airlines('{{profile.customer.id}}')" {% endif %} data-target="#forcust">
+                            <i class="fa fa-ticket fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Create New Ticket"></i>
+                        </a>
+                    {% else %}
+                        <a href="#" data-toggle="modal" data-target="#incident">
+                            <i class="fa fa-ticket fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Create New Ticket"></i>
+                        </a>
+                    {% endif %}
+                </li>
+                    {% comment %}
+                <li class="dropdown" >
+                    <a href="#" data-toggle="dropdown" class="dropdown-toggle" >
+                        <i class="fa fa-bell fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Notification Center"></i>
+                        <span class="badge badge-header badge-warning" id="counter">{{ac}}</span>
+                    </a>
+                    <!--Message dropdown menu-->
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-md with-arrow">
+                        <div class="pad-all bord-btm">
+                            <p class="text-lg text-muted text-thin mar-no"><l class="fa fa-bell"></l> Recent Notifications </p>
+                        </div>
+                        <div class="nano scrollable" style="min-height:150px">
+                            <div class="nano-content" >
+                                <ul class="head-list">
+                                    <!-- Dropdown list-->
+                                    <li>
+                                        <li id="noti"></li>
+                                    </li>
+                                    {% if not ac %}
+                                        <p class="text-center" style="margin-top:5%;color:#606060">no new notifications</p>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        <!--Dropdown footer-->
+                        <div class="pad-all bord-top">
+                            <a href="/notifications/" class="btn-link text-dark box-block">
+                                <i class="fa fa-angle-right fa-lg pull-right"></i>Show All Notifications
+                            </a>
+                        </div>
+                    </div>
+                </li>{% endcomment %}
+                <li class="dropdown"  ng-app="oneconsole"  ng-controller="notification">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle" ng-click="hidenotify">
+                                <i class="fa fa-bell fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Notification Center"></i>
+                                <span class="badge badge-header badge-warning" ng-show="count" ng-click="updateCount()">[[count]]</span>
+                            </a>
+
+                            <!--Message dropdown menu-->
+                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-md with-arrow" >
+                                <div class="pad-all bord-btm">
+                                    <p class="text-lg text-muted text-thin mar-no"><l class="fa fa-bell"></l> Recent Notifications </p>
+                                </div>
+                                <div class="nano scrollable" style="min-height:150px">
+                                    <div class="nano-content" >
+                                        <ul class="head-list">
+                                    
+                                            <!-- Dropdown list-->
+                                            <li ng-repeat="noti in data">
+                                                <!-- <li id="noti"></li> -->
+
+                                                <a class="media">
+                                                    <div class="media-body">
+                                                        <l class="pull-right fa fa-times-circle" ng-click="readme([[noti.id]], $event)"></l>
+                                                        <div>[[noti.notify]]</div>
+                                                        <!-- <small class="text-muted pull-right">15 minutes ago</small> -->
+
+                                                    </div>
+
+                                                </a>
+
+                                            </li>
+                                           <p ng-show="nonoti==true" class="text-center" style="margin-top:5%;color:#606060">no new notifications</p>
+                                    
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!--Dropdown footer-->
+                                <div class="pad-all bord-top">
+                                    <a href="/notifications/" style="text-decoration: none;" class="btn-link text-dark box-block">
+                                        <i class="fa fa-angle-right fa-lg pull-right"></i>Show All Notifications
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                {% if "oneconsole_help" in request.session.logged_user_priv  %}
+                <li>
+                    <a href="{% url 'help:help_details' %}?url_path={{ request.path }}" id="modal_sidehelp">
+                        <i class="fa fa-info fa-fw fa-lg" data-placement="right" data-toggle="tooltip" data-original-title="Help"></i> 
+                    </a>
+                </li>
+                {% endif %}
+                <li id="dropdown-user" class="dropdown">
+                    {% if "CustomerSDResolverAdminAccess" in request.session.logged_user_priv %}
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle text-right">
+                            <span class="pull-right">
+                                {% if profile.image %}
+                                <img class="img-circle img-user media-object" src="/media/{{profile.image}}" alt="Profile Picture">
+                                {% else %}
+                                <img class="img-circle img-user media-object" src="/static/img/photo.jpg" alt="Profile Picture">
+                                {% endif %}
+                            </span>
+                            <div class="username hidden-xs">{{profile.user.username}}</div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default">
+                            <ul class="head-list" >
+                                <li>
+                                    <a href="/customer/profile/">
+                                        <i class="fa fa-user fa-fw fa-lg"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/logout/">
+                                        <i class="fa fa-sign-out fa-fw"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle text-right">
+                            <span class="pull-right">
+                                <img class="img-circle img-user media-object" src="/static/img/photo.jpg" alt="Profile Picture">
+                            </span>
+                            <div class="username hidden-xs">{{profile.user.username}}</div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-md dropdown-menu-right with-arrow panel-default">
+                            <ul class="head-list" >
+                                {% if "FAQ_View" in request.session.logged_user_priv %}
+                                    <li>
+                                        <a href="/faq/view">
+                                            <span class="badge badge-danger pull-right"></span>
+                                            <i class="fa fa-dashboard fa-fw fa-lg"></i>FAQ
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    <a href="/profile/">
+                                        <i class="fa fa-user fa-fw fa-lg"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/two_factor_auth/setup/">
+                                        <i class="fa fa-lock fa-fw fa-lg"></i> Account Security
+                                    </a>
+                                </li>
+                               <li>
+                                    <a href="/logout/">
+                                    <i class="fa fa-sign-out fa-fw"></i> Logout
+                                </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+

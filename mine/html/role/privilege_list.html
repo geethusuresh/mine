@@ -1,0 +1,151 @@
+{% load humanize %}
+{% load zone %}
+
+{% include "role/role_add.html"%}
+{% include "role/role_manage.html"%}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Privilege List</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+    </style>
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/king-common.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body>
+<div class="top-bar">
+
+  <div class="container">
+    <div class="row">
+    <!-- logo -->
+    <div class="col-md-2 logo">
+      <h1 class="sr-only">Admin Dashboard</h1>
+    </div>
+    <!-- end logo -->
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+         </div>
+        <div class="col-md-9">
+          <div class="top-bar-right">
+            <a href="#" class="hidden-md hidden-lg main-nav-toggle"><i class="fa fa-bars"></i></a>
+            <button type="button" id="start-tour" class="btn btn-link"><i class="glyphicon glyphicon-user"></i>{{user.user}}</button>
+          </div>
+        </div>
+      </div>
+     </div>
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div>
+<div class="container"  >
+    <div class="row">
+      <div class="col-md-2 left-sidebar">
+
+            <!-- main-nav -->
+            <nav class="main-nav">
+              
+              <ul class="main-menu">
+              <img src="/static/img/logo.png">
+                {% include "side_bar/sidebar.html" %} 
+                <!-- <li  ><a href="/" class="js-sub-menu-toggle"><i class="glyphicon glyphicon-list-alt"></i><span class="text">List</span>
+                  <i class="toggle-icon fa fa-angle-left"></i></a>
+                  <ul class="sub-menu  ">
+                    <li  ><a href="/persongroupadmin/list/workgroup"><span class="text">Workgroup</span></a></li>
+                    <li><a href="/persongroupadmin/list/subgroup"><span class="text">Subgroup</span></a></li>
+                    <li  ><a href="/list/role"><span class="text">Role</span></a></li>
+                    <li  ><a href="/list/privilege"><span class="text">Privilege</span></a></li>
+                  </ul>
+
+                </li>
+              <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+
+                </li> -->
+              </ul>
+            </nav><!-- /main-nav -->
+            <div class="sidebar-minified js-toggle-minified">
+              <i class="fa fa-angle-left"></i>
+            </div>
+            <div class="sidebar-content">
+              
+            </div>
+          </div>
+          <div class="col-md-10 content-wrapper">
+            
+            
+            <!-- main -->
+            <div class="content">
+              <div class="main-header">
+                <h2>Privileges</h2>
+                <em>Add Details</em>
+              </div>
+
+              <div class="main-content">
+                <!-- WIDGET WIZARD -->
+                <div class="widget">
+                  <div class="widget-header"><h3><i class="fa fa-magic"></i>Privileges</h3>
+                  <a href="" data-toggle="modal" data-target="#add_role" class="btn btn-success btn-xs"  style=" float:right;margin-right:10px;margin-top:5px">Add New </a>
+                     <a href="" data-toggle="modal" data-target="#role_assign" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Assign Role</a>
+                     <a href="/role/remove" class="btn btn-success btn-xs"  style=" float:right;margin-right:5px;margin-top:5px">Person Role</a></div>
+                  <div class="widget-content">
+                    <div class="wizard-wrapper">
+                      <div id="demo-wizard" class="wizard">
+                        <div class="container"> 
+                        <div class="row">
+                          {% if messages %}
+                              {% for message in messages %}
+                              <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                              {% endfor %}
+                          {% endif %}
+                        </div>
+                        <fieldset>
+                          <div class="controls" style="width:400px;margin-left:20%">          
+                            </p>
+                            <div id="privilege_div">
+                              <table class="table" id="privilege_table">
+                                <tr>
+                                  <th>No</th>
+                                  <th>Privilege</th>
+                                  <th>Description</th>
+                                  <th></th>
+                                </tr>
+                                  {% for priv in privileges %}
+                                    <tr>
+                                      <td>{{ forloop.counter}}</td>
+                                      <td>{{ priv.privname }}</td>
+                                      <td>{{ priv.description }}</td>
+                                      <td><a href="/remove/role/privilege/{{ priv.id }}">Remove privilege from role</a></td>
+                                    </tr>
+                                  {% endfor %}
+                              </table>
+                            </div>
+                            </p>
+                          </div>
+                        </fieldset>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </body>
+
+</html>

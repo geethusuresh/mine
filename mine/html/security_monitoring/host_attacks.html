@@ -1,0 +1,317 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Events Timeline</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script type="text/javascript" src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+
+    <!--     chart js -->
+    <script src="/static/js/chart.min.js"></script>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/customer.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1><small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/security/host/details/">Host Details</a></li>                    
+                    <li class="active"> {{host_details.host}} </li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+              <div class="row">
+                 <div class="col-sm-12">
+                  {% if messages %}
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}                  
+                  {% endif %}
+                 </div>
+              </div>
+
+
+              <!-- <div class="row">
+                <div class="col-md-4 col-md-offset-8">
+                  <a class="btn btn-info pull-right" href="/security/dashboard">Dashboard</a>
+                </div>
+               
+              </div> -->
+
+
+              <br>
+                <!-- Start row-->
+                <div class="row">
+                    <!-- start First widgett-->
+                      <div class="col-md-3">
+                        <div class="box">
+                          <div class="box-title" style="background-color: white!important;">
+                            <h3 style="margin-left:35%">Host IP</h3>
+                          </div>
+                          <div class="box-body text-center">
+                            <h4 class="">{{host_details.host}}</h4>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-9">
+                        <div class="box">
+                          <div class="box-title " style="background-color: white!important;">
+                            <p class="text-center" style="font-size:15px">Events Graph (Last 24 Hour)</p>
+                          </div>
+                          <canvas id="buyers" style="width:100%" height="50"></canvas>
+                        </div>
+                      </div>
+                </div>
+                <!--End row --> 
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="box">
+                      <div class="box-title" style="background-color: white!important;">
+                        <h3 style="">Attackers (Last Week)</h3>
+                      </div>
+                      <div class="box-body ">
+                        <table class="table table-hover table-stripped no-padding" style="table-layout: fixed;    word-wrap: break-word;" id="attack_table">
+                            <thead>
+                               <tr>
+                                  <th>No</th>
+                                  <th>Source IP</th>
+                                  <th>Location</th>
+                                  <th>Total Attacks</th>
+                                  <!-- <th>Status</th> -->
+                                  <!-- <th>Insert time</th> -->
+                               </tr>
+                            </thead>
+                            <tbody>
+                               {% for attacker in attackers%}
+                                <tr style="cursor:pointer;" onclick="eventsPopup('{{attacker.key}}')">
+                                  <td>{{forloop.counter}}</td>
+                                  <td >{{ attacker.key }}</td>
+                                  <td>{{ attacker.location }}</td>
+                                  <td>{{ attacker.doc_count }}</td>
+                                </tr>
+                               {% endfor %}
+                            </tbody>
+
+                         </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>                         
+
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>     
+      {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/dashboard_footer.html" %}
+      {% endif %}   
+      
+      {% include "reports/reports_js.html" %}
+    </body>
+    <div class="modal fade" id="chart_popup"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" style="width:60%;">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="row" id="chart_change_div">
+                  <ul  class="test2 nav nav-pills nav-justified">
+                    <li class="active"><a data-toggle="pill" href="#tab1">Events from &nbsp&nbsp<b style="font-size:20px;" id="src_ip"></b></a></li>
+                    <!-- <li class=""><a data-toggle="pill" href="#chart_div">Events</a></li> -->
+                  </ul>
+                  <div class="tab-content ">
+                    <div class="tab-pane active"  id="tab1">
+                      <table class="table table-hover table-striped" style="table-layout: fixed;    word-wrap: break-word;" id="modal_events_table">
+                        <thead>
+                          <tr>
+                            <!-- <th>No</th> -->
+                            <th>Event Data</th>
+                            <th>Event Record Time</th>
+                            <th>Alert Level</th>
+                          </tr>
+                        </thead>
+                        <tbody>     
+                        </tbody>
+                      </table>
+                    </div>
+                    <div id="chart_div" class="col-md-8 tab-pane">
+                      sadfsdf
+                      <canvas id="events_from_ip" style="width:100%" height="50"></canvas>
+                    </div>
+                  </div>
+                
+              </div>
+            </div>
+          
+            <div class="modal-footer" style="border:0px">
+            
+            </form>
+            </div>
+            </div>
+        </div><!-- /.modal-content -->
+  </div>
+    <script type="text/javascript">
+    function eventsPopup(dat){
+      $("#src_ip").html(dat);
+      // console.log('{{host_details.host}}');
+      if($("#modal_events_table").hasClass('initialized')){
+          $('#modal_events_table').dataTable().fnDestroy();
+        }
+        else{
+          $("#modal_events_table").addClass('initialized')
+        }
+      $('#modal_events_table').dataTable( {
+              "bLengthChange": false,
+              "bFilter": false,
+              "bInfo": false,
+              "bAutoWidth": false,
+               "processing": true,
+               "ajax": {
+                   "processing": true,
+                   "url": "/security/host/events",
+                   "dataType":"json",
+                   "type":"POST",
+                   "data":{
+                      sourceip : dat,
+                      type : 'events',
+                      host : '{{host_details.host}}',
+                      event_time : '{{event_time}}',
+                      csrfmiddlewaretoken: '{{ csrf_token }}'
+                   },
+                   "dataSrc": ""
+               },
+               "columns": [
+                       // { "": "fields.server_name" },
+                       { "": "fields.0" },
+                       { "": "fields.1" },
+                       { "": "fields.2" },
+                   ],
+      } );
+      // $.ajax({
+      //   url:"/security/host/events/",
+      //   type:"POST",
+      //   dataType:"json",
+      //   data:{
+      //     sourceip : dat,
+      //     type : 'chart',
+      //     csrfmiddlewaretoken: '{{ csrf_token }}'
+      //   },
+      //   success : function(data1) {
+
+      //     labels = []
+      //     values = []
+      //     for (var key in data1){
+      //       labels.push(key);
+      //       values.push(data1[key]);
+      //     }
+      //     console.log("labels"+labels);
+      //     console.log("values"+values);
+      //     var data = {
+      //                 labels:labels,
+      //                 datasets: [
+      //                     {
+      //                         label: "My Second dataset",
+      //                         fillColor: "rgba(151,187,205,0.2)",
+      //                         strokeColor: "rgba(151,187,205,1)",
+      //                         pointColor: "rgba(151,187,205,1)",
+      //                         pointStrokeColor: "#fff",
+      //                         pointHighlightFill: "#fff",
+      //                         pointHighlightStroke: "rgba(151,187,205,1)",
+      //                         data: values
+      //                     }]
+      //               };
+      //     var eve_chart = document.getElementById('events_from_ip').getContext('2d');
+      //     console.log(eve_chart);
+      //     temp_ch = new Chart(eve_chart).Line(data);
+      //     console.log(temp_ch);
+      //     // console.log(values);
+      //   },
+      //   error : function(xhr,errmsg,err) {
+      //     alert(err);
+      //   }
+      // });
+      // return false;
+      $("#chart_popup").modal('show');
+    }
+    $(document).ready(function(){
+      $("#attack_table").dataTable({
+        "bLengthChange" :false,
+      });
+      $.ajax({
+        url:"/security/host/attacks/"+'{{host_details.id}}',
+        type:"POST",
+        dataType:"json",
+        data:{
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success : function(data1) {
+          console.log(data1)
+          labels = data1[1]
+          values = data1[0]
+          // for (var key in data1){
+          //   labels.push(key);
+          //   values.push(data1[key]);
+          // }
+          var data = {
+                      labels:labels,
+                      datasets: [
+                          {
+                              label: "My Second dataset",
+                              fillColor: "rgba(151,187,205,0.2)",
+                              strokeColor: "rgba(151,187,205,1)",
+                              pointColor: "rgba(151,187,205,1)",
+                              pointStrokeColor: "#fff",
+                              pointHighlightFill: "#fff",
+                              pointHighlightStroke: "rgba(151,187,205,1)",
+                              data: values
+                          }]
+                    };
+          var event_chart = document.getElementById('buyers').getContext('2d');
+          new Chart(event_chart).Line(data);
+        },
+      });
+      return false;
+    });
+    </script>
+</html>

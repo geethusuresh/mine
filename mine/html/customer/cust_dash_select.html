@@ -1,0 +1,198 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">    
+    <style type="text/css">
+      .border_panel{      
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);           
+      }
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/monitoring_header.html"%}
+    {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+    {% else %}
+      {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+        {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">                
+              <h1 class="text-thin">Customize Dashboard |<small> Step 1 : Select your widgets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+
+            <div id="floating-top-right" class="floating-container" style="margin-top:4%;display:none;" >
+              <div class="alert-wrap in animated jellyIn">
+                <div class="alert  alert-danger" role="alert">                  
+                  <div class="media">
+                    <div class="media-body">
+                      <h4 class="alert-title"></h4>
+                      <p class="alert-message"><strong>Please select atleast one widget</strong></p>
+                    </div>
+                  </div>
+                </div>
+              </div>              
+            </div>
+           
+
+
+            <div class="content">              
+
+              <div class="row col-sm-10" style="margin-left:10%; margin-top:5%">
+                
+                <div class="panel panel-dark panel-colorful">
+                    <div class="panel-heading">
+                      <div class="panel-control">
+                      </div>
+                      <h3 class="panel-title">Select widgets from below list</h3>
+                    </div>
+                    <div class="pad-ver">
+                    <form action="/customize/dashboard/select/" method="POST" onsubmit="return select_widgets()">{% csrf_token %}
+                      <ul class="list-group bg-trans list-todo mar-no">
+                        {% if "helpdesk" in request.session.logged_user_priv %}
+                        <div class="col-sm-12">
+                            <h4 class="panel-title">Heldesk</h4>
+                        </div>                                             
+                        <div class="col-sm-12">
+                          <div class="col-sm-4">
+                            <li class="list-group-item">
+                                <label class="form-checkbox form-icon form-text"><input type="checkbox" value="ticket_all" name="widget"> All Tickets</label>
+                            </li>
+                          </div>
+                          <div class="col-sm-4">
+                             <li class="list-group-item">
+                                <label class="form-checkbox form-icon form-text"><input type="checkbox" value="ticket_your" name="widget"> My Tickets</label>
+                              </li>
+                          </div>
+                          <div class="col-sm-4">
+                              <li class="list-group-item">
+                                <label class="form-checkbox form-icon form-text"><input type="checkbox" value="work_hours" name="widget"> Work Hours</label>
+                              </li>
+                          </div>
+
+                          <div class="col-sm-4">
+                            <li class="list-group-item">
+                              <label class="form-checkbox form-icon form-text"><input type="checkbox" value="ticket_new" name="widget"> New Tickets</label>
+                            </li>
+                          </div>
+                        </div>
+                        {% endif %}
+
+                         {% if "asset" in request.session.logged_user_priv %}
+                          <div class="col-sm-12">
+                            <h4 class="panel-title">Asset Management</h4>
+                          </div>
+                          <div class="col-sm-12">
+                              <div class="col-sm-4">
+                                  <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="asset_all" name="widget"> Assets</label>
+                                  </li>
+                              </div>
+                              <div class="col-sm-4">
+                                  <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="applications" value="application" name="widget">Applications</label>
+                                  </li>
+                              </div>
+                              <div class="col-sm-4">
+                                <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="count_ci" name="widget"> CI Count</label>
+                                </li>
+                              </div>                             
+                          </div>
+                         {% endif %}
+
+                         {% if "infrastructure" in request.session.logged_user_priv %}
+                          <div class="col-sm-12">
+                            <h4 class="panel-title">Infrastructure</h4>
+                          </div>
+                          <div class="col-sm-12">
+                            <div class="col-sm-4">
+                               <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" name="widget" value="datacenter"> DataCenter</label>
+                              </li>
+                            </div>
+                            <div class="col-sm-4">
+                                <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="host" name="widget">Hosts</label>
+                                </li>
+                            </div> 
+                          </div>
+                         {% endif %}
+
+                         {% if "security" in request.session.logged_user_priv %}
+                          <div class="col-sm-12">
+                            <h4 class="panel-title">Security</h4>
+                          </div>
+                          <div class="col-sm-12">
+                            <div class="col-sm-4">
+                                <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="events" name="widget"> Events</label>
+                                </li>
+                            </div>
+                            <div class="col-sm-4">
+                                <li class="list-group-item">
+                                  <label class="form-checkbox form-icon form-text"><input type="checkbox" value="blocked" name="widget"> Blocked IP</label>
+                                </li>
+                            </div>
+                            <div class="col-sm-4">
+                              <li class="list-group-item">
+                                <label class="form-checkbox form-icon form-text"><input type="checkbox" value="security" name="widget">Security</label>
+                              </li>
+                            </div>
+                          </div>
+                         {% endif %}
+                        
+                      </ul>
+                      <button type="submit" class="btn btn-success btn-lg" style="margin-left:700px">Next ></button>
+                      </form>
+                    </div>
+                   
+                  </div>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+    {% include "components/customer_footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script> 
+    <script type="text/javascript">
+      function select_widgets(){
+          if($('input[type=checkbox]:checked').length == 0){
+              $('#floating-top-right').show();
+              return false;
+          }
+          else{
+            $('#floating-top-right').hide();
+            return true;
+          }
+      }
+    </script>
+
+    </body>
+</html>

@@ -1,0 +1,127 @@
+{% load zone %}
+<html>
+    <body>
+        Hi Team,<br/><br/>
+ 
+        Please find the performance report and overview report. <br/><br/>
+        Note : The timestamp displayed below are based on timezone EST.<br/><br/>
+        Yellow - 50 % - 85 % completion <br/><br/>
+        Light red - 85 % - 99.99 % completion <br/><br/>
+        Red - SLA elapsed <br/><br/>
+        Report created time - {{ c_date|timeconversion}} EST<br/><br/>
+        {% if performance_report|length > 0 %}
+            <h4> <strong> <u>Performance Report </u>( Based on the overview report created on {{yesterday_date}} )</strong> </h4>
+            <table width="35%" style="border-collapse: collapse;">
+                <tr>
+                    <th align="center" style="text-align:center;background-color:#E26B0A;border:1px solid white;padding:1px;">Range</th>
+                    <th align="center" style="text-align:center;background-color:#E26B0A;border:1px solid white;padding:1px;"># Tickets</th>
+                    <th align="center" style="text-align:center;background-color:#E26B0A;border:1px solid white;padding:1px;"># Completed Tickets</th>
+                </tr>
+                {% for pf in performance_report %}
+                    <tr>
+                        <td align="center" style="text-align:center;background-color:#DDD9C4;border:1px solid white;padding:1px;">{{ pf.range }}</td>
+                        <td align="center" style="text-align:center;background-color:#DDD9C4;border:1px solid white;padding:1px;">{{ pf.tickets }}</td>
+                        <td align="center" style="text-align:center;background-color:#DDD9C4;border:1px solid white;padding:1px;">{{ pf.completion }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br/>
+            <br/>
+        {% endif %}
+        <h4> <strong> <u>Overview Report - {{ c_date|date:"d/m/Y"}}</u></strong> </h4>
+        <table width="100%" style="border-collapse: collapse;">
+            <tr>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">TicketId</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Customer</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Ticket Summary</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Workgroup</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Subgroup</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Team Lead</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Reported Date</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Affected Person</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Internal Priority</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Status</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Owner</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Expected Resolution</th>
+                <th align="center" bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Last Updated</th>
+            </tr>
+            {% if danger_cross|length > 0 %}
+                {% for ticket in danger_cross %}
+                    <tr>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.ticketid }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.customer.customername }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.summary }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.group.workgroup }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.subgroup.subgroupname }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.group.group_leader.user.email }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.reportdate|timeconversion }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.affectedperson }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.internalpriority }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.status|real }}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.owner }}</td>
+                        <!-- <td bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.targetfinish|timeconversion }}</td> -->
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{% calc_duration c_date ticket.targetfinish %}</td>
+                        <td align="center" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.changedate|timeconversion }}</td>
+                    </tr>
+                {% endfor%}
+            {% else %}
+                <tr><td colspan="13" align="left" bgcolor="#FF0000" style="border: 1px solid black; border-collapse: collapse;padding:10px;"> There are no tickets under this category. </td></tr>
+            {% endif %}
+            {% if middle_cross|length > 0 %}
+                {% for ticket in middle_cross %}
+                    <tr>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.ticketid }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.customer.customername }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.summary }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.group.workgroup }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.subgroup.subgroupname }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.group.group_leader.user.email }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.reportdate|timeconversion }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.affectedperson }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.internalpriority }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.status|real }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.owner }}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{% calc_duration c_date ticket.targetfinish %}</td>
+                        <td align="center" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.changedate|timeconversion }}</td>
+                    </tr>
+                {% endfor%}
+            {% else %}
+                <tr><td colspan="13" align="left" bgcolor="#FFA500" style="border: 1px solid black; border-collapse: collapse;padding:10px;"> There are no tickets under this category. </td></tr>
+            {% endif %}
+            {% if light_cross|length > 0 %}
+                {% for ticket in light_cross %}
+                    <tr>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.ticketid }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.customer.customername }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.summary }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.group.workgroup }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.subgroup.subgroupname }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.group.group_leader.user.email }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.reportdate|timeconversion }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;text-decoration:none">{{ ticket.affectedperson }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.internalpriority }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.status|real }}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.owner }}</td>
+                        <!-- <td bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.targetfinish|timeconversion }}</td> -->
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{% calc_duration c_date ticket.targetfinish %}</td>
+                        <td align="center" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;">{{ ticket.changedate|timeconversion }}</td>
+                    </tr>
+                {% endfor%}
+            {% else %}
+                <tr><td colspan="13" align="left" bgcolor="#FFFF00" style="border: 1px solid black; border-collapse: collapse;padding:10px;"> There are no tickets under this category. </td></tr>
+            {% endif %}
+        </table>
+        <br/>
+        <br/>
+        Thanks & Regards,<br/>
+        MARLABS IT Support<br/><br/>
+
+        Marlabs Software Private Limited<br/>
+        Bagmane World Technology Center, 14th Floor, Citrine Block - 4, Marathalli Outer Ring Road, Doddanakundi Village | Mahadevapura | Bangalore - 560 048 | India<br/>
+        Tel:+91-80-67229750 | VoIP: 732-694-1000 Ext: 4357<br/>
+        Email : helpdesk@marlabs.com | gcc@marlabs.com<br/>
+        www.marlabs.com<br/><br/>
+
+        Note : This is an auto generated email. Please do not reply to this email.<br/>
+    </body>
+</html>

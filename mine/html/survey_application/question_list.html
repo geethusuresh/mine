@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Questions</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Survey | <small>Questions</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Questions</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        <a href="/survey/add_question/" class="btn btn-info pull-right">Add Question</a><br/>
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Questions</h3>
+                        </div>
+                        <div class="panel-body" >
+                            {% if object_list|length > 0 %}
+                                <table class="table table-striped" id="table_questions">
+                                    <thead>
+                                        <tr>
+                                            <th> Question</th>
+                                            <th> Type</th>
+                                            <th> Choices</th>
+                                            <th> Edit </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for question in object_list %}
+                                            <tr>
+                                                <td>{{ question.question }}</td>
+                                                <td>{{ question.question_type }}</td>
+                                                <td>
+                                                    {% if question.choices.all|length > 0 %}
+                                                        <ul style="list-style:none;padding-left: 10px;">
+                                                            {% for choice in question.choices.all %}
+                                                                <li>{{ choice.choice_name }} - {{ choice.point }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endif %}
+                                                </td>
+                                                <td><a href="/survey/edit_question/{{question.id}}/"><i class="fa fa-edit"></i></a></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'components/footer.html' %}
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_quests').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+            $('#table_questions').dataTable()
+        </script>
+    </body>
+</html>

@@ -1,0 +1,21 @@
+{% load zone %}
+<table class="table table-striped" id="assess_tabl">
+    <thead>
+        <tr>
+            <th>View</th>
+            <th>Assessment ID</th>
+            <th>Change ID</th>
+            <th>Created Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assess_req in assessments %}
+            <tr>
+                <td><a href="/rfc/assessment_details/{{assess_req.id}}/" class="btn btn-success" data-toggle="tooltip" data-original-title="View" data-placement="bottom"><i class="fa fa-edit"></i></a></td>
+                <td>{{assess_req.assessment_id}}</td>
+                <td><a href="/rfc/details/{{assess_req.change_req.id}}/">{{assess_req.change_req.change_id}}</a></td>
+                <td>{% tzone assess_req.created_date %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

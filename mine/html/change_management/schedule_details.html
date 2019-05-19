@@ -1,0 +1,116 @@
+{% load zone %}
+<div class="col-md-12 row">
+    <div class="btn-group diff-btn">
+        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#create_task" {% if view_status == True and rfc.status == 'SCHED' %} {% else %} disabled {% endif %}><i class="fa fa-file-text" aria-hidden="true"></i> Create Task</a>
+        {% if rfc.change_type == 'Normal' or rfc.change_type == 'Standard' %}
+            <a href="#" class="btn btn-default" data-toggle="modal" data-target="#add_approvers" {% if view_status == True and rfc.status == 'SCHED' %} {% else %} disabled {% endif %}><i class="fa fa-user-plus" aria-hidden="true"></i> Add Approvers</a>
+        {% endif %}
+
+        <a href="/rfc/change_window/{{rfc.id}}/" class="btn btn-default" {% if view_status == True and rfc.status == 'SCHED' %} {% else %} disabled {% endif %} target="_blank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> View Conflicts</a>
+
+        <a href="/rfc/proceed_to_next_phase/{{rfc.id}}/" class="btn btn-default" {% if view_status == True and rfc.status == 'SCHED' %} {% else%} disabled {% endif %}> <i class="fa fa-arrow-right" aria-hidden="true"></i> Proceed to Next Phase</a>
+
+        <a href="/rfc/cancel_change/{{rfc.id}}/" class="btn btn-default" {% if view_status == True and rfc.status == 'SCHED' %} {% else%} disabled {% endif %} ><i class="fa fa-ban text-danger" aria-hidden="true"></i> Cancel Change</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12" style="margin-top:10px;">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a data-toggle="tab" href="#sch_tasks">
+                    <i class="fa fa-lg"></i> Scheduled Tasks
+                </a>
+            </li>
+            {% if rfc.change_type == 'Normal' or rfc.change_type == 'Standard' %}
+                <li>
+                    <a data-toggle="tab" href="#sch_appr">
+                        <i class="fa fa-lg"></i> Schedule Approvers
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+
+        <div class="tab-content"style="padding: 25px 20px;">
+            <div class="tab-pane fade in active" id="sch_tasks">
+                <table class="table table-stripped" id="sched_task_table">
+                    <thead>
+                        <tr>
+                            <th>TaskID</th>
+                            <th>Task Title</th>
+                            <th>Scheduled Start</th>
+                            <th>Scheduled Finish</th>
+                            <th>Created Date</th>
+                            <th>Implementer</th>
+                            <th>Task Status</th>
+                            {% if is_change_manager == True or rfc.owner == profile %}
+                                {% if rfc.status == 'SCHED' or rfc.status == 'AUTH' or rfc.status == 'CAB' or rfc.status == 'IMPL' %}
+                                    <th>Delete</th>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tsk in scheduled_tasks %}
+                            <tr>
+                                <td><a href="/task/details/{{tsk.task.id}}/" data-toggle="tooltip" data-placement="bottom" class="btn btn-success btn-sm" data-original-title="View/Edit" target="_blank"><i class="fa fa-edit "> {{tsk.task.taskid}}</i></a></td>
+                                <td>{{tsk.task.task_name}}</td>
+                                <td>{% tzone tsk.task.scheduled_start %}</td>
+                                <td>{% tzone tsk.task.scheduled_finish %}</td>
+                                <td>{% tzone tsk.task.created_date %}</td>
+                                <td>{{ tsk.task.owner }}</td>
+                                <td>{{ tsk.task.status }}</td>
+                                {% if is_change_manager == True or rfc.owner == profile %}
+                                    {% if rfc.status == 'SCHED' or rfc.status == 'AUTH' or rfc.status == 'CAB' or rfc.status == 'IMPL' %}
+                                        <td><a data-toggle="tooltip" data-placement="bottom" class="btn btn-danger btn-sm" data-original-title="Delete" target="_blank" onclick="delete_task('{{tsk.task.id}}')"><i class="fa fa-trash "></i></a></td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="sch_appr">
+                <table class="table table-stripped" id="sch_app">
+                    <thead>
+                        <tr>
+                            <th>Approver Domain</th>
+                            <th>Approver Subdomain</th>
+                            <th>Created Date</th>
+                            <th>Level</th>
+                            <th>Approver</th>
+                            <th>Approved Date</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sch_appr in schedule_approvers %}
+                            <tr>
+                                <td>{{sch_appr.group}}</td>
+                                <td>{{sch_appr.subgroup}}</td>
+                                <td>{% tzone sch_appr.created_date %}</td>
+                                <td>{{sch_appr.approval_level}}</td>
+                                <td>{{sch_appr.approver}}</td>
+                                <td>{% tzone sch_appr.approved_date %}</td>
+                                <td>
+                                    {% if sch_appr.status == True %}
+                                        Approved
+                                    {% elif sch_appr.status == False %}
+                                        Rejected
+                                    {% else %}
+                                        Not yet approved
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/rfc/remove_approver/{{sch_appr.id}}/" class="btn btn-danger">
+                                    Remove
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,243 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | FAQ</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">FAQ | <small>Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">FAQ</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-9">
+                  <form action="/faq/search/" method="post">{% csrf_token %}
+                    <div class="col-sm-7">
+                      <input type="text" name="faq_search" id="" class="form-control" placeholder="Search Keyword"  required maxlength="50">
+                    </div>
+                    <div class="col-sm-5">
+                      <button id="delay" type="submit" class="btn btn-success btn-huge" style="width:120px">Search</button>
+                    </div>
+                  </form>
+                 </div>
+              </div>
+              <br>
+              <div class="row">
+                <div class="col-sm-3">
+                  <div class="box">
+                    <div class="box-title">
+                    <h3> Faq Categories</h3>
+                    </div>
+                    <div class="box-body">
+                      <select class="form-control" id="faq_cat_list" style="margin-left:10%;max-width:80%">
+                          <option value="">Select Category</option>
+                          {% for categories in faq_cat %}
+                            <option value="{{ categories.id }}">{{ categories.category }}</option>
+                          {% endfor %}
+                      </select><br>
+                      <select class="form-control" id="faq_subcat_list" style="margin-left:10%;max-width:80%" >
+                          <option>--Select Subcategory--</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                </div>
+
+                <div class="col-sm-2 pad-btm" >  
+                  <div >
+                  <a href= "/faq/add" class="btn btn-info" style="margin-top:3px;width:100%"><i  ></i><span class="text" > Add Faq </span></a>
+                  </div>                  
+                 </div>
+
+                <div class="col-sm-9">
+                  <div class="box">
+                    <div class="box-title">
+
+                      <h3>Available Faq's</h3>
+                    </div>
+                    <div class="box-body">
+                      <table class="table" id ="tbldetails">
+                      {% for faq in faq_all %}
+                        <thead><tr>
+                          <th>Q {{forloop.counter}} : {{ faq.faqquestion }}</th>
+                          
+                          </tr>
+                        </thead>                        
+                        <tbody><tr>
+                          <td>Ans {{forloop.counter}} : {{ faq.faqanswer }}</td> </tr>
+                          <td>
+                          {% if faq.faqattachment %} 
+                          <a href="/media/{{faq.faqattachment}}" target="_blank" /><img src = "/static/img/pdf.png ">{{ faq.faqtitle }}</a>
+                          {% endif %}
+                          <a href="" id = "delete" class ="glyphicon glyphicon-trash" style ="float:right" title="Click to delete category" onClick=" return confirmdelete({{faq.id}});"></a>
+                          </td>
+                          <td>
+                          <a href="/faq/edit/{{ faq.id}}" class ="glyphicon glyphicon-pencil" style= "float:right;min-width:20%" title = "Click to edit a category"></a>
+                          </td>                          
+                          </tr>
+                        </tbody>
+                        {% endfor %}
+                      </table>
+                      <div class="row">
+                      <div class="col-md-10">
+                      </div>
+           
+
+
+
+                     <!--Start Pagination -->
+                    <div class="row">
+                      <div class="col-md-6">
+                      </div>
+                      <div class="col-md-6">
+                        <div class="dataTables_paginate paging_bootstrap">
+                          <ul class="pagination">                      
+                            <li class="prev">
+                            {% if faq_all.has_previous %}
+                              <a href="?page={{ faq_all.previous_page_number }}">←</a>
+                              {% endif %}
+                            </li>
+                            <li class="active">
+                              <a href="">{{ faq_all.number }}</a>
+                            </li>
+                            <li class="next">
+                            {% if faq_all.has_next %}
+                            <a href="?page={{ faq_all.next_page_number }}">→</a>
+                            {% endif %}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      </div>
+                      <!--End Pagination -->
+                    </div>
+                    </div>
+
+
+
+                  </div>
+                </div>
+                
+              </div>        
+
+            </div>
+          </div>
+        </div>
+        
+    {% include "components/footer.html"%}
+   {% include "components/service_request.html"%}
+    </body>
+
+  <script type="text/javascript">
+     $(document).ready(function(){ 
+
+       $("#faq_cat_list").on('change', function(){   
+        var id = $('#faq_cat_list').val(); 
+        // var sub_id =  //alert(id);
+        $.ajax({
+          url:"/faq/adminview",
+          type:"POST",
+          data:{cat_id:id,
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){
+            //data = JSON.parse(data);
+            $("#faq_subcat_list option:gt(0)").remove();
+            if(data.length==2){
+              sub_list = JSON.parse(data[0]);
+              detail_list = JSON.parse(data[1]);
+              for (var i=0; i<sub_list.length;i++){
+                 $('#faq_subcat_list').append('<option value="'+sub_list[i].pk+'">'+sub_list[i].fields['subcategory']+'</option>');
+              }
+            }
+            else{
+              detail_list = JSON.parse(data[0]);
+            }  
+            $('#tbldetails').empty();
+            if ($.isEmptyObject(detail_list)){
+            $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>'+"No records found"+'</th></tr></thead>');                      
+            }else{     
+                    for(var j=0,i=1;j<detail_list.length; j++,i++){
+                    $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>Q '+i+' '+':'+detail_list[j].fields['faqquestion']+'</th></tr></thead><tbody><tr><td>Ans '+i+''+':'+detail_list[j].fields['faqanswer']+'</td></tr><tr><td><a href="/media/'+detail_list[j].fields['faqattachment']+'" target="_blank"><img src="/static/img/pdf.png "/>'+detail_list[j].fields['faqtitle']+'</a></td><td><a href="/faq/edit/'+detail_list[j].pk+'" class ="glyphicon glyphicon-pencil" style= "float:right;min-width:20%" title = "Click to edit a category"></a></td><td><a href="/faq/delete/'+detail_list[j].pk+'" class ="glyphicon glyphicon-trash" style= "float:right;min-width:20%" title = "Click to delete a category" onClick=" return confirmdelete('+detail_list[j].pk+');"></a></td></tr></tbody></table>');
+                }
+              }
+            
+            console.log(data);
+           
+          },
+          error:function(xhr,errmsg,err){
+            alert(err);
+          }
+        });
+        return false;
+       });
+    
+      $('#faq_subcat_list').on('change', function(){
+         // alert('ggf');
+          var sub_id = $('#faq_subcat_list').val(); //alert(sub_id);
+          $.ajax({
+            url:"/faq/adminview",
+            type:"POST",
+            data:{subcat_id:sub_id,
+                  c_id:$('#faq_cat_list').val(),
+                  csrfmiddlewaretoken:'{{csrf_token}}'},
+          
+            success:function(data){
+              // $("#faq_cat_list option:gt(0)").remove();
+              detail_list = JSON.parse(data);
+              $('#tbldetails').empty();
+              if ($.isEmptyObject(detail_list)){
+                  $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>'+"No records found"+'</th></tr></thead>');                      
+               }else{
+               for(var j=0,i=1; j<detail_list.length; j++,i++){
+                  $('#tbldetails').append('<table class="table" id ="tbldetails"><thead><tr><th>Q '+i+' '+':'+detail_list[j].fields['faqquestion']+'</th></tr></thead><tbody><tr><td>Ans '+i+''+':'+detail_list[j].fields['faqanswer']+'</td><tr></tr><td><a href="/media/'+detail_list[j].fields['faqattachment']+'" target="_blank" ><img src="/static/img/pdf.png "/>'+detail_list[j].fields['faqtitle']+'</a></td><td><a href="/faq/edit/'+detail_list[j].pk+'" class ="glyphicon glyphicon-pencil" style= "float:right;min-width:20%" title = "Click to edit a category"></a></td><td><a href="/faq/delete/'+detail_list[j].pk+'" class ="glyphicon glyphicon-trash" style= "float:right;min-width:20%" title = "Click to delete a category" onClick=" return confirmdelete('+detail_list[j].pk+');"></a></td></tr></tbody></table>');
+               }
+             }
+             console.log.data();
+            },
+            error:function(xhr,errmsg,err){
+              //alert(err);
+            }
+          });
+          return false;
+      });
+         
+    });
+
+    function confirmdelete(id){
+      if (confirm("Are you sure you want to delete?")){
+        var url = "/faq/delete/"+id;
+        console.log(url);
+        window.location = url;
+        return false;
+      }else{
+          return false;
+
+      }
+    }
+    </script>
+    <script>
+    $("#faq").addClass("active")
+    </script>
+
+</html>

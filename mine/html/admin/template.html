@@ -1,0 +1,183 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+            <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">SD Settings | <small>Add Template</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Add SC Templates</li>
+                    </ol>
+                </div>
+                {% include 'components/msg_div.html' %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Add New Service Catalog Template</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <form action="/ticket/template/add" method="post" enctype="multipart/form-data">{% csrf_token %}
+                                        <input type="text" name="summ" id="" class="form-control" placeholder="Summary (Max 30 characters)"  required maxlength="50"><br>
+                                        <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <select class="form-control" name="customer" id="customer_data" required>
+                                                    <option value="">-Select-</option>
+                                                    {% for customer in customers %}
+                                                        <option value="{{customer.id}}">{{customer}}</option>
+                                                    {% endfor %}
+                                                </select><br/>
+                                                <select class="form-control" name="function_name" required>
+                                                    <option value="">-Select-</option>
+                                                    {% for t_privilege in template_privileges %}
+                                                        <option value="{{t_privilege.fun_id}}">{{t_privilege.fun_name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <br/>
+                                                <label>IT Manager Approval </label>
+                                                <input type="checkbox" name="is_approval">
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <select class="form-control" id="cat" name="category" required>
+                                                    <option value="">-Select category-</option>
+                                                </select><br> 
+                                                <select class="form-control" id="sub_category" name="subcat" required >
+                                                    <option value="">-Select Subcategory-</option>
+                                                </select><br>
+                                            </div>
+                                        </div>
+                                        <button id="delay" type="submit" class="btn btn-success btn-huge">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Currently rendering Templates</h3>
+                                </div>
+                                <div class="panel-body">
+                                    {% if templates|length == 0 %}
+                                        <div class="row text-center">
+                                            No data found
+                                        </div>
+                                    {% else %}
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Summary</th>
+                                                    <th>Category</th>
+                                                    <th>Customer</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for details in templates %}
+                                                    <tr>
+                                                        <td>{{ details.summary }}</td>
+                                                        <td>{{ details.category }}</td>
+                                                        <td>{{ details.customer.customername }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        <script>
+            $(document).ready(function(){
+                $("#customer_data").val('');
+                $("#customer_data").on('change',function(){
+                    $("#cat option:gt(0)").remove().end();
+                    $.ajax({
+                        url :"/category/enduser",
+                        type:"POST",
+                        dataype:"json",
+                        data:{custid: $("#customer_data").val(),
+                              csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }
+                    });
+                });
+            });
+        </script>
+        <script>
+            $(document).ready(function(){
+                $('#cat').on('change', function(){
+                    var catid = $('#cat').val(); 
+                    $.ajax({
+                        url :"/ticket/template/add",
+                        type:"POST",
+                        dataype:"json",
+                        data:{catty: catid,
+                        csrfmiddlewaretoken:'{{csrf_token}}'},
+                        success:function(data){            
+                            $("#sub_category option:gt(0)").remove();
+                            cat_list = JSON.parse(data);
+                            for (var i in cat_list){
+                                $("#sub_category").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+                            }
+                        },
+                        error: function(xhr,errmsg,err){
+                            alert(xhr);
+                        }       
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

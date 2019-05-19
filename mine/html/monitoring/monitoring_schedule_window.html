@@ -1,0 +1,359 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Hostgroup - Customer Mapping</title>
+    {% include "components/css.html"%} 
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap_cmb_datepicker.css">     
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-datetimepicker.min.css"> 
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">  
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Schedule Maintenance<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Schedule Maintenance</li>
+                </ol>
+            </div>
+            <div class="content">
+              <div class="col-sm-12">
+                {% if messages %}               
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success">{{ message|safe }}</div>
+                    {% else %}
+                    <div class="alert alert-danger">{{ message|safe }}</div>
+                  {% endif %}
+                  {% endfor %}               
+                {% endif %}
+              </div>
+              <div class="col-sm-12">               
+                  <div class="row" style="margin-top:10px;">
+                    <div class="col-sm-12">
+                       <div class="box">
+                        <div class="box-title">                                  
+                          <h3>
+                          {% if op == "update" %}
+                            Update Hostgroup - Customer Mapping
+                          {% else %}
+                            Configure Maintenance Window
+                          {% endif %}
+                          </h3>                                  
+                        </div>
+                        <div class="box-body">
+                          <form method="post" action="/advanced_monitoring/scheduled_window/">
+                          {% csrf_token %}
+                            <fieldset>
+                            <div class="controls" style="text-align:center;">
+                              <div class="row">
+                                  <div class="col-sm-12" style="margin-top:10px;">
+                                    <select class="form-control" id="customer" name="customer" required style="width:300px;display: block;margin: 0 auto;" onchange="select_hostgroup()">
+                                      <option value="">Select Customer</option>
+                                        {% for customer in customers %}
+                                          {% if customer_sel.id == customer.id %}
+                                          <option value="{{customer.id}}" selected="selected">{{customer.customername }}</option>
+                                          {% else %}
+                                          <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                          {% endif %}
+                                        {% endfor %}
+                                      </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-sm-12" style="margin-top:10px;">
+                                      <select class="form-control" id="hostgroup" name="hostgroup" required style="width:300px;display: block;margin: 0 auto;" onchange="select_hosts()">
+                                        <option value="">Select Hostgroup</option>
+                                      </select>
+                                  </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-sm-8" style="margin-top:10px;">
+                                      <select class="form-control" id="hosts" name="hosts" required style="width:300px;display: block;margin: 0 auto;">
+                                        <option value="">Select Host</option>
+                                      </select>
+                                  </div>
+                                  <div class="col-sm-4" style="margin-top:10px;text-align:left;">
+                                     <a class="btn btn-success" onclick="select_items()">
+                                        Fetch Monitored items                                 
+                                      </a>
+                                      <img src="/static/img/ajax-loader.gif" id="monitored_items_graph_loader" style="display:none;margin-top:10px;" />
+                                  </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-sm-12" style="margin-top:10px;">
+                                    <select class="form-control" id="items" name="items[]" style="width:300px;height:200px;display: block;margin: 0 auto;" multiple required>
+                                    <option value="">Select Impacted Items</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div class="row">
+                                  <div class="col-sm-3" style="margin-top:10px;">
+                                    <div id="datetimepicker" class="input-append date">
+                                        <input type="text" name="startdate" id="startdate" required placeholder="Maintenance Startdate" readonly></input>
+                                        <span class="add-on">
+                                          <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+                                        </span>
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-1">
+                                  </div>
+                                  <div class="col-sm-3" style="margin-top:10px;">
+                                     <div id="datetimepicker1" class="input-append date">
+                                        <input type="text" required name="enddate" id="enddate" placeholder="Maintenance Enddate" readonly></input>
+                                        <span class="add-on">
+                                          <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+                                        </span>
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-1">
+                                  </div>
+                                  <div class="col-sm-4" style="margin-top:10px;">
+                                    <input type="text" class="form-control" name="ticket_number" id="ticket_number" placeholder="Ticket Number" required>
+                                  </div>
+                                </div>
+
+                                
+
+                                <div class="row">
+                                    <div class="col-sm-12" style="margin-top:10px;">
+                                        <textarea required class="form-control" placeholder="Enter your comments" style="" id="comments" name="comments"></textarea>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="update_id" value="{{map_id}}" />
+                                <div class="row" style="margin-top:10px;">
+                                  <div class="col-sm-12" style="text-align:right;">
+                                    {% if op == "update" %}
+                                      <input type="hidden" name="op" value="update" />
+                                      <button class="btn btn-success" type="submit">
+                                      Update
+                                    </button>                                        
+                                    {% else %}
+                                    <input type="hidden" name="op" value="Add" />
+                                    <button class="btn btn-success" type="submit">
+                                      Submit
+                                    </button>
+                                  {% endif %}
+                                  </div> 
+                                </div>
+                            </div>
+                            </fieldset>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <table class="table table-hover" id="hostgrp_table">
+                    <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Hostgroup</th>
+                      <th>Host</th>
+                      <th>Startdate</th>
+                      <th>Enddate</th>
+                      <th>Customer</th>
+                      <th>Status</th>                              
+                      <th>Delete</th>          
+                    </tr> 
+                    </thead>
+                    <tbody>
+                    {% for config_details in window_config_details  %}                              
+                      <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{config_details.hostgroup_name}}</td>
+                        <td>{{config_details.hostname}}</td>
+                        <td>{{config_details.startdate}}</td>
+                        <td>{{config_details.enddate}}</td>
+                        <td>{{config_details.customer.customername}}</td>                          
+                        {% if config_details.window_active %}
+                        <td>                                 
+                          <input value="{{config_details.window_id}}"  type="checkbox" name="window_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                        </td>
+                        {% else %}
+                        <td>                                  
+                          <input value="{{config_details.window_id}}" type="checkbox" class="switch" name="window_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                        </td>
+                        {% endif %}
+                        <td>
+                          <a href="/advanced_monitoring/delete_window/{{config_details.window_id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                        </td>
+                      </tr>
+                    {% endfor %}                              
+                    </tbody>
+                  </table>                                      
+                <!--End Hostgroup details -->                  
+              </div>             
+        </div>
+    {% include "components/footer.html"%}      
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+    </body>
+  <script type="text/javascript">
+      $("#mon_admin_main").addClass("active");
+      $("#mon_admin_sub").css({'display' : 'block'});
+      $("#sch_mainten").addClass("active"); 
+  </script> 
+
+    <script type="text/javascript">  
+    $(document).ready(function(){ 
+      $("#hostgrp_table").dataTable({
+        bLengthChange :false,
+        bInfo:false        
+      });
+    });
+
+    // $(function() {
+    //   $( "#startdate" ).datepicker({ dateFormat: "mm-dd-yy" });
+    //   $( "#enddate" ).datepicker({ dateFormat: "mm-dd-yy" });
+    // });
+
+   
+  // $(function() {
+  //   $('#datetimepicker1').datetimepicker({      
+  //     format: 'dd/MM/yyyy hh:mm:ss',
+  //     language: 'pt-BR'
+  //   });
+  // });
+
+  </script>
+
+  <script type="text/javascript">
+    $('#datetimepicker').datetimepicker({
+      format: 'dd/MM/yyyy hh:mm:ss',
+      language: 'pt-BR'
+    });
+
+    $('#datetimepicker1').datetimepicker({
+      format: 'dd/MM/yyyy hh:mm:ss',
+      language: 'pt-BR'
+    });
+  </script>
+  <script type="text/javascript">
+    var status=0;
+    $("input[name='window_status']").bootstrapSwitch();       
+    $('input[name="window_status"]').on('switchChange.bootstrapSwitch', function(event, state) {     
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/window_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/window_activate/'+this.value;
+        status = 1;
+      }
+    });
+
+    function select_hostgroup(){
+      var selected_customer = $('#customer').val();
+      $('#hostgroup').html('<option value="" disabled="disabled">Select Hostgroup Details</option>');
+      $('#hosts').html('<option value="" disabled="disabled">Select Hosts Details</option>');
+      $('#items').html('<option value="" disabled="disabled">Select Impacted Items</option>');      
+      $.ajax({
+            url:"/advanced_monitoring/customer_hostgroup/",
+            type: "POST",
+            dataType:"json",                      
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              selected_customer:selected_customer
+            },
+            success: function(data){
+              var hostgroup_details = '<option value="">Select Hostgroup Details</option>';  
+              $.each(data, function(key, val) {
+              var hostgrp_id = val.hostgroup_id;
+              var hostgrp_name = val.hostgroup_name;                 
+              hostgroup_details = hostgroup_details + '<option value="'+hostgrp_id+'">'+hostgrp_name+'</option>';
+              });
+              $('#hostgroup').html(hostgroup_details);              
+            },
+            error: function () {
+              $('#message_box_failed').html("Not able to fetch hostgroup details");
+              $('#message_box_failed').show(100);             
+            }
+      });     
+    }
+
+    function select_hosts(){
+      var selected_hostgroup = $('#hostgroup').val();
+      $('#items').html('<option value="">Select Impacted Items</option>');
+      $.ajax({
+            url:"/advanced_monitoring/hostgroup_hosts/",
+            type: "POST",
+            dataType:"json",                      
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              selected_hostgroup:selected_hostgroup
+            },
+            success: function(data){
+              var hosts_details = '<option value="">Select Hosts Details</option>';  
+              $.each(data, function(key, val) {
+              var host_id = val.hostid;
+              var host_name = val.host_name;                 
+              hosts_details = hosts_details + '<option value="'+host_id+'">'+host_name+'</option>';
+              });
+              $('#hosts').html(hosts_details);              
+            },
+            error: function () {
+              $('#message_box_failed').html("Not able to fetch host details");
+              $('#message_box_failed').show(100);             
+            }
+      });
+    }
+
+    function select_items(){
+      var host = $('#hosts').val();
+      $('#monitored_items_graph_loader').show();
+      $.ajax({
+            url:"/advanced_monitoring/select_hostitems/",
+            type: "POST",
+            dataType:"json",                      
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              selected_host:host
+            },
+            success: function(data){
+              $('#monitored_items_graph_loader').hide();
+              var items_details = '<option value="">Select Impacted Items</option>';  
+              $.each(data, function(key, val) {
+              var itemid = val.itemid;
+              var itemname = val.itemname;                 
+              items_details = items_details + '<option value="'+itemid+'">'+itemname+'</option>';
+              });
+              $('#items').html(items_details);              
+            },
+            error: function () {
+              $('#monitored_items_graph_loader').hide();
+              $('#message_box_failed').html("Not able to fetch item details");
+              $('#message_box_failed').show(100);             
+            }
+      });
+    }
+
+    function delete_item(){
+      if(confirm("Are you sure. You want to delete it? ")){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    </script>  
+</html>
+

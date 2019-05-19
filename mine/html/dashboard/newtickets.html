@@ -1,0 +1,193 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | New Tickets</title>
+    {% include "components/css.html"%}
+
+     <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+     
+      #cust_perm .dataTables_length{
+            margin-left: 55% !important;
+            margin-top: -26px;
+        }
+ 
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          {% include "components/msg_div.html" %}  
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Ticket Details | <small>New tickets</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">New Tickets</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+              <!-- New Interface of new tickets page -->
+              <div class="panel">
+                    <div class="panel-body">
+                        <!-- <h3 class="text-thin text-center">New Tickets</h3> -->
+                        <div class="col-md-3"><a href="#" class="btn btn-danger" onclick="is_selected(); return false;">Cancel Tickets</a></div>
+                        <div class="col-md-9" id="error_select_ticket" style="display:none"><label class="text-danger">Please select a ticket.</label></div>
+                       <table  class="table table-hover table-striped" id="new_ticket_table_id">
+                     <thead>
+                          <th><input type="checkbox" class="multi_cancel">Select All</th>
+                          <th>Edit</th>
+                          <th style="display:none">ID</th>
+                          <th>Ticket Id</th>
+                          <th>Ticket Summary</th>
+                          <th>Reported Date</th>
+                          <th>Reported Priority</th>
+                          <th>Status</th>
+                          <th>Affected Person</th>
+                          <th>Customer</th>
+                          <th>Source</th>
+                        </thead>
+                        <tbody>
+                        {% for details in tickets %}
+                        <tr>
+                          <td><input type="checkbox" name="mul_can" class="select"></td>
+                          <td><a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="bottom" title="View/Edit"  href="/ticket/status/edit/{{details.id}}">
+                              <i class="fa fa-edit"> </i>           
+                              </a></td>
+                          <td style="display:none">{{ details.id }}</td>
+                          <td>{% if details.affectedperson__id in vips %}
+                              <i class="fa fa-star" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="VIP Ticket"style="color: #d89801;margin-right:3px;"></i>
+                          {% endif %}{{details.ticketid }}</td>
+                          <td>{{ details.summary }}</td>
+                          <td><span style="display:none">{{details.reportdate.year}}{% if details.reportdate.month >= 10 %}{{ details.reportdate.month }}{% else %}0{{ details.reportdate.month }}{% endif %}{% if details.reportdate.day >= 10 %}{{details.reportdate.day}}{% else %}0{{details.reportdate.day}}{%endif%}{{details.reportdate.time | time}}</span>{% tzone details.reportdate %}</td>
+                          <td> {{ details.reportedpriority }}</td>
+                          <td> {{ details.status | real:details.customer__id}} </td>
+                          <td> {{ details.affectedemail|lower }} </td>
+                          <td> {{ details.customer__customername }} </td>
+                          <td> {{ details.source }} </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="cancel" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Cancel ticket </h4>
+                    </div>
+                    <div class="modal-body">
+                        <!-- <form action="/ticket/cancel/{{ticket.id}}" method="POST">{% csrf_token %}
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <input class="hidden" value="{{ticket.rowstamp}}" name="rowstamp">
+                            <button class="btn btn-warning" style="float:right;width:50%" type="submit">Cancel Ticket</button>
+                        </form> -->
+                        <form method="POST" action="/cancel/multiple/tickets/">
+                            {% csrf_token %}
+                            <input id="checked_list_data" type="hidden" name="checked_list_data">
+                            <textarea type="text" name="remark" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required></textarea><br>
+                            <input type="submit" value="Cancel Tickets" class="btn btn-danger">
+                        </form>
+                    </div>
+                    <div class="modal-footer" style="border:0px">
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% include "components/footer.html"%}
+    {% include "components/service_request.html" %}
+     <script type="text/javascript">
+        // $("#subc").css({'display' : 'inline-block'})
+        // $("#recent_close").addClass("active");
+          $("#tickets_main").addClass("active");
+          $("#tickets_nav").css({'display' : 'block'});
+          $("#newtet").addClass("active");
+        $(document).ready(function() {
+          $('#new_ticket_table_id').DataTable({
+            aaSorting: [[5, 'desc']],
+            "columnDefs": [
+                { "width": "10%", "targets": 3 },
+            ]
+          });
+        });
+      </script>
+        <script>
+            $('#new_ticket_table_id').on('click', 'td', function(){
+                var th = $(this).closest('table').find('th').eq( this.cellIndex );
+                var head_th = th.find("input");
+                if (head_th){
+                  var rows = $('#new_ticket_table_id').dataTable().fnGetNodes();
+                  var checked_list = []
+                  for(var i=0; i < rows.length; i++) {
+                      if ($(rows[i]).find('td:eq(0)').find('input.select')[0].checked) {
+                          checked_list.push($(rows[i]).find('td:eq(2)').text());
+                      }
+                  }
+                  $('#checked_list_data').val(checked_list);
+                }
+            });
+        </script>
+        <script>
+            $('.multi_cancel').on('change', function(){
+                var rows = $('#new_ticket_table_id').dataTable().fnGetNodes();
+                var checked_list = [];
+                if ($(this)[0].checked) {
+                    for(var i=0; i < rows.length; i++) {
+                        $(rows[i]).find('td:eq(0)').find('input.select')[0].checked = true;
+                        checked_list.push($(rows[i]).find('td:eq(2)').text());
+                    }
+                } else {
+                    for(var i=0; i < rows.length; i++) {
+                        $(rows[i]).find('td:eq(0)').find('input.select')[0].checked = false;
+                    }
+                }
+                $('#checked_list_data').val(checked_list);
+            });
+
+            function is_selected(){
+              if(jQuery('input[type=checkbox]:checked').length > 0){
+                $('#error_select_ticket').hide();
+                $('#cancel').modal('show');
+              }
+              else{
+                $('#error_select_ticket').show();
+              }
+            }
+
+            $('.select').on('change', function(){
+              if($(this).is(":checked") == false){
+                $('.multi_cancel').prop('checked', false);
+              }
+            });
+
+        </script>
+    </body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,76 @@
+{% load zone %}
+{% load tag_conversion %}
+
+<div class="row">
+    <div class="col-sm-12">
+        {% if rfc.status == 'ACC_CAT' %}
+            <div class="col-md-12 row">
+                <div class="btn-group diff-btn">
+                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#approve_req" {% if rfc.status == 'ACC_CAT' and is_change_manager == True %} {% else %} disabled {% endif %}><i class="fa fa-thumbs-up text-success" ></i> Approve / <i class="fa fa-thumbs-down text-danger" ></i> Reject Request </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Category : </dt>
+                    <dd>{{rfc.category.name}}</dd><br/>
+                    <dt>Subcategory : </dt>
+                    <dd>{{rfc.subcategory.name}}</dd><br/>
+                    <dt>Change Manager : </dt>
+                    <dd>{{rfc.changeapprovals_set.all.0.approver.user.email}} </dd><br/>
+                    <dt>Approved/Rejected Date: </dt>
+                    <dd>{% tzone rfc.changeapprovals_set.all.0.approved_time %}</dd>
+                </dl>
+            </div>
+            <div class="col-sm-6">
+                <dl class="dl-horizontal">
+                    <dt>Status : </dt>
+                    <dd>
+                        {% if rfc.is_approved %}
+                            <label class="label label-success" style="font-size:90%">Approved</label>
+                        {% elif rfc.is_approved == False %}
+                            <label class="label label-danger" style="font-size:90%">Rejected</label>
+                        {% endif %}
+                    </dd><br/>
+                    <dt>Remarks : </dt>
+                    <dd>{{rfc.changeapprovals_set.all.0.remarks|safe}}</dd>
+                </dl>
+            </div>
+        {% endif %}
+        {% if rfc.changemanagerchangelog_set.all|length > 0 %}
+            <div class="col-sm-12">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Change Log</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>Field</th>
+                                        <th>Old Value</th>
+                                        <th>New Value</th>
+                                        <th>Changed Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for change_field_log in rfc.changemanagerchangelog_set.all %}
+                                        <tr>
+                                            <td class="text-center">{{ forloop.counter }}</td>
+                                            <td>{% field_help_text change_field_log.field_name %}</td>
+                                            <td>{% instance_display_name change_field_log.old_value change_field_log.field_name %}</td>
+                                            <td>{% instance_display_name change_field_log.new_value change_field_log.field_name %}</td>
+                                            <td>{% tzone change_field_log.changed_date %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

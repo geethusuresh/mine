@@ -1,0 +1,995 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Task Details</title>
+        {% include "components/css.html"%}
+        <style>
+            @media screen and (max-width: 640px) {
+                table {
+                    overflow-x: auto;
+                    display: block;
+                }
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">
+        <style type="text/css">
+            .timeline-label {
+                background-color: #FFFFFF !important;
+            }
+            a:hover {
+                color: #515151;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Task | <small>Details</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Task Details</li>
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="panel panel-primary">
+                                <!--Panel heading-->
+                                <div class="panel-heading">
+                                    <div class="panel-control">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a data-toggle="tab" href="#task_details">
+                                                    <i class="fa fa-lg"></i> Task Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a data-toggle="tab" href="#task_log">
+                                                    <i class="fa fa-lg"></i> Task Logs
+                                                </a>
+                                            </li>
+                                            {% if task.related_tickets.all %}
+                                                <li>
+                                                    <a data-toggle="tab" href="#task_tickets">
+                                                        <i class="fa fa-lg"></i>Task Tickets
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            {% if task.taskworkhour_set.all %}
+                                                <li>
+                                                    <a data-toggle="tab" href="#task_workhours">
+                                                        <i class="fa fa-lg"></i>Work Hours
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            {% if is_change_manager == True or change_owner == profile %}
+                                                {% if is_task_edit %}
+                                                    <li>
+                                                        <a data-toggle="tab" href="#task_change_records">
+                                                            <i class="fa fa-lg"></i>Update Task
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <h3 class="panel-title">{{task.taskid}}</h3>
+                                </div>
+                                <!--Panel Body-->
+                                <div class="panel-body">
+                                    <div class="tab-content">
+                                        <div id="task_details" class="tab-pane fade in active">
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <label><strong>Title:</strong> </label>
+                                                    {{ task.task_name }}<br>
+                                                </div>
+                                                <div class="col-sm-2" style="border-left:1px solid black" >
+                                                    <h4>{{ task.taskid }}</h4>
+                                                    <label class="label label-success" style="font-size:14px" >{{task.status.status}}</label>
+                                                </div>
+                                             </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-sm-12"><br>
+                                                    <label><strong>Description:</strong>  </label>
+                                                    <p>{{ task.description }}</p>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6"> 
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Created Person :</dt>
+                                                        <dd>{{ task.created_person }}</dd>
+                                                        <br>
+                                                        <dt>Created Date :</dt>
+                                                        <dd>{% tzone task.created_date %}</dd><br>
+                                                        <dt>Ticket :</dt>
+                                                        <dd>{{ task.ticket}}</dd><br/>
+                                                        <dt>Initiated Date :</dt>
+                                                        <dd>{% tzone task.initiated_date %}</dd><br/>
+                                                        {% if task.sla %}
+                                                            <dt>Target Start :</dt>
+                                                            <dd>{% tzone task.target_start%}</dd><br/>
+                                                            <dt>Scheduled Start :</dt>
+                                                            <dd>{% tzone task.scheduled_start %}</dd><br/>
+                                                        {% endif %}
+                                                        <dt>Implementer : </dt>
+                                                        <dd>{{ task.owner }}</dd>
+                                                    </dl>
+                                                    <hr>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <dl class="dl-horizontal">
+                                                        <dt>Category :</dt>
+                                                        <dd>{{ task.category }}</dd>
+                                                        <br>
+                                                        <dt> SubCategory :</dt>
+                                                        <dd>{{ task.subcategory }}</dd><br>
+                                                        <dt>Domain :</dt>
+                                                        <dd>{{ task.group }}</dd><br>
+                                                        <dt>SubDomain :</dt>
+                                                        <dd>{{ task.subgroup }}</dd><br>
+                                                        {% if task.sla %}
+                                                            <dt>Target Finish</dt>
+                                                            <dd>{% tzone task.target_finish %}</dd><br/>
+                                                            <dt>Scheduled Finish</dt>
+                                                            <dd>{% tzone task.scheduled_finish %}</dd><br/>
+                                                        {% endif %}
+                                                        <dt>Priority : </dt>
+                                                        <dd>{{ task.priority }}</dd>
+                                                    </dl>
+                                                    <hr>
+                                                </div>
+                                            </div> 
+                                            <!-- SLA Dates -->
+                                        </div> 
+                                        <div id="task_log" class="tab-pane fade">
+                                            <h4 class="text-thin"><i class="fa fa-fw"></i> Task Worklog</h4>
+                                            <div class="row">
+                                                <div class="col-sm-1">
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <div class="timeline">
+                                                        <!-- Timeline header -->
+                                                        <div class="timeline-header">
+                                                            <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                                                            <div class="timeline-header-title bg-info">Now</div></a>
+                                                        </div>
+                                                        {% for activity in task.taskactivity_set.all %}
+                                                            <div class="timeline-entry">
+                                                                <div class="timeline-stat">
+                                                                    <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                                                                    </div>
+                                                                    <div class="timeline-time">{{activity.time}}</div>
+                                                                </div>
+                                                                <div class="timeline-label">
+                                                                    <!-- <p class="text-semibold">{{activity.owner}} - {{activity.remark}} </p> -->
+                                                                    <h5 class="pad-bottom" style="font-weight: 500;font-size:15px">
+                                                                        <a href="#">{{ activity.owner }}</a>
+                                                                        <span style="opacity: 0.6;">{{ activity.remark }}</span>
+                                                                    </h5>
+                                                                    {% if activity.taskattachment_set.all|length > 0 %}
+                                                                        <a href="/media/{{activity.taskattachment_set.all.0.attachment}}"  style="float:right" download="{{activity.taskattachment_set.all.0.attachment}}" class="glyphicon glyphicon-paperclip"></a>
+                                                                    {% endif %}
+                                                                    {% if activity.note %}<pre>{{ activity.note|safe }}</pre>{% endif %}
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-1"></div>
+                                            </div>
+                                        </div>
+                                        <div id="task_tickets" class="tab-pane fade">
+                                            <h4 class="text-thin panel-title text-center"><i class="fa fa-fw"></i> Task Tickets</h4>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <table class="table table-stripped" id="task_tickets_tab">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>TicketID</th>
+                                                                <th>Customer</th>
+                                                                <th>Ticket Summary</th>
+                                                                <th>Status</th>
+                                                                <th>Domain</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for ticket in task.related_tickets.all %}
+                                                                <tr>
+                                                                    <td>{{ticket.ticketid}}</td>
+                                                                    <td>{{ ticket.customer}}</td>
+                                                                    <td>{{ ticket.summary }}</td>
+                                                                    <td>{{ticket.status}}</td>
+                                                                    <td>{{ticket.domain}}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="task_workhours" class="tab-pane fade">
+                                            <h4 class="text-thin panel-title text-center"><i class="fa fa-fw"></i> Work Hours</h4>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <table class="table table-striped table-bordered" id="task_wh_tab">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Group</th>
+                                                                <th>Subgroup</th>
+                                                                <th>Added Date</th>
+                                                                <th>Owner</th>
+                                                                <th>Work Hour</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for task_wh_data in task.taskworkhour_set.all %}
+                                                                <tr>
+                                                                    <td>{{ task_wh_data.group.workgroup }}</td>
+                                                                    <td>{{ task_wh_data.subgroup.subgroupname }}</td>
+                                                                    <td>{% tzone task_wh_data.created_date %}</td>
+                                                                    <td>{{ task_wh_data.added_by.user.email }}</td>
+                                                                    <td>{{ task_wh_data.workhour }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="task_change_records" class="tab-pane fade">
+                                            <div class="col-md-12">
+                                                <form method="post" action="{% url 'edit_change_task' task.id %}">{% csrf_token %}
+                                                    <div class="col-sm-6">
+                                                        <label><strong>Task Title</strong></label>
+                                                        <input type="text" name="task_title"  class="form-control" required value="{{ task.task_name}}" />
+                                                        <label><strong>Category</strong></label>
+                                                        <select name="task_cat" id="task_cate" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                            {% for cat in categories %}
+                                                                <option value="{{cat.id}}" {% if cat.id == task.category.id %} selected {% endif %}>{{cat.name}}</option>
+                                                            {% endfor %}
+                                                        </select><br/>
+                                                        <label><strong>SubCategory</strong></label>
+                                                        <select name="task_subcat" id="task_sub_cat" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                        </select><br/>
+                                                        <label class="label label-success" ><strong>Change Start : </strong>{% tzone task.changerequesttask_set.all.0.change_req.scheduled_start %}</label><br/>
+                                                        <label><strong>Scheduled Start</strong></label>
+                                                        <p id="sched_star" class="display-none">{{ task.changerequesttask_set.all.0.change_req.scheduled_start|date:'m/d/Y H:i' }}</p>
+                                                        <div class='input-group date' id='datetimepicker12' >
+                                                            <input type='text' class="form-control"  id="schedu_start_dat_val" name="schedu_start" required value="{{ task.scheduled_start|date:'m/d/Y h:i'}}" />
+                                                            <input type="hidden" id="utc_date1" name="sched_start"/>
+                                                            <span class="input-group-addon">
+                                                                <span class="glyphicon glyphicon-calendar"></span>
+                                                            </span>
+                                                        </div><br/>
+                                                        <div id="blink_start" class="label label-danger text-center" style="display:none"> Please check the SCHEDULED START</div>
+                                                        <div id="blink_date_conflict" class="label label-danger" style="display:none">Please check the choosed date</div><br/>
+                                                        <label><strong>Priority</strong></label>
+                                                        <select name="task_priority" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                            <option value="Low" {% if task.priority == "Low" %} selected {% endif %}>Low</option>
+                                                            <option value="Medium" {% if task.priority == "Medium" %} selected {% endif %}>Medium</option>
+                                                            <option value="High" {% if task.priority == "High" %} selected {% endif %}>High</option>
+                                                        </select><br/>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <label><strong>Domain</strong></label>
+                                                        <select name="task_domain" id="task_doma" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                            {% for group in groups %}
+                                                                <option value="{{group.id}}" {% if task.group.id == group.id %} selected='true' {% endif %}
+                                                                >{{group.workgroup}}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label><strong>Subdomain</strong></label>
+                                                        <select name="task_sub_doma" id="task_sub_domain" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                        </select><br/>
+                                                        <label><strong>Implementer</strong></label>
+                                                        <select name="task_own" id="task_owner" class="form-control" required>
+                                                            <option value="">--Select--</option>
+                                                        </select><br/>
+                                                        <label class="label label-success" ><strong>Change Finish : </strong>{% tzone task.changerequesttask_set.all.0.change_req.scheduled_finish %}</label><br/>
+                                                        <label><strong>Scheduled Finish</strong></label>
+                                                        <p id="sched_fini" class="display-none">{{ task.changerequesttask_set.all.0.change_req.scheduled_finish|date:'m/d/Y H:i' }}</p>
+                                                        <div class='input-group date' id='datetimepicker2'>
+                                                            <input type='text' class="form-control"  id="schedu_finish_dat_val" required value="{{ task.scheduled_finish|date:'m/d/Y H:i'}}"/>
+                                                            <span class="input-group-addon">
+                                                                <span class="glyphicon glyphicon-calendar"></span>
+                                                            </span>
+                                                        </div><br/>
+                                                        <div id="blink_finish" class="label label-danger" style="display:none"> Please check the SCHEDULED FINISH</div>
+                                                        <input type="hidden" id="utc_date2" name="sched_finish"/><br/>
+                                                        <label><strong>Target CI</strong></label>
+                                                        <select name="task_ci" class="form-control">
+                                                            <option value="">--Select--</option>
+                                                            {% for ci in ci_list %}
+                                                                <option value="{{ci.id}}" {% if ci.id == task.changerequesttask_set.all.0.target_ci.id %} selected="true" {% endif %}>{{ci.name}}</option>
+                                                            {% endfor %}
+                                                        </select><br/>
+                                                    </div>
+                                                    <br/>
+                                                    <label><strong>Description</strong></label>
+                                                    <textarea name="task_desc" class="form-control" required>{{ task.description }}</textarea><br/>
+                                                    <button type="submit" class="btn btn-success" style="float:right" id="task_submit_test">Update Task</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="panel-group accordion" id="accordion">
+                                {% if task.status.status_number == "T8" %}
+                                    <div class="custom-box palette-peter-river" style="text-align:center">
+                                        <p>Task closed by {{task.owner.user.email}} </p>
+                                        <i class="fa fa-clock-o"></i>
+                                    </div>
+                                {% else %}
+                                    {% if task.target_finish %}
+                                        {% if sla_status == "within" %}
+                                            <div class="custom-box palette-peter-river" style="text-align:center">
+                                                <h4  id="clock"></h4>
+                                                <p>Time Left!</p>
+                                                <i class="fa fa-clock-o"></i>
+                                            </div>
+                                        {% elif sla_status == "crossed" %}
+                                            <div class="custom-box palette-alizarin" style="text-align:center">
+                                                <h4>Time up</h4>
+                                                <p>Sla Breached</p>
+                                                <i class="fa fa-info"></i>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="custom-box palette-nephritis" style="text-align:center">
+                                            <h4>No SLA</h4>
+                                            <p>Free to work</p>
+                                            <i class="fa fa-magic"></i>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                                {% if task.owner == profile and task.status.status_number in status_list_active and task.is_routine_task %}
+                                    <div class="panel" style="margin-bottom:10px">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title btn-success">
+                                                <a href="#" data-target="#reassign_task" class="text-center" data-toggle="modal" onclick="fetch_subgroups('{{ task.group.id }}', '{{ task.subgroup.id }}')">Reassign Task</a>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if "Helpdesk_Dashboard" in request.session.logged_user_priv or is_member == True %}
+                                    {% if task.status.status_number in status_list_active %}
+                                        <div class="panel" style="margin-bottom:5px">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title btn-success">
+                                                    <a href="#" class="text-center" data-toggle="modal" data-target="#add_task_log">Add Task Log</a>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                                {% if task.status.status_number == "T1" %}
+                                    <div class="panel">
+                                          <!--Accordion title-->
+                                        {% if task.owner %}
+                                            {% if task.owner == profile %}
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title btn-success">
+                                                        <a data-parent="#accordion" data-toggle="collapse" href="#collapseOne" aria-expanded="false" class="collapsed" style="text-align:center">Accept Task</a>
+                                                    </h4>
+                                                </div>
+                                                <!--Accordion content-->
+                                                <div class="panel-collapse collapse" id="collapseOne" aria-expanded="false" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <form action="/task/accept/{{task.id}}/" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                            <label>Remarks </label>
+                                                            <textarea name="remark" class="form-control" rows="4" cols="20" required></textarea>
+                                                            <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Accept</button> 
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if is_member == True  %}
+                                                {% if task.is_routine_task == True or task.is_normal_task == True %}
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title btn-pink">
+                                                            <a data-parent="#accordion" data-toggle="collapse" href="#collapseOne" aria-expanded="false" class="collapsed" style="text-align:center">Take Ownership</a>
+                                                        </h4>
+                                                    </div>
+                                                        <!--Accordion content-->
+                                                    <div class="panel-collapse collapse" id="collapseOne" aria-expanded="false" style="height: 0px;">
+                                                        <div class="panel-body">
+                                                            <form action="{% url 'task_ownership' task.id %}" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                                <label>Remarks </label>
+                                                                <textarea name="remark" class="form-control" rows="4" cols="20" required></textarea>
+                                                                <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Take Ownership</button> 
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel" style="margin-top:10px">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title btn-success">
+                                                                <a href="#" data-target="#assign_member" class="text-center" data-toggle="modal">Assign to Subgroup Member</a>
+                                                            </h4>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                {% elif task.status.status_number == "T10" %}
+                                    <div class="panel-group" id="accordion">
+                                        <div class="panel">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title btn-info">
+                                                    <a data-parent="#accordion" data-toggle="collapse" href="" class="collapsed" aria-expanded="false" style="text-align:center"><strong>Task owned by {{task.owner}} </strong></a>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        {% if task.owner == profile %}
+                                            <div class="panel">
+                                                {% if task.changerequesttask_set.all|length > 0 %}
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title btn-success" {% if task.changerequesttask_set.all.0.change_req.status == 'INPROG' %} {% else %} disabled="true" {% endif %} >
+                                                            <a id="accordion_href"data-parent="#accordion_accept" data-toggle="collapse" href="#collapseOne1" aria-expanded="false" class="collapsed" style="text-align:center" {% if task.changerequesttask_set.all.0.change_req.status == 'INPROG' %} {% else %} disabled="true" {% endif %} >Start Task</a>
+                                                        </h4>
+                                                    </div>
+                                                    <!--Accordion content-->
+                                                    <div class="panel-collapse collapse" id="collapseOne1" aria-expanded="false" style="height: 0px;">
+                                                        <div class="panel-body">
+                                                            <form action="/task/start/{{task.id}}/" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                                <label>Remarks </label>
+                                                                <textarea name="remark" class="form-control" rows="4" cols="20" required {% if task.changerequesttask_set.all.0.change_req.status == 'INPROG' %} {% else %} readonly {% endif %}></textarea>
+                                                                <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit" {% if task.changerequesttask_set.all.0.change_req.status == 'INPROG' %} {% else %} disabled="true" {% endif %}>Start</button> 
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title btn-danger">
+                                                            <a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed" aria-expanded="false" style="text-align:center">Start Task</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
+                                                        <div class="panel-body">
+                                                            <form action="/task/start/{{task.id}}/" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                                <label>Remarks </label>
+                                                                <textarea name="remark" class="form-control" rows="4" cols="20"></textarea>
+                                                                <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Start</button> 
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% elif task.status.status_number == "T9" %}
+                                    <div class="panel-group" id="accordion">
+                                        <div class="panel">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title btn-info">
+                                                    <a data-parent="#accordion" data-toggle="collapse" href="" class="collapsed" aria-expanded="false" style="text-align:center"><strong>Task started by {{task.owner}} </strong></a>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        {% if task.owner == profile %}
+                                            <div class="panel">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title btn-danger">
+                                                        <a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed" aria-expanded="false" style="text-align:center">Complete Task</a>
+                                                    </h4>
+                                                </div>
+                                                <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <form action="/task/complete/{{task.id}}/" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                            <label>Remarks </label>
+                                                            <textarea name="remark" class="form-control" rows="4" cols="20"></textarea>
+                                                            {% if task.changerequesttask_set.all|length > 0 or task.is_routine_task %}<br/>
+                                                                <label>Work Hours ( in minutes ) </label>
+                                                                <input type="number" name="work_hour" min="0" class="form-control" required>
+                                                                <br/>
+                                                            {% endif %}
+                                                            <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Complete</button> 
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% elif task.status.status_number == "T7" %}
+                                    <div class="panel">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title btn-info">
+                                                <a data-parent="#accordion" data-toggle="collapse" href="" class="collapsed" aria-expanded="false" style="text-align:center"><strong>Task completed by {{task.owner}} </strong></a>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    {% if task.owner == profile %}
+                                        {% if task.changerequesttask_set.all|length > 0 %}
+                                            <a href="#create_ticket" class="btn btn-success" style="width:100%; margin:10px 0px 10px 0px;" data-toggle="modal" >Create Ticket</a>
+                                        {% endif %}
+                                        <div class="panel">
+                                            <!--Accordion title-->
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title btn-danger">
+                                                    <a data-parent="#accordion" data-toggle="collapse" href="#collapseTwo" class="collapsed" aria-expanded="false" style="text-align:center">Close Task</a>
+                                                </h4>
+                                            </div>
+                                            <!--Accordion content-->
+                                            <div class="panel-collapse collapse" id="collapseTwo" aria-expanded="false" style="height: 0px;">
+                                                <div class="panel-body">
+                                                    <form action="/task/close/{{task.id}}/" method="POST" enctype="multipart/form-data">{% csrf_token %}  
+                                                        <label>Remarks </label>
+                                                        <textarea name="remark" class="form-control" rows="4" cols="20"></textarea>
+                                                        <button class="btn btn-success" style="width:100%;margin-top:2%;" type="submit">Close</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% elif task.status.status_number == "CLOSED" %}
+                                    <div class="panel">
+                                        <!--Accordion title-->
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title btn-danger">
+                                                <a data-parent="#accordion" data-toggle="collapse" href="" class="collapsed" aria-expanded="false" style="text-align:center">Task Closed</a>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% comment %}
+                                    {% if "Helpdesk_Dashboard" in request.session.logged_user_priv and task.ticket %}
+                                        <a href="/ticket/status/edit/{{task.ticket.id}}" class="btn btn-warning" style="margin-top:3px;width:100%"><i class="" ></i><span class="text" >Create New Task for - {{task.ticket.ticketid}}</span></a>
+                                    {% elif "Resolver_Dashboard" in request.session.logged_user_priv and task.ticket %}
+                                        <a href="/ticket/stat/{{task.ticket.id}}" class="btn btn-warning" style="margin-top:3px;width:100%"><i class="" ></i><span class="text" >Create New Task</span></a>
+                                    {% endif %}
+                                {% endcomment %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Assign to subgroup member -->
+        <div class="modal fade" id="assign_member" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Assign Task To Team Member</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'assign_task_member' task.id %}">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label>Assign To: </label>
+                                        <select class="form-control" name="owner_choosed" required>
+                                            <option value="">-Select Owner-</option>
+                                            {% for member in subgroup_members %}
+                                                <option value="{{ member.person.id }}">{{ member.person.user.email }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Remarks</label>
+                                        <textarea class="form-control" name="remarks" required></textarea>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <input type="submit" value="Assign" class="btn btn-success" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Reassign Task Modal -->
+        <div class="modal fade" id="reassign_task" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Reassign Task </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'reassign_task' task.id %}">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-6">
+                                        <label>Workgroup: </label>
+                                        <select class="form-control" name="new_group" required id="task_group">
+                                            <option value="">-Select Workgroup-</option>
+                                            {% for wg in groups %}
+                                                <option value="{{ wg.id }}" {% if task.group == wg %} selected {% endif %}>{{ wg.workgroup }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label>Subgroup: </label>
+                                        <select class="form-control" name="new_subgroup" required id="task_subgroup">
+                                            <option value="">-Select Subgroup-</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Remarks</label>
+                                        <textarea class="form-control" name="remarks" required></textarea>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <input type="submit" value="Reassign" class="btn btn-success" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- add task log -->
+        <div class="modal fade" id="add_task_log" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Add Task Log</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'add_task_log' task.id %}" enctype="multipart/form-data">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Remarks</label>
+                                        <textarea class="form-control" name="remarks" required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="file" name="log_attachment" class="file_data">
+                                        <span class="file_error_msg" style="color:red;"></span>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <input type="submit" value="Add Task Log" class="btn btn-success" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- create ticket modal comes here -->
+        <div class="modal fade" id="create_ticket" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button"  class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="ModalLabel">Create Ticket </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/rfc/task_related_ticket/{{task.id}}/">{% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label>Ticket Summary: </label>
+                                    <input type="text" name="tic_summ" class="form-control" required/><br/>
+                                    <label>Description: </label>
+                                    <textarea name="tic_desc" class="form-control" required></textarea><br/>
+                                    <label>Email: </label>
+                                    <input type="email" name="email" class="form-control" value="{{profile.user.email}}" required/><br/>
+                                    <div class="col-sm-6">
+                                        <label>Impact: </label>
+                                        <select class="form-control" name="priority" required>
+                                            <option value="">-Select Impact-</option>
+                                            <option value="High">High</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Low">Low</option>
+                                        </select><br/>
+                                        <label>Worklocation: </label>
+                                        <input type="text" name="work_loc" class="form-control" required/><br/>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label>Phone: </label>
+                                        <input type="text" name="ph" class="form-control" value="{{profile.phonenumber_set.all.0.primary}}" required/><br/>
+                                        <label>Workstation: </label>
+                                        <input type="text" name="work_statn" class="form-control" required/><br/>
+                                    </div>
+                                    <input type="submit" value="Create Ticket" class="btn btn-success" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html" %}
+        <script src="/static/customer/css/date/bootstrap-datetimepicker.js"></script>
+        <script src="/static/customer/moment.min.js"></script>
+        <script>
+            $(".close").click(function () { 
+                $("div").remove('.alert-wrap'); 
+            }); 
+        </script>
+        <script type="text/javascript" charset="utf8" src="/static/countdown/jquery.countdown.js"></script>
+        <script>
+            $("#clock").countdown("{% counter task.target_finish %}", function(event) {
+              $(this).text(
+                event.strftime('%D days %H:%M:%S')
+              );
+            });
+        </script>
+        <script>
+            $('#accordion_href').click(function(e){
+                if ('{{task.changerequesttask_set.all.0.change_req.status}}' == 'INPROG'){
+                    console.log("in progress");
+                } else {
+                    $("#collapseOne1").hide();
+                }
+            })
+        </script>
+        <script>
+            $('#task_tickets_tab').DataTable();
+        </script>
+        <script type="text/javascript">
+            function get_subgroup_list(workgroup, subgroup) {
+                $.ajax({
+                    url:"/persongroupadmin/remove/subgroup",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                        workgroupid : workgroup,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                        data = JSON.parse(data);
+                        for (var i in data){
+                            $("#task_subgroup").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}));
+                            if (subgroup) {
+                                $("#task_subgroup").val(subgroup);
+                            }
+                        }
+                    },
+                    error : function(xhr,errmsg,err) {
+                        alert(err);
+                    }
+                });
+            }
+        </script>
+        <script type="text/javascript">
+            function fetch_subgroups(group_id, subgroup_id){
+                $('#task_group').val(group_id);
+                $("#task_subgroup option:gt(0)").remove();
+                get_subgroup_list(group_id, subgroup_id);
+            }
+        </script>
+        <script type="text/javascript">
+            $("#task_group").on('change',function(){
+                if (this.value != "") {
+                    $("#task_subgroup option:gt(0)").remove();
+                    get_subgroup_list(this.value, '');
+                }
+            });
+        </script>
+        <script type="text/javascript">
+            var notAllowedFiles = ["exe", "rar", "dll"];
+            $('.file_data').bind('change', function() {
+                var validFileStatus = 0;
+                var ext = $('.file_data').val().split('.').pop().toLowerCase();
+                if(this.files[0].size>10000000){
+                    $(".file_error_msg").html('Upload error try again,  Check your file size (maximum 10mb is allotted)')
+                    $('.file_data').val("")
+                    validFileStatus = 1;
+                }
+                if(notAllowedFiles.indexOf(ext)!=-1){
+                    $(".file_error_msg").html('Upload error try again, exe,rar,dll file types are not allowed')
+                    $('.file_data').val("")
+                    validFileStatus = 1;
+                }
+                if(validFileStatus!=1){
+                    $(".file_error_msg").empty()
+                }
+            });
+        </script>
+        <script>
+            function get_subdomain_list(group_id) {
+                $.ajax({
+                    url:"/ticket/incident/create",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                        workgroupid : group_id,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success : function(data) {
+                        data = JSON.parse(data);
+                        for (var i in data){
+                            $("#task_sub_domain").append($('<option>', {value:data[i].pk,text:data[i].fields.subgroupname}))
+                        }
+                        $("#task_sub_domain").val('{{ task.subgroup.id}}');
+                    },
+                    error : function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+              });
+            }
+            $("#task_doma").on('change', function(){
+                $("#task_sub_domain option:gt(0)").remove().end();
+                $("#task_owner option:gt(0)").remove().end();
+                if($("#task_doma :selected").text()!='--Select--'){
+                    get_subdomain_list(this.value);
+                    return false;
+                }
+            });
+            $(document).ready(function(){
+                get_subdomain_list('{{task.group.id}}');
+                get_subgroup_members_list('{{task.subgroup.id}}');
+                get_subcategory_list('{{ task.category.id}}');
+            })
+        </script>
+        <script>
+            function get_subgroup_members_list(subgroup_id) {
+                $.ajax({
+                    url :"/subgroup/members/",
+                    type:"POST",
+                    dataype:"json",
+                    data:{
+                        "subgroup_id": subgroup_id,
+                        csrfmiddlewaretoken:'{{csrf_token}}'
+                    },
+                    success:function(data){
+                        $("#task_owner option:gt(0)").remove();
+                        member_list = data;
+                        for (var i in member_list){
+                            $("#task_owner").append($('<option>', {value:member_list[i].id, text:member_list[i].name}));
+                        }
+                        $("#task_owner").val('{{ task.owner.id}}')
+                    },
+                    error: function(xhr,errmsg,err){
+                        console.log(xhr);
+                    }
+                });
+            }
+            $('#task_sub_domain').on('change', function(){
+                $("#task_owner option:gt(0)").remove().end();
+                var subgroup_id = $('#task_sub_domain').val();
+                if($("#task_sub_domain").text()!='--Select--'){
+                    get_subgroup_members_list(subgroup_id);
+                }
+            });
+        </script>
+        <script>
+            function get_subcategory_list(subcategory_id) {
+                $.ajax({
+                    url :"/category/enduser",
+                    type:"POST",
+                    dataype:"json",
+                    data:{
+                        catty: subcategory_id ,
+                        csrfmiddlewaretoken:'{{csrf_token}}'
+                    },
+                    success:function(data){
+                        cat_list = JSON.parse(data);
+                        for (var i in cat_list){
+                            $("#task_sub_cat").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+                        }
+                        $("#task_sub_cat").val('{{task.subcategory.id}}');
+                    },
+                    error: function(xhr,errmsg,err){
+                    }
+                });
+            }
+            $('#task_cate').on('change', function(){
+                $('#task_sub_cat option:gt(0)').remove().end();
+                if ($('#task_cate').text() != '--Select--'){
+                    get_subcategory_list(this.value);
+                }
+            })
+            $(function () {
+                $('#datetimepicker12').datetimepicker({
+                    'sideBySide': true,
+                })
+                .on('change.dp', function (e) {
+                    $('#utc_date1').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+                })
+                .change(function (){
+                    $('#utc_date1').val(moment($('#schedu_start_dat_val').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                    check_task_scheduled_dates();
+                })
+            });
+            $(function () {
+                $('#datetimepicker2').datetimepicker({
+                    'sideBySide': true,
+                })
+                .on('change.dp', function (e) {
+                    $('#utc_date2').val(moment(e.date).format('MM/DD/YYYY hh:mm a'));
+                })
+                .change(function(){
+                    $('#utc_date2').val(moment($('#schedu_finish_dat_val').val()).utc().format('MM/DD/YYYY hh:mm a'));
+                    check_task_scheduled_dates();
+                })
+            });
+            function check_task_scheduled_dates(){
+                val_1 = new Date($('#utc_date1').val());
+                val_2 = new Date($('#utc_date2').val());
+                console.log(val_1.length, val_2.length);
+                if (val_1.length == 0) {
+                    $('#utc_date1').val() = $('#schedu_start_dat_val').val();
+                }
+                if (val_2.length == 0) {
+                    $('#utc_date1').val() = $('#schedu_finish_dat_val').val();
+                }
+                sched_1 = new Date($('#sched_star').text());
+                sched_2 = new Date($('#sched_fini').text());
+                console.log(sched_1, sched_2);
+                console.log(val_1,val_2)
+                var check_eligibility = false;
+                if (val_1) {
+                    if (val_1 >= sched_1 && val_1 <= sched_2){
+                        check_eligibility = true;
+                        $("#blink_start").hide();
+                        $('#task_submit_test').removeAttr('disabled');
+                    } else {
+                        $("#blink_start").show();
+                        $('#task_submit_test').attr('disabled', 'true');
+                        // $('#task_submit_test').hide();
+                    }
+                }
+                if ($('#utc_date2').val().length > 0){
+                    if (check_eligibility == true) {
+                        if (val_2 >= sched_1 && val_2 <= sched_2){
+                            check_eligibility = true;
+                            $("#blink_finish").hide();
+                            $('#task_submit_test').removeAttr('disabled');
+                        } else {
+                            $("#blink_finish").show();
+                            $('#task_submit_test').attr('disabled', 'true');
+                            // $('#task_submit_test').hide();
+                        }
+                    }
+                }
+                // console.log(check_eligibility);
+                if (val_1 && val_2) {
+                    if (val_2 <= val_1 && check_eligibility == true){
+                        console.log('inside if ', check_eligibility)
+                        $("#blink_date_conflict").show();
+                        $('#task_submit_test').attr('disabled', 'true');
+                        // $('#task_submit_test').hide();
+                    } else {
+                        $("#blink_date_conflict").hide();
+                        // $('#task_submit_test').removeAttr('disabled');
+                        $('#task_submit_test').show();
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

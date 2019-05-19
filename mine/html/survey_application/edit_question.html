@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Oneconsole | Edit Question</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1><small></small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/survey/questions/">Questions</a></li>
+                        <li class="active">Edit Question</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <form id = "" method = "POST" action = "/survey/edit_question/{{question.id}}/" enctype="multipart/form-data">{% csrf_token %}
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Edit Question</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-sm-6">                  
+                                       <input class="form-control" type="text" name="question" placeholder="Enter the Question" required id="question" value="{{ question.question }}"/><br/>
+                                        <select class="form-control" name="question_type" id="question_type" required>
+                                            <option value="">--Select Question type--</option>
+                                            <option value="choice" {% if question.question_type == 'choice' %} selected {% endif %}> Choice </option>
+                                            <option value="text" {% if question.question_type == 'text' %} selected {% endif %}> Text </option>
+                                        </select><br/>
+                                        <select class="form-control" id="question_choice" name="question_choices" multiple>
+                                            <option value="">--Select Choices--</option>
+                                            {% for choice in choices %}
+                                                <option value="{{ choice.id }}" {% if choice in question.choices.all %} selected {% endif %}>{{ choice.choice_name }}</option>
+                                            {% endfor %}
+                                        </select><br/>
+                                        <button type="submit" id="submit_button" class="btn btn-success">Save</button><br/>
+                                    </div>
+                                </div>     
+                            </div>  
+                        </div>
+                    </form> 
+                </div>
+            </div>
+        </div>
+        {% include 'components/footer.html' %}
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                var question_type = $('#question_type').val();
+                if (question_type == 'choice') {
+                    $('#question_choice').show();
+                    $('#question_choice').prop('required',true);
+                } else {
+                    $('#question_choice').hide();
+                    $('#question_choice').prop('required',false);
+                }
+            });
+            $(function(){
+                $('#question_type').change(function() {
+                    var question_type = $('#question_type').val();
+                    if (question_type == 'choice') {
+                        $('#question_choice').show();
+                        $('#question_choice').prop('required',true);
+                    } else {
+                        $('#question_choice').hide();
+                        $('#question_choice').prop('required',false);
+                    }
+                });
+            });
+        </script>
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_quests').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

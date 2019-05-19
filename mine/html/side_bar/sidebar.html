@@ -1,0 +1,791 @@
+ <div class="leftside">
+    <div class="sidebar">
+        <div class="" style="padding:10px;background-color:white">
+            <div>
+                <img style="width:100%" src="/media/{{profile.customer.logo}}" alt="" />
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            {% if "Asset_management" in request.session.logged_user_priv  %}
+                <li id="asset"><a href="/asset/"><i class="fa fa-laptop"></i><span class="text">Asset Dashboard</span></a></li>
+            {% endif %}
+            {% if "IT_Manager_Approval_Dashboard" in request.session.logged_user_priv  %}
+                <li id="adash"><a href="/ticket/app/"><i class="fa fa-sitemap"></i><span class="text">Approval Dashboard</span></a></li>
+            {% else %}
+                <li id="dash">
+                    <a href="/">
+                        <i class="fa fa-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="sla_crossed">
+                    <a href="#" id="sla_crossed_dash">
+                        <i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                        <span>SLA Dashboard</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="sla_dashboard_sub_nav">
+                        <li id="sla_cross_response_dashboard"><a href="{% url 'sla_cross_response_dashboard' %}"><span class="text">Response Dashboard</span></a></li>
+                        <li id="sla_resolution_crossed"><a href="{% url 'sla_resolution_crossed' %}"><span class="text">Resolution Dashboard</span></a></li>
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Operation_Definition" in request.session.logged_user_priv  %}
+                <li id="op_def">
+                    <a href="/op_definition/">
+                        <i class="fa fa-list"></i>
+                        <span class="text">Operational Definitions</span>
+                    </a>
+                </li>   
+            {% endif %}
+
+            {% if approver or profile.approval_set.all or "ITmanager_Pending_Tickets" in request.session.logged_user_priv or "Add_Approval_By_Servicedesk" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="approvals">
+                    <a href="#" id="main_approval_dash">
+                        <i class="fa fa-book"></i>
+                        <span>Approval Details</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="approvals_sub_nav">
+                        <li id="approval" >
+                            <a href="/ticket/approval/">
+                                <span class="text">Pending Approvals</span>
+                            </a>
+                        </li>
+                        {% if profile.approval_set.all %}
+                            <li id="approval_his">
+                                <a href="/ticket/approval/supervisor/">
+                                    <span class="text" >Approval History</span>            
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "ITmanager_Pending_Tickets" in request.session.logged_user_priv %}
+                            <li id="it-manager-pend">
+                              <a href="/itmanager/pending_approvals/">
+                                  <span>ITManager Approvals</span>
+                              </a>
+                          </li>
+                        {% endif %}
+                        {% if "Add_Approval_By_Servicedesk" in request.session.logged_user_priv %}
+                            <li id="sd_apprpval">
+                              <a href="/manager_approval_tickets/">
+                                  <span>Servicedesk Approvals</span>
+                              </a>
+                          </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Task_Management" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="task_manage_main">
+                    <a href="#" id="task_management_dash">
+                        <i class="fa fa-dashboard"></i>
+                        <span>Task Management</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="task_sub_nav">
+                        {% if "Routine_Task" in request.session.logged_user_priv %}
+                            <li id="routine_task">
+                                <a href="{% url 'routine_tasks' %}">Routine Tasks</a>
+                            </li>
+                        {% endif %}
+                        <li id="queued_task">
+                            <a href="{% url 'queued_tasks' %}">Queued Routine Tasks</a>
+                        </li>
+                        <li id="owned_task">
+                            <a href="{% url 'owned_tasks' %}">Owned Routine Tasks</a>
+                        </li>
+                        <li id="closed_task">
+                            <a href="{% url 'closed_tasks' %}">Closed Routine Tasks</a>
+                        </li>
+                        <li id="task_report">
+                            <a href="{% url 'task_report' %}">Task Report</a>
+                        </li>
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Change_Management" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="change_request_main">
+                    <a href="#" id="main_change_dash">
+                        <i class="fa fa-dashboard"></i>
+                        <span>Change Management</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="change_sub_nav">
+                        <li id="rfc_dashboard">
+                            <a href="/rfc/change_dashboard/">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li id="create_rfc_req">
+                            <a href="/rfc/create/" > Create Change Request</a>
+                        </li>
+                        <li id="change_report">
+                            <a href="/rfc/reports/">
+                                Reports
+                            </a>
+                        </li>
+                        <li id="task">
+                            <a href="/tasks/list/">
+                                Tasks
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "CMDB" in request.session.logged_user_priv %}
+                           <li class="sub-nav" id="cmdb">
+                               <a><i class="fa fa-database"></i><span>CMDB</span>
+                                   <i class="fa fa-angle-right pull-right"></i></a>
+
+
+                               <ul class="sub-menu" id="subsec">
+                                   <li id="sec_detail"><a href="/cmdb/info_cm/">Details </a></li>
+                                   <li id="sec_adm"><a href="/cmdb/cmdb_admin/">Configure </a></li>
+
+                               </ul>
+
+
+                           </li>
+
+                        {% endif %}
+            {% if "View_queued_tickets" in request.session.logged_user_priv or "New_Tickets" in request.session.logged_user_priv or "Tickets_ALL" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="tickets_main">
+                    <a href="#" id="main_ticket_dash">
+                        <i class="fa fa-tasks"></i>
+                        <span>Ticket Details</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="tickets_nav">
+                        {% if "View_queued_tickets" in request.session.logged_user_priv %}
+                            <li id="queued">
+                                <a href="/ticket/queuedticket/">
+                                    <span class="text">All Queued Tickets</span>
+                                </a>
+                            </li>
+                            <li id="flagged">
+                                <a href="/tickets/flaged/">
+                                    <span class="text">Flagged Tickets</span>
+                                </a>
+                            </li>
+                            <li id="favourite">
+                                <a href="{% url 'favourite_tickets' %}">
+                                    <span class="text">Favourite Tickets</span>
+                                </a>
+                            </li>
+                            <li id="open">
+                                <a href="/tickets/openticket/">
+                                    <span class="text">All Open Tickets</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "New_Tickets" in request.session.logged_user_priv %}
+                            <li id="newtet">
+                                <a href="/ticket/new_ticket/">
+                                    <span class="text">New Tickets</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Tickets_ALL" in request.session.logged_user_priv %}
+                            <li id="tktall">
+                                <a href="/ticket/all">
+                                    <span class="text">All Tickets</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Ticket_Administration" in request.session.logged_user_priv %}
+                <li id="service" class="sub-nav">
+                    <a href="#">
+                        <i class="fa fa-briefcase"></i>
+                        <span>Service Desk</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="subc">
+                        <li id="mytkt"><a href="/dashboard/tickets">My Tickets</a></li>
+                        <li id="sgtkt"><a href="/ticket/group/sub/">My Team Tickets</a></li>
+                        <li id="clsed_team_tic"><a href="/closed_team_tickets/">Closed Team Tickets</a></li>
+                        {% if "CustomerSDResolverAdminAccess" not in request.session.logged_user_priv %}
+                            <li id="pitkt"><a href="/ticket/similar_issues/">Predict Issues</a></li>
+                        {% endif %}
+                        <li id="ownstkt"><a href="/tickets/owned/">Owned Tickets</a></li>
+                        <li id="recent_close"><a href="/dashboard/recently_closed/">My Closed Tickets</a></li>
+                        <li id="cu_wait"><a href="/dashboard/customer_wait_tickets/">Customer Waiting</a></li>
+                        <li id="team_tasks"><a href="/team_tasks/">My Team Tasks</a></li>
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Kb_View" in request.session.logged_user_priv or "Kb_Approval" in request.session.logged_user_priv %}
+                <li id="kb_approvals" class="sub-nav">
+                    <a href="#">
+                        <i class="fa fa-briefcase"></i>
+                        <span>Knowledge Base</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="appr_subc">
+                        {% if "Kb_View" in request.session.logged_user_priv %}
+                            <li id="kb_views"><a href="/knowledge_base/view/">Knowledge Base List</a></li>
+                        {% endif %}
+                        {% if "Kb_Approval" in request.session.logged_user_priv %}
+                            <li id="kb_apprls"><a href="/knowledge_base/approvals/">Pending Approvals</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Customer_KB_Access" in request.session.logged_user_priv or "Customer_KB_Management" in request.session.logged_user_priv %}
+                <li id="cust_kb_main" class="sub-nav">
+                    <a href="#" id="kb_head">
+                        <i class="fa fa-briefcase"></i>
+                        <span>Knowledge Base</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="cust_kb_list">
+                        {% if "Customer_KB_Access" in request.session.logged_user_priv %}
+                            <li id="kb_list"><a href="{% url 'customer_kb_list' %}">{% if "Customer_KB_Management" in request.session.logged_user_priv %} Administration {% else %} Knowledgebase List {% endif %}</a></li>
+                            <li id="kb_search"><a href="{% url 'kb_search' %}">Knowledgebase Search</a></li>
+                        {% endif %}
+                        {% if "Customer_KB_Management" in request.session.logged_user_priv %}
+                            <li id="kb_create"><a href="{% url 'create_kb' %}">Create Knowledgebase</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Problem_Management" in request.session.logged_user_priv %}
+                <!-- -->
+                <li id="problm_managemnt" class="sub-nav">
+                    <a href="#" id="problem_head" style="padding:11px">
+                        <i class="glyphicon glyphicon-pushpin"></i>
+                        <span>Problem Management</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="prblm_sectn">
+                        <li id="problem_tickets">
+                            <a href="/problem_management/">
+                                <span>Tickets</span>
+                            </a>
+                        </li>
+                        <li id="problem_report">
+                            <a href="/problem_report/">
+                                <span>Problem Report</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            {% endif %}
+
+            {% if "Notify_Group_Management" in request.session.logged_user_priv %}
+                <li id="notify_grop">
+                    <a href="/notification_group/">
+                        <i class="fa fa-bell-o"></i>
+                        <span>Group Notification</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if "Hadoop_Log" in request.session.logged_user_priv %}
+                <li id="notify_grop">
+                    <a href="{% url 'hadoop:job_list' %}">
+                        <i class="fa fa-bell-o"></i>
+                        <span>Hadoop Log</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if "Add_Template" in request.session.logged_user_priv or "Alert_Message_Management" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="tkt_sd_sett">
+                    <a href="#" id="tkt_sd_sub">
+                        <i class="fa fa-gears"></i>
+                        <span>SD Settings</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="sub_add_temp">
+                        {% if "Add_Template" in request.session.logged_user_priv %}
+                            <li id="tempadd">
+                                <a href="/ticket/template/add">
+                                    <!-- <i class="glyphicon glyphicon-pushpin"></i> -->
+                                    <span class="text">Add Template</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                            <li id="deactivate_list">
+                                <a href="/deactivate/users">
+                                    <!-- <i class="glyphicon glyphicon-list"></i> -->
+                                    <span class="text">Deactivate List</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Alert_Message_Management" in request.session.logged_user_priv %}
+                            <li id="scroll_alt">
+                                <a href="/alert_messages/add/">
+                                    <!-- <i class="glyphicon glyphicon-plus"></i> -->
+                                    <span>Scrolling Messages</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Add_Ticket_Templates" in request.session.logged_user_priv %}
+                            <li id="tkt_temp">
+                                <a href="/ticket_templates/add/">
+                                    <!-- <i class="glyphicon glyphicon-plus"></i> -->
+                                    <span>Ticket Templates</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Impacted_Airline_Management" in request.session.logged_user_priv %}
+                            <li id="custm_ia">
+                                <a href="{% url 'impacted_airlines' %}">Impacted Airline </a>
+                            </li>
+                        {% endif %}
+                        {% if "CustomerSDResolverAdminAccess" not in request.session.logged_user_priv %}
+                            <li id="custm_priority">
+                                <a href="{% url 'priority_management' %}">Priority Management</a>
+                            </li>
+                            <li id="custm_severity">
+                                <a href="{% url 'severity_management' %}">Severity Management</a>
+                            </li>
+                            <li id="custm_resolution_codes">
+                                <a href="{% url 'resolution_codes' %}">Resolution Codes</a>
+                            </li>
+                            <li id="change_manag">
+                                <a href="{% url 'change_manager' %}" ><span class="text">Change Manager</span></a>
+                            </li>
+                            <li id="custom_status_label">
+                                <a href="{% url 'status_label_management' %}">Status Labels</a>
+                            </li>
+                            <li id="vip_management">
+                                <a href="{% url 'vip_list_management' %}">VIP List Management</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Incident_ticket_creation" in request.session.logged_user_priv or "New_Service_Request" in request.session.logged_user_priv or "Service_catalog_view" in request.session.logged_user_priv or "New_Incident" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="create_tkt">
+                    <a href="#" id="main_ticket_dash">
+                        <i class="fa fa-ticket"></i>
+                        <span>Create Ticket</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="create_tkt_in">
+                        {% if "Incident_ticket_creation" in request.session.logged_user_priv %}
+                            <li id="create_tkt_inci">
+                                <a href="/ticket/incident/create">
+                                    <!-- <i class="glyphicon glyphicon-plus"></i> -->
+                                    <span class="text">Create Customer Ticket</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "New_Service_Request" in request.session.logged_user_priv  or "New_Incident" in request.session.logged_user_priv  %}
+                            <li id="create_tkt_sr">
+                                <a href="" data-toggle="modal" data-target="#incident">
+                                    <!-- <i class="fa fa-ticket"></i> -->
+                                    <span class="text">Create New Ticket</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Service_catalog_view" in request.session.logged_user_priv %}
+                            <li id="create_tkt_cat">
+                                <a href="/ticket/template/">
+                                    <!-- <i class="fa  fa-tags"></i> -->
+                                    <span class="text">Service Catalog</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Jira_Marlabs_Report_Access" in request.session.logged_user_priv or "Report_Management" in request.session.logged_user_priv or "EGA_Report_Management" in request.session.logged_user_priv  %}
+                <li class="sub-nav" id="reports_main">
+                    <a href="#" id="main_report_dash">
+                        <i class="glyphicon glyphicon-import"></i>
+                        <span>Reports</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="report_sub_nav">
+                        {% if "Jira_Marlabs_Report_Access" in request.session.logged_user_priv %}       
+                            <li id="jira_menu">
+                                <a href="/jira_management_dash/">
+                                    <!-- <i class="fa fa-dashboard"></i> -->
+                                    <span>Jira Reports</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Report_Management" in request.session.logged_user_priv  %}
+                            <li id="reports_mlb">
+                                <a href="/report/new/">
+                                <!-- <a href="/report/old/"> -->
+                                    <!-- <i class="glyphicon glyphicon-import"></i> -->
+                                    <span class="text">Reports</span>
+                                </a>
+                            </li>
+                            {% if profile.customer.customerid == "MLB" %}
+                                <li id="analytic_report">
+                                    <a href="{% url 'analytics' %}">
+                                        <!-- <i class="glyphicon glyphicon-import"></i> -->
+                                        <span class="text">Analytics Dashboard</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                        {% if "EGA_Report_Management" in request.session.logged_user_priv %}
+                            <li id="reports_mlb">
+                                <a href="/reports/">
+                                    <!-- <i class="glyphicon glyphicon-import"></i> -->
+                                    <span class="text">Reports</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Search_Knowledge_Base" in request.session.logged_user_priv or "Advanced_Ticket_Search" in request.session.logged_user_priv or "Advanced_Ticket_Search_Egate" in request.session.logged_user_priv %}
+                <li class="sub-nav" id="search_main">
+                    <a href="#" id="main_search_dash">
+                        <i class="glyphicon glyphicon-search"></i>
+                        <span>Search</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="search_sub_nav">
+                        {% if "Search_Knowledge_Base" in request.session.logged_user_priv  %}
+                            <li id="know_base">
+                                <a href="/kb/search/">
+                                    <!-- <i class="glyphicon glyphicon-search"></i> -->
+                                    <span class="text">Search Knowledge Base</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Advanced_Ticket_Search" in request.session.logged_user_priv  %}
+                            <li id="advanced_tkt">
+                                <a href="/advanced_search/old/">
+                                    <!-- <i class="glyphicon glyphicon-search" ></i> -->
+                                    <span class="text">Advanced Search</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Advanced_Ticket_Search_Egate" in request.session.logged_user_priv  %}
+                            <li id="advanced_tkt">
+                                <a href="/advanced/search/">
+                                    <!-- <i class="glyphicon glyphicon-search" ></i> -->
+                                    <span class="text">Advanced Search</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+            {% if "Customer_Management" in request.session.logged_user_priv or "Person_administration" in request.session.logged_user_priv or "Email_Account_Settings" in request.session.logged_user_priv or "Knowledge_Base_Management" in request.session.logged_user_priv or "Category_Management" in request.session.logged_user_priv or "Permission_Management" in request.session.logged_user_priv or "Email_Administration" in request.session.logged_user_priv or "SLA_Administration" in request.session.logged_user_priv or "Function_Administration" in request.session.logged_user_priv or "Ldap_Administration" in request.session.logged_user_priv or "Email_Templates_Management" in request.session.logged_user_priv or "FAQ_Administration" in request.session.logged_user_priv%}
+                <li class="sub-nav" id="admin_settings_main">
+                    <a href="#" id="main_admin_settings_dash">
+                        <i class="fa fa-gears"></i>
+                        <span>Admin Settings</span>
+                        <i class="fa fa-angle-right pull-right"></i>
+                    </a>
+                    <ul class="sub-menu" id="admin_settings_sub_nav">
+                        {% if "Customer_Management" in request.session.logged_user_priv %}
+                            <li id="customer">
+                                <a href="/customer/add">
+                                    <!-- <i class="glyphicon glyphicon-plus"></i> -->
+                                    <span class="text">Customers</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li id="tempadd">
+                            <a href="/management/schedule/">
+                                <!-- <i class="glyphicon glyphicon-tasks"></i> -->
+                                <span class="text">Cron Jobs</span>
+                            </a>
+                        </li>
+                        <!-- <li id="cron_settings">
+                            <a href="/management/schedule/">
+                                <i class="glyphicon glyphicon-pushpin"></i>
+                                <span class="text">Cron Settings</span>
+                            </a>
+                        </li> -->
+                        <!-- <li id="cron_settings">
+                            <a href="/deactivate/users">
+                                <i class="glyphicon glyphicon-list"></i>
+                                <span class="text">Deactivate List</span>
+                            </a>
+                        </li> -->
+                        {% if "Person_administration" in request.session.logged_user_priv %}
+                            <li><a href="/personadmin/listview">Person Group Admin</a></li>
+                            <li><a href="/list/role">Role Privilege</a></li>
+                        {% endif %}
+                        {% if "Email_Account_Settings" in request.session.logged_user_priv  %}
+                            <li id="emailadd">
+                                <a href="/emailcron/">
+                                    <!-- <i class="glyphicon glyphicon-inbox"></i> -->
+                                    <span class="text">Email Account Settings</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Knowledge_Base_Management" in request.session.logged_user_priv  %}
+                            <li id="tempadd">
+                                <a href="/kb/list">
+                                    <!-- <i class="glyphicon glyphicon-book"></i> -->
+                                    <span class="text">Knowledge Base</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Category_Management" in request.session.logged_user_priv  %}
+                            <li id="tempadd">
+                                <a href="/category/list">
+                                    <!-- <i class="glyphicon glyphicon-pushpin"></i> -->
+                                    <span class="text">Category</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Permission_Management" in request.session.logged_user_priv %}
+                            <li>
+                                <a href="/customer/permission/add">
+                                    <!-- <i class="glyphicon glyphicon-plus"></i> -->
+                                    <span class="text">Customer Permission</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Email_Administration" in request.session.logged_user_priv %}
+                            <li id="tempadd">
+                                <a href="/email/log/">
+                                    <!-- <i class="glyphicon glyphicon-pushpin"></i> -->
+                                    <span class="text">Email Log</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "SLA_Administration" in request.session.logged_user_priv  %}
+                            <li id="view"><a href="/sla/definitions">SLA Definitions</a></li>
+                        {% endif %}
+                        {% if "Function_Administration" in request.session.logged_user_priv  %}
+                            <li>
+                                <a href="/functionality/add">
+                                    <!-- <i class="glyphicon glyphicon-pushpin"></i> -->
+                                    <span class="text">Function Administration</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if "Ldap_Administration" in request.session.logged_user_priv  %}
+                            <li id="view"><a href="/ldap_auth_setting/">Add Ldap Details</a></li>
+                            <li id="sub"><a href="/ldap_details/">View Ldap Details</a></li>
+                        {% endif %}
+                        {% if "Email_Templates_Management" in request.session.logged_user_priv  %}
+                            <li id="view"><a href="/email_template_admin/">Configure Email Templates</a></li>
+                            <li id="sub"><a href="/view_email_template/">View Templates Details</a></li>
+                        {% endif %}
+                        {% if "FAQ_Administration" in request.session.logged_user_priv  %}
+                            <li><a href="/faq/adminview"><span class="text">Faq Details</span></a></li>
+                            <li><a href="/faq/category/add"><span class="text">Faq Category</span></a></li>
+                            <li><a href="/faq/subcategory/add"><span class="text">Faq Subcategory </span></a></li>
+                            <li><a href="/faq/image/add"><span class="text">Faq Image</span></a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            {% endif %}
+         <li id="notis">
+           <a href="/notifications/">
+             <i class="fa fa-bell"></i>
+             <span class="text">Notification Center</span>
+           </a>
+         </li>
+        {% if "asset_management" in request.session.logged_user_priv %}
+         <li id="asset"><a href="/asset/"><i class="fa fa-laptop"></i><span class="text">Asset Home</span></a></li>
+        {% endif %}
+        {% if "finance_approval" in request.session.logged_user_priv %}
+            <li id="finance_approval"><a href="/approval/finance/"><i class="fa fa-check"></i><span class="text">Finance Dashboard</span></a></li>
+        {% endif %}
+       
+      {% if "Customer_Servicedesk" in request.session.logged_user_priv %}
+       <li class="sub-nav" id="service">
+          <a href="#">
+              <i class="fa fa-briefcase"></i>
+              <span>Service Desk</span>
+              <i class="fa fa-angle-right pull-right"></i>
+          </a>
+          <ul class="sub-menu" id="subm">
+
+              <li id="view"{% if "Managed_Service_Enduser" in request.session.roles %} style="display:none"{% endif %}><a href="/customer/tickets/" >{{profile.customer.customername}} Tickets</a></li>
+              <li id="sub"><a href="/customer/tickets/raised/">My Tickets</a></li>
+              {% if profile.customer.payment %}
+              <li ><a href="/ticket/workhours/{{profile.customer.id}}">Support Hours</a></li>
+              {% endif %}
+              <li ><a href="" data-toggle="modal" data-target="#forcust">New Incident</a></li>
+
+              
+          </ul>
+      </li>
+      {% endif %}      
+        {% if "Noc_Dashboard" in request.session.logged_user_priv %}
+        <li id="realtime_mon">
+        <a href="/advanced_monitoring/monitoring_realtime">
+            <i class="fa fa-dashboard"></i>
+            <span>NOC Dashboard</span>
+        </a>
+        </li>
+
+        {% endif %}
+
+        {% if "Monitoring_view" in request.session.logged_user_priv %}
+        <li class="sub-nav" id="monitoring_nav">
+          <a href="#">
+              <i class="fa fa-dashboard"></i>
+              <span>Monitoring Service</span>
+              <i class="fa fa-angle-right pull-right"></i>
+          </a>
+          <ul class="sub-menu" id="monitoring_sub">
+              <li id="mon_dash"><a href="/monitor_dashboard/">Dashboard</a></li>
+              <li id="mon_detail"><a href="/monitor_details/">Monitoring Details</a></li>
+            {% if "Network_Monitoring_View" in request.session.logged_user_priv  %}
+              <li id="network_detail"><a href="/advanced_monitoring/network_monitoring/">Network Monitoring</a></li>
+            {% endif %}                       
+              <li id="maintten"><a href="/advanced_monitoring/maintanance_details/">Scheduled Maintenance</a></li>
+
+          </ul>
+        </li> 
+        {% endif %}
+        {% if "Security_Monitoring" in request.session.logged_user_priv %}
+          <li id="service">
+              <a href="/security/host/details/">
+                  <i class="fa fa-briefcase"></i>
+                  <span>Security Monitoring</span>
+              </a>
+          </li>
+        {% endif %}
+        {% if "FAQ_View" in request.session.logged_user_priv %}
+         <li id="faq"><a href="/faq/view"><i class="fa  fa-question-circle"></i><span class="text"> FAQ </span></a></li> 
+         {% endif %}
+
+        <!-- <li id="profile"><a href="/profile/"><i class="glyphicon glyphicon-user"></i><span class="text">Profile </span></a></li> -->
+
+        {% if "oneconsole_help" in request.session.logged_user_priv  %}
+            {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                <li id="notify_grop">
+                    <a href="{% url 'help:user_help_list' %}">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                        <span>Help</span>
+                    </a>
+                </li>
+                <li id="notify_grop">
+                    <a href="{% url 'help:help_list' %}">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                        <span>Help Admin</span>
+                    </a>
+                </li> 
+            {% else %}
+               <li id="notify_grop">
+                    <a href="{% url 'help:user_help_list' %}">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                        <span>Help</span>
+                    </a>
+                </li>
+            {% endif %}
+        {% endif %}
+        
+      {% if "Survey_Management" in request.session.logged_user_priv %}
+        <li class="sub-nav" id="survey_main">
+          <a href="#" id="survey_anchor">
+              <i class="fa  fa-users"></i>
+              <span>Survey</span>
+              <i class="fa fa-angle-right pull-right"></i>
+          </a>
+          <ul class="sub-menu" id="survey_sub_nav">
+              <li id="survey_choices"><a href="/survey/choices/" ><span class="text">Choices</span></a></li>
+              <li id="survey_quests"><a href="/survey/questions/" ><span class="text">Questions</span></a></li>
+              <li id="survey_survy"><a href="/survey/list/"><span class="text">Survey List</span></a></li>
+              <li id="survey_reports"><a href="/survey/group_survey_report/"><span class="text">Survey Reports </span></a></li>
+          </ul>
+      </li>
+       
+      {% endif %}
+
+    {% if "monitoring_scheduler" in request.session.logged_user_priv  %}
+      <li class="sub-nav" id="mon_sheduler">
+          <a href="#">
+              <i class="fa fa-desktop"></i>
+              <span>Monitoring Reports</span>
+              <i class="fa fa-angle-right pull-right"></i>
+          </a>
+          <ul class="sub-menu" id="mon_sheduler_sub">
+            <li id="scheduler"><a href="/advanced_monitoring/monitoring_sheduler/">Scheduled Details</a></li>
+            <li id="configuration"><a href="/advanced_monitoring/monitoring_configuration/">Scheduler Settings</a></li>
+          </ul>
+        </li>     
+    {% endif %}
+
+      {% if "Monitoring_Admin" in request.session.logged_user_priv  %}
+      <li class="sub-nav" id="mon_admin_main">
+          <a href="#">
+              <i class="fa  fa-bullseye"></i>
+              <span>Monitoring Admin</span>
+              <i class="fa fa-angle-right pull-right"></i>
+          </a>
+          <ul class="sub-menu" id="mon_admin_sub">
+              <li id="lay_details"><a href="/advanced_monitoring/layout_details/" ><span class="text">Dashboard Layout</span></a></li>
+              <li id="top_details"><a href="/advanced_monitoring/topbox_items_mapping/" ><span class="text">Topbox Items Mapping</span></a></li>
+               <li id="spe_details"><a href="/advanced_monitoring/speedo_items_mapping/" ><span class="text">Speedo Items Mapping</span></a></li>
+               <li id="grp_details"><a href="/advanced_monitoring/graph_items_mapping/" ><span class="text">Graph Items Mapping</span></a></li>
+               <!--<li><a href="/advanced_monitoring/detail_items_mapping/" ><span class="text">Detail Page Items Mapping</span></a></li>-->
+               <li id="hstgrp_details"><a href="/advanced_monitoring/hostgroup_customer/" ><span class="text">Hostgroups Customer Mapping</span></a></li>
+              <li id="hstgrpdash_details"><a href="/advanced_monitoring/hostgroup_customer_dash/" ><span class="text">Hostgroups Dashboard Mapping</span></a></li>
+              <li id="hstgrpuser_details"><a href="/advanced_monitoring/hostgroup_user_map/" ><span class="text">Hostgroups User Mapping</span></a></li>
+               <li id="mon_package"><a href="/advanced_monitoring/monitoring_package/" ><span class="text">Monitoring Package</span></a></li>
+               <li id="sch_mainten"><a href="/advanced_monitoring/scheduled_window/" ><span class="text">Scheduled Maintenance Conf</span></a></li>
+               <li id="zabbix_conf"><a href="/advanced_monitoring/zabbix-manage-conf-file/" ><span class="text">Manage Zabbix Conf file</span></a></li>
+          </ul>
+      </li>     
+      {% endif %}
+
+        {% if profile.is_admin %}
+          <li id="controlpanel" class="sub-nav">
+            <a href="/customers/controlpanel/">
+             <i class="fa fa-flag"></i>
+             <span class="text">Control Panel</span>
+           </a>
+          <ul class="sub-menu" id="controlpanel_block">
+            <li id="dashctrl">
+              <a href="/customers/controlpanel/">
+               <span class="text">Dashboard</span>
+             </a>
+             </li>
+             <li id="activation">
+              <a href="/customer/activation/all/">
+               <span class="text">Activation Request</span>
+             </a>
+             </li>
+          </ul>
+      </li>     
+         {% endif %}
+
+        {% comment %}
+            {% if profile.customer.customerid == 'MLB' %}
+                <li> <a href="https://csd-archive.marlabs.com" target="_blank"><i class="glyphicon glyphicon-book"></i><span class="text">
+                    CSD Portal - Archive
+                </span></a></li>
+                <li> <a href="https://oneconsole-archive.marlabs.com" target="_blank"><i class="glyphicon glyphicon-book"></i><span class="text">
+                    OneConsole - Archive
+                </span></a></li> 
+            {% endif %}
+        {% endcomment %}
+      <li><a href="/logout/"><i class="glyphicon glyphicon-log-out"></i><span class="text">Logout</span></a></li>
+
+</ul>
+
+
+  <div class="sidebar-widget online-users">
+    <div class="body online-list">              
+      <div class="footer">
+        <span class="btn btn-info" style="width:100%">
+            <a style="color:white" href="mailto:{{profile.customer.help_text}}" target="_top">
+                <l class="fa fa-envelope-o" style="font-size:12px">
+                        {{profile.customer.help_text}}
+                    <!-- -->
+                </l>
+            </a> 
+        </span>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>

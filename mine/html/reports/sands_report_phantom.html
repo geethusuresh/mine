@@ -1,0 +1,508 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/lightslider/lightslider.css">
+        <link rel="stylesheet" type="text/css" href="/static/fonts/font-mfizz.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .media-left{
+                float: left;
+            }
+            ul{
+                list-style: none outside none;
+                padding-left: 0;
+                margin: 0;
+            }
+            .content-slider li{
+                /*background-color: #ed3020;*/
+                text-align: center;
+                color: #FFF;
+            }
+            .content-slider h3 {
+                margin: 0;
+                padding: 70px 0;
+            }
+            .demo {
+                margin: 3em 0;
+                padding: 0px;
+                background: transparent;
+            }
+            .box_rotate {
+                -webkit-transform: rotate(360.5deg);  /* Chrome, Safari 3.1+ */
+                -moz-transform: rotate(360.5deg);  /* Firefox 3.5-15 */
+                -ms-transform: rotate(360.5deg);  /* IE 9 */
+                -o-transform: rotate(360.0deg);  /* Opera 10.50-12.00 */
+                transform: rotate(360.0deg);  /* Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .box_transition {
+                -webkit-transition: all 15.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+                -moz-transition: all 15.3s ease-out;  /* Firefox 4-15 */
+                -o-transition: all 15.3s ease-out;  /* Opera 10.50–12.00 */
+                transition: all 15.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.50+ */
+            }
+            .lSAction > a {
+                background-color: gray !important;
+                z-index: 0 !important;
+            }
+            .lSAction > a:hover {
+                z-index: 0 !important;
+            }
+        </style>
+        <script type="text/javascript" src="/static/js/justgauge/raphael-2.1.4.min.js"></script>
+        <script type="text/javascript" src="/static/js/justgauge/justgage-1.1.0.min.js"></script>
+    </head>
+    <body class="fixed" style="font-size:13px" id="customer_dashboard">       
+        <div class="content">
+            <div class="row">
+                {% if event_type == "severity" %}
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div  id="pie_chart_severity"> </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if event_type == "source" %}
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div  id="pie_chart_events" ></div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if event_type == "category" %}
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div  id="pie_chart_category"> </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% if event_type == "escalated" %}
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div  id="pie_chart_events_es" ></div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>                    
+        </div>
+               
+
+        {% include "components/customer_footer.html" %}
+        {% include "reports/reports_js.html" %}
+        {% include "security_monitoring/redcanary/tickets_pie.html" %}
+        <script src="/static/lightslider/lightslider.js"></script>
+        <script src="/static/chartjs/Chart.js"></script>
+        <script>
+            $(document).ready(function() {
+                $("#content-slider").lightSlider({
+                    loop: false,
+                    keyPress: true,
+                    item: 1,
+                });
+            });
+        </script>
+        <script>
+            $("#dash").addClass("active")
+        </script>
+
+        <script>
+            function animate_alert_msg() {
+                $('#alert_msg').css({right:'0%'});
+                $('#alert_msg').animate({right: '-100%'}, 20000, 'linear', function(){animate_alert_msg();});
+            }
+            $(document).ready(function(){
+                animate_alert_msg();
+            });
+        </script>
+
+
+        <script src="/static/js/highcharts/highcharts.js"></script>
+        <script src="/static/js/highcharts/no-data-to-display.js"></script>
+        <script src="/static/js/highcharts/highcharts-more.js"></script>
+        <script src="/static/js/highcharts/exporting.js"></script>
+        <script src="/static/js/chart.min.js"></script>
+        <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+        <script type="text/javascript" src="/static/angular/angular-chart.js"></script>
+        <script type="text/javascript" src="/static/angular/app.js"></script>
+        <script type="text/javascript" src="/static/angular/controllers.js"></script>
+        <script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.js">
+        <!-- // <script src="/static/daterangepicker/daterangepicker.js" type="text/javascript"></script> -->
+
+        <script type="text/javascript">       
+
+        function pieChart1() {
+            $('#pie_chart_severity').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Severity ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                colors: ["#FF0000", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    // data: data_list,
+                    data: [
+                        {% for item in severities %}
+                            {
+                                name: '{{item.internalpriority}}',
+                                y: {{item.count}},
+                                {% if item.internalpriority == "Critical" %}
+                                    color: "#BC0707" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "High" %}
+                                    color: "red" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "Medium" %}
+                                    color: "#2A82D7" // Joe's color
+                                {% endif %}
+                                {% if item.internalpriority == "Low" %}
+                                    color: "#008000" // Joe's color
+                                {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                // debugger;
+                                // pieData(this.name, 'category')
+                                view_tickets_only(this.name, 'severity')
+                                // console.log(this.name, 'Severity');
+                                // if (this.name == "Severity 1")
+                                // {
+                                //     view_map(1, 'Severity');
+                                // }
+                                // else if(this.name == "Severity 2")
+                                // {
+                                //     view_map(2, 'Severity');
+                                // }
+                                // else{
+                                //     view_map(3, 'Severity');
+                                // }
+                                // view_map("niksun", 'category')
+
+                            }
+                        }
+                    }
+
+                }]
+            });
+            $("#date_filter1").show();
+            $("#date_filter2").show();
+        }
+
+        function pieChart2(data_list, title) {
+            $('#pie_chart2').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 16px "Trebuchet MS", Verdana, sans-serif'
+                    },
+                    text: 'Classification of alerts (' + title + ')'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                exporting: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    data: data_list,
+                    point: {
+                        events: {
+                            click: function() {
+                                view_map(this.name, 'classification')
+                            }
+                        }
+                    }
+                }]
+            });
+        }
+       
+        if('{{ event_type }}' == "severity"){
+            pieChart1();
+        }
+
+    function PieChartEvents() {
+            $('#pie_chart_events').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Source ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in alerts %}
+                            {
+                            name: '{{item.0}}',
+                            y: {{item.1}},
+                            {% if item.0 == "Niksun" %}
+                                color: "#FFCC33" 
+                            {% endif %}
+                            {% if item.0 == "Redcanary" %}
+                                color: "#CE232E" 
+                            {% endif %}
+                            {% if item.0 == "LEM" %}
+                                color: "#C14000" 
+                            {% endif %}
+                            {% if item.0 == "Varonis" %}
+                                color: "#E7111A" 
+                            {% endif %}
+                            {% if item.0 == "Zixcorp" %}
+                                color: "#1637A7" 
+                            {% endif %}
+                            {% if item.0 == "Isensor" %}
+                                color: "#CECECF" 
+                            {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name);
+                                // view_tickets(this.name, 'tickets')
+                                view_tickets_only(this.name, 'tickets');
+                            }
+                        }
+                    }
+
+                }]
+            });
+        }
+    function PieChartCategory() {
+            $('#pie_chart_category').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Events by Category ({{title_label}})'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                exporting: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                width: '130px',
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in tickets %}
+                            {
+                            name: '{{item.0}}',
+                            y: {{item.1}},
+                            // color: "#DF5353" // Joe's color
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name, 'incident');
+                                // view_tickets(this.name, 'Category')
+                                view_tickets_only(this.name, 'Category');
+                            }
+                        }
+                    }
+                }]
+            });
+        }
+        function PieChartES() {
+            $('#pie_chart_events_es').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    style: {
+                        font: 'bold 12px "Arial", Verdana, sans-serif'
+                    },
+                    text: 'All Escalated Events ({{title_label}})'
+                },
+                exporting: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.y}',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        },
+                    }
+                },
+                colors: ["#f45b5b", "#8085e9", "#8d4654", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+                "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                series: [{
+                    type: 'pie',
+                    name: 'Percentage',
+                    data: [
+                        {% for item in internalpriority %}
+                            {
+                            name: '{{item.internalpriority}}',
+                            y: {{item.count}},
+                            {% if item.internalpriority == "Critical" %}
+                                color: "#BC0707" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "High" %}
+                                color: "red" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "Medium" %}
+                                color: "#2A82D7" // Joe's color
+                            {% endif %}
+                            {% if item.internalpriority == "Low" %}
+                                color: "#008000" // Joe's color
+                            {% endif %}
+                            },
+                        {% endfor %}
+                    ],
+                    point: {
+                        events: {
+                            click: function() {
+                                console.log(this.name, 'incident');
+                                // view_tickets(this.name, 'incident');
+                                view_tickets_only(this.name, 'Escalated');
+
+                                // view_section_tickets(this.name, 'incident')
+
+                            }
+                        }
+                    }
+
+                }]
+            });
+        }
+
+        if('{{ event_type }}' == "source"){
+            PieChartEvents();
+        }
+        if('{{ event_type }}' == "category"){
+            PieChartCategory();
+        }
+        if('{{ event_type }}' == "escalated"){
+            PieChartES();
+        }
+ </script>     
+
+    
+    </body>
+</html>

@@ -1,0 +1,395 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/asset_css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/nifty.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <style>
+            .list-info li label {
+                width: 100px;
+            }
+            .clb{
+                display: inline-block;max-width: 100%;margin-bottom: 5px;font-weight: bold;
+            }
+        </style>
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/asset_header.html"%}
+            <div class="wrapper">
+                {% include "side_bar/asset_sidebar.html"%}
+                <div class="rightside">
+                    <div class="page-head" style="margin-top:10px">
+                        <h1 class="text-thin">Task Panel  <small></small></h1>
+                        <ol class="breadcrumb">
+                            <li>You are here:</li>
+                            <li><a href="/">Home</a></li>
+                            <li class="active">Task Management</li>
+                        </ol>
+                    </div>
+                    <div class="content">
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        <div class="panel-control">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a data-toggle="tab" href="#Details" aria-expanded="true">Task Details</a>
+                                                </li>
+                                                <li class=""><a data-toggle="tab" href="#stock" aria-expanded="false">Stock Details</a>
+                                                </li>
+                                                <li class=""><a data-toggle="tab" href="#logs" aria-expanded="false">Task Logs</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <h3 class="panel-title">{{task.taskid}}</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="tab-content">
+                                            <div id="Details" class="tab-pane fade active in">
+                                                <h4 class="text-thin">Basic Details</h4>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <dl class="dl-horizontal">
+                                                          <dt>Task Title :</dt>
+                                                          <dd>{{task.task_name}}</dd>
+                                                          <br>
+                                                          <dt>Task Status :</dt>
+                                                          <dd>{{task.status}}</dd><br>
+                                                          <dt>Asset Tag :</dt>
+                                                          <dd>{{task.stock.tag}}</dd><br>
+                                                          <dt>Purchase Date :</dt>
+                                                          <dd>{{task.stock.purchase_date}}</dd><br>
+                                                          <dt>Depresiation :</dt>
+                                                          <dd>{{task.stock.depreciation}}</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Affiliated Ticket :</dt>
+                                                            <dd>{{task.ticket.ticketid}}</dd><br>
+                                                            <dt>Asset Status :</dt>
+                                                            <dd>{{task.status.available}}</dd><br>
+                                                            <dt>Last Audit :</dt>
+                                                            <dd>{{task.stock.last_audit}}</dd><br>
+                                                            <dt>Warranty Expiry :</dt>
+                                                            <dd>{{task.stock.warranty_expiry}}</dd><br>
+                                                            <dt>Cost :</dt>
+                                                            <dd>${{task.stock.cost}}</dd><br>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="logs" class="tab-pane fade ">
+                                                <h4 class="text-thin">Task Activities</h4>
+                                                <div class="timeline">
+                                                    <div class="timeline-header">
+                                                        <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                                                        <div class="timeline-header-title bg-info">Now</div></a>
+                                                    </div>
+                                                    {% for activity in taskactivities %}
+                                                        <div class="timeline-entry">
+                                                            <div class="timeline-stat">
+                                                                <div class="timeline-icon bg-purple"><i class="fa fa-check fa-lg"></i>
+                                                                </div>
+                                                                <div class="timeline-time">{{activity.time}}</div>
+                                                            </div>
+                                                            <div class="timeline-label">
+                                                                <p class="text-semibold">{{activity.remark}} by {{activity.owner}}</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div id="stock" class="tab-pane fade">
+                                                <h4 class="text-thin">Request Details</h4>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>StockID :</dt>
+                                                            <dd>{{stock.stockid}}</dd><br>
+                                                            <dt>Serial Number :</dt>
+                                                            <dd>{{stock.serial_no}}</dd><br>
+                                                            <dt>Given date :</dt>
+                                                            <dd>{{stock.tag}}</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Modal Name :</dt>
+                                                            <dd>{{stock.model_name}}</dd><br>
+                                                            <dt>Alotted By :</dt>
+                                                            <dd>{{status.owner}}</dd><br>
+                                                            <dt>Warranty Expiry :</dt>
+                                                            <dd>{{stock.last_audit}}</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="purchases" class="tab-pane fade">
+                                                <h4 class="text-thin">Purchase Details</h4>
+                                                {% for purchase in purchases %}
+                                                    <div class="row">
+                                                        <div class="col-sm-4 text-center">
+                                                            <div class="plan-icon" style="font-size: 7em;">
+                                                                <i class="fa fa-desktop 5x"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-8">
+                                                            <div class="pad-ver">
+                                                                <a href="/asset/purchase/{{purchase.id}}">
+                                                                    <p class="text-lg">{{purchase.purchaseid}}</p>
+                                                                </a>
+                                                                {% if purchase.status.status_number == "P1"  %}
+                                                                    <div class="progress progress-sm">
+                                                                        <div role="progressbar"style="width: 15%;"aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" class="progress-bar progress-bar-purple">
+                                                                            <span class="sr-only">15%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted">15% Completed</small>
+                                                                {% elif purchase.status.status_number == "P2" %}
+                                                                    <div class="progress progress-sm">
+                                                                        <div role="progressbar"style="width: 30%;"aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" class="progress-bar progress-bar-purple">
+                                                                            <span class="sr-only">30%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted">30% Completed</small>
+                                                                {% elif purchase.status.status_number == "P3" %}
+                                                                    <div class="progress progress-sm">
+                                                                        <div role="progressbar"style="width: 60%;"aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" class="progress-bar progress-bar-purple">
+                                                                            <span class="sr-only">60%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted">60% Completed</small>
+                                                                {% elif purchase.status.status_number == "P4" %}
+                                                                    <div class="progress progress-sm">
+                                                                        <div role="progressbar"style="width: 80%;"aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" class="progress-bar progress-bar-purple">
+                                                                            <span class="sr-only">80%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted">80% Completed</small>
+                                                                {% elif purchase.status.status_number == "P5" %}
+                                                                    <div class="progress progress-sm">
+                                                                        <div role="progressbar"style="width: 100%;"aria-valuemax="100" aria-valuemin="0" aria-valuenow="15" class="progress-bar progress-bar-purple">
+                                                                            <span class="sr-only">100%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <small class="text-muted">100% Completed</small>
+                                                                {% endif %}
+                                                            </div>
+                                                            <hr>
+                                                            <dl class="dl-horizontal">
+                                                                <dt>Purchase Status :</dt>
+                                                                <dd>{{purchase.status}}</dd>
+                                                            </dl>
+                                                            <small class="text-muted"><em>Last Update : Des 12, 2014</em></small>
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Manage Task</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <p>You are been assigned to configure the asset - {{task.stock.stockid}} to <strong>{{task.ticket.affectedperson}}</strong> at {{task.ticket.affectedperson.location}} </p>
+                                        <dl class="dl-horizontal">
+                                            <dt>Task Status :</dt>
+                                            <dd>{{task.status.status}}</dd><br>
+                                            <dt>task owner :</dt>
+                                            <dd>{{task.owner}}</dd><br>
+                                            <dt>Asset owner :</dt>
+                                            <dd>{{task.owner}}</dd><br>
+                                        </dl>
+                                        {% if task.task_closed %}
+                                            <p class="label label-success pull-right">Task resolved by <strong>{{task.owner}}</strong> </p>
+                                        {% else %}
+                                            {% if task.delivery_conform %}
+                                                <div class="row" style="margin-top:1%">
+                                                    <a href="" data-toggle="modal" data-target="#returnitem" ><span style="width:100%" class="btn btn-warning">Return Item</span></a>
+                                                </div>
+                                                <div class="row" style="margin-top:1%">
+                                                    <a href=""  data-toggle="modal" data-target="#conformation" ><span  style="width:100%" class="btn btn-info">Completed Process</span></a>
+                                                </div>
+                                                <div class="row" style="margin-top:1%">
+                                                    <a href=""  data-toggle="modal" data-target="#closing"><span  style="width:100%" class="btn btn-success">Close Task</span></a>
+                                                </div>
+                                            {% else %}
+                                                <a data-toggle="modal" data-target="#delivery" href=""><span  style="width:100%" class="btn btn-success">Is item delivered ?</span></a>
+
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+          </div>
+        </div>
+
+
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-success" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <div class="modal fade" id="delivery" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Is item Delivered at Designation ?</h4>
+        </div>
+        <form action="/task/conformation/{{task.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Please Please conform item delivery</label>
+              <!-- <textarea name="soft" class="form-control"></textarea> -->
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <!-- <button   type="button" class="close btn btn-info" data-dismiss="modal" aria-hidden="true">No</button> -->
+        <button class="btn btn-success" type="submit">Yes, Delivered</button>
+        <!-- <p>Note: Work under process, we are trying hard to make it as awesome as possible </p> -->
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="returnitem" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Do you want to return item?</h4>
+        </div>
+        <!-- <form action="/asset/stock/relation/{{stock.id}}" method="POST">{% csrf_token %} -->
+        <div class="modal-body">
+          
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Please Specify the reason why you are sending item  back</label>
+              <textarea name="soft" class="form-control"></textarea>
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Return Item</button>
+        <p>Note: Work under process, we are trying hard to make it as awesome as possible </p>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        <!-- </form> -->
+      </div>
+    </div>
+  </div>
+
+
+ <div class="modal fade" id="conformation" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Is your Work Complete?</h4>
+        </div>
+        <form action="/task/complete/{{task.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Please Specify a note:</label>
+              <textarea name="soft" class="form-control">
+              </textarea>
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-success" type="submit">Complete and Close Task </button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="closing" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md ">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">Are You sure you want to close this task?</h4>
+        </div>
+        <form action="/task/close/{{task.id}}" method="POST">{% csrf_token %}
+        <div class="modal-body">
+          
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Please Specify a note:</label>
+              <textarea name="remark" class="form-control"></textarea>
+            </div>
+          </div>          
+        </div>
+        <div class="modal-footer" style="border:0px">
+        <button class="btn btn-danger" type="submit">Close Task </button>
+        <!-- <span style="color:red">* </span> are mandatory -->
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+      {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    <script type="text/javascript" src="/static/asset/nifty.min.js"></script>
+    <script>
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+      });
+      $('#task').addClass("active") 
+    </script>
+
+
+
+
+
+    </body>
+</html>

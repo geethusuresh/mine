@@ -1,0 +1,60 @@
+<form method="post" action="{% url 'update_docker_server' server_id %}" enctype="multipart/form-data">
+{% csrf_token %}
+	<div class="modal-body">
+		<div class="form-group pad-all">
+            <label class="control-label col-md-4">Server Name:</label>
+            <div class="col-md-8">
+                {{form.server_name}}
+            </div>
+        </div>
+        <div class="form-group pad-all">
+            <label class="control-label col-md-4">Docker URL(with port):</label>
+            <div class="col-md-8">
+                {{form.docker_url}}
+            </div>
+        </div>
+        <div class="form-group pad-all">
+            <label class="control-label col-md-4">Connection Type:</label>
+            <div class="col-md-8">
+                {{form.connection_type}}
+            </div>
+        </div>
+        <div class="ssl_upload">
+            <div class="form-group pad-all">
+                <label class="control-label col-md-4">Ca file:</label>
+                <div class="col-md-8">
+                    {{form.ssl_ca_file}} 
+                </div>
+            </div>
+            <div class="form-group pad-all">
+                <label class="control-label col-md-4">cert file:</label>
+                <div class="col-md-8">
+                    {{form.ssl_cert_file}}
+                </div>
+            </div>
+            <div class="form-group pad-all">
+                <label class="control-label col-md-4">key file:</label>
+                <div class="col-md-8">
+                    {{form.ssl_key_file}}
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		<button type="submit" class="btn btn-primary">Save changes</button>
+	</div>
+</form>
+
+<script type="text/javascript">
+       //  $('#id_connection_type').addClass('connection');
+       // $('.connection-type').change(function(){
+       //      var option = $('.connection-type').val();
+       //      if(option== 'S'){
+       //          $('.ssl_upload').show();
+       //      }
+       //      else{
+       //          $('.ssl_upload').hide();
+       //      }
+       //  });
+</script>

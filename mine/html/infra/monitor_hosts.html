@@ -1,0 +1,293 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/asset_css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    <style>
+.select-label {
+  position: absolute; }
+
+.select-wrapper {
+  position: relative;
+  margin-top: 15px; }
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    cursor: pointer;
+    color: #444;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    outline: none;
+    height: 3rem;
+    line-height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    padding: 0;
+    display: block; }
+  .select-wrapper .mdi-navigation-arrow-drop-down {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 23px; }
+
+select {
+  display: none; }
+
+select.browser-default {
+  display: block; }
+
+select:disabled {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-wrapper input.select-dropdown:disabled {
+  color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3); }
+
+.select-wrapper i {
+  color: rgba(0, 0, 0, 0.3); }
+
+.select-dropdown li.disabled {
+  color: rgba(0, 0, 0, 0.3); }
+  .select-dropdown li.disabled:hover {
+    background-color: transparent; }
+
+        select {
+display: inline;
+}
+    </style>
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/asset_header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1  class="text-thin">Control Center | <small>Hosts</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">DataCenter</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+            <div class="row">
+              <div class="col-sm-1"> </div>
+              <div class="col-sm-10">
+                <div class="panel">
+                  <div class="panel-heading">
+                    <h3 class="panel-title text-center">Hosts</h3>
+                  </div>
+                  <!-- <a href="" class="btn btn-info pull-right" data-toggle="modal" data-target="#app_host">Add</a> -->
+                  <div class="panel-body">
+                    <div class="pull-right">
+                      
+                    </div>
+                    {% if hosts %}
+                    <div class="table-responsive">
+                      <table class="table table-striped" id="table_id">
+                        <thead>
+                          <tr>
+                            <th>Host Name</th>
+                            <th >IP Address</th>
+                            <th> Customer </th>
+                            <th class="text-center">Status</th>
+                            <th class="pull-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {% for host in hosts %}
+                          <tr>
+                            <td>{{host.name}}</td>
+                            <td>{{host.host}}</td>
+                            <td>{{host.customer}}</td>
+                            <td  class="text-center">{% if host.status == 0 %}<span class="badge badge-success">o</span> Online {% else %}<span class="badge badge-danger">o</span> Offline {% endif %}</td>
+                            <td><span class="pull-right">
+                            <a href="/management/host/{{host.id}}" class="btn btn-info"  data-toggle="tooltip" data-original-title="Host Map"><l class="fa fa-cloud-download "></l></a><a href="/management/host/monitoring/{{host.id}}" data-toggle="tooltip" data-original-title="Monitoring" class="btn btn-warning"><l class="fa fa-dashboard "></l></a><a href="/dashboard/index/host/{{host.id}}" class="btn btn-success"  data-toggle="tooltip" data-original-title="Security"><l class="fa fa-shield"></l></a></span>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% else %}
+
+                    <span class="alert alert-success"><l class="fa fa-warning"></l> Elastic search Server is Down</span>
+
+                    {% endif %}
+                  
+
+
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1"> </div>
+            </div>
+
+              {% if apps %}
+              <div class="row">
+                <h3 class="col-sm-12 text-thin">Installed Applications</h3>
+                <hr>
+               {% for app in apps %}
+                  <div class="col-lg-4">
+                    <a href="/management/application/{{app.id}}">
+                      <div class="panel media middle">
+                      <div class="media-left bg-{% cycle "success" "info" "primary" 'purple' "warning" %} pad-all" style="float:left">
+                        <l class="fa {% if app.classification %}{{app.classification.icon}} {%else%} fa-user {% endif %} fa-5x"></l>
+                      </div>
+                      <div class="media-body pad-lft" style="margin-top:4%">
+                        <p class="text-2x mar-no text-thin">{{app.app_name}}</p>
+                        <p class="text-muted mar-no">{{app.host}}</p>
+                      </div>
+                    </div>
+                    </a>
+                  </div>
+                {% endfor %}
+
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+<div class="modal fade" id="app_add" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Create Infrastructure Application</h4>
+      </div>
+      <form action="/dashboard/index/application/add/" method="post" enctype="multipart/form-data" id="incident_form">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>App name</label>
+              <input type="text" name="appname" class="form-control" required  maxlength="20">
+            </div>
+            <div class="col-sm-6">
+              <label>Type of Application</label>
+              <select class="form-control" name="classi" required>
+                <option value="" disabled selected>-select one-</option>
+                {% for class in classi %}
+                <option value="{{class.id}}">{{class.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" >
+      <p class="pull-left">*Appname contains maximum of 20 Charecter</p>
+      <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Create</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+
+
+<div class="modal fade" id="app_host" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Add Host to the datacenter {{dc.dc_name}}</h4>
+      </div>
+      <form action="/datacenter/add/host/new/{{dc.id}}" method="post" enctype="multipart/form-data" id="incident_form">{% csrf_token %}
+      <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <label>Host Name :</label>
+              <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-sm-6">
+              <label>IP Address :</label>
+              <input type="ip" name="ip" class="form-control" required>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer" >
+      <button id="delay" type="submit" class="btn waves-effect waves-light btn-info btn-large" style="float:right;width:120px">Create</button>
+      <p class="pull-left">* please enter a valid ip</p>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+
+
+
+{% include "asset/addtostock.html" %}
+
+
+
+{% if messages %}
+<div id="floating-top-right" class="floating-container" style="margin-top:4%">
+{% for message in messages %}
+  <div class="alert-wrap in animated jellyIn">
+    <div class="alert alert-purple" role="alert">
+      <button class="close" type="button">
+      <i class="fa fa-times-circle"></i>
+      </button>
+      <div class="media">
+        <div class="media-body">
+          <h4 class="alert-title"></h4>
+          <p class="alert-message"><strong>{{ message|safe }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+              
+
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+    <script>
+     $("#table_id").DataTable();
+
+    $("#infra").addClass("active");
+    $("#infraopen").css('display','block');
+    $("#dcview").addClass("active");
+
+    $(".close").click(function () { 
+        $("div").remove('.alert-wrap'); 
+
+      }); 
+    </script>
+    
+    </body>
+</html>

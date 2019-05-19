@@ -1,0 +1,102 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/asset_header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/asset_sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Asset Management  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Item Management</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="box">
+                    <div class="box-title">
+                      <span><strong>Item Details</strong></span>
+                      <a href="" data-toggle="modal" data-target="#additem">
+                      <small class="label label-success pull-right">Add Item</small></a>
+                    </div>
+                    <div class="box-body table-responsive no-padding">
+                    <table class="table table-striped" id="table_id"  >
+                          <thead>
+                            <tr>
+                              <th></th>
+                              <th>Item</th>
+                              <th>Assets Category </th>
+                            </tr>
+                          </thead>   
+                          <tbody>
+                          {% for item in items %}
+                          <tr>
+                            <td class="grey">
+                              <a class="btn btn-success btn-sm" href="/asset/stock/{{stock.id}}">
+                                <i class="fa fa-search-plus "></i>  
+                              </a>
+                            </td>
+                            <td class="grey">{{item.item_type}}</td>
+                            <td class="grey">{{item.asset}}</td>
+                            
+                          </tr>
+                          {% endfor %}
+                          </tbody>
+                        </table>        
+                    </div>
+                  </div>
+                </div>
+
+              </div>    
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+          <div class="modal fade" id="additem" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title" id="myModalLabel">Add New Item</h4>
+                </div>
+                <div class="modal-body">
+                  
+
+Goes Here!
+
+
+                </div>
+                <div class="modal-footer" style="border:0px">
+                <span style="color:red">* </span> are mandatory
+                </div>
+              </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+          </div>
+          {% include "asset/addtostock.html" %}
+
+    {% include "components/footer.html"%}
+    </body>
+</html>

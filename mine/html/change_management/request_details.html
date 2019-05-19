@@ -1,0 +1,566 @@
+{% load zone %}
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a data-toggle="tab" href="#req_details">
+            <i class="fa fa-lg"></i> Request Details
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#req_logs">
+            <i class="fa fa-lg"></i> Request Logs
+        </a>
+    </li>
+    <li>
+        <a data-toggle="tab" href="#req_history">
+            <i class="fa fa-lg"></i>
+            Request History
+        </a>
+    </li>
+    {% if change_attachments|length > 0 %}
+        <li>
+            <a data-toggle="tab" href="#req_attachments">
+                Request Attachments
+            </a>
+        </li>
+    {% endif %}
+</ul>
+<div class="tab-content">
+    <div class="tab-pane fade in active" id="req_details">
+        <form method="post" action="/rfc/details/{{rfc.id}}/">{% csrf_token %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <label><strong>Summary: <label style="color:red" class="rfc_data">*</label></strong> </label>
+                    <p class="hide_data">{{ rfc.summary }}</p><br>
+                    <input type="text" class="form-control rfc_data" value="{{rfc.summary}}" name="summary" required>
+                </div>
+                {% comment %}
+                <div class="col-sm-2" style="border-left:1px solid black" >
+                    
+                    <!-- <h4>{{ rfc.change_id }}</h4> -->
+                    <!-- <label class="label label-success" >{{rfc.status}}</label><br/><br/> -->
+                    <!-- <label style="margin-right:10px" class="label label-info" style="font-size:13px">Type : {{rfc.change_type}}</label> -->
+                    
+                        {% if rfc.status == 'ACC_CAT' and is_change_manager == True %}
+                            <a href="#" class="pull-left pad-all" id="edit_change" data-toggle="tooltip" data-original-title="Edit" data-placement="bottom" ><i class="fa fa-pencil-square-o fa-2x"> </i></a>
+                        {% endif %}
+                    <!-- <br/> -->
+                    <!-- <br/> -->
+                    <!-- <a href="#" onclick="exit_edit()" data-toggle="tooltip" class="pull-right rfc_data" data-original-title="Exit" data-placement="bottom"><i class="fa fa-close fa-2x"></i></a> -->
+                    <!-- <button type="submit" class="pull-left rfc_data" id="save_change" data-toggle="tooltip" data-original-title="Save" data-placement="bottom"><i class="fa fa-save fa-2x"></i></button> -->
+                </div>
+                {% endcomment %}
+             </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-12"><br>
+                    <label><strong>Description : <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data">{{ rfc.description|safe }}</p>
+                    <textarea name="desc" class="form-control rfc_data" required>{{rfc.description|safe}}</textarea>
+                </div>
+            </div>
+            {% if rfc.change_type == 'Emergency' and rfc.approval_attachment %}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4 class="text-thin">Approval Attachment Details</h4>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th> Uploaded Date </th>
+                                    <th> Uploaded by </th>
+                                    <th> View </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if rfc.approval_attachment %}
+                                    <tr>
+                                        <td> {% tzone rfc.created_date %} </td>
+                                        <td> {{ rfc.created_person }} </td>
+                                        <td> <a class="btn btn-info btn-sm" href="/media/{{rfc.approval_attachment}}" download="{{rfc.approval_attachment}}" title="Download Attachment" data-placement="bottom" data-toggle="tooltip">
+                                                <i class="fa fa-download "></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Created Date :</dt>
+                        <dd>{% tzone rfc.created_date %}</dd><br>
+                        <dt>Scheduled Start:</dt>
+                        <dd>{% tzone rfc.scheduled_start %}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Created User : </dt>
+                        <dd>{{ rfc.created_person }}</dd><br/>
+                        <dt>Scheduled Finish:</dt>
+                        <dd>{% tzone rfc.scheduled_finish %}</dd>
+                    </dl>
+                </div>
+            </div>
+            <hr/>
+            <div class="row">
+                <div class="col-sm-12">
+                    {% if rfc.status == 'SCHED' or rfc.status == 'ACC_CAT' %}
+                        <a href="" class="btn btn-success" {% if view_status == True %} {% else %} disabled {% endif %} data-toggle="modal" data-target="#resched">Re Schedule</a>
+                        <hr/>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Customer : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd>
+                            <div class="hide_data"> {{ rfc.customer.customername}} </div>
+                            <select class="form-control rfc_data" required name="customer" id="c_cust">
+                                <option value=""> Select Customer </option>
+                                {% for cust in customers %}
+                                    <option value="{{cust.id}}" {% if cust == rfc.customer %} selected {% endif %}>{{cust.customername}}</option>
+                                {% endfor %}
+                            </select>
+                        </dd><br/>
+                        <dt>Category : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd> <div class="hide_data"> {{ rfc.category }} </div>
+                            <select class="form-control rfc_data" id="c_cat" name="category" required >
+                                <option value=""> Select Category </option>
+                                {% if rfc.category %}
+                                    <option value="{{rfc.category.id}}" selected>{{rfc.category}}</option>
+                                {% endif %}
+                            </select>                            
+                        </dd>
+                        <br>
+                        <dt> Subcategory : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd>
+                            <div class="hide_data">{{ rfc.subcategory }}</div>
+                            <select class="rfc_data form-control" name="sub_cat" id="c_sub_cat" required>
+                                <option value=""> Select Subcategory </option>
+                                {% if rfc.subcategory %}
+                                    <option value="{{ rfc.subcategory.id}}" selected> {{rfc.subcategory}}</option>
+                                {% endif %}
+                            </select>
+                        </dd>
+                        <br/>
+                        <dt> Down Time Required : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd>
+                            <div class="hide_data">
+                                {% if rfc.down_time_required == True %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </div>
+                            <select id="down_time_required" name="down_time_required" class="form-control rfc_data">
+                                <option value="">--Select--</option>
+                                <option value="yes" {% if rfc.down_time_required == True %}selected{% endif %}>Yes</option>
+                                <option value="no" {% if rfc.down_time_required == False %}selected{% endif %}>No</option>
+                            </select>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Group : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd> <div class="hide_data">{{ rfc.group }}</div>
+                            <select name="group" id="c_group" class="rfc_data form-control" required>
+                                <option value=""> Select Group </option>
+                                {% if rfc.group %}
+                                    <option value="{{rfc.group.id}}" selected>{{rfc.group}}</option>
+                                {% endif %}
+                            </select>
+                        </dd><br>
+                        <dt>Subgroup : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd><div class="hide_data">{{ rfc.subgroup }}</div>
+                            <select class="form-control rfc_data" id="c_subgroup" required name="subgroup">
+                                <option value=""> Select Subgroup </option>
+                                {% if rfc.subgroup %}
+                                    <option value="{{rfc.subgroup.id}}" selected>{{rfc.subgroup}}</option>
+                                {% endif %}
+                            </select>
+                        </dd><br>
+                        <dt>Owner : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd><div class="hide_data">{{ rfc.owner }}</div>
+                            <select class="form-control rfc_data" id="c_owner" name="owner" required>
+                                <option value=""> Select Owner </option>
+                                {% if rfc.owner %}
+                                    <option value="{{rfc.owner.id}}" selected>{{rfc.owner}}</option>
+                                {% endif %}
+                            </select>
+                        </dd><br/>
+                        <dt class="dw_time" style="display:none">Down Time : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd class="dw_time" style="display:none">
+                            <div class="hide_data">{{ rfc.down_time }} min</div>
+                            <input type="number" name="down_time" id="down_time" class="form-control rfc_data" min="0" value="{{ rfc.down_time }}" placeholder="in minutes"> 
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Change Type : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd> <div class="hide_data">{{ rfc.change_type }}</div>
+                            <select class="form-control rfc_data" name="change_type" required>
+                                <option value="">Select Change Type</option>
+                                <option value="Normal" {% if rfc.change_type == "Normal" %} selected {% endif %}>Normal</option>
+                                <option value="Standard" {% if rfc.change_type == "Standard" %} selected {% endif %}>Standard</option>
+                                <option value="Emergency" {% if rfc.change_type == "Emergency" %} selected {% endif %}>Emergency</option>
+                            </select>
+                        </dd><br/>
+                        <dt class="hide_data">Impact:</dt>
+                        <dd class="hide_data">
+                            <div class="hide_data">{{rfc.impact}}</div>
+                            {% if rfc.status == 'ACC_CAT' %}
+                                <select class="form-control rfc_data" name="impact">
+                                    <option value="">Select Impact</option>
+                                    {% for impact_val in impact_values %}
+                                        <option value="{{impact_val.field_value}}" {% if rfc.impact == impact_val.field_value %} selected {% endif %}>{{impact_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </dd><br/>
+                        <!-- urgency removed -->
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal hide_data">
+                        <dt>Priority :</dt>
+                        <dd>
+                            <div class="hide_data">{{ rfc.priority}}</div>
+                            {% if rfc.status == 'ACC_CAT' %}
+                                <select class="form-control rfc_data" name="priority">
+                                    <option value=""> Select Priority </option>
+                                    {% for priority_val in priorities %}
+                                        <option value="{{priority_val.field_value}}" {% if rfc.priority == priority_val.field_value %} selected {% endif %}>{{priority_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </dd><br/>
+                        <!-- <dt>Failure Probability :</dt> -->
+                        <!-- <dd>
+                            <div class="hide_data">{{ rfc.failure_probability }}</div>
+                            {% if rfc.status == 'ACC_CAT' %}
+                                <select class="form-control rfc_data" name="failure_prob">
+                                    <option value="">-Select Failure Probability-</option>
+                                    {% for failure_prob_val in failure_prob_values %}
+                                        <option value="{{failure_prob_val.field_value}}" {% if rfc.failure_probability == failure_prob_val.field_value %} selected {% endif %}>{{failure_prob_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </dd><br/> -->
+                        <!-- <dt>Source : </dt>
+                        <dd>{{ rfc.source }}</dd> -->
+                        <dt>Urgency :</dt>
+                        <dd>
+                            <div class="hide_data">{{ rfc.urgency }}</div>
+                            {% if rfc.status == 'ACC_CAT' %}
+                                <select class="form-control rfc_data" name="urgency">
+                                    <option value=""> Select Urgency </option>
+                                    {% for urgency_val in urgency_values %}
+                                        <option value="{{urgency_val.field_value}}" {% if rfc.urgency == urgency_val.field_value %} selected {% endif %}>{{urgency_val.display_value}}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <!-- <dt> Primary Asset or CI : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd>
+                        CI <input type="radio" name="asset_ci_type" value="ci" required style="margin-left:10px" onclick="get_list_data('ci')" {% if rfc.ci %} checked {% endif %} disabled class="radio_class"> 
+                        Asset <input type="radio" name="asset_ci_type" value="asset" required style="margin-left:10px" onclick="get_list_data('asset')" {% if rfc.asset %} checked {% endif %} disabled class="radio_class">
+                        </dd> -->
+
+                        <!-- <br/> -->
+                        <dt>Primary CI : <label style="color:red" class="rfc_data">*</label></dt>
+                        <dd><div class="hide_data">{{ rfc.ci.name }}</div>
+                            <select class="form-control rfc_data" id="ci_data" name="ci" {% if rfc.ci %} required {% elif rfc.asset %} disabled {% endif %} required>
+                                <option value=""> Select CI </option>
+                                {% if rfc.ci %}
+                                    <option value="{{rfc.ci.id}}" selected>{{rfc.ci.name}}</option>
+                                {% endif %}
+                            </select>
+                        </dd><br/>
+                        <!-- removed additional ci -->
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <!-- <dl class="dl-horizontal">
+                        <dt>&nbsp;</dt>
+                        <dd>&nbsp;</dd><br/>
+                        <dt>Primary Asset : </dt>
+                        <dd><div class="hide_data">{{ rfc.asset.model_name }}</div>
+                            <select class="form-control rfc_data" id="asset_data" name="asset" {% if rfc.asset %} required {% elif rfc.ci %} disabled {% endif %} >
+                                <option value=""> Select asset </option>
+                                {% if rfc.asset %}
+                                    <option value="{{rfc.asset.id}}" selected>{{rfc.asset.model_name}}</option>
+                                {% endif %}
+                            </select>
+                        </dd><br/>
+                        <dt>Additional Assets: </dt>
+                        <dd>
+                            <div class="hide_data">
+                                {% for asset in rfc.additional_assets.all %}
+                                    <div class="col-sm-4" style="margin-bottom:10px" >
+                                        <label class="label label-info">{{asset.model_name}}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <select class="form-control rfc_data" id="add_asset" name="add_asset_dat" multiple>
+                                <option value="">--Select--</option>
+                                {% for asset in assets %}
+                                    <option value="{{asset.id}}" {% if asset.id in add_asset_val %} selected="selected" {% endif %}>{{asset.model_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </dd>
+                    </dl> -->
+                    <dl class="dl-horizontal">
+                        <dt>Additional CIs : </dt>
+                        <dd>
+                            <div class="hide_data">
+                                {% for ci in rfc.additional_cis.all %}
+                                    <label class="label label-info">{{ci}}</label>
+                                {% endfor %}
+                            </div>
+                            <select class="form-control rfc_data" id="add_ci" name="add_ci_dat" multiple>
+                                <option value="">--Select--</option>
+                                {% for ci in cis %}
+                                    <option value="{{ci.id}}" {% if ci.id in add_ci_val %} selected="selected" {% endif %}>{{ci.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr/>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Pre Implementation Checklist: </dt>
+                        <dd><p class="hide_data text-justify">{{rfc.pre_implementation_checklist}}</p>
+                        <textarea name="pre_implementation_checklist" class="form-control rfc_data" >{{rfc.pre_implementation_checklist}}</textarea></dd><br/>
+                        <dt>Step by Step Plan: </dt>
+                        <dd><p class="hide_data text-justify">{{rfc.step_by_step_plan}}</p>
+                        <textarea name="step_by_step_plan" class="form-control rfc_data" >{{rfc.step_by_step_plan}}</textarea></dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Post Implementation Checklist: </dt>
+                        <dd><p class="hide_data text-justify">{{rfc.post_implementation_checklist}}</p>
+                        <textarea name="post_implementation_checklist" class="form-control rfc_data" >{{rfc.post_implementation_checklist}}</textarea></dd><br/>
+                        <dt>Roll-Back Plan: </dt>
+                        <dd><p class="hide_data text-justify">{{rfc.roll_back_plan}}</p>
+                        <textarea name="roll_back_plan" class="form-control rfc_data" >{{rfc.roll_back_plan}}</textarea></dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Reason for Change: <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data text-justify">{{rfc.reason}}</p>
+                    <textarea name="reason" class="form-control rfc_data" required>{{rfc.reason}}</textarea>
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Change Impact: <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data text-justify">{{rfc.risk}}</p>
+                    <textarea name="risk" class="form-control rfc_data" required>{{rfc.risk}}</textarea>
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Impact if not implement the change: <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data text-justify">{{rfc.effect_of_no_implementation}}</p>
+                    <textarea name="effect" class="form-control rfc_data" required>{{rfc.effect_of_no_implementation}}</textarea>
+                    <hr/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <label><strong>Pre Implementation Details: <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data text-justify">{{rfc.pre_test_details}}</p>
+                    <textarea name="pre_test_details" class="form-control rfc_data" >{{rfc.pre_test_details}}</textarea>
+                </div>
+                <div class="col-sm-12">
+                    <hr/>
+                </div>
+                <div class="col-sm-12">
+                    <label><strong>Post Implementation Details: <label style="color:red" class="rfc_data">*</label></strong>  </label>
+                    <p class="hide_data text-justify">{{rfc.post_implementation_details}}</p>
+                    <textarea name="post_implementation_details" class="form-control rfc_data" >{{rfc.post_implementation_details}}</textarea>
+                </div>
+            </div>
+            <div class="btn-group edit-details-btn">
+                {% if rfc.status == 'ACC_CAT' and is_change_manager == True %}
+                    <a href="#" class="btn btn-default" id="edit_change" data-toggle="tooltip" data-original-title="Edit" data-placement="bottom" ><span class="glyphicon glyphicon-edit"></span> Edit</a>
+
+                    <a href="#" onclick="exit_edit()" class="btn btn-default rfc_data" data-toggle="tooltip" data-original-title="Exit" data-placement="bottom" ><i class="fa fa-sign-out"></i> Exit</a>
+                            <!-- <a href="#" class="pull-left pad-all" id="edit_change" data-toggle="tooltip" data-original-title="Edit" data-placement="bottom" ><i class="fa fa-pencil-square-o fa-2x"> </i></a> -->
+                {% endif %}
+                <button type="submit" class="btn btn-success rfc_data" id="save_change" data-toggle="tooltip" data-original-title="Save" data-placement="bottom"><span class="glyphicon glyphicon-save"></span> Save</button>
+            </div>
+        </form>
+    </div>
+    <div id="req_logs" class="tab-pane fade">
+        <h4 class="text-thin"><i class="fa fa-fw"></i> Request Worklog</h4>
+        <div class="row">
+            <div class="col-sm-1">
+            </div>
+            <div class="col-sm-10">
+                <div class="timeline">
+                    <div class="timeline-header">
+                        <a id="delay" data-toggle="modal" data-target="#addrelation" class="waves-effect waves-light btn-info btn-large" style="cursor:pointer" >
+                        <div class="timeline-header-title bg-info">Now</div></a>
+                    </div>
+                    {% for activity in activity_logs %}
+                        <div class="timeline-entry">
+                            <div class="timeline-stat">
+                                <div class="timeline-icon bg-purple"><i class="fa fa-check"></i>
+                                </div>
+                                <div class="timeline-time">{% tzone activity.added_time %}</div>
+                            </div>
+                            <div class="timeline-label">
+                                <p class="mar-no pad-btm"><a href="#" class="btn-link text-semibold">{{activity.added_person}}</a> {{activity.note}}  </p>
+                                {% if activity.remark %}
+                                    <blockquote class="bq-sm bq-open">
+                                        <p>{{activity.remark|safe}}</p>
+                                    </blockquote>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+    </div>
+    <div id="req_history" class="tab-pane fade">
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-stripped" id="request_hist_tab">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Owner</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hist in rfc_histories %}
+                            <tr>
+                                <td class="details-control"></td>
+                                <td>{{hist.status}}</td>
+                                <td>{{ hist.changed_time }}</td>
+                                <td>{{hist.owner}}</td>
+                                <td class="hidden">
+                                    {{hist.sub_tasks|safe}}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="req_attachments" class="tab-pane fade">
+        <div class="row pad-all">
+            <div class="col-sm-9">
+                <h4 class="text-thin">Request Attachment Details</h4>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <!-- <th>Name</th> -->
+                            <th> Uploaded Date </th>
+                            <th> Uploaded by </th>
+                            <th> Remove </th>
+                            <th> View </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attachment in change_attachments %}
+                            <tr>
+                                <!-- <td> {{ attachment.attachment.name }} </td> -->
+                                <td> {% tzone attachment.created_date %} </td>
+                                <td> {{ attachment.uploded_by }} </td>
+                                <td> <a class="btn btn-danger btn-sm" href="#" title="Remove Attachment" data-placement="bottom" data-toggle="tooltip" onclick="remove_change_attachment('{{ attachment.id }}')">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </td>
+                                <td> <a class="btn btn-info btn-sm" href="/media/{{attachment.attachment}}" download="{{attachment.docfile}}" title="Download Attachment" data-placement="bottom" data-toggle="tooltip">
+                                        <i class="fa fa-download "></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-3">
+                <a href="#" class="btn btn-success" data-toggle="modal" data-target="#add_attachment">Add New Attachment</a>
+            </div>
+        </div>
+        {% if pre_attachment or post_attachment %}
+            <div class="row pad-all">
+                <h4 class="text-thin">Implementation Attachment Details</h4>
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th> Uploaded Date </th>
+                            <th> Uploaded by </th>
+                            <th> Type </th>
+                            <th> View </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pre_attachment %}
+                            <tr>
+                                <td> {% tzone pre_attachment.0.created_date %} </td>
+                                <td> {{ pre_attachment.0.uploded_by }} </td>
+                                <td>Pre Implementation</td>
+                                <td> <a class="btn btn-info btn-sm" href="/media/{{pre_attachment.0.attachment}}" download="{{pre_attachment.0.attachment}}" title="Download Attachment" data-placement="bottom" data-toggle="tooltip">
+                                        <i class="fa fa-download "></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if post_attachment %}
+                            <tr>
+                                <td> {% tzone post_attachment.0.created_date %} </td>
+                                <td> {{ post_attachment.0.uploded_by }} </td>
+                                <td>Post Implementation</td>
+                                <td> <a class="btn btn-info btn-sm" href="/media/{{post_attachment.0.attachment}}" download="{{post_attachment.0.attachment}}" title="Download Attachment" data-placement="bottom" data-toggle="tooltip">
+                                        <i class="fa fa-download "></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>

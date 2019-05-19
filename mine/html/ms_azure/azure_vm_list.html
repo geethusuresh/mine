@@ -1,0 +1,175 @@
+{% extends 'cloud_management/home.html'%}
+{% block section_header %}
+<script type="text/javascript">
+  var cloud_account_id = {{ cloud_account_id }}
+
+  $(document).ready(function() {
+      $(".select").select2({placeholder: "Select"});
+  });
+
+</script>
+    <h1>
+        Azure Instance List
+        <small>Instance Overview</small>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'aws_accounts_view' %}">Azure Home </a>
+        </li>
+            <li class="active">
+            <strong>Azure Instance List</strong>
+        </li>
+    </ol>
+
+{% endblock %}
+
+
+{% block content %}{% load staticfiles %}
+
+
+{% if messages %}
+{% for message in messages %}
+     {% if 'error' in message.tags %}
+        <div class="alert alert-error alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-success alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+
+
+<div ng-controller="AzureVMListController" ng-init="init('{{csrf_token}}')">
+  <div class="row">
+  <div class="col-lg-1">
+  </div>
+    <div class="col-lg-9">
+      <!-- TABLE: LATEST ORDERS -->
+      <div class="panel panel-mint">
+        <div class="panel-heading">
+            <div class="panel-control">
+              <div class="btn-group">
+                  <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#instance-list-minmize-button" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+              </div>
+            </div>
+            <h3 class="panel-title">Instance List</h3>
+
+
+
+
+          <div class="row">
+              <div class="col-sm-6 table-toolbar-left">
+              </div>
+              <div class="col-sm-6 table-toolbar">
+                <div class="form-group">
+                  <!-- <input type="text" autocomplete="off" class="form-control ng-pristine ng-untouched ng-valid" ng-model="group_sort.node_id" placeholder="Search Instance" id="demo-input-search2"> -->
+                </div>
+              </div>
+            </div>
+
+
+
+        </div><!-- /.box-header -->
+        <div class="panel-body" id="instance-list-minmize-button">
+          <div class="img-container" ng-if="loading_instance_list_data">   
+              <img id="loading_gif" src="/static/cloud-static-files/img/throbber.svg" alt="Product Image">
+          </div>
+          <div class="table-responsive" id="node_list_table">
+            <table class="table" id="node_table" ng-if="loading_instance_list_table_data">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>IP Address</th>
+                  <th>Host Name</th>
+                  <th>Instance State</th>
+                  <th>Power State</th>
+                  <th>Operation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat= 'each_node in instance_list | filter:group_sort' ng-class="{node_selected: isActive(each_node.node_id)}">
+                  <td><a href="/cloud_management/azure/{{cloud_account_id}}/vm/{[{each_node.service_name}]}/{[{each_node.deployment_name}]}/{[{each_node.name}]}/details/" class="btn-link">{[{each_node.name}]}</a></td>
+                  <td>{[{each_node.ip_address}]}</td>
+                  <td>{[{each_node.host_name}]}</td>
+                  <td>{[{each_node.instance_status}]}</td>
+                  <td ng-if="each_node.power_state == 'Started'">
+                    <span class="label label-table label-success">Running</span>
+                  </td>
+                  <td ng-if="each_node.power_state == 'Stopped'">
+                    <span class="label label-table label-danger">Stopped</span>
+                  </td>
+                  <td ng-if="each_node.power_state == 'terminated'">
+                    <span class="label label-table label-danger">Terminated</span>
+                  </td>
+                  <td  ng-if="each_node.power_state == 'stopping' || each_node.power_state == 'pending' || each_node.power_state == 'shutting-down' ">
+                    <span class="label label-table label-warning">Waiting</span>
+                    <img id="loading_gif" src="/static/cloud-static-files/img/server_load.gif" alt="Product Image">
+                  </td>
+                  <td>
+                    <a ng-if="each_node.power_state == 'Started'" class="btn btn-danger btn-sm" href="" style='color:white' title="Stop Instance" ng-click="perform_azure_vm_operation('stop',each_node.service_name, each_node.deployment_name, each_node.name)">
+                      <i class="fa fa-ban fa-lg"></i>
+                    </a>
+                    <a ng-if="each_node.power_state == 'Stopped'" class="btn btn-success btn-sm" href="" style='color:white' title="Start Instance" ng-click="perform_azure_vm_operation('start',each_node.service_name, each_node.deployment_name, each_node.name)">
+                      <i class="fa fa-bolt fa-lg"></i>
+                    </a>
+                    <a ng-if="each_node.power_state == 'Stopped'" class="btn btn-warning btn-sm" href="" style='color:white' title="Delete Instance" ng-click="perform_azure_vm_operation('delete',each_node.service_name, each_node.deployment_name, each_node.name)">
+                      <i class="fa fa-trash fa-lg"></i>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div><!-- /.table-responsive -->
+        </div><!-- /.box-body -->
+        <div class="footer clearfix">
+         <a href="/cloud_management/azure/{{cloud_account_id}}/dashboard/" class="btn btn-block btn-info btn-flat">Create New VM </a>
+        </div><!-- /.box-footer -->
+      </div><!-- /.box -->
+    </div><!-- /.col md 8-->
+  </div><!-- /.row -->
+
+
+
+
+
+
+
+
+  <style type="text/css">
+  .node_selected {
+      background-color: #39cccc;
+  }
+
+  .img-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      text-align:center; /* Align center inline elements */
+      font: 0/0 a;
+  }
+
+  .img-container:before {
+      content: ' ';
+      display: inline-block;
+      vertical-align: middle;
+      height: 100%;
+  }
+
+  .img-container img {
+      vertical-align: middle;
+      display: inline-block;
+  }
+</style>
+
+{% endblock%}

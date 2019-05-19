@@ -1,0 +1,65 @@
+
+  
+
+  {% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+
+            <div class="content">
+
+<form  id="frm_person_group" name ="frm_person_group" method='post' action=''>
+                        {% csrf_token %}    
+                        <div class="row">
+                          {% if messages %}
+                              {% for message in messages %}
+                              <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+                              {% endfor %}
+                          {% endif %}
+                        </div>
+                        <fieldset>
+                          <div class="form-group">
+              <label>Customer</label>
+              <select class="form-control" name="customer" id="customer" name="customer" required style="width:40px;">
+                <option value="">Select any customer</option>
+                {% for customer in customers %}
+                    <option value="{{customer.id}}">{{customer.customername}}</option>
+                {% endfor %}
+               </select>
+            </div>
+           
+            <button class="btn btn-success" type="submit">Generate CSV</button>  
+                        </fieldset>
+                      </form>          
+
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>

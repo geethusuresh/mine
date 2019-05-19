@@ -1,0 +1,476 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+<!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script> -->
+
+<!-- Charts -->
+
+<!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+<!-- Forms -->
+    <!-- <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script> -->
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme_sand.js"></script>     
+    <!--End High Charts -->
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+{% if messages %}
+              <ul >
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+              {% endif %}
+            <div class="content">
+
+              <div class="row">                
+                <div style="padding:30px;margin-top:10px">
+                  <div class="row">
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-alizarin"><a href="/ticket/all" style="color:#fff">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{ticketc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Service Desk</p>
+                              <i class="fa fa-ticket"></i></a>
+                          </div>
+                      </div>
+                       <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-midnight-blue"><a href="/administration/management/" style="color:#fff">
+                              <h3 class="timer" data-start="0" data-from="0" data-to="{{userc}}" data-speed="300" data-refresh-interval="10"></h3>
+                              <p>Admin Panel</p>
+                              <i class="fa fa-users"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-nephritis" >
+                              <a href="/monitor_dashboard/" style="color:#fff">
+                              <h3 class="fa fa-cogs"></h3>
+                              <p style="">Monitoring Dashboard</p>
+                              <i class="fa fa-dashboard"></i>
+
+                            </a>
+                          </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-peter-river">
+                              <a href="/reports/" style="color:#fff">
+                                <p style="height: 75px;">Reports</p>
+                                <i class="fa fa-bar-chart-o"></i>
+
+                              </a>
+                          </div>
+                      </div><!-- ./col -->
+                      
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">                
+                <div style="padding:30px;margin-top:10px">
+                  <div class="row">
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-sun-flower"><a href="/kb/list" style="color:#fff">                              
+                              <p style="height: 75px;">Knowledge Base</p>
+                              <i class="fa fa-users"></i></a>
+                          </div>
+                      </div>
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-carrot" >
+                              <a href="/notifications/" style="color:#fff">                             
+                              <p style="height: 75px;">Notifications</p>
+                              <i class="fa fa-dashboard"></i>
+{% load zone %}
+
+                            </a>
+                          </div>
+                      </div>
+
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-amethyst">
+                              <a href="/category/list" style="color:#fff">
+                                <p style="height: 75px;">Category</p>
+                                <i class="fa fa-bar-chart-o"></i>
+
+                              </a>
+                          </div>
+                      </div><!-- ./col -->
+                      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                          <div class="custom-box palette-emerald">
+                             <a href="/ticket/template/add" style="color:#fff">
+                              <p style="height: 75px;">Add Templates</p>
+                              <i class="fa fa-tasks"></i>
+                              </a>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+                
+              <!--Report to Dashboard Feature -->
+              {% if user_dash_reports %}             
+                {% for report_details in user_dash_reports %}
+                    {% if report_details.report_type == "open_tickets_trend" %}
+
+                     <div class="row">
+                      <div class="col-sm-12">
+                          <img src="/static/img/ajax-loader.gif" id="ajax_loader_{{forloop.counter}}" style="display:none;float:right; margin: 0 10px 0 5px;" />
+                      </div>
+                    </div> 
+
+                    <div class="row" id="report_graph_{{forloop.counter}}">
+
+                      <div class="col-sm-12">
+                        <div class="btn-group widget-header-toolbar" style="float:right;">
+                          <span style="margin: 9px 3px 3px 2px;cursor:pointer;" class="glyphicon glyphicon-remove-sign" onclick="dashboard_item_delete('{{report_details.dashboard_report_id}}','report_graph_{{forloop.counter}}','ajax_loader_{{forloop.counter}}','normal_report');"></span>                                   
+                        </div>
+                      </div>
+
+                      
+
+                      <div class="col-sm-12">
+                      <div id="container_open_trend_count"></div>
+                      <script type="text/javascript">
+                          $(function () {
+                              $('#container_open_trend_count').highcharts({
+                                  chart: {
+                                      plotBackgroundColor: null,
+                                      plotBorderWidth: 1,//null,
+                                      plotShadow: false
+                                  },
+                                  title: {
+                                      text: 'Open Tickets Count'
+                                  },
+                                  tooltip: {
+                                      pointFormat: '{series.name}: <b>{point.y}</b>'
+                                  },
+                                  plotOptions: {
+                                      pie: {
+                                          allowPointSelect: true,
+                                          cursor: 'pointer',
+                                          dataLabels: {
+                                              enabled: true,
+                                              format: '<b>{point.name}</b>: {point.y}',
+                                              style: {
+                                                  color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                              }
+                                          }
+                                      }
+                                  },
+                                  series: [{
+                                      type: 'pie',
+                                      name: 'Open Tickets Count',
+                                      data: [
+                                        {% for status_count in report_details.status_wise_count %}
+                                          ['{{status_count.1 | real}}', {{status_count.0}}],
+                                        {% endfor %}
+                                      ]
+                                  }]
+                              });
+                          });
+                      </script>
+                      </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+              {% endif %}
+              <!--End Report to Dashboard Feature -->
+
+            <!--Monitoring data to dashboard feature -->
+            <!--Speedo Meter -->
+            {% if user_monitor_reports.speedoitemlist %}
+            <div class="row">
+              <img src="/static/img/ajax-loader.gif" id="ajax_loader_speedo" style="display:none;float:right; margin: 0 10px 0 5px;" />
+            </div>
+            <div class="row">
+            {% for bandwidth_items in user_monitor_reports.speedoitemlist %}                
+                <div class="col-lg-6" id="report_speedo_{{forloop.counter}}">                      
+                    <div class="panel panel-default">
+                        <div class="panel-heading" style="position:relative;">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>
+                           {{bandwidth_items.speedo_itemname}}                       
+
+                          <span style="float:right;position:absolute; right:0px;top:0px;cursor:pointer;" class="glyphicon glyphicon-remove-sign" onclick="dashboard_item_delete('{{bandwidth_items.dashboard_report_id}}','report_speedo_{{forloop.counter}}','ajax_loader_speedo','speedo');"></span>
+
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div id="container_speedo{{forloop.counter}}"></div>                 
+                             <script type="text/javascript">
+                             $('#container_speedo{{forloop.counter}}').highcharts({
+                                    chart: {
+                                        type: 'gauge',
+                                        plotBackgroundColor: null,
+                                        plotBackgroundImage: null,
+                                        plotBorderWidth: 0,
+                                        plotShadow: false,
+                                        height: 240,
+                                    },
+
+                                    title: {
+                                        text: '{{bandwidth_items.speedo_itemname}}',
+                                        style:{
+                                            fontSize:"12px"
+                                        }
+                                    },
+
+                                    pane: {
+                                        startAngle: -150,
+                                        endAngle: 150,
+                                        background: [{
+                                            backgroundColor: {
+                                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                                stops: [
+                                                    [0, '#555'],
+                                                    [1, '#333']
+                                                ]
+                                            },
+                                            borderWidth: 0,
+                                            outerRadius: '109%'
+                                        }, {
+                                            backgroundColor: {
+                                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                                stops: [
+                                                    [0, '#333'],
+                                                    [1, '#FFF']
+                                                ]
+                                            },
+                                            borderWidth: 1,
+                                            outerRadius: '107%'
+                                        }, {
+                                            // default background
+                                        }, {
+                                            backgroundColor: '#555',
+                                            borderWidth: 0,
+                                            outerRadius: '105%',
+                                            innerRadius: '103%'
+                                        }]
+                                    },
+
+                                    // the value axis
+                                    yAxis: {
+                                        min: {{bandwidth_items.speedo_lowrange_min}},
+                                        max: {{bandwidth_items.speedo_highrange_max}},
+
+                                        minorTickInterval: 'auto',
+                                        minorTickWidth: 1,
+                                        minorTickLength: 10,
+                                        minorTickPosition: 'inside',
+                                        minorTickColor: '#666',
+
+                                        tickPixelInterval: 30,
+                                        tickWidth: 2,
+                                        tickPosition: 'inside',
+                                        tickLength: 10,
+                                        tickColor: '#666',
+                                        /*labels: {
+                                            step: 2,
+                                            rotation: 'auto'
+                                        },*/
+                                        title: {
+                                            text: '{{bandwidth_items.speedo_valuesuffix}}'
+                                        },
+                                        plotBands: [{
+                                            from: {{bandwidth_items.speedo_lowrange_min}},
+                                            to: {{bandwidth_items.speedo_lowrange_max}},
+                                            color: '#55BF3B' // green
+                                        }, {
+                                            from: {{bandwidth_items.speedo_midrange_min}},
+                                            to: {{bandwidth_items.speedo_midrange_max}},
+                                            color: '#DDDF0D' // yellow
+                                        }, {
+                                            from: {{bandwidth_items.speedo_highrange_min}},
+                                            to: {{bandwidth_items.speedo_highrange_max}},
+                                            color: '#DF5353' // red
+                                        }],
+
+                                        labels: {
+                                            style: {
+                                                color: '#555'
+                                            }
+                                        }
+                                    },
+
+                                    plotOptions: {
+                                        series: {
+                                            dataLabels: {
+                                                enabled: true,
+                                                color: '#555'
+                                            }
+                                        }
+                                    },
+
+                                    series: [{
+                                        name: 'Value',
+                                        data: [{{bandwidth_items.monitored_value}}],
+                                        tooltip: {
+                                            valueSuffix: '{{bandwidth_items.speedo_valuesuffix}}'
+                                        }
+                                    }]
+
+                                });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->                                     
+                </div>
+                <!-- /.col-lg-4 -->
+                {% if forloop.counter|divisibleby:"2" %}
+                </div>
+                <!-- /.row -->
+                 <div class="row">
+                {% endif %}
+            {% endfor %}
+            </div>
+            <!-- /.row -->            
+            <!--End Speedo Meter -->
+            {% endif %}
+
+            <!--Multigraph-->
+            {% if user_monitor_reports.multigraph_details %}
+            <div class="row">
+              <img src="/static/img/ajax-loader.gif" id="ajax_loader_graph" style="display:none;float:right; margin: 0 10px 0 5px;" />
+            </div>      
+            {% for monitored_item in user_monitor_reports.multigraph_details %}
+            {% if monitored_item.x_axis_value and monitored_item.y_axis_values  %}
+            <div class="row" id="report_monitorgraph_{{forloop.counter}}">
+            <div class="col-lg-12">     
+            <div class="panel panel-default">
+                <div class="panel-heading" style="position:relative;">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> 
+                    {{monitored_item.title}}
+                     <span style="float:right;position:absolute; right:0px;top:0px;cursor:pointer;" class="glyphicon glyphicon-remove-sign" onclick="dashboard_item_delete('{{monitored_item.dashboard_report_id}}','report_monitorgraph_{{forloop.counter}}','ajax_loader_graph','monitor_graph');"></span>                         
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                <div id="container_multi_{{forloop.counter}}"></div>                           
+                     <script type="text/javascript">     
+                      $(function () {
+                          $('#container_multi_{{forloop.counter}}').highcharts({
+                              chart: {
+                                /*type: 'line'*/
+                                type: 'line',
+                                height: 250
+                              },
+                              title: {
+                                  text: "{{monitored_item.title}}",
+                                  x: -20 //center
+                              },                                      
+                              xAxis: {
+                                  categories:[{% for x_item in monitored_item.x_axis_value %} "{{x_item}}", {% endfor %}],
+                                  labels: {
+                                    rotation: -90,                                  
+                                  },
+                                  type: 'datetime',
+                                  title: {
+                                      text: 'Monitored Time'
+                                  }
+                              },
+                              yAxis: {
+                                  title: {
+                                      text: ''
+                                  },
+                                  plotLines: [{
+                                      value: 0,
+                                      width: 1,
+                                      color: '#808080'
+                                  }]
+                              },
+                              tooltip: {
+                                  valueSuffix: ''
+                              },
+                              
+                              series: [
+                              {% for yaxis_items in monitored_item.y_axis_values %}
+                              {
+                                  name:'{{yaxis_items.tooltip}}',                                  
+                                  data: [{% for y_item in yaxis_items.itemvalue %} {{y_item}}, {% endfor %}],
+                                  marker: {
+                                    enabled: false
+                                    },
+                              },
+                              {% endfor %}
+                              ],
+
+                               exporting: {
+                                enabled: true,
+                                chartOptions: {                
+                              xAxis: [{categories:[{% for x_item in monitored_item.x_axis_value %} "{{x_item}}", {% endfor %}],            
+                                    labels: {
+                                        style: {
+                                            fontSize: '6px',                            
+                                        },
+                                        rotation: -90,
+                                    }
+                                }]
+                            }
+                        }
+                          });
+                      });
+                    </script>
+                  </div>
+                  <!-- /.panel-body -->
+                </div>
+              </div>
+             </div>
+             {% endif %}
+            {% endfor %}                        
+            {% endif %}
+            <!--End multigraph -->
+
+            <!--End Monitoring data to dashboard feature -->
+
+            </div>
+          </div>
+        </div>
+    {% include "ticket/advanced_search_popup.html" %}
+    <script src="/static/customer/js/custom.js" type="text/javascript"></script>    
+    <script>
+     $("#dash").addClass("active")
+     </script>
+     {% include "components/dashboard_footer.html" %}
+     {% include "components/service_request.html"%}
+     {% include "reports/reports_js.html" %}
+    </body>
+</html>

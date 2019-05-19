@@ -1,0 +1,104 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">SD Settings | <small>Scrolling messages</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        {% if alert_msg %}
+                            <li class="active">Edit Message</li>
+                        {% else %}
+                            <li class="active">Add Message</li>
+                        {% endif %}
+                    </ol>
+                </div>
+                {% include "components/msg_div.html" %}
+                <div class="content">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    {% if alert_msg %}
+                                        <h3 class="panel-title pull-left">Edit Message</h3>
+                                        <a href="/alert_messages/add/" class="btn btn-success pull-right" style="margin:10px"> Add Message </a>
+                                    {% else %}
+                                        <h3 class="panel-title">Add Message</h3>
+                                    {% endif %}
+                                </div>
+                                <div class="panel-body">
+                                    <form {% if alert_msg.id %} action="/alert_messages/edit/{{alert_msg.id}}/" {% else %} action="/alert_messages/add/" {% endif %} method="post" enctype="multipart/form-data">    {% csrf_token %}
+                                        <input type="text" name="title" class="form-control" placeholder="Title (Max 30 characters)"  required maxlength="50" value="{{alert_msg.title}}"><br>
+
+                                        <textarea type="text" name="dec" style="max-width:100%" class="form-control" placeholder="Description " rows="4" cols="20" required>{{alert_msg.description}}</textarea><br>
+                                        <select class="form-control" name="enable" required value="{{alert_msg.show}}">
+                                            <option value=""> -Select Enabling Status- </option>
+                                            <option value="True" {% if alert_msg.show == True %} selected {% endif %}>Yes</option>
+                                            <option value="False" {% if alert_msg.show == False %} selected {% endif %}>No</option>
+                                        </select>
+                                        <br/>
+                                        <select name="viewable_cust" class="form-control" multiple>
+                                            <option value=""> --Select Customers--</option>
+
+                                            {% for cust in customers %}
+                                                <option value="{{cust.0}}" {% if cust.0 in viewable_custs %} selected {% endif %}>{{cust.1}}</option>
+                                            {% endfor %}
+                                        </select><br>
+                                        <button type="submit" class="btn btn-success btn-huge">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Currently Available Messages</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <thead>
+                                            <th>View</th>
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>Show</th>
+                                        </thead>
+                                        {% for details in alert_messages %}
+                                            <tbody>
+                                                <td><a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="bottom" title="View" href="/alert_messages/edit/{{details.id}}/"><i class="fa fa-edit "> </i></a></td>
+                                                <td>{{ details.title }}</td>
+                                                <td>{{ details.description }}</td>
+                                                <td>{% if details.show %} Yes {% else %} No {% endif %}</td>
+                                            </tbody>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>1
+        {% include "components/footer.html"%}
+        {% include "components/service_request.html"%}
+        <script type="text/javascript">
+        $("#tkt_sd_sett").addClass("active");
+        $("#sub_add_temp").css({'display' : 'block'});
+        $("#scroll_alt").addClass("active");
+        $('#tkt_sd_sett').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>        
+    </body>
+</html>

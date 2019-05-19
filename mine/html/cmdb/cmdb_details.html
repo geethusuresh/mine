@@ -1,0 +1,281 @@
+{% load humanize %}
+{% load zone %}
+{% load sec_filters %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Dashboard</title>
+        {% include "components/css.html"%}
+        <!--<link rel="stylesheet" href="/static/customer/css/custom.css">-->
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/sweetalert.css">
+        <style>
+            .paging-nav {
+  text-align: right;
+  padding-top: 2px;
+}
+
+.paging-nav a {
+  margin: auto 1px;
+  text-decoration: none;
+  display: inline-block;
+  padding: 1px 7px;
+  background: #91b9e6;
+  color: white;
+  border-radius: 3px;
+}
+
+.paging-nav .selected-page {
+  background: #187ed5;
+  font-weight: bold;
+}
+
+
+        </style>
+
+    </head>
+    {% if "Customer_Dashboard" in request.session.logged_user_priv %} {% include "components/header.html"%} {% else %} {% include "components/header.html"%} {% endif %}
+<body class="fixed" style="font-size:13px" >
+     <div class="wrapper">
+              {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+              {% include "side_bar/customer.html"%}
+            {% else %}
+                {% include "side_bar/sidebar.html"%}
+            {% endif %}
+
+            <div class="rightside">
+                  <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">CMDB | <small>Details</small></h1>
+                    <ol class="breadcrumb">
+                        <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="">CMDB</a></li>
+                        <li class="active"><a href="">CMDB Details</a></li>
+
+                    </ol>
+                   </div>
+                {% if messages %}
+                <ul style="padding-right: 40px;">
+                    {% for message in messages %} {% if message.tags == 'success' %}
+                    <div class="alert alert-success">{{ message|safe }}</div>
+                    {% else %}
+                    <div class="alert alert-danger">{{ message|safe }}</div>
+                    {% endif %} {% endfor %}
+                </ul>
+                {% endif %}
+
+                <div class="content">
+                  <div class="box">
+
+                      {% if customers %}
+                        <form action="/cmdb/info_cm/" method="get" >
+                        <div class="box-body">
+                          <div class="row">
+                               <div class="col-md-4">
+                                                    <p class="data-row">
+                                                        <span class="data-name"><label class="labelz">Customer *</label></span>
+                                                        <span class="data-value">
+                                                            <select class="form-control" id="customer" name="customer" onchange="this.form.submit()" required="">
+                                                                <option value="">-Select-</option>
+                                                                {% for customer in customers %}
+                                                                    {% if customer.customer == default_customer.0 %}
+                                                                    <option value="{{customer.customer}}" selected>{{customer.customer}}</option>
+                                                                    {% else %}
+                                                                    <option value="{{customer.customer}}" >{{customer.customer}}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </span>
+                                                    </p>
+
+                                </div>
+                           </div>
+                            </div>
+                        </form>
+                          {% endif %}
+                    </div>
+                    {% if domain_obj %}
+                    <div class="box">
+                        <div class="row">
+                             <div class="box-body">
+                              <div class="col-sm-12">
+                                  <input type="text" class="pull-right" id="searchtable" placeholder="Type to search">
+                                <table class="table table-striped" id="table_id1" class="display">
+
+                                      <thead>
+                                        <tr>
+
+                                            <th>Edit / Delete</th>
+                                            {% for dom in domain_obj %}
+                                            <th>{{dom.domain_name}}</th>
+                                            {% endfor %}
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+
+                                      {% for ob in obj %}
+                                      <tr>
+
+                                          <td>
+                                           {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+                                              <a data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success btn-sm" href="/cmdb/cmdb_edit/?ref={{ob.reference}}" data-original-title="Edit"><i class="fa fa-edit "></i>
+                            </a>
+                                           {% else %}
+                                               <a data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-success btn-sm" onclick="edit_cmdb({{ob.reference}})"  data-original-title="Edit"><i class="fa fa-edit "></i>
+                            </a>
+                                           {% endif %}
+
+                                                  <a data-toggle="tooltip" data-placement="bottom" title="" class="btn btn-danger btn-sm" data-original-title="Delete" onclick="delete_cmdb({{ob.reference}})">
+                              <i class="fa fa-trash-o "></i>
+                            </a></td>
+                                          {% load set_cmdbproperty %}
+                                          {% get_property ob.reference as host %}
+                                              {% for h in host %}
+                                                  {% if h.value_char %}
+                                                    <td>{{h.value_char}}</td>
+                                                  {% elif h.value_int %}
+                                                    <td>{{h.value_int}}</td>
+                                                  {% elif h.value_float %}
+                                                    <td>{{ h.value_float }}</td>
+                                                  {% elif h.value_date %}
+                                                    <td>{{h.value_date}}</td>
+                                                  {% elif h.value_text %}
+                                                    <td>{{h.value_text}}</td>
+                                                  {% endif %}
+                                              {% endfor %}
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                    </table>
+                              </div>
+                            </div>
+
+
+
+                    </div>
+
+                  </div>
+                    {% endif %}
+                </div>
+
+
+
+
+            </div>
+     </div>
+ {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/customer_footer.html"%}
+          {% else %}
+          {% include "components/footer.html"%}
+          {% endif %}
+
+<script type="text/javascript" src="/static/js/sweetalert.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/static/js/paging.js" charset="UTF-8"></script>
+
+<script>
+
+    function delete_cmdb(ref){
+    $.ajax({
+        type: 'GET',
+        url: '/cmdb/cmdb_delete/?ref='+ref,
+        success: function(response){
+          if (response.status == 'false'){
+
+               swal({
+            title: "Are you sure?",
+            text: "This Configuration Item has a relation with tickets",
+            type: "warning",
+            showCancelButton: true,
+             confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            closeOnConfirm: false, 
+                closeOnConfirm: false},
+              function(isConfirm){
+             if (isConfirm) {
+              
+            $.ajax({
+                type: 'POST',              
+                url: '/cmdb/cmdb_delete/?ref='+ref,
+                data: {'csrfmiddlewaretoken': '{{ csrf_token }}',},
+                success:  function(data) {
+                console.log(data);
+                swal('Deleted!', 'The Configuration Item has been deleted successfully.'),
+              location.reload();}
+                 
+                
+                });
+                }
+
+            })
+
+          } //end of if
+          else if (response.status == 'true'){
+            location.reload();
+          }
+
+
+
+        },
+
+
+
+
+
+      });
+    
+
+
+    }
+
+
+</script>
+<script>
+    function edit_cmdb(ref){
+        var customer= $('#customer').val();
+        console.log(customer);
+        window.location = "/cmdb/cmdb_edit/?ref="+ref+"&customer="+customer;
+
+    }
+
+</script>
+<script>
+function page(){
+$('#table_id1').paging({
+limit: 10,
+rowDisplayStyle: 'block',
+activePage: 0,
+rows: []
+
+});}
+
+$( document ).ready(function() { page(); });
+
+</script>
+ <script>
+     var $rows = $('#table_id1 tbody tr');
+$('#searchtable').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+    $rows.show().filter(function() {
+        var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+        return !~text.indexOf(val);
+    }).hide();
+
+
+});
+
+ </script>
+
+
+ <script>
+
+
+ $("#subsec").css('display', 'block');
+        $("#cmdb").addClass("active");
+        $("#sec_detail").addClass("active");
+</script>
+
+
+</body>

@@ -1,0 +1,148 @@
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}
+      <script type="text/javascript">
+        var cloud_account_id = {{ cloud_account_id }}
+      </script>
+      <h1>
+          Billing Information
+          <small>Billing overview for this account</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><a href="{% url 'dashboard' %}">Home</a></li>
+          <li><a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a></li>
+          <li>Billing</li>
+      </ol>
+{% endblock %}
+
+{% block content%}
+
+<div ng-controller='AWSBillingController'>
+    <section class="content">
+      <div class="row">
+      <div class="col-md-12">
+        <div class="col-md-10">
+          <div class="panel panel-mint">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-xs-1">
+                </div>
+                <div class="col-xs-3">
+                  <label class="" >Select Date Range: </label>
+                </div>
+                <div class="col-xs-5">
+                  <input type="text" id="date_range" class="form-control" readonly>
+                </div>
+                <div class="col-xs-3">
+                  <button id="billing-filter" class="btn btn-success form-control" ng-click='get_billing_details()' >Submit</button>
+                </div>
+              </div>
+            </div><!-- /.box-body -->
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="col-md-10">
+            <div class="panel panel-mint">
+              <div class="panel-heading">
+                <div class="panel-control">
+                  <div class="btn-group">
+                      <button class="btn btn-default" type="button" data-toggle="collapse" data-target="#billing_graph_container" aria-expanded="true"><i class="fa fa-chevron-down"></i></button>
+                  </div>
+                </div>
+                <h3 class="panel-title">Billing Details Overview <small>Last Month details</small></h3>
+              </div><!-- /.box-header -->
+              <div class="panel-body" id="billing_graph_container">
+                <div class="row">
+                  <div class="col-xs-9">
+                    <div class="row">
+                    <div class="col-lg-12">
+                        <div class="img-container" ng-if="loading_instance_list_data">   
+                          <img id="loading_gif" src="/static/cloud-static-files/img/throbber.svg" alt="Product Image">
+                        </div>
+                        <div id = 'instance_statstics_chart'>
+                        </div>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- /.box-body -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+</div>
+
+<script>
+  $( document ).ready(function() {
+    $('#date_range').daterangepicker(
+      {
+        ranges: {
+           'This Week': [moment().startOf('week'), moment().endOf('week')],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        },
+        startDate: moment().subtract('days', 29),
+        endDate: moment()
+      },
+        function(start, end) {
+            $('#id_pub_date span').html(start.format('MMMM D, YYYY') + '-' + end.format('MMMM D, YYYY'));
+        }
+    );
+
+
+
+      $('#instance_date_range').daterangepicker(
+      {
+        ranges: {
+           'This Week': [moment().startOf('week'), moment().endOf('week')],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        },
+        startDate: moment().subtract('days', 29),
+        endDate: moment()
+      },
+        function(start, end) {
+            $('#id_pub_date span').html(start.format('MMMM D, YYYY') + '-' + end.format('MMMM D, YYYY'));
+        }
+    );
+
+
+    $( "#instance-details").click(function(){
+      $("#billing-instance-popup" ).modal('show');
+    });
+
+  });
+</script>
+<style type="text/css">
+
+  .img-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      text-align:center; /* Align center inline elements */
+      font: 0/0 a;
+  }
+
+  .img-container:before {
+      content: ' ';
+      display: inline-block;
+      vertical-align: middle;
+      height: 100%;
+  }
+
+  .img-container img {
+      vertical-align: middle;
+      display: inline-block;
+  }
+</style>
+{% endblock %}

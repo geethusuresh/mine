@@ -1,0 +1,293 @@
+{% extends 'cloud_management/home.html'%}
+{% block section_header %}
+	<script>
+		var node_unique_id = '{{selected_node_id}}'
+		var cloud_account_id = '{{cloud_account_id}}'
+		var service_name = '{{service_name}}'
+		var deployment_name = '{{deployment_name}}'
+		var vm_name = '{{vm_name}}'
+	</script>
+
+    <h1>
+        Azure Cloud Service Details
+        <small>Instance statistics and operations</small>
+    </h1>
+
+    <ol class="breadcrumb">
+        <li>
+            <a href="#">Azure Home </a>
+        </li>
+        <li>
+            <a href="">Azure Vm List</a>
+        </li>
+        <li class="active">
+            <strong>Azure Vm Details</strong>
+        </li>
+    </ol>
+{% endblock %}
+
+{% block content %}{% load staticfiles %}
+
+{% if messages %}
+{% for message in messages %}
+    {% if message.tags  %}
+        <div class="alert alert-success alert-dismissable fade in">
+            <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+            {{message}}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endif %}
+
+<div ng-controller="AzureVMDetailsController">
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel">
+			<div class="panel-heading">
+				<h3 class="panel-title">VM Details</h3>
+			</div>
+
+			<!--Hover Rows-->
+			<!--===================================================-->
+			<div class="panel-body">
+				<table class="table table-hover table-vcenter">
+					<thead>
+						<tr>
+							<th></th>
+							<th class="text-mint">Name</th>
+							<th class="text-mint">Ip Address</th>
+							<th class="text-mint">CreatedTime</th>
+							<th class="text-mint">OS</th>
+							<th class="text-mint">RoleSize</th>
+							<th class="text-center text-mint">State</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="text-center"><span class="icon-wrap icon-wrap-sm icon-circle bg-purple"><i class="fa fa-desktop fa-lg"></i></span></td>
+								<td>
+									<span >{{vm_details.PersistentVMRole.RoleName}}</span>
+								</td>
+								<td>
+									<span>{{vm_cloud_service_details.Deployment.VirtualIPs.VirtualIP.Address}}</span>
+								</td>
+								<td>
+									<span>{{vm_cloud_service_details.Deployment.CreatedTime}}</span>
+								</td>
+								<td>
+									<span >{{vm_details.PersistentVMRole.OSVirtualHardDisk.OS}}</span>
+								</td>
+								<td>
+									<span >{{vm_details.PersistentVMRole.RoleSize}}</span>
+								</td>
+								<td>
+									{% if vm_cloud_service_details.Deployment.Status == "Running" %}
+										<span class="label label-table label-success"><strong>{{vm_cloud_service_details.Deployment.Status}}</strong></span>
+									{% elif vm_cloud_service_details.Deployment.Status == "Stopped" %}
+										<span class="label label-table label-danger"><strong>{{vm_cloud_service_details.Deployment.Status}}</strong></span>
+									{% else %}
+										<span class="label label-table label-warning"><strong>{{vm_cloud_service_details.Deployment.Status}}</strong></span>
+									{% endif%}
+						</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--===================================================-->
+			<!--End Hover Rows-->
+
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+
+
+	<a href="javascript:void(0)" ng-click="show_vm_cpu_details_modal('cpu_percentage')">
+		<div class="col-sm-6 col-lg-3">
+			<!--Registered User-->
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+			<div class="panel media pad-all">
+				<div class="media-left">
+					<span class="icon-wrap icon-wrap-sm icon-circle bg-success">
+					<i class="fa fa-tachometer fa-2x"></i>
+					</span>
+				</div>
+
+				<div class="media-body">
+					<h5 class="text-muted mar-no" style="padding-top: 10%;">CPU Details</h5>
+				</div>
+			</div>
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+		</div>
+	</a>
+	<a href="javascript:void(0)" ng-click="show_vm_cpu_details_modal('network_in')">
+		<div class="col-sm-6 col-lg-3">
+
+			<!--New Order-->
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+			<div class="panel media pad-all">
+				<div class="media-left">
+					<span class="icon-wrap icon-wrap-sm icon-circle bg-info">
+					<i class="fa fa-arrow-down fa-2x"></i>
+					</span>
+				</div>
+
+				<div class="media-body">
+					<h5 class="text-muted mar-no" style="padding-top: 10%;">Network IN Details</h5>
+				</div>
+			</div>
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+		</div>
+	</a>
+	<a href="javascript:void(0)" ng-click="show_vm_cpu_details_modal('network_out')">
+		<div class="col-sm-6 col-lg-3">
+
+			<!--Comments-->
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+			<div class="panel media pad-all">
+				<div class="media-left">
+					<span class="icon-wrap icon-wrap-sm icon-circle bg-warning">
+					<i class="fa fa-arrow-up fa-2x"></i>
+					</span>
+				</div>
+
+				<div class="media-body">
+					<h5 class="text-muted mar-no" style="padding-top: 10%;">Network Out Details</h5>
+				</div>
+			</div>
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+		</div>
+	</a>
+	<a href="javascript:void(0)" ng-click="show_vm_cpu_details_modal('disk_read')">
+		<div class="col-sm-6 col-lg-3">
+
+			<!--Sales-->
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+			<div class="panel media pad-all">
+				<div class="media-left">
+					<span class="icon-wrap icon-wrap-sm icon-circle bg-danger">
+					<i class="fa fa-dot-circle-o fa-2x"></i>
+					</span>
+				</div>
+
+				<div class="media-body">
+					<h5 class="text-muted mar-no" style="padding-top: 10%;">Disk Read Details</h5>
+				</div>
+			</div>
+			<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+		</div>
+	</a>
+</div>
+
+
+<div class="modal fade bs-example-modal-lg" id="vm_cpu_Modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" ng-if="!loading_instance_list_data">VM {{vm_details.Deployment.Name}} {[{chart_title}]}</h4>
+      </div>
+      <div class="modal-body">
+		<div class="panel">
+			<div class="panel-body">
+
+
+			<div class="pad-btm form-inline">
+				<div class="row">
+					<div class="col-sm-7 table-toolbar-left">
+					</div>
+					<div class="col-sm-3 table-toolbar-right">
+						<input id="date_range" type="text" placeholder="Select DateRange" class="form-control" autocomplete="off">
+					</div>
+					<div class="col-sm-1 table-toolbar-right">
+						<button id="demo-btn-addrow" class="btn btn-purple btn-labeled fa fa-filter" ng-click="get_metric_details()">submit</button>
+					</div>
+				</div>
+			</div>
+
+
+
+				<div class="table-responsive">
+					<div class="img-container" ng-if="loading_instance_list_data">   
+						<img id="loading_gif" src="/static/cloud-static-files/img/throbber.svg" alt="Product Image">
+					</div>
+					<div id="vm_metric_graph_container">
+					</div>
+				</div>
+			</div>
+		</div>
+       </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+
+
+<style type="text/css">
+  .node_selected {
+      background-color: #39cccc;
+  }
+
+  .img-container {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+      text-align:center; /* Align center inline elements */
+      font: 0/0 a;
+  }
+
+  .img-container:before {
+      content: ' ';
+      display: inline-block;
+      vertical-align: middle;
+      height: 100%;
+  }
+
+  .img-container img {
+      vertical-align: middle;
+      display: inline-block;
+  }
+</style>
+
+
+<script type="text/javascript">
+	
+  $( document ).ready(function() {
+    $('#date_range').daterangepicker(
+      {
+        ranges: {
+           'This Week': [moment().startOf('week'), moment().endOf('week')],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        },
+        startDate: moment().subtract('days', 29),
+        endDate: moment()
+      },
+        function(start, end) {
+            $('#id_pub_date span').html(start.format('MMMM D, YYYY') + '-' + end.format('MMMM D, YYYY'));
+        }
+    );
+
+});
+
+
+</script>
+
+{% endblock%}

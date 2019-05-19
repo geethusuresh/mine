@@ -1,0 +1,246 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Customer Permission</title>
+    {% include "components/css.html"%}
+    <style type="text/css">
+      .borderless tbody tr td, .borderless thead tr th {
+      border: none;
+      }
+      table.fixed { table-layout:fixed; word-break:break-all;}
+      table.fixed td { overflow: hidden; }
+     
+      #cust_perm .dataTables_length{
+            margin-left: 55% !important;
+            margin-top: -26px;
+        }
+ 
+    </style>
+       <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+    {% include "components/header.html"%}
+        <div class="wizard-wrapper">
+        {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Customer Permission <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Customer Permission</li>
+                </ol>
+            </div>
+            <div class="content">
+            {% if messages %}
+              <ul>
+              {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="alert alert-success" >{{ message|safe }}</div>
+                {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+              <div class="col-sm-10">
+              <div class="widget">                  
+                  <div class="widget-content">
+                  <div class="wizard-wrapper">
+                    <div id="" class="wizard">                              
+                      <div class="box">
+                      <div class="box-body">
+                      <!-- <label for="customer">Select a Customer to see the users</label>  -->
+                     <!--  <select class="form-control" name= "cust_perm" id= "cust_perm" required style="width:300px;display: block;margin: 0 auto;">
+                        <option value="">Select Customer</option>
+                        {% for customer in customers %}
+                        <option value= "{{customer.id}}">{{customer.customername}}</option>
+                        {%endfor%}
+                      </select> -->
+                      </div>
+                      <div class="box-body" id="cust_perm">
+                         <table class="table table-hover table-striped" id="perm_table">
+                          <div id="add_div" >
+                            <thead>
+                             <tr>
+                              <!-- <th>Sl No</th> -->
+                              <th>Customer</th>
+                              <th>User</th>
+                              <th>Edit</th>
+                              <th>Delete</th>
+                             </tr>
+                             </thead> 
+                          <tbody id = "tid">
+                          {% for custpem in custperm %}                          
+                          <tr>
+                            <!-- <td>{{ forloop.counter}}</td>                             -->
+                            <td>{{ custpem.customer}}</td>
+                            <td>{{ custpem.person.user.username }}</td>
+                           <td><a href="/customer/permission/edit/{{ custpem.id }}" id = "edit" class ="glyphicon glyphicon-edit" title="Click to edit category"></a></td>
+                            <td><a href="/customer/permission/add/{{ custpem.id }}" id = "delete" class ="glyphicon glyphicon-trash" title="Click to delete category"></a></td>                         
+                          </tr>                         
+                          {% endfor %} 
+                          </tbody>                                         
+                          </div>
+                        </table>
+                       </div>
+                     </div>
+                                                
+                    </div>
+                    </div>
+                   </div>
+                    <!--Start Pagination -->
+                    <div class="row">
+                      <div class="col-md-6">
+                      </div>
+                     
+                      </div>
+                      <!--End Pagination -->
+                  </div>
+                    
+                  </div>                  
+                 <div class="col-sm-2" style="margin-top:0px">  
+                  <div >
+                  <a class="btn btn-info" style="margin-top:3px;width:100%" href="" data-toggle="modal" data-target="#addPerm"><i  ></i><span class="text" > Add Permission </span></a>
+                  </div>                  
+                 </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+    
+    <script type="text/javascript">
+    // $(document).ready(function(){
+    //   $("#cust_perm").on('change',function(){
+    //     // $("#perm_table").show();
+    //     customer_id = $("#cust_perm").val();
+    //     // alert(cust_id);
+    //     $.ajax({
+    //       url : "/customer/permission/add",
+    //       type : "POST",
+    //       async:true,
+    //       data : {customer_id:customer_id,
+    //               csrfmiddlewaretoken: '{{ csrf_token }}'},
+    //       success:function(data){
+    //        $("#perm_table").empty();
+    //        console.log(data); 
+    //        if ($.isEmptyObject(data)){
+    //             $('#perm_table').append('<table id="perm_table"><tbody id = "tid">'+'No Data Found'+'</tbody></table>');                      
+    //        }else{
+    //        for (var j=0,i=1; j<data.length; j++,i++){ 
+    //          $('#perm_table').append('<table class="table table-hover table-striped" id="perm_table"><thead></thead><tbody id = "tid"><tr><td>'+i+'</td><td>'+data[j].customer__customername+'</td><td>'+data[j].person__user__username+'</td><td><a href="/customer/permission/edit/'+data[j].id+'" id = "edit" class ="glyphicon glyphicon-edit" title="Click to edit permission"></a></td><td><a href="/customer/permission/add/'+data[j].id+'" id = "delete" class ="glyphicon glyphicon-trash" title="Click to delete permission"></a></td></tr></tbody></table>');         
+    //         }
+    //       }           
+    //       },
+    //       error:function(xhr,errmsg,err){
+    //          alert(err);
+    //       }
+
+    //     });
+    //     return false;
+    //   });
+    // });
+    </script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+       $('a#delete').on('click',function(){
+       // alert("s");
+        var answer=confirm('Are you sure you want to delete this?'); 
+          if(answer){
+            id = $(this).attr('href').split('/')[4];
+             $.ajax({
+                 url: '/customer/permission/add',
+                 type: "POST",
+                 datatype:"json",
+                 data: {delete_id:id,
+                         csrfmiddlewaretoken: '{{ csrf_token }}'},                  
+                 success: function (data) {
+                   window.location = '/customer/permission/add';
+                 },
+                 error: function() {
+                   alert("error");
+                 }
+             });
+             return false;
+            }
+            else{
+              
+              return false;
+            }
+       });  
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $("#customer_permadd").on('change',function(){
+        cust_id = $("#customer_permadd").val(); 
+        $.ajax({
+          url : '/customer/permission/add',
+          type: "POST",
+          dataType:"json",
+          async:true,
+          data: {cust_id:cust_id,
+                 csrfmiddlewaretoken: '{{ csrf_token }}'},
+          success:function(data){ 
+            $("#user option:gt(0)").remove();
+            for (var i in data){              
+              $("#user").append($('<option>',{value:data[i].pk, text:data[i].username}));
+            } 
+            console.log(data);
+          },
+          error:function(){
+            alert('error');
+          }
+
+        });
+      });
+    });
+  </script>
+</html>
+
+ <div class="modal fade" id="addPerm" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Map Permission</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/customer/permission/add">
+        {% csrf_token %}
+          <fieldset>
+          <div class="controls" style="text-align: center;">                       
+            <select class="form-control" id="customer_permadd" name="customer" required style="width:300px;display: block;margin: 0 auto;">
+              <option value="">Select Customer</option>
+                {% for customer in customers %}
+                  <option value="{{customer.id}}">{{ customer.customername }}</option>
+                {% endfor %}
+            </select></p>
+             <select class="form-control" id="user" name="user" required style="width:300px;display: block;margin: 0 auto;">
+              <option value="">Select User</option>
+                
+            </select></p></p> 
+            <button class="btn btn-success " type="submit">Map Permission</button> 
+          </div>
+          </fieldset>
+        </form>
+        </div>
+        <div class="modal-footer" style="border:0px">
+        </div>
+      </div>
+    </div>
+  </div>    
+ <script type="text/javascript">
+ $(document).ready(function(){
+      $('#perm_table').DataTable({
+        "aoColumnDefs": [ { "bSortable": false, "aTargets": [ 2, 3 ] } ] 
+      });
+    })
+ </script>

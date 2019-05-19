@@ -1,0 +1,111 @@
+<div class="modal fade" id="oneconsole_help" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="btn_helpclose">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Oneconsole Help</h4>
+      </div>
+      <div class="modal-body">
+          <div id="oc_helpcontent">              
+          </div>
+      </div>
+      <div class="modal-footer" style="border:0px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="oneconsole_help_side" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" id="btn_helpclose">&times;</button>
+        <h4 class="modal-title" id="ModalLabel">Oneconsole Help</h4>
+      </div>
+      <div class="modal-body">
+          <div id="oc_helpcontent_side">              
+          </div>
+      </div>
+      <div class="modal-footer" style="border:0px">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+/*$(document).ready(function(){
+    $('#modal_help').click(function(){
+        var current_modal_length = $(this).parents("div.modal").length;
+        if(current_modal_length > 0){
+           var action_form = $($(this).parents("div.modal")[0]).find("form").attr("action");
+           var modal_obj = $($(this).parents("div.modal")[0]);
+           if(action_form != ""){
+              $.ajax({
+                url :"/help/details/",
+                type:"POST",
+                dataype:"json",
+                data:{help_url: action_form,
+                      csrfmiddlewaretoken:'{{csrf_token}}'},
+                success:function(data){
+                    status = data.status;
+                    if(status == "success"){
+                        var help_content = data.help_content;
+                        $('#oc_helpcontent').html(help_content);                        
+                        modal_obj.modal('hide');
+                        $('#oneconsole_help').modal('show');
+                        $('#btn_helpclose').click(function(){
+                            $('#oneconsole_help').modal('show');
+                            modal_obj.modal('show');
+                        });
+
+                        $('#oneconsole_help').on( 'keydown', function (e) {
+                            if (e.keyCode === 27) { // ESC
+                                $('#oneconsole_help').modal('hide');
+                                modal_obj.modal('show');
+                            }
+                        });                        
+                    }
+                    else{
+                        $('#oc_helpcontent').html('No help data found');
+                    }
+                 },
+                 error: function(xhr,errmsg,err){
+                    $('#oc_helpcontent').html('Something went wrong. Please try again');
+                 }       
+              });
+           }           
+        }               
+    });
+    
+    $('#modal_sidehelp').click(function(){
+        $('#oneconsole_help_side').modal('show');
+        var action_form = window.location.pathname;
+        $.ajax({
+            url :"/help/details/",
+            type:"POST",
+            dataype:"json",
+            data:{help_url: action_form,
+                  csrfmiddlewaretoken:'{{csrf_token}}'},
+            success:function(data){
+                status = data.status;
+                if(status == "success"){
+                    var help_content = data.help_content;
+                    $('#oc_helpcontent_side').html(help_content); 
+                    $('#oneconsole_help_side').modal('show');
+                }
+                else{
+                    $('#oc_helpcontent_side').html('No help data found');
+                }
+             },
+             error: function(xhr,errmsg,err){
+                $('#oc_helpcontent_side').html('Something went wrong. Please try again');
+             }       
+        });        
+    });
+
+});*/
+</script>
+
+
+
+

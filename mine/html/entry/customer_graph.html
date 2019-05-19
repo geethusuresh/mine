@@ -1,0 +1,330 @@
+{% load humanize %}
+{% load zone %}
+
+
+<!DOCTYPE html>
+<html ng-app="security">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+    .table{
+      border-color:white;
+    }
+    .table .ng-scope{
+      text-align: center;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/angular/angular-chart.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px" ng-controller="realtimedata_dash_all">
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "components/cust_header.html"%}
+          {% else %}
+          {% include "components/header.html"%}
+          {% endif %}
+
+        <div class="wrapper">
+                     {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+          {% include "side_bar/customer.html"%}
+          {% else %}
+          {% include "side_bar/asset_sidebar.html"%}
+          {% endif %}
+          <div class="rightside">
+ 
+          {% if alert_message %}
+            {% for alert in alert_message %}
+               <div class="panel-alert"><div class="alert-wrap in"><div class="alert alert-danger" style="padding: 6px;margin-bottom: 0px;border: 0px solid transparent;border-radius: 0px;" role="alert" ><div class="media" style="margin-top:0px;position:relative;" id="alert_msg"><strong>{{alert.title}}! </strong> {{alert.description}}</div></div></div></div>
+            {% endfor %}
+          {% endif %}
+
+
+
+            <div class="page-head" style="margin-top:10px">                
+                <h1 class="text-thin">Threat Management | <small>Real Time Events Map</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/dashboard/index/">Threat Management</a></li>
+                    <li  class="active">Real Time Events Map</li>
+                </ol>
+            </div>
+
+            <div class="content">
+             {% if messages %}
+                  <ul>
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                    <div class="alert alert-success" >{{ message|safe }}</div>
+                    {% else %}
+                      <div class="alert alert-danger" >{{ message|safe }}</div>
+                    {% endif %}
+                    {% endfor %}
+                  </ul>
+              {% endif %}
+
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <div class="panel">
+                      <div class="panel-heading">
+                        <div class="panel-title text-center"><l class="fa fa-globe"></l> Real Time Events Map</div>
+                      </div>
+                        <div class="panel-alert" id="distroy">
+                          <div class="alert-wrap in">
+                            <div class="alert alert-info" role="alert">
+                                <strong>Please Wait</strong> while we get your data.
+                            </div>
+                          </div>
+                        </div>
+                        <div class="panel-body">
+
+                          <!-- <alert class="label alert-info text-center text-center" > Please Wait... </alert> -->
+                          <div class="col-sm-9">
+                            
+                            <div id="canvas-container"></div>
+                          </div>
+                          <div class="col-sm-3" id="addision" class="hidden" ng-cloak style="display:none;">
+                            <p class="h4 text-thin text-center">Event Index</p>
+                            <div ng-if="agg.length != 0">
+                              <table class="table table-vcenter" id="addision">
+                                <thead>
+                                  <tr>
+                                    <th class="text-center">Country</th>
+                                    <th  class="text-center">Events Count</th>
+                                  </tr>
+                                </thead>   
+                                <tbody ng-repeat="result in agg">
+                                  <tr>
+                                    <td  class="text-center"> [[result.country]]</td>
+                                    <td  class="text-center btn btn-danger  btn-circle">[[result.count]]</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <div ng-if='agg.length == 0'>
+                              <div class="text-center"><span class="label label-primary">No Data Found</span></div>
+                            </div>
+                          <hr>
+                          <p class="h4 text-thin text-center">Alert Levels</p>
+                          <table class="table  table-vcenter" id="addision">
+                              <thead>
+                                <tr>
+                                  <th class="text-center">Alert Level</th>
+                                  <th  class="">Number of events</th>
+                                </tr>
+                              </thead>   
+                              <tbody class="text-center">
+                              <tr>
+                                <td  class="text-center">High</td>
+                                <td  class=" btn btn-danger  btn-circle"><a href="" id="high_data">[[levels.high]]</a></td>
+                              </tr>
+                              <tr>
+                                <td  class="text-center">Medium</td>
+                                <td  class=" btn btn-warning  btn-circle"><a href="" >[[levels.medium]]</a></td>
+                              </tr>
+                              <tr>
+                                <td  class="text-center">Low</td>
+                                <td  class=" btn btn-info btn-circle"><a href="" >[[levels.low]]</a></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div>
+                           <canvas id="line" class="chart chart-doughnut" chart-data="data" chart-labels="labels" chart-legend="true" chart-colours="chart_color" ></canvas> 
+                          </div>
+                          </div>                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <br>
+            </div>
+          </div>
+        </div>
+
+
+
+<div class="modal fade" id="high_event" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">High Event Location</h4>
+      </div>
+      <div class="panel-body">
+        <table class="table  table-vcenter" id="addision">
+          <thead>
+            <tr>
+              <th class="text-center">Alert Level</th>
+              <th  class="">Number of events</th>
+            </tr>
+          </thead>   
+          <tbody class="text-center" id="higherval">
+          
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="med_event" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Medium Event Location</h4>
+      </div>
+      <div class="panel-body">
+        <table class="table  table-vcenter" id="addision">
+          <thead>
+            <tr>
+              <th class="text-center">Alert Level</th>
+              <th  class="">Number of events</th>
+            </tr>
+          </thead>   
+          <tbody class="text-center">
+          <tr>
+            <td  class="text-center">High</td>
+            <td  class=" btn btn-danger  btn-circle"><a href="" data-toggle="modal" data-target="#high_event">[[levels.high]]</a></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="low_event" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Low Event Location</h4>
+      </div>
+      <div class="panel-body">
+        <table class="table  table-vcenter" id="addision">
+          <thead>
+            <tr>
+              <th class="text-center">Alert Level</th>
+              <th  class="">Number of events</th>
+            </tr>
+          </thead>   
+          <tbody class="text-center">
+          <tr>
+            <td  class="text-center">High</td>
+            <td  class=" btn btn-danger  btn-circle"><a href="" data-toggle="modal" data-target="#high_event">[[levels.low]]</a></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+          {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/customer_footer.html"%}
+      {% else %}
+      {% include "components/footer.html"%}
+      {% endif %}
+     <script >
+      var results = {{graphs|safe}};
+      var custid = {{customer.id}};
+      var agg = {{agg|safe}}
+      var levels = '';
+     </script>
+     
+    <script type="text/javascript" src="/static/map/d3.min.js"></script>
+    <script type="text/javascript" src="/static/map/topojson.min.js"></script>
+    <script type="text/javascript" src="/static/map/datamaps.world.min.js"></script>
+    <script type="text/javascript" src="/static/chartjs/Chart.js"></script>
+    <script type="text/javascript" src="/static/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-resource.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-route.js"></script>
+    <script type="text/javascript" src="/static/angular/angular-chart.js"></script>
+    <script type="text/javascript" src="/static/angular/app.js"></script>
+    <script type="text/javascript" src="/static/angular/controllers.js"></script>
+    <style type="text/css">
+      [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+        display: none !important;
+      }
+    </style>
+      
+              <script>
+
+
+          $("#realtime").addClass("active");
+          $("#sec_open").css('display','block');
+          $("#security").addClass("active");
+          $(".close").click(function () { 
+              $("div").remove('.alert-wrap'); 
+
+            }); 
+
+          </script>
+
+
+          <script>
+          $("#high_data").click(function(){
+            $.ajax({
+            url:"/realtime/data/all/",
+            type:"POST",
+            dataType:"json",
+            data:{
+              'type_of':"High",
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            type: "POST",
+            success : function(data){
+              console.log(data);
+              i=0;
+              $('#higherval tr').slice(1).remove();
+              for (var i in data){
+                $tr = $('<tr>');
+                $tr.append($('<td><input type="checkbox">')).append($('<td>').html(data[i].user__first_name)).
+                append($('<td>').html(data[i].user__last_name)).
+                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id))
+              }
+            },
+             error: function(data) {
+              
+
+              $('#higherval tr').slice(1).remove();
+              for (var i in data){
+                console.log(data[i]);
+                $tr = $('<tr>');
+                $tr.append($('<td>').html(data[i].details)).
+                append($('<td>').html(data[i].user__last_name)).
+                append($('<td>').html(data[i].user__email)).append($('<td class="hidden">').html(data[i].id))
+                $("#higherval").append($tr);
+              }
+           }
+          });
+        });
+          </script>
+    </body>
+    
+
+
+
+
+    
+
+</html>
+
+
+
+
+
+
+
+
+
+

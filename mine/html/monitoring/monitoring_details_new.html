@@ -1,0 +1,387 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+     <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+     <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>    -->
+
+    <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>      
+    <!--End High Charts -->
+
+    <script type="text/javascript">
+    function item_details(item_id){
+        $('#trigger_item_details').val(item_id);
+        $('#frm_item_details').submit();
+    }
+
+    function check_host_change(){
+        $('#host_selection').val('host_selected');
+        $('#hostgroup_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function check_hostgroup_change(){
+        $('#hostgroup_selection').val('hostgroup_selected');
+        $('#host_selection').val('');
+        $('#frm_host_item').submit();
+    }
+
+    function timeintervel_duration(duration){
+        $('#timeinterval').val(duration);
+        $('#frm_timeinterval').submit();
+    }
+
+    function multi_customer_perm(){
+        $('#frm_multi_customer').submit();
+    }
+    </script>
+    <style type="text/css">        
+      .panel-title{font-size:15px;}
+    </style> 
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css"> 
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/monitoring_header.html"%}
+    {% elif "Customer_Dashboard" in request.session.logged_user_priv %}
+      {% include "components/cust_header.html"%}
+    {% else %}
+      {% include "components/header.html"%}
+    {% endif %}
+
+        <div class="wrapper">
+         {% if "Monitoring_Main_Dashboard" in request.session.logged_user_priv %}
+            {% include "side_bar/monitoring_customer.html" %}
+        {% elif "Customer_Dashboard" in request.session.logged_user_priv %}        
+            {% include "side_bar/customer.html"%}
+        {% else %}
+          {% include "side_bar/sidebar.html" %}
+        {% endif %}
+
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Monitoring Service | <small>Monitoring Details</small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/monitor_dashboard/">Monitoring Service</a></li>
+                    <li class="active">Monitoring Details</li>
+                </ol>
+            </div>
+            <div class="content">
+              {% if customer_count > 1 %}
+                <div class="row">
+                    <div class="col-lg-12" style="margin-bottom:5px;">
+                    <form id="frm_multi_customer" name="frm_multi_customer" method="POST" action="/monitor_details/">
+                    {% csrf_token %} 
+                        <select name="customer" id="customer" class="form-control" onchange="multi_customer_perm()">
+                            <option value="">Select Customer</option>
+                            {% for customer_pem in customer_details %}
+                            {% if customer_pem.customer.id == selected_customer.id %}
+                            <option value="{{customer_pem.customer.id}}" selected="selected">
+                            {{customer_pem.customer.customername}}</option>
+                            {% else %}
+                            <option value="{{customer_pem.customer.id}}">{{customer_pem.customer.customername}}</option>
+                            {% endif  %}
+                            {% endfor %}
+                        </select>
+                    </form>
+                    </div>                   
+                </div>
+                {% endif %}
+
+                <!-- /.row -->
+                <div class="row">
+                    <form name="frm_host_item" id="frm_host_item" action="/monitor_details/" method="POST">{% csrf_token %}
+                    <div class="row">
+                      <div class="col-lg-12"> 
+                         <div class="col-lg-4">
+                            <div class="panel" style="margin-top:16px;">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">
+                                    <i class="fa fa-exchange fa-fw"></i>Monitored Groups
+                                  </h3>
+                                </div>
+                                <div class="panel-body">                                                   
+                                    <select class="form-control" name="hostgroup" id="hostgroup" onchange="check_hostgroup_change();">
+                                        <option value="" style="font-weight:bold;">
+                                         Please select any groups</option>      
+                                          {% for hostitem in hostgroup_details %}
+                                          {% if hostitem.hostgroup_id in selected_hostgroup %}           
+                                          <option value="{{hostitem.hostgroup_id}}" selected="selected">
+                                          {{hostitem.hostgroup_name}}
+                                          </option>
+                                          {% else %}            
+                                          <option value="{{hostitem.hostgroup_id}}">{{hostitem.hostgroup_name}}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                    </select>                           
+                                </div>
+                            </div>                 
+                         </div>
+
+                         <div class="col-lg-4" {% if hostdetails %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                            <div class="panel" style="margin-top:16px;">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">
+                                    <i class="fa fa-exchange fa-fw"></i>Monitored Hosts
+                                  </h3>
+                                </div>
+                                <div class="panel-body">                                                   
+                                    <select class="form-control" name="host" id="host" onchange="check_host_change();">
+                                        <option value="" style="font-weight:bold;">
+                                         Please select any hosts</option>      
+                                          {% for hostitem in hostdetails %}
+                                          {% if hostitem.hostid in selected_host %}           
+                                          <option value="{{hostitem.hostid}}" selected="selected">
+                                          {{hostitem.hostname}}
+                                          </option>
+                                          {% else %}            
+                                          <option value="{{hostitem.hostid}}">{{hostitem.hostname}}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                    </select>                           
+                                </div>
+                            </div>                 
+                         </div>
+                       </div>
+                    </div>                
+
+                    <div class="row">
+                      <div class="col-lg-12">
+                        <div class="col-lg-8" {% if items %} style="display:inline;" {% else %} style="display:none;" {% endif %}>                          
+                            <div class="panel" style="margin-top:16px;">
+                                <div class="panel-heading">
+                                  <h3 class="panel-title">
+                                    <i class="fa fa-exchange fa-fw"></i>Monitored Items
+                                  </h3>
+                                </div>
+                                <div class="panel-body">                                                   
+                                   <select multiple class="form-control" name="host_item" id="host_item" style="height: 161px;">
+                                      <option style="font-weight:bold;" disabled>Please select any monitored item</option>      
+                                      {% for itemdetail in items %}
+                                      {% if itemdetail.itemid in selected_items %}
+                                      <option value="{{itemdetail.itemid}}" selected="selected">{{itemdetail.itemname}}</option>
+                                      {% else %}
+                                       <option value="{{itemdetail.itemid}}">{{itemdetail.itemname}}</option>
+                                      {% endif %}
+                                      {% endfor %}
+                                    </select>               
+                                </div>
+                            </div>
+                            <button id="btn_chart_details" name="btn_chart_details" type="submit" style="float:right" class="btn waves-effect waves-light btn-info ">
+                             Fetch Monitoring Details</button>                          
+                        </div>
+                      </div>
+                    </div>
+
+                    <input type="hidden" name="host_selection" id="host_selection" value="" />
+                    <input type="hidden" name="hostgroup_selection" id="hostgroup_selection" value="" />
+                    <input type="hidden" name="customer" value="{{selected_customer.id}}" />
+                </form>
+              </div>        
+              <!-- /.row -->               
+            
+              <div class="row">               
+                    <div class="col-lg-12">
+                        <div style="font-size:14px;">
+                         Monitoring Intervals:
+                        </div>
+                        <div style="float:left;">
+                            <form name="frm_timeinterval" id="frm_timeinterval" method="POST" action="/duration_analysis/">{% csrf_token %}  
+                                <ul class="pagination" style="text-align:left;margin:0px;">
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(1);">1Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(2);">2Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(3);">3Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(6);">6Hr</a></li>
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(12);">12Hr</a></li> 
+                                  <li><a href="javascript:void(0);" onclick="timeintervel_duration(24);">1D</a></li>                
+                                </ul>
+                            <input type="hidden" name="timeinterval" id="timeinterval" value="" />
+                            <input type="hidden" name="itemdetails" id="itemdetails" value="{{items_submitted}}"/>
+                             <input type="hidden" name="hostdetails" id="hostdetails" value="{{host_submitted}}"/>
+                             <input type="hidden" name="hostgroupdetails" id="hostgroupdetails" value="{{hostgroup_submitted}}"/>
+                             <input type="hidden" name="customer" value="{{selected_customer.id}}" />
+                            </form>
+                        </div>                
+                    </div>         
+                </div>        
+        
+                    {% if monitored_values %}      
+                    {% for monitored_item in monitored_values %}
+                    {% if monitored_item.x_axis %}
+                     <div class="row">
+                     <div class="col-lg-12">     
+                     <div class="panel">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                            {{monitored_item.item_name}} 
+                            {% if selected_interval != "0" %}
+                               - Last {{selected_interval}} Hr Analysis
+                            {% else %}
+                             - Last 1 Hr Analysis
+                            {% endif %} 
+                          </h3>                          
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                        <div id="container_{{forloop.counter}}"></div>                           
+                             <script type="text/javascript">     
+                              $(function () {
+                                  $('#container_{{forloop.counter}}').highcharts({
+                                      chart: {
+                                        /*type: 'line'*/
+                                        type: 'line',
+                                        height: 250
+                                      },
+                                      title: {
+                                          text: "{{monitored_item.item_name}}",
+                                          x: -20 //center
+                                      },                                      
+                                      xAxis: {
+                                          categories:[{% for x_item in monitored_item.x_axis %} "{% time_zone_change x_item %}", {% endfor %}],
+                                          labels: {
+                                            rotation: -45,                                  
+                                          },
+                                          type: 'datetime',
+                                          title: {
+                                              text: 'Monitored Time'
+                                          }
+                                      },
+                                      yAxis: {
+                                          title: {
+                                              text: ''
+                                          },
+                                          plotLines: [{
+                                              value: 0,
+                                              width: 1,
+                                              color: '#808080'
+                                          }]
+                                      },
+                                      tooltip: {
+                                          valueSuffix: ''
+                                      },
+                                      legend: {
+                                          layout: 'vertical',
+                                          align: 'right',
+                                          verticalAlign: 'middle',
+                                          borderWidth: 0,
+                                          labelFormatter: function() {                     
+                                                  return '';                      
+                                          }
+                                      },
+                                      series: [{
+                                          name:'Monitored Data',                                  
+                                          data: [{% for y_item in monitored_item.y_axis %} {{y_item}}, {% endfor %}],
+                                          marker: {
+                                            enabled: false
+                                            },
+                                      }],
+
+                                       exporting: {
+                                        enabled: false,
+                                        chartOptions: {                
+                                      xAxis: [{categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],            
+                                            labels: {
+                                                style: {
+                                                    fontSize: '6px',                            
+                                                },
+                                                rotation: -90,
+                                            }
+                                        }]
+                                    }
+                                }
+                                  });
+                              });
+                            </script>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                    <div class="col-lg-12"> 
+                     <div class="panel">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                          </h3>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found for the {{monitored_item.item_name}}
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div> 
+                    </div>   
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="row">
+                    <div class="col-lg-12"> 
+                     <div class="panel">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> 
+                          </h3>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div class="alert alert-danger" role="alert">
+                                No monitored data found. Please select any group and find out the monitored items.
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div> 
+                     </div>                 
+                    {% endif %} 
+            </div>
+          </div>
+        </div>
+        {% if "Customer_Dashboard" in request.session.logged_user_priv %}
+            {% include "components/sr_cust.html"%}
+        {% else %}
+            {% include "components/service_request.html"%}
+        {% endif %}
+      {% include "ticket/advanced_search_popup.html" %}
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      <script type="text/javascript">
+          $("#monitoring_nav").addClass("active");
+          $("#monitoring_sub").css('display','block');
+          $("#mon_detail").addClass("active");
+      </script>
+      {% include "components/dashboard_footer.html" %} 
+      {% include "components/service_request.html" %} 
+    </body>
+</html>

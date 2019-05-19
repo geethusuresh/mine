@@ -1,0 +1,63 @@
+
+{% extends 'aws/aws_base.html'%}
+{% block section_header %}{% load staticfiles %}
+            <h1>
+                Create Stack
+                <small>Create New Stack</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li>
+                    <a href="{% url 'aws_accounts_view' %}">AWS Home </a>
+                </li>
+            <!--     <li>
+                   <a href="{% url 'aws_details_dashboard' cloud_account_id %}">AWS Dashboard</a>
+                </li> -->
+                <li>
+                    <a href="{% url 'get_aws_opswork_list' cloud_account_id %}">Application Group Dashboard </a>
+                </li>
+
+                <li class="active">
+                    <strong>Opswork Create Stack</strong>
+                </li>
+            </ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+{% if stack_message %}
+
+<div class="alert alert-danger alert-dismissable">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+    {{stack_message}}
+</div>
+
+{% endif %}
+
+<div class="row">
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-8">
+        <!--Mint Panel-->
+        <!--===================================================-->
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Create Stack</h3>
+            </div>
+            <div class="panel-body">
+                
+              <form method="post" class="form-horizontal style-form" id="aws-form" action="{% url 'create_stack_aws_opswork' cloud_account_id %}">{% csrf_token %}
+                 {{stack_form.as_p}}
+                    <div class="panel-footer text-center">
+                        <button class="btn" type="submit" id="form-submit">Submit</button>
+                    </div>
+              </form>
+            </div>
+        </div>
+        <!--===================================================-->
+        <!--End Mint Panel-->
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'docker_management/base.html' %}
+
+{% block section_header %}
+
+<script type="text/javascript">
+  server_id = {{server_id}}
+</script>
+
+<h1 class="text-thin">Download Images |
+  <small>Images from Docker Hub/Repository</small>
+</h1>
+<ol class="breadcrumb">
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'list_docker_server' %}">Docker Servers</a></li>
+  <li><a href="{% url 'list_application' server_id %}">{{server_name}}</a></li>
+  <li><a href="{% url 'list_image' server_id %}">Images</a></li>
+  <li><a href="{% url 'search_image' server_id %}">Search Image</a></li>
+  <li class="active">Image List</li>
+</ol>
+
+{% endblock %}
+
+{% block basecontent %}
+
+  <div class="row">
+
+    <div class="col-md-12 pad-all">
+      <div class="col-md-8 col-md-offset-1">
+        <input type="text" class="form-control" value="{{search_keyword}}" id="search_keyword" name="search_keyword" style="width:100%">
+      </div>
+      <div class="col-md-3">
+        <span class="input-group-btn">
+          <button type="button" onclick="image_search_from_result_page()" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
+        </span>
+      </div>
+    </div>
+
+    <div class="col-md-12">
+    {% for image in image_search_result %}
+      <div class="col-md-6">
+        <div class="panel">
+          <div class="panel-heading">
+            <div class="panel-control">
+
+              <span class="label label-success badge">
+                {% if image.is_official %}
+                    Official
+                {% else %}
+                    Automated
+                {% endif %}
+              </span>
+
+              <button class="btn">
+                <span title="" class="badge bg-green" data-original-title="Number of Stars">{{image.star_count}}<i class="fa fa-star"></i></span>
+              </button>
+
+            </div>
+
+            <h3 class="panel-title unselectable add-tooltip"><strong><a data-html="true" data-original-title="{{image.name}}">{{image.name}}</a></strong></h3>
+
+          </div>
+
+          <div class="panel-body">
+            <div style="height:80px">
+              <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                {{image.description|linebreaks}}
+                </div>
+                <div class="col-md-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-footer">
+            {% if not image.existing %}
+            <div class="row">
+              <div class="col-md-4">
+                <button type="button" class="btn btn-primary btn-hover-primary" onclick="fetch_tags('{{image.name}}', {{forloop.counter}})">Fetch Tags</button>
+              </div>
+              <div class="col-md-7" id="div_select_tag">
+                <select id="{{forloop.counter}}" class="form-control select-option" onchange="show_button_download({{forloop.counter}})" required disabled>
+                  <option>Select</option>
+                </select>
+              </div>
+              <div class="col-md-1"></div>
+            </div>
+            <div class="row pad-all">
+              <button type="button" id="button_download_{{forloop.counter}}" class="btn btn-primary btn-block" onclick="show_image_download_modal('{{image.name}}', {{forloop.counter}})" style="display:none;"><i class="fa fa-download"></i></button>
+            </div>
+            {% else %}
+              <p class="text-warning">Image is already downloaded!!</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+  </div>
+
+  <div class="modal fade" id="image_download_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title head-color" id="myModalLabel">Download Image</h4>
+        </div>
+        
+        <div class="modal-body">
+          <h4>Are you sure you want to download image?</h4>
+        </div>
+        
+        <div class="modal-footer">
+          <form action="{% url 'download_image' server_id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="image_to_download" name="image_name">
+            <input type="hidden" id="tag_for_image_to_download" name="tag">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit"  class="btn btn-primary">Confirm</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+  $("#search_keyword").keyup(function(event){
+      if(event.keyCode == 13){
+          image_search_from_result_page()
+      }
+  });
+
+  function image_search_from_result_page(){
+    search_keyword = $('#search_keyword').val();
+    if(search_keyword != ""){
+      url = '/docker_management/server/' + server_id + '/image/search/list?name=' + search_keyword
+      window.location.href = url;
+    }
+    else{
+      alert('Please enter search keyword')
+    }
+  }
+
+  function fetch_tags(image_name, id){
+    $.ajax({
+      url: "/docker_management/server/" + server_id + "/image/tags/?name=" + image_name,
+      type: 'GET',
+      success : function(tag_list) {
+        if(tag_list.length != 0){
+          tag_list = JSON.parse(tag_list);
+          tag_select_id = '#'+id;
+          $.each(tag_list, function( index, value ) {
+            if(value.status){
+              option = '<option class="disabled" value="' + value.name + '" disabled>' + value.name + '</option>';
+            }
+            else{
+              option = '<option value="' + value.name + '">' + value.name + '</option>';
+            }
+            $(tag_select_id).append(option);
+          });
+          $(tag_select_id).removeAttr('disabled');
+        }
+        else{
+          $('#div_select_tag').empty();
+          $('#div_select_tag').append('<h5 class="text-danger">Server error occured!!</h5>');
+        }
+      },
+      error : function(xhr,errmsg,err) {
+        console.log(err);
+      },
+    });
+  }
+
+  function show_image_download_modal(image_name, id){
+    tag = $('#'+id).val();
+    $('#image_download_modal').modal('show');
+    $('#image_to_download').val(image_name);
+    $('#tag_for_image_to_download').val(tag);
+  }
+
+  function show_button_download(id){
+   $('#button_download_' + id).show();
+  }
+
+</script>
+
+{% endblock %}

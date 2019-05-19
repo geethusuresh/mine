@@ -1,0 +1,62 @@
+{% extends "change_management/change_base.html" %}
+{% block title_content %} Assessment Dashboard {% endblock title_content %}
+{% block page_head %} Change Management <small>| Assessment Dashboard </small>{% endblock page_head %}
+
+{% block bread_crumb %} <li class="active"> Assessment Dashboard </li>{% endblock bread_crumb %}
+{% block body_content %}
+    <div class="panel">
+        <div class="panel-heading">
+            {% if status_dat == "BOTH" %}
+                <div class="panel-control">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a data-toggle="tab" href="#assessment_details">
+                                <i class="fa fa-lg"></i> Assessment Approvals
+                            </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#assessment_history">
+                                <i class="fa fa-lg"></i>Assessment History
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+            <h3 class="panel-title">Assessment Dashboard</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-12">
+                    {% if status_dat == "BOTH" %}
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="assessment_details">
+                                {% include "change_management/assessment_approval.html" %}
+                            </div>
+                            <div class="tab-pane fade" id="assessment_history">
+                                {% include "change_management/assessment_history.html" %}
+                            </div>
+                        </div>
+                    {% elif status_dat == "APPR_ONLY" %}
+                        {% include "change_management/assessment_approval.html" %}
+                    {% elif status_dat == "HIST_ONLY" %}
+                        {% include "change_management/assessment_history.html" %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body_content %}
+
+{% block footer_content %}
+    <script>
+        $('#assess_tabl').dataTable();
+        $('#assess_history_tab ').dataTable();
+    </script>
+    <script type="text/javascript">
+        $('#change_request_main').addClass("active");
+        $('#main_change_dash').addClass("active");
+        $('#change_sub_nav').css("display", "block");
+        // $('#rfc_dashboard').addClass("active");
+        $('#change_request_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+    </script>
+{% endblock footer_content %}

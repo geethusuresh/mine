@@ -1,0 +1,450 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | GSD Reports</title>
+    {% include "components/css.html"%}
+    <!-- Javascript -->
+    <script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/jquery-ui/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+
+    <!-- Bootstrap -->
+    <script src="/static/customer/js/plugins/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/gritter/jquery.gritter.min.js" type="text/javascript"></script>
+
+    <!-- Charts -->
+
+    <!-- Interface -->
+    <script src="/static/customer/js/plugins/jquery-countTo/jquery.countTo.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="/static/customer/js/plugins/pace/pace.min.js" type="text/javascript"></script>
+
+    <!-- Forms -->
+    <script src="/static/customer/js/plugins/bootstrap-tagsinput/bootstrap-tagsinput.min.js" type="text/javascript"></script>
+    <!-- <script src="/static/customer/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script> -->
+
+     <!-- High Charts -->  
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/highcharts-more.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <!--<script src="/static/js/highcharts/highcharts_theme_sand.js"></script> -->     
+    <!--End High Charts -->
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+            {% if l1_resoponse_results %}
+                <h1>L1 Individual Incident Response Count<small></small></h1>
+            {% elif l1_resoponse_service_results %} 
+                <h1>L1 Individual Service Response Count<small></small></h1>
+            {% elif l15_resoponse_results %} 
+                <h1>L1.5 Individual Incident Response Count<small></small></h1>
+            {% elif l15_resoponse_service_results %} 
+                <h1>L1.5 Individual service Response Count<small></small></h1>
+            {% elif l2_resoponse_results %} 
+                <h1>L2 Individual Incident Response Count<small></small></h1>
+            {% elif l2_resolution_service_results %} 
+                <h1>L2 Individual Service Resolution Count<small></small></h1>
+             {% else %} 
+                  <h1>Engineer Wise Response Count<small></small></h1>
+            {% endif %}
+
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="/reports/">Reports</li>
+                    <li class="active">Response Count</li>
+                </ol>
+            </div>
+
+            <div class="content">
+              
+              <br>
+              <!-- Search bar-->
+                <div class="row">
+                <form method="POST" action="{% url 'responsecount_engineers' %}" name="frm_gsd" id="frm_gsd">{% csrf_token %}
+                  <div class="col-md-5">
+                    <div class="row">
+                      <div class="col-md-8">
+                        <select id="report_type" name="report_type" class="form-control" required>
+                            {% if "Jira_Marlabs_Report_Access" in request.session.logged_user_priv %} 
+                              <option value=""> Select Workgroup Engineers </option> 
+                              <option value="1" {% if report_type == '1'%}selected{%endif%}>Ticket Response Count of L1 Engineers</option>
+                              <option value="2" {% if report_type == '2'%}selected{%endif%}>Ticket Response count of L1.5 Engineers</option>
+                              <option value="3" {% if report_type == '3'%}selected{%endif%}>Ticket Response count of L2 SAP Engineers</option>
+                            {% endif %}
+                              
+                              
+                            </select>
+                      
+                      
+                      </div>
+
+                      <div class="col-md-4">
+                        <select id="period" name="period" class="form-control" required>
+                              <option value=""> Select Date </option>
+                              <option value="1" {% if period_type == '1'%}selected{%endif%}>On</option>
+                              <option value="2" {% if period_type == '2'%}selected{%endif%}>Between</option>
+                          </select>
+                      </div>
+                    </div>
+                    <!-- <label class="label label-info pull-right" style="font-size:15px;">Tickets</label> -->
+                  </div>
+                  <div class="col-md-4" style="background:white;">
+                    <div class="row">
+                      <div class="col-md-12" id="on_div">
+                        {% if on_date %}
+                          <input type="text" class="form-control" name="on_date" id="on_date" value="{{on_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="on_date" id="on_date" />
+                        {% endif %}
+                      </div>
+                      <div class="col-md-6" id="from_div" style="display:none;">
+                        {% if from_date %}
+                          <input type="text" class="form-control" name="from_date" id="from_date" value="{{from_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="from_date" id="from_date" />
+                        {% endif %}
+                      </div>
+                      <div class="col-md-6" id="to_div" style="display:none;">
+                        {% if to_date %}
+                          <input type="text" class="form-control" name="to_date" id="to_date" value="{{to_date}}"/>
+                        {% else %}
+                          <input type="text" class="form-control" name="to_date" id="to_date"/>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="submit" class="btn btn-success" value="Fetch Report">
+                    <a href="{% url 'responsecount_engineers' %}" class="btn btn-success">Reset</a>
+                  </div>
+                </div>
+             <br> 
+                <div class="row">
+                  <div class="col-md-5">
+                    <select id="ticket" name="ticket" class="form-control" required>
+                    <option value=""> Select Ticket Type </option>
+                              <option value="1" {% if ticket_type == '1'%}selected{%endif%}>Incident Response Tickets</option>
+                              <option value="2" {% if ticket_type == '2'%}selected{%endif%}>Service Response Tickets</option>
+                    </select>
+                  </div>
+                </div>
+
+                  
+                </form>
+                
+              <!--End Search bar -->
+              <!--start row -->
+              
+              <!--End row -->
+
+              <br>
+                <!-- Start row-->
+                <div class="row">
+                {% if l1_resoponse_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L1 ENGINEER</th>
+              <th>INCIDENT TICKETS WITH IN SLA</th>
+              <th>INCIDENT TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l1details in l1_resoponse_results%}
+               <tr>
+               
+                  <td>{{l1details.assigneee}}</td>
+                  <td>{{l1details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l1details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif l1_resoponse_service_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L1 ENGINEER</th>
+              <th>SERVICE REQUEST TICKETS WITH IN SLA</th>
+              <th>SERVICE REQUEST TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l1details in l1_resoponse_service_results%}
+               <tr>
+               
+                  <td>{{l1details.assigneee}}</td>
+                  <td>{{l1details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l1details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif l15_resoponse_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L1.5 ENGINEER</th>
+              <th>INCIDENT TICKETS WITH IN SLA</th>
+              <th>INCIDENT TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l15details in l15_resoponse_results%}
+               <tr>
+               
+                  <td>{{l15details.assigneee}}</td>
+                  <td>{{l15details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l15details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif l15_resoponse_service_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L1.5 ENGINEER</th>
+              <th>SERVICE REQUEST TICKETS WITH IN SLA</th>
+              <th>SERVICE REQUEST TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l15details in l15_resoponse_service_results%}
+               <tr>
+               
+                  <td>{{l15details.assigneee}}</td>
+                  <td>{{l15details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l15details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif l2_resoponse_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L2 ENGINEER</th>
+              <th>INCIDENT TICKETS WITH IN SLA</th>
+              <th>INCIDENT TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l2details in l2_resoponse_results%}
+               <tr>
+               
+                  <td>{{l2details.assigneee}}</td>
+                  <td>{{l2details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l2details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif l2_resoponse_service_results %}
+                <br /><br />
+
+    <table id="myTable" class="table   table-striped table-hover">
+    <thead>
+            <tr>
+              <th>L2 ENGINEER</th>
+              <th>SERVICE REQUEST TICKETS WITH IN SLA</th>
+              <th>SERVICE REQUEST TICKETS CROSSED SLA</th>
+              
+
+              
+            </tr>
+      </thead>
+        <tbody >
+           {% for l2details in l2_resoponse_service_results%}
+               <tr>
+               
+                  <td>{{l2details.assigneee}}</td>
+                  <td>{{l2details.total_inc_tickets_withinSLA}}</td>
+                  <td>{{l2details.total_inc_tickets_crossedSLA}}</td>
+                  
+                  
+                 
+              </tr>
+          {% endfor %}
+       </tbody>
+     </table>
+     {% elif msg %}
+     <div class="col-md-12">
+                      <div class="panel">
+                        <div class="panel-heading">
+                          <i class="fa fa-bar-chart-o fa-fw"></i>
+                          Date Range Exceeds                           
+                        </div>
+                      <div class="panel-body">
+                          <small style="color:red; font-size:20px !important">{{msg}}</small></td>
+                      </div>
+                    </div>
+                  </div>
+     
+     {% else %}
+                   <div class="col-md-12">
+                      <div class="panel">
+                        <div class="panel-heading">
+                          <i class="fa fa-bar-chart-o fa-fw"></i>
+                          Workgroup Response Count                           
+                        </div>
+                      <div class="panel-body">
+                          No Data Found from the system
+                      </div>
+                    </div>
+                  </div>
+
+     {% endif %}
+                                      
+                  </div>
+                <!--End row -->                          
+                
+            </div>
+          </div>
+        </div>
+      {% include "ticket/advanced_search_popup.html" %}      
+      <script src="/static/customer/js/custom.js" type="text/javascript"></script>
+      <script src="/static/js/bootstrap-datepicker.js" type="text/javascript"></script>      
+      {% include "components/dashboard_footer.html" %}
+      {% include "components/service_request.html" %}
+      {% include "reports/reports_js.html" %}
+    </body>
+    <script type="text/javascript">
+      // $("#from_date").datepicker({
+      //   format: 'mm/dd/yyyy',
+            
+      // }).on('changeDate', function(e){
+      // $(this).datepicker('hide');
+      // });
+      // $("#to_date").datepicker({
+      //   format: 'mm/dd/yyyy',
+      //       endDate: '+0d'
+      // }).on('changeDate', function(e){
+      //   $(this).datepicker('hide');
+      // });
+
+      $("#on_date").datepicker({
+        format: 'mm/dd/yyyy'
+      }).on('changeDate', function(e){
+      $(this).datepicker('hide');
+      });
+      $("#from_date").datepicker({
+        autoclose: true,
+        format: 'mm/dd/yyyy'
+      }).on('changeDate', function(e){
+        $("#to_date").datepicker('setStartDate', $('#from_date').val());
+      });
+
+      $("#to_date").datepicker({
+        autoclose: true,
+        endDate: '+0d',
+        format: 'mm/dd/yyyy'
+      }).on('changeDate', function(e){
+        $("#from_date").datepicker('setEndDate', $('#to_date').val());
+      });
+
+      $("#period").change(function(){
+        if(this.value==1){
+          $("#on_date").prop('required',true)
+          $("#from_date").prop('required',false)
+          $("#to_date").prop('required',false)
+          $("#on_div").show()
+          $("#from_div").hide()
+          $("#to_div").hide()
+        }
+        else{
+         $("#on_date").prop('required',false)
+         $("#from_date").prop('required',true)
+         $("#to_date").prop('required',true)
+         $("#on_div").hide()
+         $("#from_div").show()
+         $("#to_div").show()
+        }
+      });
+      $(document).ready(function(){
+        // alert($("#period").val());
+        if ($("#period").val() == '1'){
+          $("#on_date").prop('required',true)
+          $("#from_date").prop('required',false)
+          $("#to_date").prop('required',false)
+          $("#on_div").show()
+          $("#from_div").hide()
+          $("#to_div").hide() 
+        }
+        else if($("#period").val() == '2'){
+          $("#on_date").prop('required',false)
+          $("#from_date").prop('required',true)
+          $("#to_date").prop('required',true)
+          $("#on_div").hide()
+          $("#from_div").show()
+          $("#to_div").show()
+        }
+      }); 
+      
+    </script>
+    <script>
+
+$(document).ready( function () {
+    $('#myTable').DataTable({
+
+
+
+    
+
+  } );
+} );
+</script>
+</html>

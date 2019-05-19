@@ -1,0 +1,182 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home - Monitoring</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/docs.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link href="/static/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <script src="/static/js/jquery-2.1.0.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>    
+    <script src="/static/js/highcharts/highcharts.js"></script>
+    <script src="/static/js/highcharts/exporting.js"></script>
+    <script src="/static/js/highcharts/highcharts_theme.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body style="background-color:#f1f1f1">
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">        
+        <div class="navbar-collapse collapse" id="navbar-main">
+          <ul class="nav navbar-nav">
+             <li>
+              <a>Monitoring System</a>
+            </li>
+            <li>
+              <a href="/">Home</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="" data-toggle="modal" data-target="#invite">&nbsp;</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+   
+    <div class="container" style="margin-top:6%;margin-left: 10px;margin-right: 10px;width: 100%;">    
+    <div style="margin:0px 2px 13px 5px;">       
+        <form class="form-inline" role="form" id="frm_monitoring" name="frm_monitoring" action="/monitoring/" method="post">{% csrf_token %}
+          <div class="form-group" style="margin-right:5px;">
+            <label  for="hostgroups" class="sr-only">Host Groups</label>
+             <select multiple class="form-control" name="hostgroups" id="hostgroups" style="height: 130px;">
+             <option value="" style="font-weight:bold;" disabled>Please select any hostgroups</option>      
+              {% for groupitem in hostgroups %}
+              {% if groupitem.groupid in selected_hostgroups %}           
+              <option value="{{groupitem.groupid}}" selected="selected">
+              {{groupitem.name}}
+              </option>
+              {% else %}            
+              <option value="{{groupitem.groupid}}">{{groupitem.name}}</option>         
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group" {% if hosts %} style="display:inline;" {% else %} style="display:none;"  {% endif %} style="margin-right:5px;">
+             <label for="hosts" class="sr-only">Hosts</label>
+             <select multiple class="form-control" name="hosts" id="hosts" style="height: 130px;">
+             <option value="" style="font-weight:bold;" disabled>Please select any hosts</option>       
+              {% for hostitem in hosts %}
+              {% if hostitem.hostid in selected_hosts%}
+              <option value="{{hostitem.hostid}}" selected="selected">{{hostitem.name}}</option>
+              {% else %}
+              <option value="{{hostitem.hostid}}">{{hostitem.name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group" {% if hostitems %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+             <label for="host_item" class="sr-only">Host Item</label>
+             <select multiple class="form-control" name="host_item" id="host_item" style="height: 130px;">
+              <option style="font-weight:bold;" disabled>Please select any host item</option>      
+              {% for hostitem in hostitems %}
+              {% if hostitem.itemid in selected_host_item %}
+              <option value="{{hostitem.itemid}}" selected="selected">{{hostitem.name}}</option>
+              {% else %}
+               <option value="{{hostitem.itemid}}">{{hostitem.name}}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          {% if hostitems %}
+          <div class="form-group" style="display:inline;">             
+             <select class="form-control" name="monitor_interval" id="monitor_interval">
+              <option style="font-weight:bold;">Select any Monitoring Interval</option> 
+              <option value="1_hr" {% if selected_interval == "1_hr" %} selected="selected" {% endif %}>Last 1 Hr</option>
+              <option value="2_hr" {% if selected_interval == "2_hr" %} selected="selected" {% endif %}>Last 2 Hr</option>
+              <option value="3_hr" {% if selected_interval == "3_hr" %} selected="selected" {% endif %}>Last 3 Hr</option>
+              <option value="6_hr" {% if selected_interval == "6_hr" %} selected="selected" {% endif %}>Last 6 Hr</option>
+              <option value="12_hr" {% if selected_interval == "12_hr" %} selected="selected" {% endif %}>Last 12 Hr</option>
+              <option value="1_day" {% if selected_interval == "1_day" %} selected="selected" {% endif %}>1 day</option>             
+            </select>
+          </div>
+          {% endif %}
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+      </div>
+      {% if monitored_values %}      
+      {% for monitored_item in monitored_values %}
+      {% if monitored_item.x_axis %}     
+     <div id="container_{{forloop.counter}}" style="height: 400px; margin: 0 auto"></div>
+     <div style="clear:both;height:30px;"></div>
+     <script type="text/javascript">     
+      $(function () {
+          $('#container_{{forloop.counter}}').highcharts({
+              chart: {
+                /*type: 'line'*/
+                type: 'area'
+              },
+              title: {
+                  text: "{{monitored_item.item_key}}",
+                  x: -20 //center
+              },
+              subtitle: {
+                  text: '{{monitored_item.item_name}}',
+                  x: -20
+              },
+              xAxis: {
+                  categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],
+                  labels: {
+                    rotation: -90,                                  
+                  },
+                  type: 'datetime',
+                  title: {
+                      text: 'Monitored Time'
+                  }
+              },
+              yAxis: {
+                  title: {
+                      text: ''
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: ''
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0,
+                  labelFormatter: function() {                     
+                          return '';                      
+                  }
+              },
+              series: [{
+                  name:'Monitored Data',                                  
+                  data: [{% for y_item in monitored_item.y_axis %} {{y_item}}, {% endfor %}],
+              }],
+
+               exporting: {
+                enabled: true,
+                chartOptions: {                
+              xAxis: [{categories:[{% for x_item in monitored_item.x_axis %} "{{x_item}}", {% endfor %}],            
+                    labels: {
+                        style: {
+                            fontSize: '6px',                            
+                        },
+                        rotation: -90,
+                    }
+                }]
+            }
+        }
+          });
+      });
+    </script>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        No monitored data found. Please select any hostgroups and found out the monitored items 
+    </div>
+    {% endif %}   
+    </div>    
+  </body>
+</html>

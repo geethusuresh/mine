@@ -1,0 +1,252 @@
+            <div class="leftside" style="z-index: 1;">
+                <div class="sidebar">
+                    <div class="" style="padding:10px;background-color:white">
+                        <div style="">
+                            <img src="/media/{{profile.customer.logo}}" alt=""  style="width:100%"/>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu">
+                        <li id="dash">
+                            <a href="/">
+                                <i class="fa fa-home"></i> 
+                                <span>{% if request.session.user_dashboard == "Advanced" %} My {% else %} {{request.session.user_dashboard}} {% endif %}Dashboard</span>
+                            </a>
+                        </li>
+
+                    
+                        {% if "customer_admin" in request.session.logged_user_priv  %}
+                        <li id="cps">
+                            <a href="/controlpanel/">
+                                <i class="fa fa-toggle-on"></i>
+                                    <span>Control Panel</span>
+                                <small class="label pull-right"></small>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if "infrastructure" in request.session.logged_user_priv  %}
+
+                         <li class="sub-nav" id="infra">
+                            <a href="#">
+                                <i class="fa fa-sitemap"></i>
+                                <span>Infrastructure</span>
+                                <i class="fa fa-angle-right pull-right"></i>
+                            </a>
+                            <ul class="sub-menu" id="infraopen">                                
+                                <li id="casset"><a href="/management/infradashboard/">Dashboard</a></li>
+                                <li id="dcview"><a href="/management/infrastructure/">Data Centers</a></li>
+                                <li id="appview"><a href="/management/application/">Applications</a></li>
+                            </ul>
+                        </li>
+
+
+                        {% endif %}
+
+
+                        
+<!--                         <li id="custo">
+                            <a href="/customize/dashboard/">
+                                <i class="fa fa-th-large"></i>
+                                    <span>Customize</span>
+                                <small class="label pull-right"></small>
+                            </a>
+                        </li>
+ -->
+
+
+                        {% if "cloud" in request.session.logged_user_priv  %}
+                        <li class="sub-nav">
+                          <a href="#">
+                              <i class="fa fa-cloud"></i>
+                              <span>Cloud Management</span>
+                              <i class="fa fa-angle-right pull-right"></i>
+                          </a>
+                          <ul class="sub-menu">
+                              <li id="view"><a href="/cloud_management/aws_accounts/">AWS Servers</a></li>
+                              <li id="sub"><a href="/cloud_management/openstack_accounts/">OpenStack Servers</a></li>
+                              <li id="view"><a href="/cloud_management/azure/">Azure Servers</a></li>
+                              <li id="view"><a href="/docker_management/">Docker Management</a></li>
+                          </ul>
+                        </li> 
+                        {% endif %}
+
+
+                        {% if "Monitoring_view" in request.session.logged_user_priv  %}
+                        <li class="sub-nav" id="monitoring_nav">
+                          <a href="#">
+                              <i class="fa fa-dashboard"></i>
+                              <span>Monitoring Service</span>
+                              <i class="fa fa-angle-right pull-right"></i>
+                          </a>
+                          <ul class="sub-menu" id="monitoring_sub">
+                              <li id="mon_dash"><a href="/monitor_dashboard/">Dashboard</a></li>
+                              <li id="mon_detail"><a href="/monitor_details/">Monitoring Details</a></li>
+                              {% if profile.customer.customerid == "GAG" %}
+                              {% if "Network_Monitoring_View" in request.session.logged_user_priv  %}
+                              <li id="network_detail"><a href="/advanced_monitoring/network_monitoring/">Network Monitoring</a></li>
+                              {% endif %}                              
+                               <li id="maintten"><a href="/advanced_monitoring/maintanance_details/">Scheduled Maintenance</a></li>
+                              {% endif %}
+                          </ul>
+                        </li> 
+                        {% endif %}
+
+
+                        {% if "helpdesk" in request.session.logged_user_priv  %}
+                        <li class="sub-nav" id="service">
+                            <a href="#" id="subm_a">
+                                <i class="fa fa-briefcase"></i>
+                                <span>Service Desk</span>
+                                <i class="fa fa-angle-right pull-right"></i>
+                            </a>
+                            <ul class="sub-menu" id="subm">
+                                <li ><a 
+{% if "Managed_Service_Enduser" in request.session.roles or "Managed_Service_Admin" in request.session.roles %} onclick="fetch_impacted_airlines('{{ profile.customer.id }}')" {% endif %} href="" data-toggle="modal" data-target="#forcust">Create New Ticket</a></li>
+                                <li id="mytic"><a href="/customer/tickets/raised/">My Tickets</a></li>
+                                {% if "Managed_Service_Enduser" not in request.session.roles %}
+                                    <li id="alltic"><a href="/customer/tickets/">All Tickets</a></li>
+                                {% endif %}
+                                {% if profile.customer.payment %}
+                                    <li id="support_hr"><a href="/ticket/workhours/{{profile.customer.id}}">Support Hours</a></li>
+                                {% endif %}
+                                
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if "security" in request.session.logged_user_priv  %}
+                        <li class="sub-nav" id="security">
+                            <a {% if "niksun_dashboard" in request.session.logged_user_priv %} href="/security_tool/security/dashboard/" {% else %} href="/dashboard/index/" {%endif%}>
+                                <i class="fa fa-shield"></i>
+                                    <span>Threat Management</span>
+                               
+                                <i class="fa fa-angle-right pull-right"></i>
+                            </a>
+                            <ul class="sub-menu" id="sec_open">
+                              {% if "niksun_dashboard" in request.session.logged_user_priv  %}
+                                <li id="snd_dash"><a href="/security_tool/security/dashboard/">Events</a></li>
+                                {% for event in sources_niksun %}
+                                  <li id="nik_event"><a href="/security_tool/dashboard/{{ event }}">{{ event }} Events</a></li>
+                                {% endfor %}
+
+                              {% else %}
+                                <!--<li id="snd_dash"><a href="/niksun/security/dashboard/">Dashboard</a></li>
+                                <li id="nik_event"><a href="/niksun/dashboard/">Niksun Events</a></li>
+                                <li id="red_event"><a href="/redcanary/dashboard/">Redcanary Events</a></li>-->
+                                <li id="sec_dash"><a href="/dashboard/index/">Dashboard</a></li>
+                                <li id="sec_event"><a href="/security/dashboard">Events</a></li>
+                                <li id="sec_protection"><a href="/security/host/details/">Protection</a></li>
+                                <li id="realtime"><a href="/dashboard/realtime/map/customer/">Real Time Events Map</a></li>
+                                <li id="control"><a href="/security/settings/">Settings</a></li>
+                              {% endif %}
+                               <!--  <li id="control"><a data-toggle="modal" data-target="#block_ip">Block IP</a></li> -->
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if "CMDB" in request.session.logged_user_priv %}
+                           <li class="sub-nav" id="cmdb">
+                               <a><i class="fa fa-database"></i><span>CMDB</span>
+                                   <i class="fa fa-angle-right pull-right"></i></a>
+
+
+                               <ul class="sub-menu" id="subsec">
+                                   <li id="sec_detail"><a href="/cmdb/info_cm/">Details</a></li>
+                                   <li id="sec_adm"><a href="/cmdb/cmdb_admin/">Configure </a></li>
+
+                               </ul>
+
+
+                           </li>
+
+                        {% endif %}
+
+
+
+                        {% if "Report_Management" in request.session.logged_user_priv  and "niksun_dashboard" not in request.session.logged_user_priv %}
+                            <li class="sub-nav" id="reports_main">
+                              <a href="#">
+                                  <i class="fa fa-file-text"></i>
+                                  <span>Analytics</span>
+                                  <i class="fa fa-angle-right pull-right"></i>
+                              </a>
+                              <ul class="sub-menu" id="report_sub_nav">
+                                  <li id="reports_mlb"><a href="/reports/">Reports</a></li>
+                              </ul>
+                            </li> 
+                        {% endif %}
+
+                         {% if "niksun_dashboard" in request.session.logged_user_priv %}
+                            <li>
+                              <a href="/reports/">
+                                  <i class="fa fa-file-text"></i>
+                                  <span>Reports</span>
+                              </a>
+                            </li> 
+                        {% endif %}
+
+<!--                         {% if "FAQ_View" in request.session.logged_user_priv  %}
+                        <li>
+                            <a href="/faq/view">
+                                <i class="fa fa-calendar"></i> <span>FAQ</span>
+                            </a>
+                        </li>
+                        {% endif %} -->
+                        <!-- <li class="sub-nav" id="setti">
+                          <a href="#">
+                              <i class="fa fa-cogs"></i>
+                              <span>Settings</span>
+                              <i class="fa fa-angle-right pull-right"></i>
+                          </a>
+                          <ul class="sub-menu" id="setti_open">
+                              <li id="custome"><a href="/customize/dashboard/">Customize Dashboard</a></li> -->
+                              <!-- <li id="view"><a href="/customer/profile/"> Profile Settings</a></li> -->
+                          <!-- </ul>
+                        </li>  -->
+                      {% if "oneconsole_help" in request.session.logged_user_priv  %}
+                        {% if "Helpdesk_Dashboard" in request.session.logged_user_priv %}
+                          <li id="notify_grop">
+                              <a href="{% url 'help:user_help_list' %}">
+                                  <i class="glyphicon glyphicon-info-sign"></i>
+                                  <span>Help</span>
+                              </a>
+                          </li>
+                          <li id="notify_grop">
+                              <a href="{% url 'help:help_list' %}">
+                                  <i class="glyphicon glyphicon-info-sign"></i>
+                                  <span>Help Admin</span>
+                              </a>
+                          </li> 
+                        {% else %}
+                           <li id="notify_grop">
+                                <a href="{% url 'help:user_help_list' %}">
+                                    <i class="glyphicon glyphicon-info-sign"></i>
+                                    <span>Help</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                      {% endif %}
+
+                      
+                        <li>
+                            <a href="/logout/">
+                                <i class="fa fa-calendar"></i> <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="sidebar-widget online-users">
+                      <div class="body online-list">              
+                        <div class="footer">
+                          <span class="btn btn-info" style="width:100%">
+                            <l class="fa fa-envelope-o" style="font-size:12px">
+                              {{profile.customer.help_text}}
+                            </l>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+ 

@@ -1,0 +1,109 @@
+{% load zone %}
+<div class="row">
+    <div class="col-sm-12">
+        {% if rfc.is_approved == True  and rfc.status == 'ASSESS' %}
+            <h4 class="panel-title" style="text-align:center">Create Assessment</h4>
+            <form method="post" action="/rfc/create_assessment/{{rfc.id}}/">{% csrf_token %}
+                <div class="col-sm-12">
+                    <div class="col-sm-6">
+                        <label><strong>Group:</strong></label>
+                        <select name="group" class="form-control" id="ass_group" required>
+                            <option value="">--Select--</option>
+                            {% for grp in group_list %}
+                                <option value="{{grp.id}}">{{grp.workgroup}}</option>
+                            {% endfor %}
+                        </select><br/>
+                        <label><strong>Assessor:</strong></label>
+                        <select name="assessor" class="form-control" id="ass_owner" required>
+                            <option value="">--Select--</option>
+                        </select><br/>
+                    </div>
+                    <div class="col-sm-6">
+                        <label><strong>Subgroup:</strong></label>
+                        <select name="subgroup" class="form-control" id="ass_subgroup" required>
+                            <option value="">--Select--</option>
+                        </select><br/>
+                        <label><strong>Assessment Type:</strong></label>
+                        <select name="assessment_type" class="form-control" required>
+                            <option value="">--Select--</option>
+                            <option value="Business">Business</option>
+                            <option value="Technical">Technical</option>
+                        </select><br/>
+                    </div>
+                    <div class="col-sm-12">
+                        <label><strong>Assessment Description:</strong></label>
+                        <textarea name="assessment_desc" class="form-control" required></textarea><br/>
+                    </div>
+                    <div class="col-sm-12">
+                        <label><strong>Remarks</strong></label>
+                        <textarea name="remarks" class="form-control"></textarea><br/>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-success" {% if view_status == True %} {% else %} disabled {% endif %}> <i class="fa fa-plus" aria-hidden="true"></i> &nbsp;Create</button>
+                        </div>
+                        
+                        <div class="col-sm-6">
+                            <a href="/rfc/proceed_to_next_phase/{{rfc.id}}/" class="btn btn-success" style="float:right"{% if view_status == True and all_assessmts_approved == True %} {% else%} disabled {% endif %}> Proceed to Next Phase <i class="fa fa-arrow-right" aria-hidden="true"></i> </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="col-sm-12">
+                <hr/>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-sm-12">
+        <h4 class="panel-title">Assessments</h4>
+        <table class="table table-stripped" id="assessment_tab">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="hidden">AssessID</th>
+                    <!-- Assess id is hidden to capture  the assess data while expanding.-->
+                    <th>AssessmentId</th>
+                    <th>Change ID</th>
+                    <th>Group</th>
+                    <th>Subgroup</th>
+                    <th>Assessment Type</th>
+                    <th>Created Date</th>
+                    <th>Assessor</th>
+                    <th>Status</th>
+                    <th class="hidden">Implementation Notes</th>
+                    <th class="hidden">Cost</th>
+                    <th class="hidden">Effort</th>
+                    <th class="hidden">Impact</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assess in assessments %}
+                    <tr>
+                        <td class="details-control"></td>
+                        <td class="hidden">{{assess.id}}</td>
+                        <td>{{assess.assessment_id}}</td>
+                        <td>{{assess.change_req}}</td>
+                        <td>{{assess.group}}</td>
+                        <td>{{assess.subgroup}}</td>
+                        <td>{{assess.assessment_type}}</td>
+                        <td>{% tzone assess.created_date %}</td>
+                        <td>{{assess.assessor}}</td>
+                        <td>
+                            {% if assess.is_approved == None %}
+                                Not yet approved
+                            {% elif assess.is_approved == True %}
+                                Completed
+                            {% elif assess.is_approved == False %}
+                                Pending
+                            {% endif %}
+                        </td>
+                        <td class="hidden">{{assess.implementation_notes}}</td>
+                        <td class="hidden">{{assess.cost}}</td>
+                        <td class="hidden">{{assess.effort}}</td>
+                        <td class="hidden">{{assess.impact}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

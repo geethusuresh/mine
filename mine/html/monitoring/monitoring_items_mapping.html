@@ -1,0 +1,309 @@
+{% load humanize %}
+{% load zone %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <style>
+      .dataTables_wrapper .dataTables_filter {
+      color: #333333;
+      margin-top: 5px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">  
+    {% include "components/header.html"%}
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1>Topbox Items Mapping<small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Topbox Items Mapping</li>
+                </ol>
+            </div>
+            <div class="content">
+            <div class="col-sm-12">
+              {% if messages %}               
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                  <div class="alert alert-success" >{{ message|safe }}</div>
+                  {% else %}
+                  <div class="alert alert-danger" >{{ message|safe }}</div>
+                {% endif %}
+                {% endfor %}               
+              {% endif %}
+            </div>
+
+            <div class="col-sm-12 alert alert-success" id="message_box_success" style="display:none;">
+            </div>
+            <div class="col-sm-12 alert alert-danger" id="message_box_failed" style="display:none;">
+            </div>
+
+              <div class="col-sm-12">
+                <div class="box">
+                  <div class="box-title">
+                    <ul class="nav nav-tabs" id="myTab">                       
+                      <li class="{% if topbox_activate %} active {% endif %}"><a data-toggle="tab" href="#topbox">Top Box Details</a></li>                     
+                    </ul>
+                  </div>
+                  <div class="box-body no-padding">
+                    <div class="tab-content">
+
+                      <!--Top Box Details -->
+                      <div id="topbox" class="tab-pane fade in {% if topbox_activate %} active {% endif %}">
+                          <div class="row" style="margin-top:10px;">
+                            <div class="col-sm-8">
+                               <div class="box">
+                                <div class="box-title">                                  
+                                  <h3>                                  
+                                    Top Box Items Mapping                                 
+                                  </h3>                                  
+                                </div>
+                                <div class="box-body">
+                                  <form method="post" action="/advanced_monitoring/topbox_items_mapping/">
+                                  {% csrf_token %}
+                                    <fieldset>
+                                    <div class="controls" style="text-align: center;">
+                                    <!--First section -->
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                            <select class="form-control" id="customer_topbox" name="customer_topbox" required style="width:300px;display: block;margin: 0 auto;" onchange="topbox_details()">
+                                              <option value="" style="font-weight:bold;">Select Customer</option>
+                                                {% for customer in customers %}
+                                                  {% if obj_topbox_config.topbox.customer.id == customer.id %}
+                                                  <option value="{{customer.id}}" selected="selected">{{ customer.customername }}</option>
+                                                  {% else %}
+                                                  <option value="{{customer.id}}">{{ customer.customername }}</option>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="col-sm-6">
+                                            <select class="form-control" id="topbox_name" name="topbox_name" required style="width:300px;display: block;margin: 0 auto;">
+                                              <option value="">Select Top Box</option>
+                                                {% for topbox_item in topbox_details %}
+                                                  {% if obj_topbox_config.topbox.id == topbox_item.id %}
+                                                  <option value="{{topbox_item.id}}" selected="selected">{{ topbox_item.topbox_name }}</option>
+                                                  {% else %}
+                                                  <option value="{{topbox_item.id}}">{{ topbox_item.topbox_name }}</option>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                          </div>
+                                      </div>
+                                      <!--End First section -->
+
+                                      <!--Second Section -->
+                                      {% if topbox_op != "update" %}
+                                      <div class="row">                                     
+                                        <div class="col-sm-8" style="margin-top:10px;">
+                                            <select class="form-control" id="hosts" name="hosts[]" required style="display: block;margin: 0 auto;height:149px;" multiple>
+                                              <option value="">Select Hosts</option>
+                                                {% for hostitems in hostdetails %}
+                                                <option value="{{hostitems.hostid}}">{{hostitems.hostname}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-4" style="margin-top:10px;">
+                                             <a class="btn btn-success" onclick="fetch_monitored_items()">
+                                                Fetch Monitored items                                 
+                                              </a><br /> 
+                                              <img src="/static/img/ajax-loader.gif" id="monitored_items_loader" style="display:none;margin-top:10px;" />
+                                        </div>                                      
+                                      </div>
+                                      {% endif %}
+                                      <!--End Second Section -->
+
+                                      <div class="row">
+                                        <div class="col-sm-12" style="margin-top:10px;">
+                                            <select class="form-control" name="monitored_items[]" id="monitored_items" multiple style="height:149px;" required>
+                                              <option value="" disabled="disabled" style="font-weight:bold;">Select Moniotred Items</option>
+                                              {% if topbox_op == "update" %}
+                                               <option value="{{itemid}}" selected="selected">{{itemname}}</option>
+                                              {% endif %}
+                                            </select>
+                                        </div>                                        
+                                      </div>
+
+                                      <button class="btn btn-success" type="submit" style="margin-top:10px;">
+                                       {% if topbox_op == "update" %}
+                                          Move Selected Monitored Items to the Box
+                                       {% else %}
+                                          Add Selected Monitored Items to the Box                                    
+                                       {% endif %}
+                                      </button> 
+                                    </div>
+                                    </fieldset>
+                                    {% if topbox_op == "update" %}
+                                      <input type="hidden" name="topbox_action" id="topbox_action" value="update" />
+                                    {% else %}
+                                      <input type="hidden" name="topbox_action" id="topbox_action" value="add" />
+                                    {% endif  %}
+                                      <input type="hidden" name="topbox_update_id" value="{{update_id}}" />
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                         
+                            <table class="table table-hover" id="topbox_table">
+                              <thead>
+                              <tr>
+                                <th>No</th>
+                                <th>Topbox Name</th>
+                                <th>Items</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Delete</th>
+                                <th>Edit</th>                              
+                              </tr> 
+                              </thead>
+                              <tbody>
+                            {% for items_mapped in topbox_config_details %}                                                   
+                                <tr>
+                                  <td>{{ forloop.counter }}</td>
+                                  <td>{{items_mapped.topbox_name}}</td>
+                                  <td>{{items_mapped.item_name}}</td>
+                                  <td>{{items_mapped.topbox_customer.customername}}</td>
+                                  {% if items_mapped.item_active %}
+                                  <td>                                 
+                                    <input value="{{items_mapped.topbox_config_id}}"  type="checkbox" name="topbox_item_status" checked data-size="mini" data-on-text="Active" data-off-text="Inactive" class="switch"/>
+                                  </td>
+                                  {% else %}
+                                  <td>                                  
+                                    <input value="{{items_mapped.topbox_config_id}}" type="checkbox" class="switch" name="topbox_item_status" data-size="mini" data-on-text="Active" data-off-text="Inactive">
+                                  </td>
+                                  {% endif %}
+                                  <td>
+                                    <a href="/advanced_monitoring/delete_topbox_mapping/{{items_mapped.topbox_config_id}}"><img src="/static/img/cancel-32.png" style="width:23px;" onclick="return delete_item();" /></a>
+                                  </td>  
+                                  <td>
+                                    <a class="btn btn-info btn-sm" href="/advanced_monitoring/topbox_config_edit/{{items_mapped.topbox_config_id}}">
+                                    <span class="text">Edit</span>
+                                    </a>
+                                  </td>                                
+                                </tr> 
+                            {% endfor %}                  
+                              </tbody>
+                            </table>
+                      </div>                     
+                     <!--End Top box details -->
+
+                    </div>
+                  </div>
+                </div>
+              </div>             
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+
+  <script type="text/javascript">
+    $(document).ready(function(){     
+     $("#topbox_table").dataTable({
+        bLengthChange :false,
+        bInfo:false        
+      });                
+    });
+  </script>
+  <script type="text/javascript">
+      $("#mon_admin_main").addClass("active");
+      $("#mon_admin_sub").css({'display' : 'block'});
+      $("#top_details").addClass("active"); 
+  </script>     
+  <script type="text/javascript">
+    var status=0;
+    $("input[name='topbox_item_status']").bootstrapSwitch();       
+    $('input[name="topbox_item_status"]').on('switchChange.bootstrapSwitch', function(event, state) {
+      if(state==true && status==0){
+        window.location = '/advanced_monitoring/topbox_item_activate/'+this.value;
+        status= 1;
+      }
+      else if(state==false && status==0){
+        window.location = '/advanced_monitoring/topbox_item_activate/'+this.value;
+        status = 1;
+      }
+    });      
+
+    function fetch_monitored_items(){
+      var selected_hosts = $('#hosts').val();
+      if(selected_hosts != null){
+        $('#message_box_failed').html('');
+        $('#message_box_failed').hide(100);
+        selected_hosts = selected_hosts.toString();
+        $('#monitored_items_loader').show();            
+        $.ajax({
+              url:"/advanced_monitoring/monitoring_selected_items/",
+              type: "POST",
+              dataType:"json",                      
+              data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                selected_hosts:selected_hosts
+              },
+              success: function(data){
+                var monitored_items = '<option value="">Select Monitored Items</option>';    
+                 $.each( data, function(key, val) {
+                    var itemid = val.itemid;
+                    var itemname = val.itemname;                 
+                    monitored_items = monitored_items + '<option value="'+itemid+'">'+itemname+'</option>';
+                });
+                $('#monitored_items').html(monitored_items);
+                $('#monitored_items_loader').hide();
+              },
+              error: function () {                
+                $('#message_box_failed').html("Not able to fetch monitored items");
+                $('#message_box_failed').show(100);              
+              }
+        });
+      }
+      else{
+        $('#message_box_failed').html("Please select any hosts");
+        $('#message_box_failed').show(100);
+      }     
+      
+    }
+
+    function topbox_details(){
+      var selected_customer = $('#customer_topbox').val();      
+      $.ajax({
+            url:"/advanced_monitoring/customer_topbox/",
+            type: "POST",
+            dataType:"json",                      
+            data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              selected_customer:selected_customer
+            },
+            success: function(data){
+              var topbox_details = '<option value="">Select Topbox Details</option>';    
+               $.each( data, function(key, val) {
+                  var topbox_id = val.topbox_id;
+                  var topbox_name = val.topbox_name;                 
+                  topbox_details = topbox_details + '<option value="'+topbox_id+'">'+topbox_name+'</option>';
+              });
+              $('#topbox_name').html(topbox_details);              
+            },
+            error: function () {
+              $('#message_box_failed').html("Not able to fetch top box details");
+              $('#message_box_failed').show(100);             
+            }
+      });
+    }    
+
+    function delete_item(){
+      if(confirm("Are you sure. You want to delete it? ")){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }        
+    </script>  
+</html>
+

@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en" ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <title>My App</title>  
+  
+  <link rel="stylesheet" href="/static/mobile_ui/css/onsenui.css">  
+  <link rel="stylesheet" href="/static/mobile_ui/css/onsen-css-components-blue-theme.css">  
+  <link rel="stylesheet" href="/static/mobile_ui/styles/app.css"/>
+
+  <script src="/static/mobile_ui/js/angular/angular.min.js"></script>    
+  <script src="/static/mobile_ui/js/onsenui.min.js"></script>    
+  <!-- <script src="js/app.js"></script>  -->
+
+  <script>
+    angular.module('app', ['onsen']);
+
+    angular.module('app').controller('AppController', function($scope) {
+    });
+  </script>
+
+  <style>
+  .to-wrapper {
+  line-height: 1;
+  height: 62px;
+  padding: 10px;
+}
+
+.to-image {
+  width: 42px;
+  height: 42px;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+
+.to-name {
+  font-weight: 500;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.to-email {
+  font-size: 14px;
+  opacity: 0.4;
+}
+
+.text-input {
+  margin-top: 4px;
+}
+
+.textarea {
+  margin-top: 4px;
+}
+
+    .tab {
+      line-height: 1;
+    }
+    .tab-icon {
+      font-size: 24px;
+      padding: 0;
+      margin: 0;
+      vertical-align: top;
+      line-height: 28px;
+    }
+    .tab-label {
+      line-height: 11px;
+      vertical-align: top;
+      font-size: 11px;
+    }
+
+    .profile-wrapper {
+      padding: 16px 10px 0 10px;
+    }
+
+    .profile-image {
+      width: 50px;
+      height: 50px;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+      background-color: #ccc;
+    }
+
+    .profile-name {
+      font-size: 18px;
+      padding: 4px 0 2px 0;
+    }
+
+    .profile-email {
+      font-size: 15px;
+      opacity: 0.4;
+    }
+
+    .switch--list-item {
+      margin-right: 0px;
+    }
+
+    .settings-header {
+      font-weight: 500;
+      font-size: 14px;
+      opacity: 0.4;
+      padding: 10px 0 0px 10px;
+      margin-bottom: -4px;
+    }
+
+    .settings-list {
+      margin-top: 10px;
+    }
+
+    .item {
+      padding: 10px;
+      line-height: 1;
+    }
+    .item-thum {
+      background-color: #ccc;
+      width: 50px;
+      height: 50px;
+      border-radius: 100%;
+      -webkit-border-radius: 100%;
+    }
+    .item-title {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .item-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.3;
+      margin: 4px 0 0 0;
+      padding: 0 30px 0 0;
+    }
+    .item-label {
+      font-size: 12px;
+      color: #999;
+      float: right;
+    }
+.ons-css .alert-dialog {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 17px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 270px;
+  margin: auto auto;
+  background-color: rgba(255,255,255,0.92);
+  -webkit-box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  -webkit-border-radius: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 16px 0 0 0;
+  max-width: 95%;
+  color: #1f1f21;
+}
+.ons-css .alert-dialog-title {
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 17px;
+  font-size: 17px;
+  font-weight: 500;
+  padding: 0px 8px 0px 8px;
+  text-align: center;
+  color: #1f1f21;
+}
+.ons-css .alert-dialog-content {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  padding: 4px 12px 8px 12px;
+  font-size: 14px;
+  min-height: 36px;
+  text-align: center;
+  color: #1f1f21;
+}
+.ons-css .alert-dialog-footer {
+  width: 100%;
+}
+.ons-css .alert-dialog-button {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 17px;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+  border: none;
+  border-top: 1px solid #ddd;
+  font-size: 16px;
+  padding: 0 8px;
+  margin: 0;
+  display: block;
+  width: 100%;
+  background-color: transparent;
+  text-align: center;
+  height: 44px;
+  line-height: 44px;
+  outline: none;
+  color: rgba(24,103,194,0.81);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .ons-css .alert-dialog-button {
+    border-top: none;
+    -webkit-background-size: 100% 1px;
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: top;
+    background-image: -webkit-linear-gradient(270deg, #ddd, #ddd 50%, transparent 50%);
+    background-image: -moz-linear-gradient(270deg, #ddd, #ddd 50%, transparent 50%);
+    background-image: -o-linear-gradient(270deg, #ddd, #ddd 50%, transparent 50%);
+    background-image: linear-gradient(180deg, #ddd, #ddd 50%, transparent 50%);
+  }
+}
+.ons-css .alert-dialog-button:active {
+  background-color: rgba(0,0,0,0.05);
+}
+.ons-css .alert-dialog-button--primal {
+  font-weight: 500;
+}
+.ons-css .alert-dialog-footer--one {
+  white-space: nowrap;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+.ons-css .alert-dialog-button--one {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -moz-box-flex: 1;
+  -moz-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  display: block;
+  width: 100%;
+  border-left: 1px solid #ddd;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .ons-css .alert-dialog-button--one {
+    border-top: none;
+    border-left: none;
+    -webkit-background-size: 100% 1px, 1px 100%;
+    background-size: 100% 1px, 1px 100%;
+    background-repeat: no-repeat;
+    background-position: top, left;
+    background-image: -webkit-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%), -webkit-linear-gradient(0deg, transparent, transparent 50%, #ddd 50%);
+    background-image: -moz-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%), -moz-linear-gradient(0deg, transparent, transparent 50%, #ddd 50%);
+    background-image: -o-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%), -o-linear-gradient(0deg, transparent, transparent 50%, #ddd 50%);
+    background-image: linear-gradient(0deg, transparent, transparent 50%, #ddd 50%), linear-gradient(90deg, transparent, transparent 50%, #ddd 50%);
+  }
+}
+.ons-css .alert-dialog-button--one:first-child {
+  border-left: none;
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .ons-css .alert-dialog-button--one:first-child {
+    border-top: none;
+    -webkit-background-size: 100% 1px;
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: top, left;
+    background-image: -webkit-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%);
+    background-image: -moz-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%);
+    background-image: -o-linear-gradient(90deg, transparent, transparent 50%, #ddd 50%);
+    background-image: linear-gradient(0deg, transparent, transparent 50%, #ddd 50%);
+  }
+}
+.ons-css .alert-dialog-mask {
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  line-height: normal;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.2);
+}
+.profile-card {
+  width: 100%;
+  text-align: center;
+  color: white;
+  padding: 30px 0;
+  line-height: 1.4;
+  background-color: #33393c;
+  text-shadow: rgba(0, 0, 0, 0.4) 0px 1px 0px;
+}
+
+.profile-image {
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  background-color: black;
+  border 1px solid white;
+  box-shadow:rgba(0, 0, 0, 0.2) 0px 2px 0px 0px;
+  -webkit-box-shadow:rgba(0, 0, 0, 0.2) 0px 2px 0px 0px;
+}
+
+.profile-name {
+  margin: 20px 0 0 0;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.profile-id {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.profile-desc {
+  font-size: 15px;
+  opacity: 0.6;
+  width: 90%;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.info-col {
+  height: 60px;
+  line-height: 1;
+  padding: 12px 0 12px 4px;
+}
+
+.info-num {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.info-unit {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.4;
+}
+  </style>
+</head>
+
+<body ng-controller="AppController"> 
+  <ons-tabbar>
+    <ons-tab active="true" page="home.html">
+      <div class="tab">
+        <ons-icon icon="ion-home" class="tab-icon"></ons-icon>
+        <div class="tab-label">Home</div>
+      </div>
+    </ons-tab>
+    <ons-tab page="settings.html">
+      <div class="tab">
+        <ons-icon icon="ion-person" class="tab-icon"></ons-icon>
+        <div class="tab-label">Profile</div>
+      </div>
+    </ons-tab>
+    {% if approval %}
+    <ons-tab page="approval.html">
+      <div class="tab">
+        <span  class="tab-icon fa fa-check"></span>
+        <div class="tab-label">Approvals</div>
+      </div>
+    </ons-tab>
+    {% endif %}
+    {% if profile.customer.customerid == "MLB" %}
+    {% else %}
+    <ons-tab page="all.html">
+      <div class="tab">
+        <span  class="tab-icon fa fa-ticket"></span>
+        <div class="tab-label">All Tickets</div>
+      </div>
+    </ons-tab>
+    {% endif %}
+    <ons-tab page="new.html">
+      <div class="tab">
+        <span  class="tab-icon fa fa-ticket"></span>
+        <div class="tab-label">Create Incident</div>
+      </div>
+    </ons-tab>
+
+  </ons-tabbar>
+
+  <ons-template id="home.html">
+    <ons-navigator>
+      <ons-page>
+        <ons-toolbar>
+          <div class="center">Dashboard</div>
+          <div class="right"></div>
+
+        </ons-toolbar>
+
+        {% for ticket in ticketes %}
+        <ons-list style="margin: -1px 0">
+        
+          <a href="/mobile/app/ticket/{{ticket.id}}" style="text-decoration: None">
+          <ons-list-item modifier="chevron" class="item">
+          
+            <ons-row>
+              <ons-col width="60px"> 
+                
+                    {% if ticket.cls == "REQ" %}
+                  <div class="item-thum" style="background-color:#3498db">
+                  <span style="color: #FFF;padding: 4%; position: absolute;padding: 10px;margin-top: 6px;" >{{ticket.cls}}</span>
+                  </div>
+                    {% elif ticket.cls == "IN" %}
+                    <div class="item-thum" style="background-color:#27ae60">
+                  <span style="color: #FFF;padding: 5%; position: absolute;padding: 17px;margin-top: 0px;" >{{ticket.cls}}</span>
+                  </div>
+                     {% else %}
+                     <div class="item-thum" style="background-color:#27ae60">
+                     <span style="color: #FFF;padding: 5%; position: absolute;padding: 15px;margin-top: 0px;" >{{ticket.cls}}</span>
+                     </div>
+                    {% endif %}
+                <!-- </div> -->
+              </ons-col>
+              
+              <ons-col>
+                <header>
+                  <span class="item-title">{{ticket.ticketid}} - {{ticket.summary}}</span>
+                  <span class="item-label">{{ticket.createddate}}</span>
+                </header>
+                <p class="item-desc" style="max-height:10px">{{ticket.description}}</p>
+              </ons-col>
+              
+            </ons-row>    
+
+          </ons-list-item>
+          </a>
+          
+        </ons-list>
+        {% endfor %}
+      </ons-page>
+    </ons-navigator>
+  </ons-template>
+
+{% if profile.customer.customerid == "MLB" %}
+    {% else %}
+  <ons-template id="all.html">
+    <ons-navigator>
+      <ons-page>
+        <ons-toolbar>
+          <div class="center">All Tickets</div>
+          <div class="right"></div>
+
+        </ons-toolbar>
+
+        {% for ticket in all_tickets %}
+        <ons-list style="margin: -1px 0">
+        
+          <a href="/mobile/app/ticket/{{ticket.id}}"  style="text-decoration: None">
+          <ons-list-item modifier="chevron" class="item">
+          
+            <ons-row>
+              <ons-col width="60px"> 
+                 {% if ticket.cls == "REQ" %}
+                  <div class="item-thum" style="background-color:#3498db">
+                  <span style="color: #FFF;padding: 4%; position: absolute;padding: 10px;margin-top: 6px;" >{{ticket.cls}}</span>
+                  </div>
+                    {% elif ticket.cls == "IN" %}
+                    <div class="item-thum" style="background-color:#27ae60">
+                  <span style="color: #FFF;padding: 5%; position: absolute;padding: 17px;margin-top: 0px;" >{{ticket.cls}}</span>
+                  </div>
+                     {% else %}
+                     <div class="item-thum" style="background-color:#27ae60">
+                     <span style="color: #FFF;padding: 5%; position: absolute;padding: 15px;margin-top: 0px;" >{{ticket.cls}}</span>
+                     </div>
+                    {% endif %}
+              </ons-col>
+              
+              <ons-col>
+                <header>
+                  <span class="item-title">{{ticket.ticketid}} - {{ticket.summary}}</span>
+                  <span class="item-label">{{ticket.createddate}}</span>
+                </header>
+                <p class="item-desc" style="max-height:10px">{{ticket.description}}</p>
+              </ons-col>
+              
+            </ons-row>    
+
+          </ons-list-item>
+          </a>
+          
+        </ons-list>
+        {% endfor %}
+      </ons-page>
+    </ons-navigator>
+  </ons-template>
+{% endif %}
+
+  <ons-template id="approval.html">
+    <ons-navigator>
+      <ons-page>
+        <ons-toolbar>
+          <div class="center">Approval Dashboard</div>
+          <div class="right"></div>
+
+        </ons-toolbar>
+
+        {% for ticket in approval %}
+        <ons-list style="margin: -1px 0">
+        
+          <a href="/mobile/app/ticket/approval/{{ticket.id}}" style="text-decoration: None">
+          <ons-list-item modifier="chevron" class="item">
+          
+            <ons-row>
+              <ons-col width="60px"> 
+                 {% if ticket.ticket.cls == "REQ" %}
+                  <div class="item-thum" style="background-color:#3498db">
+                  <span style="color: #FFF;padding: 4%; position: absolute;padding: 10px;margin-top: 6px;" >{{ticket.ticket.cls}}</span>
+                  </div>
+                    {% elif ticket.ticket.cls == "IN" %}
+                    <div class="item-thum" style="background-color:#27ae60">
+                  <span style="color: #FFF;padding: 5%; position: absolute;padding: 17px;margin-top: 0px;" >{{ticket.ticket.cls}}</span>
+                  </div>
+                     {% else %}
+                     <div class="item-thum" style="background-color:#27ae60">
+                     <span style="color: #FFF;padding: 5%; position: absolute;padding: 15px;margin-top: 0px;" >{{ticket.ticket.cls}}</span>
+                     </div>
+                    {% endif %}
+              </ons-col>
+              
+              <ons-col>
+                <header>
+                  <span class="item-title">{{ticket.ticket.ticketid}} - {{ticket.ticket.summary}}</span>
+                  <span class="item-label">{{ticket.ticket.createddate}}</span>
+                </header>
+                <p class="item-desc" style="max-height:10px">{{ticket.ticket.description}}</p>
+              </ons-col>
+              
+            </ons-row>    
+
+          </ons-list-item>
+          </a>
+          
+        </ons-list>
+        {% endfor %}
+      </ons-page>
+    </ons-navigator>
+  </ons-template>
+
+  <ons-template id="settings.html">
+    <ons-page>
+      <ons-toolbar>
+        <!-- <div class="left"><ons-back-button>Back</ons-back-button></div> -->
+        <div class="center">Profile</div>
+       <!--  <div class="right">
+          <ons-toolbar-button><ons-icon icon="ion-gear-a" style="vertical-align: -4px; font-size: 28px;"></ons-icon></ons-toolbar-button>
+        </div> -->
+      </ons-toolbar>
+
+      <div class="profile-card" >
+        <!-- <span id="pickers"></span> -->
+        <img src="/static/img/photo.jpg" class="profile-image">
+        <div class="profile-name">{{profile.user.username}}</div>
+        <div class="profile-id">{{profile.customer.customername}}</div>
+        <div class="profile-desc">{{profile.title}}</div>
+
+      </div>
+
+      <ons-list>
+        <ons-list-item>
+          <ons-row>
+            <ons-col class="info-col">
+              <div class="info-num">{{new_tickets}}</div>
+              <div class="info-unit">New Tickets</div>
+            </ons-col>
+            <ons-col class="info-col">
+              <div class="info-num">{{queued_tickets}}</div>
+              <div class="info-unit">Queued</div>
+            </ons-col>
+            <ons-col class="info-col">
+              <div class="info-num">{{inprogress_tickets}}</div>
+              <div class="info-unit">InProgress</div>
+            </ons-col>
+            <ons-col class="info-col">
+              <div class="info-num">{{closed_tickets}}</div>
+              <div class="info-unit">Closed</div>
+            </ons-col>
+          </ons-row>
+        </ons-list-item>
+      </ons-list>
+
+      <ons-list modifier="inset" style="margin-top: 10px">
+        <!-- <ons-list-item modifier="chevron">
+          Write a comment
+        </ons-list-item> -->
+
+        <ons-list-item modifier="">
+          <ons-list-item class="item">
+          <header>
+            <span class="item-title">First name:</span>
+          </header>
+          <p class="item-desc">{{profile.user.first_name}}</p>
+        </ons-list-item>
+        <ons-list-item class="item">
+          <header>
+            <span class="item-title">Email:</span>
+          </header>
+          <p class="item-desc">{{profile.user.username}}</p>
+        </ons-list-item>
+        <ons-list-item class="item">
+          <header>
+            <span class="item-title">Work Location:</span>
+          </header>
+          <p class="item-desc">{{profile.location}}</p>
+        </ons-list-item>
+        <ons-list-item class="item">
+          <header>
+            <span class="item-title">Nationality:</span>
+          </header>
+          <p class="item-desc">{{profile.country}}</p>
+        </ons-list-item>
+        </ons-list-item>
+
+        <a href="/mobile/app/logout/" style="text-decoration:None">
+          <ons-list-item modifier="chevron">
+            logout
+          </ons-list-item>
+        </a>
+
+      </ons-list>
+
+      <br>
+
+
+    </ons-page>
+  </ons-template>
+
+  <ons-template id="new.html">
+    <ons-navigator>
+      <ons-page>
+      <form action="/mobile/app/incident/" method="POST">{% csrf_token %}
+        
+
+        <ons-toolbar>
+          <!-- <div class="left"><ons-toolbar-button ng-click="doSomething()"><ons-icon icon="ion-compose"></ons-icon></ons-toolbar-button></div> -->
+          <div class="center">New Incident Request</div>
+          <div class="right"></div>
+        </ons-toolbar>
+         <ons-list modifier="inset" style="margin-top: 10px">
+        <ons-list-item>
+          <input type="text" name="summ" class="text-input text-input--transparent" placeholder="Summary" style="width: 100%">
+        </ons-list-item>
+
+        <ons-list-item>
+          <textarea class="textarea textarea--transparent" name="dec" placeholder="Message" style="width: 100%; height: 100px;"></textarea>
+        </ons-list-item>
+         <ons-list-item>
+          <input type="email" class="text-input text-input--transparent" name="email" placeholder="Email" style="width: 100%">
+        </ons-list-item>
+         <ons-list-item>
+          <input type="text" class="text-input text-input--transparent" name="phone" placeholder="Phone Number" style="width: 100%">
+        </ons-list-item>
+         <ons-list-item>
+          <input type="text" class="text-input text-input--transparent" name="Worklocation" placeholder="Work Location" style="width: 100%">
+        </ons-list-item>
+        <ons-list-item>
+          <input type="text" class="text-input text-input--transparent" name="Workstation" placeholder="Work Station" style="width: 100%">
+        </ons-list-item>
+
+
+      <ons-list>
+
+        <ons-list-header>What is the impact of this issue?</ons-list-header>
+
+        <ons-list-item modifier="tappable">
+          <label class="radio-button radio-button--list-item">
+            <input type="radio" value="High" name="impact" checked="checked">
+            <div class="radio-button__checkmark radio-button--list-item__checkmark"></div>
+            High
+          </label>
+        </ons-list-item>
+
+        <ons-list-item modifier="tappable">
+          <label class="radio-button radio-button--list-item">
+            <input type="radio" value="Medium" name="impact">
+            <div class="radio-button__checkmark radio-button--list-item__checkmark"></div>
+            Medium
+          </label>
+        </ons-list-item>
+
+        <ons-list-item modifier="tappable">
+          <label class="radio-button radio-button--list-item">
+            <input type="radio" value="Low" name="impact">
+            <div class="radio-button__checkmark radio-button--list-item__checkmark"></div>
+            Low
+          </label>
+        </ons-list-item>
+      </ons-list>
+
+<input type="file">
+
+        <ons-list-item modifier="chevron">
+            
+          <ons-icon icon="fa-tag" style="opacity:0.2"></ons-icon>
+        </ons-list-item>
+
+      </ons-list>
+
+      <div style="padding: 10px 9px">
+        <button  type="submit" style="background: None;width:100%;border-style:None">
+        <ons-button modifier="large"  class="login-button">Create Incident</ons-button></button>
+      </div>
+      </form>
+
+      </ons-page>
+    </ons-navigator>
+  </ons-template>
+<script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+ <script>
+    $.ajax({
+        url: '/static/img/profile_pic/{{profile}}.jpg',
+        type: 'HEAD',
+        success: function () { 
+          $("#pickers").prepend('<img src="/static/img/profile_pic/{{profile}}.jpg" class="profile-image"" alt="image">');
+         },
+        error: function () { 
+          $("#pickers").prepend('<img src="/static/img/photo.jpg" class="profile-image" alt="image">');
+         }
+    });
+    </script>
+    <script>
+      $(document).ready(function() {
+            $('#page-wrap').delay(500).fadeIn(1000);
+
+            $('.menu-item').click(function(event) {
+                event.preventDefault();
+                var newLocation = this.href;
+                $('#page-wrap').fadeOut(1000, function () {
+                    window.location = newLocation;
+                });
+            });
+      });
+    </script>
+<script src="/static/customer/js/plugins/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+
+    <script>
+$(document).ready(function(){$("body").hide().fadeIn(500);});
+    </script>
+</body>
+ 
+</html>

@@ -1,0 +1,136 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oneconsole | Dashboard</title>
+    {% include "components/css.html"%}
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+
+    {% include "components/header.html"%}
+
+        <div class="wrapper">
+          {% include "side_bar/sidebar.html"%}
+
+          <div class="rightside">
+            <div class="page-head" style="margin-top:10px">
+                <h1 class="text-thin">Dashboard  <small></small></h1>
+                <ol class="breadcrumb">
+                   <li>You are here:</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="active">Dashboard</li>
+                </ol>
+            </div>
+              {% if messages %}
+          <ul >
+            {% for message in messages %}
+              {% if message.tags == 'success' %}
+                  <div class="alert alert-success" style='width:60%;margin-left: 18%;margin-top:4%'>{{ message|safe }}</div>
+                {% else %}
+                  <div class="alert alert-danger" style='width:60%;margin-left: 18%;'>{{ message|safe }}</div>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+            <div class="content">
+              <div class="box">
+                <div class="box-title">
+                  <h3>Search results</h3>
+                </div>
+                <div class="box-body">
+      <div class="col-lg-12">
+        <div class="col-lg-1">
+        </div> 
+        <div class="col-lg-10" style="margin-top:10%">
+        <form action="/search" method="post" >{% csrf_token %}
+          <div class="col-sm-2" >
+            <input type="text" name="tid" class="form-control" placeholder="Id" required>
+          </div>
+          <div class="col-sm-5" >
+            <input type="text" name="issue" class="form-control" placeholder="Issue" required>
+          </div>
+          <div class="col-sm-3" >
+            <input type="text" name="user" class="form-control" placeholder="User" required>
+          </div>
+          <div  style="float:right;width:10%" >
+            <button class="btn btn-success" type="submit" id="delay">Search </button>
+          </div>
+        </form>
+        <br>
+
+
+
+
+        <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Issue</th>
+          <th>User</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td>SR{{ ticket.id }}</td>
+          <td>{{ ticket.summary }}</td>
+          <td>{{ ticket.reportedby }}</td>
+        </tr>
+        {% endfor %}
+
+
+        {% for result in results %}
+        <tr class='clickableRow' href='/ticket/{{result.id}}'>
+          <td>SR{{ result.id }}</td>
+          <td>{{ result.summary }}</td>
+          <td>{{ result.reportedby }}</td>
+
+        </a>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+        </div>
+        <div class="col-lg-1">
+        </div>
+      </div>
+            </div>
+          </div>
+        </div>
+    {% include "components/footer.html"%}
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

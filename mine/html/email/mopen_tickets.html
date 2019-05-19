@@ -1,0 +1,48 @@
+{% load zone %}
+<html>
+	<body>
+		Dear Team,<br/><br/>
+ 
+		Below are the list of Medium Priority tickets which are open in your queue. <br/><br/>
+		<table width="100%" style="border-collapse: collapse;">
+			<tr>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Serial No</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">TicketId</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Ticket Summary</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Reported Date</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Affected Person</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Internal Priority</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Status</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Owner</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Expected Resolution</th>
+				<th bgcolor="#00b0f0" style="padding:10px;border: 1px solid black;border-collapse: collapse;">Last Updated</th>
+			</tr>
+			{% for ticket in tickets %}
+				<tr>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{forloop.counter}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.ticketid}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.summary}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.reportdate|date:'d/m/Y P'}}</td> 
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.affectedperson}}</td>
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.internalpriority}}</td> 
+					<td style="border: 1px solid black; border-collapse: collapse;">{{ticket.status|real}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ticket.owner}}</td>
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ticket.targetfinish|date:'d/m/Y P'}}</td> 
+                    <td style="border: 1px solid black; border-collapse: collapse;">{{ticket.changedate|date:'d/m/Y P'}}</td>
+				</tr>
+			{% endfor%}
+		</table>
+		<br/>
+		<br/>
+		Thanks & Regards,<br/>
+		MARLABS IT Support<br/><br/>
+
+		Marlabs Software Private Limited<br/>
+		Bagmane World Technology Center, 14th Floor, Citrine Block - 4, Marathalli Outer Ring Road, Doddanakundi Village | Mahadevapura | Bangalore - 560 048 | India<br/>
+		Tel:+91-80-67229750 | VoIP: 732-694-1000 Ext: 4357<br/>
+		Email : helpdesk@marlabs.com | gcc@marlabs.com<br/>
+		www.marlabs.com<br/><br/>
+
+		Note : This is an auto generated email. Please do not reply to this email.<br/>
+	</body>
+</html>

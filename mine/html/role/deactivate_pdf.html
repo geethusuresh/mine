@@ -1,0 +1,160 @@
+{% load humanize %}
+{% load zone %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    @page {
+        size: letter landscape;        
+        margin: 0cm;               
+    }
+
+    @font-face {
+        font-family: "Lato";
+        src: url("{{static_dir}}fonts/lato-reg-webfont.ttf");
+    }
+
+    div { font-family: Lato; }
+    table { font-family: Lato; }
+
+    .report_heading{
+    	text-align:center;
+    	font-size:24px;
+    	margin:20px 0px 0px 0px;
+    }
+
+    .summary{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bold;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:18px;
+    }
+
+    .summary_tbl_contents{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:18px;
+    	background-color:#e7eefa;
+    	border:1px solid #FFF;
+    }
+
+    .ticket_details_head{
+    	text-align:center;
+    	background-color:#93d5fc;
+    	font-weight:bolder;
+    	padding:5px 0px 5px 0px;
+    	vertical-align:middle;
+    	font-size:14px;
+    	border:1px solid #FFF;
+    	color:#154a9b;
+    }
+
+    .ticket_details_cnt{
+    	text-align:left;
+    	padding:2px 0px 2px 2px;
+    	font-size:14px;
+    	/*background-color:#93d5fc;*/
+    	border:1px solid #FFF;
+    }
+    table, td, th {
+        border: 1px solid green;
+    }
+    th {
+        background-color: green;
+        color: white;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+  </head>
+  <body class="fixed" style="font-size:13px">
+  	<div class="content">
+        <div>
+            <div style="text-align:right;padding-top:10px;">
+                <img src="{{static_dir}}img/logo.png" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <br />
+        <div>
+            <div style="text-align:center;color:#595959;font-size:35px;">
+                Marlabs OneConsole
+            </div>
+
+            {% if customer_logo %}            
+            <div style="text-align:center;">
+                <img src="{{media_root}}/{{customer_logo}}" style="text-align:center;height:90px;" /> 
+            </div>            
+            {% endif %}
+
+        </div>         
+              
+    	<div style="{% if customer_logo %}padding-top:145px;{% else %}padding-top:235px;{% endif %}">
+    		<div>
+                <span>
+                    <img src="{{static_dir}}img/background-layer.jpeg" style="width:1050px; height:250px;" />
+                </span>
+    		</div>    		
+    	</div>
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        <br />
+        <br />
+
+    	<div>
+    		<div style="text-align:right;">
+    			<img src="{{static_dir}}img/logo.png" style="text-align:right;width:120px;" />
+    		</div>
+    	</div>
+        
+    	<br />
+    	<br />
+
+        <div>
+            <div style="text-align:left;color:#4d4d4d;font-size:26px;">
+                User Deactivation List       
+            </div>
+        </div>
+
+    	<div>
+    		<table cellpadding="1" cellspacing="1" style="backgroud-color:#FFF;">
+    			<tr>
+                    <th class="">
+                        <strong>Number</strong>
+                    </th>    				
+    				<th class="">
+    					<strong>User</strong>
+    				</th>
+    				<th class="">
+    					<strong>Note{{temp_dict}}</strong>
+    				</th>
+    				
+    			</tr>
+                {% for user in users_list %}
+        			<tr>
+                        <td class="" style="text-align:center;">
+                            {{forloop.counter}}
+                        </td>    				
+        				<td class="" style="text-align:center;">
+        					{{user.user__user__username}}
+        				</td>
+        				<td class="" style="text-align:center;">
+        					{{user.reason}}
+        				</td>
+        			</tr>
+                {% endfor %}
+    			 			
+    		</table>
+    	</div>
+
+    </div>
+  </body>
+  </html>
+

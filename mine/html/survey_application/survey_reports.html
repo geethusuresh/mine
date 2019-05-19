@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html ng-app="oneconsole">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oneconsole | Survey Reports</title>
+        {% include "components/css.html"%}
+        <style type="text/css">
+            .no-js #loader { display: none;  }
+            .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+            .page-loader-js {
+                position: fixed;
+                left: 0px;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                z-index: 9999;
+                background: url(/static/img/ajax-loader.gif) center no-repeat #fff;
+                opacity: 0.8;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="/static/asset/bootstrap-select.min.css">
+    </head>
+    <body class="fixed" style="font-size:13px">
+
+        <div class="page-loader-js"></div>
+
+        {% include "components/header.html"%}
+        <div class="wrapper">
+            {% include "side_bar/sidebar.html"%}
+            <div class="rightside">
+                <div class="page-head" style="margin-top:10px">
+                    <h1 class="text-thin">Survey | <small>Report</small></h1>
+                    <ol class="breadcrumb">
+                       <li>You are here:</li>
+                        <li><a href="/">Home</a></li>
+                        <li class="active">Survey Reports</li>
+                    </ol>
+                </div>
+                <div class="content">
+                    {% include "components/msg_div.html" %}
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Survey Reports</h3>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="active">
+                                    <a href="#group_wise" role="tab" data-toggle="tab" onclick="hide_survey()"> Group Wise Survey Report</a>
+                                </li>
+                                <li>
+                                    <a href="#survey_wise" role="tab" data-toggle="tab" onclick="hide_group_survey()"> Survey Report </a>
+                                </li>
+                            </ul><br/>
+                            <div class="row">
+                                <div class="tab-pane active" id="group_wise">
+                                    <form id="" method="GET" action="/survey/group_survey_report/" enctype="multipart/form-data">{% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <input type="text" name="start_date" id="start_date" placeholder="Please choose start date" required class="form-control"/><br/>
+                                                <input type="text" name="end_date" id="end_date" placeholder="Please choose end date" required class="form-control"/><br/>
+                                                <button class="btn btn-success" type="submit">Submit</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="tab-pane" id="survey_wise">
+                                    <form id="" method="GET" action="/survey/survey_report/" enctype="multipart/form-data">{% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <input type="text" name="start_date" id="survey_start_date" placeholder="Please choose start date" required class="form-control" autocomplete="off"/><br/>
+                                                <input type="text" name="end_date" id="survey_end_date" placeholder="Please choose end date" required class="form-control" autocomplete="off"/><br/>
+                                                <button class="btn btn-success" type="submit">Submit</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'components/footer.html' %}
+
+        <script type="text/javascript">
+          $(window).load(function() {
+            $(".page-loader-js").fadeOut("slow");;
+          });
+        </script>
+
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                hide_survey();
+            });
+            $(function(){
+                $( "#start_date" ).datepicker({ dateFormat: "dd/mm/yy" });     
+                $( "#end_date" ).datepicker({ dateFormat: "dd/mm/yy" });
+                $( "#survey_start_date" ).datepicker({ dateFormat: "dd/mm/yy" });     
+                $( "#survey_end_date" ).datepicker({ dateFormat: "dd/mm/yy" });
+            });
+            function hide_survey(){
+                $('#group_wise').show();
+                $('#survey_wise').hide();
+            }
+            function hide_group_survey(){
+                $('#group_wise').hide();
+                $('#survey_wise').show();
+            }
+        </script>
+        {% include "components/service_request.html" %}
+        <script type="text/javascript">
+            $('#survey_main').addClass("active");
+            $('#survey_anchor').addClass("active");
+            $('#survey_sub_nav').css("display", "block");
+            $('#survey_reports').addClass('active');
+            $('#survey_main').find('i').last().removeClass("fa-angle-right").addClass("fa-angle-down");
+        </script>
+    </body>
+</html>

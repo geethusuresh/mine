@@ -1,0 +1,376 @@
+<div class="modal fade" id="incident" role="dialog" tabindex="-1" aria-labelledby="demo-default-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <!--Modal header-->
+        <div class="modal-header"  style="background: transparent;">
+          <button data-dismiss="modal" class="close" type="button">
+          <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title text-center">Create New Ticket</h4>
+        </div>        
+        <form action="/sr/create/v2/" method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <!--Modal body-->
+        <div class="modal-body">
+                        
+        <div class="laval" style=" border-top: 1px solid #8399b2">
+          <p class="text-thin h4" style="color: #8399b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-ticket"></l> Issue Details</p>
+          <div class="row" style="margin-left:10%;margin-right:10%">
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Summary</label>
+              <div class="col-sm-9">
+                <input type="text" placeholder="Max 50 characters" class="form-control input-sm" name="summ" required maxlength="50">
+              </div>
+            </div>
+
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label" for="demo-is-inputsmall">Additional Details</label>
+              <div class="col-sm-9">
+                <textarea id="dec" rows="4" name="dec" class="form-control" required></textarea>
+              </div>
+            </div>
+            
+          </div>
+          <br><br>
+          
+        </div>
+
+
+         <div class="laval" style=" border-top: 1px solid #a594b2">
+          <p class="text-thin h4" style="color: #a594b2;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-warning"></l> Categorize the issue</p>
+          
+          <div class="row">
+            <div class="row col-sm-12">
+              <div class="col-sm-6">
+                <label class="col-sm-4">Ticket Type</label>
+               <select name="type_req"  class="selectpicker" id="showsome">
+                <option value="IT">IT Service</option>
+                <option value="PURC">Purchase Request</option>
+              </select>
+              </div>
+              <div class="col-sm-6"  id="argency">
+                <label class="col-sm-2">Priority</label>
+               <select  class="selectpicker" name="reportedpriority" >
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+              </div>
+            </div>
+
+
+
+
+            <div class="col-sm-12" id="purchase">
+              
+              <hr>
+              <h4 class="text-thin text-center"><l class="fa fa-user-plus" style="color:red"></l> This ticket will undergo an approval process, following additional details are required.</h4>
+              <div class="col-sm-1"></div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label class="control">Quantity</label>
+                    <input type="number" name="quantity" id="quantity" class="form-control" maxlength="15" min="0">
+                </div>
+                <div class="form-group">
+                  <label>Project Name</label>
+                    <input type="text" id="pname" name="pname" class="form-control" maxlength="15" >
+                </div>
+                <div class="form-group">
+                  <label>Asset Request Type</label>
+                    <select name="rtype"  class="selectpicker">
+                    <option value="Permanent">Permanent</option>
+                    <option value="Temporary">Temporary</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label>Additional info</label>
+                  <textarea type="text" id="extra" name="extra" style="max-width:100%" class="form-control" rows="6"  ></textarea>
+                </div>
+                
+              </div>
+              <div class="col-sm-1"></div>
+            </div>
+
+            </div>
+
+          <br><br>
+        </div>
+
+       
+
+<div class="laval" style=" border-top: 1px solid #82A3A9">
+          <p class="text-thin h4" style="color: #82A3A9;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-paperclip"></l> Add Attachments</p>
+          <div class="row" style="margin-left:10%;margin-right:10%">
+            <label> Attach a file </label>
+            <input  type="file"  name="image" class="screenshot_image_upload" >
+            <span class="error_message_for_upload" style="color:red;"></span>
+            <br><br>
+          </div>
+          
+          
+        </div>
+
+
+
+
+
+        <div class="laval" style=" border-top: 1px solid #a1a1a1">
+          <p class="text-thin h4" style="color: #a1a1a1;border-top: 3px solid;width: 30%;padding: 1%;margin-top:0px"><l class="fa fa-user"></l> Confirm Your Contact Details</p>
+          <div class="row" >
+           <div class="form-group col-sm-6" style="margin-bottom:1%" >
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Email</label>
+              <div class="col-sm-8">
+                <input type="email" name="email" class="form-control" id="ticket_email" value="{{profile.user.email}}" required >
+              </div>
+            </div>
+
+
+            <div class="form-group col-sm-6" style="margin-bottom:1%">
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Phone Number</label>
+              <div class="col-sm-8">
+                <input type='number' min="0" pattern="\d*" id="ticket_ph" name="phone" class="form-control" value="{{profile.phonenumber_set.all.0.primary}}" required>
+              </div>
+            </div>
+
+             <div class="form-group col-sm-6" style="margin-bottom:1%">
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Work Location</label>
+              <div class="col-sm-8">
+                <input type='text' name="Worklocation" class="form-control" required id="ticket_worklocation">
+              </div>
+            </div>
+
+             <div class="form-group col-sm-6" style="margin-bottom:1%">
+              <label class="col-sm-4 control-label" for="demo-is-inputsmall">Work Station</label>
+              <div class="col-sm-8">
+                <input type='text' name="Workstation" class="form-control" required id="ticket_workstation">
+              </div>
+            </div>
+            
+          </div>
+          
+          
+        </div>
+
+
+        </div>
+
+        <!--Modal footer-->
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+          <button class="btn btn-info btn-labeled fa fa-paper-plane fa-lg" type="submit">Create Ticket</button>
+        </div>
+         </form>
+      </div>
+    </div>
+  </div>
+
+
+                </div>
+               <!--  <div class="modal-footer" style="border:0px">
+                <span style="color:red">* </span> mandatory
+                </div> -->
+              </div>
+            </div>
+
+          </div>
+       
+
+
+
+
+
+<script src="/static/js/upload_file_validation.js"></script>
+<script>
+
+$(document).ready(function(){
+  $("#purchase").hide();
+  $("#showsome").change(function(){
+    var get_type = $("#showsome").val();
+    if (get_type == "PURC"){
+      $('#purchase').show('fadeIn');
+      $('#quantity').prop('required', true);
+      $('#pname').prop('required', true);
+      $("#argency").hide('fadeOut');
+    }else{
+      $("#purchase").hide('fadeOut');
+      $('#quantity').prop('required', false);
+      $('#pname').prop('required', false);
+      $("#argency").show('fadeIn');
+    }
+    
+  })
+})
+
+</script>
+<script type="text/javascript">
+  $("#mySelect").on('change',function(){ 
+     typeid = $("#mySelect").val(); 
+   $.ajax({
+        url : "/categorychange",
+        datatype : "json",
+        type:"POST",
+        data:{
+          typeid : typeid,
+          csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success:function(data){
+          data = JSON.parse(data);
+          $("#cat option:gt(0)").remove();
+          for (var i in data){              
+            $("#cat").append($('<option>', {value:data[i].pk, text:data[i].fields['name']}))
+          }            
+          },
+        error:function(xhr,errmsg,err){
+
+        }
+
+    });
+  });
+
+</script>
+
+<script type="text/javascript">
+  function category_change(reportedpriority){
+    typeid = reportedpriority; 
+     $.ajax({
+          url : "/categorychange",
+          datatype : "json",
+          type:"POST",
+          data:{
+            typeid : typeid,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success:function(data){
+            data = JSON.parse(data);
+            $("#cat option:gt(0)").remove();
+            for (var i in data){              
+              $("#cat").append($('<option>', {value:data[i].pk, text:data[i].fields['name']}))
+            }            
+            },
+          error:function(xhr,errmsg,err){
+
+          }
+
+      });
+  }
+
+</script>
+
+  <script type="text/javascript">
+          $("#ticket").on('change',function(){
+            $.ajax({
+              url:"/faq",
+              type:"POST",
+              dataType:"json",
+              data:{
+                summ : this.value,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+              },
+              success : function(data) {
+                faqlist = JSON.parse(data);
+                $( "#faqpopup" ).empty();
+                if($.isEmptyObject(faqlist)){
+                  $("#faqpopup").append('<p></p>');
+                }else{
+                  console.log(data);
+                  $("#faqpopup").append('<p style = "color : red">Below links may help you to solve your problem</p>');
+                  for (var i in faqlist){
+                  $("#faqpopup").append('<a href="/faq/faqpopup/'+faqlist[i].pk+'" target="_blank">'+faqlist[i].fields.faqquestion+'</a><br>');
+                    
+                  } 
+               }
+                
+              },
+              error : function(xhr,errmsg,err) {
+                // alert(err);
+              }
+
+            });
+            return false;
+          });
+          
+
+      $("#sub_category1").change(function(){
+        if(this.value){
+            $.ajax({
+                  url:"/check/approval/",
+                  type:"POST",
+                  dataType:"json",
+                  data:{
+                    cid : this.value,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                  },
+                  success : function(data) {
+                    cat_item = data[0]
+                    // if(cat_item.fields.approval == true)
+                    // {
+                    //  showExtras();
+                    // }
+                    // else{
+                    //   hideExtras();
+                    // }
+                  },
+                  error : function(xhr,errmsg,err) {
+                    // alert(err);
+                  }
+
+                });
+                return false;        
+            }
+            else{
+                  // hideExtras();
+          }
+        });
+      $('#sub_category1').on('change',function(){
+        if(this.value == ''){
+          // hideExtras();
+        }
+      });
+       $('#cat').on('change', function(){
+        var catid = $('#cat').val(); 
+        if (catid == ''){
+          $('#sub_category1 option:gt(0)').remove().end();
+          // hideExtras();
+         // alert(catid);
+        }
+        $.ajax({
+          url :"/category/enduser",
+          type:"POST",
+          dataype:"json",
+          data:{catty: catid,
+                "enduser_sr": "true",
+                csrfmiddlewaretoken:'{{csrf_token}}'},
+          success:function(data){            
+             $("#sub_category1 option:gt(0)").remove();
+             cat_list = JSON.parse(data);
+            for (var i in cat_list){
+              
+              $("#sub_category1").append($('<option>', {value:cat_list[i].pk, text:cat_list[i].fields['name']}));
+
+            } 
+            console.log(data);
+           },
+           error: function(xhr,errmsg,err){
+           }       
+        });
+        return false;
+      });
+
+
+    </script> 
+    <script type="text/javascript">
+        // function clear_incident_data(){
+        //     $('#summ').val('');
+        //     $('#dec').val('');
+        //     $('#email').val('');
+        //     $('#phone').val('');
+        //     $('#Workstation').val('');
+        //     // $('#incident_form input[type="radio":checked]').each(function(){
+        //     //     $(this).prop('checked', false);
+        //     // })
+        // }
+    </script>
